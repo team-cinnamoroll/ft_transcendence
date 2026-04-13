@@ -39,3 +39,6 @@ Thumbs.db
 *.pid.lock
 tmp/
 temp/
+
+# Local production (mkcert)
+infra/local-prod/certs/

@@ -5,6 +5,9 @@
   "scripts": {
     "install:all": "pnpm install",
     "dev": "pnpm -r --parallel dev",
+    "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
+    "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
+    "local-prod:down": "bash scripts/down-local-prod.sh",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "format": "pnpm -r format",

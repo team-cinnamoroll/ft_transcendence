@@ -7,6 +7,9 @@ export default defineConfig({
       entry: 'src/index.ts',
     }),
   ],
+  ssr: {
+    noExternal: ['hono', '@hono/node-server'],
+  },
   server: {
     host: '0.0.0.0',
     port: 8000,

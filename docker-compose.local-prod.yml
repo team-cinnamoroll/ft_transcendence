@@ -1,0 +1,90 @@
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_HTTP_TLS_CERTIFICATE: /etc/registry/tls/tls.crt
+      REGISTRY_HTTP_TLS_KEY: /etc/registry/tls/tls.key
+    volumes:
+      - registry_data:/var/lib/registry
+      - ./infra/local-prod/certs/tls.crt:/etc/registry/tls/tls.crt:ro
+      - ./infra/local-prod/certs/tls.key:/etc/registry/tls/tls.key:ro
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: tracen
+      POSTGRES_USER: tracen
+      POSTGRES_PASSWORD: tracen
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  backend:
+    image: registry.tracen.local:5000/tracen-backend:${TRACEN_IMAGE_TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "8443"
+      TLS_CERT_PATH: /etc/tracen/certs/tls.crt
+      TLS_KEY_PATH: /etc/tracen/certs/tls.key
+    volumes:
+      - ./infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
+      - ./infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
+    depends_on:
+      - db
+    networks:
+      local-prod:
+        aliases:
+          - backend.tracen.local
+
+  frontend:
+    image: registry.tracen.local:5000/tracen-frontend-bff:${TRACEN_IMAGE_TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/frontend-bff/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "3443"
+      TLS_CERT_PATH: /etc/tracen/certs/tls.crt
+      TLS_KEY_PATH: /etc/tracen/certs/tls.key
+      NODE_EXTRA_CA_CERTS: /etc/tracen/certs/ca.crt
+      API_BASE_URL: https://tracen.local/api
+    volumes:
+      - ./infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
+      - ./infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
+      - ./infra/local-prod/certs/ca.crt:/etc/tracen/certs/ca.crt:ro
+    depends_on:
+      - backend
+    networks:
+      local-prod:
+        aliases:
+          - frontend.tracen.local
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.https.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/local-prod/certs/tls.crt:/etc/nginx/certs/tls.crt:ro
+      - ./infra/local-prod/certs/tls.key:/etc/nginx/certs/tls.key:ro
+      - ./infra/local-prod/certs/ca.crt:/etc/nginx/certs/ca.crt:ro
+    networks:
+      local-prod:
+        aliases:
+          - tracen.local
+
+networks:
+  local-prod:
+
+volumes:
+  registry_data:
+  postgres_data:

@@ -54,6 +54,31 @@ Nginx 経由では、以下のルーティングです。
 - /api/* -> backend:8000
 - /* -> frontend:3000
 
+### Tips: Nginx が 502 になる場合
+
+起動直後やコンテナ再作成後に、`http://localhost:8080` が `502 Bad Gateway` になることがあります。
+
+- まず直アクセスで切り分けする
+	- `http://localhost:3000`（Next.js）と `http://localhost:8000/hello`（API）が表示されるか確認
+	- 起動直後は dev server の起動まで 502 になることがあるため、数十秒待って再読込
+- 直アクセスは OK で nginx だけ 502 の場合は nginx を再起動する（IP 変化・名前解決の影響を受けることがあります）
+
+```bash
+docker compose restart nginx
+```
+
+- 原因が分からない場合はログと状態を見る
+
+```bash
+docker compose ps
+docker compose logs -f --tail=200 nginx frontend backend
+```
+
+補足:
+
+- `infra/nginx/nginx.conf` を編集した場合、反映には `docker compose restart nginx` が必要です。
+- `infra/nginx/nginx.conf` は Docker DNS（127.0.0.11）を使って upstream を再解決する設定を入れてあります。ローカルで設定を差し替えている場合は、同等の設定になっているか確認してください。
+
 ### 補足: 開発時の起動コマンド
 
 compose 内では次のコマンドが実行されます。
@@ -69,83 +94,74 @@ pnpm dev
 
 ## プロダクション作成手順
 
-現在の docker-compose.yml は開発向け設定です。
-本番では apps/backend/Dockerfile と apps/frontend-bff/Dockerfile からイメージを作成して実行します。
+### 推奨: ローカル本番相当（HTTPS + ローカルレジストリ + 1コマンドデプロイ）
 
-### 手順 1: プロダクションイメージをビルド
+この手順は「ローカルPC上で本番に近い構成（build 済みイメージ + レジストリ + HTTPS）を 1コマンドで起動」するためのものです。
 
-リポジトリルートで実行します。
+前提:
 
-```bash
-docker build -t tracen-backend:prod -f apps/backend/Dockerfile .
-docker build -t tracen-frontend-bff:prod -f apps/frontend-bff/Dockerfile .
+- デプロイ操作（docker / mkcert / hosts 変更）はホストOS（Ubuntu想定）で実行します
+- Dev Container は編集専用です
+
+#### 手順 1: hosts を設定
+
+ホストOSの `/etc/hosts` に以下を追加します。
+
+```
+127.0.0.1 tracen.local registry.tracen.local
 ```
 
-### 手順 2: 共通ネットワークを作成
+#### 手順 2: mkcert を用意して TLS 資材を生成
+
+ホストOSに mkcert をインストールし、ローカルCAを信頼させます。
 
 ```bash
-docker network create tracen-net
+mkcert -install
 ```
 
-すでに存在する場合はエラーになっても問題ありません。
-
-### 手順 3: PostgreSQL を起動
+次に、このリポジトリで TLS 資材を生成します。
 
 ```bash
-docker run -d \
-	--name tracen-db \
-	--network tracen-net \
-	-e POSTGRES_DB=tracen \
-	-e POSTGRES_USER=tracen \
-	-e POSTGRES_PASSWORD=tracen \
-	-p 5432:5432 \
-	postgres:17-alpine
+pnpm local-prod:setup-tls
 ```
 
-必要なら初期化 SQL を投入します。
+#### 手順 3: Docker がローカルレジストリの TLS を信頼するように設定
+
+ホストOSで以下を実行します。
 
 ```bash
-docker cp infra/db/init.sql tracen-db:/init.sql
-docker exec tracen-db sh -lc "psql -U tracen -d tracen -f /init.sql"
+sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
+sudo cp infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
 ```
 
-### 手順 4: backend を起動
+環境によっては Docker の再起動が必要な場合があります。
+
+#### 手順 4: 1コマンドデプロイ
 
 ```bash
-docker run -d \
-	--name tracen-backend \
-	--network tracen-net \
-	-e PORT=8000 \
-	-p 8000:8000 \
-	tracen-backend:prod
+pnpm local-prod:deploy
 ```
 
-### 手順 5: frontend-bff を起動
+#### 手順 5: 動作確認
+
+- 入口: https://tracen.local
+- API: https://tracen.local/api/hello
+
+#### 停止
 
 ```bash
-docker run -d \
-	--name tracen-frontend-bff \
-	--network tracen-net \
-	-e NEXT_PUBLIC_API_BASE_URL=http://tracen-backend:8000 \
-	-p 3000:3000 \
-	tracen-frontend-bff:prod
+pnpm local-prod:down
 ```
 
-### 手順 6: Nginx を起動
+補足:
 
-```bash
-docker run -d \
-	--name tracen-nginx \
-	--network tracen-net \
-	-p 8080:80 \
-	-v "$(pwd)/infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro" \
-	nginx:1.27-alpine
-```
+- `docker-compose.local-prod.yml` はデフォルトで HTTPS（`443`）のみを公開します（ホストの `80` が他プロセスで使用中でも起動しやすくするため）。HTTP→HTTPS リダイレクトが必要な場合は `docker-compose.local-prod.yml` で `80:80` の公開を追加してください。
+- rootless Docker などで `443` の公開が難しい場合は、ポートを `8443` 等に変更してください。
+- `.local` が環境の名前解決と衝突する場合は、`tracen.test` などへ切り替えてください（hosts / 証明書SAN / compose の alias も同様に変更が必要です）。
 
-### 手順 7: 本番動作確認
+### 参考: 手動でのプロダクション検証（旧手順）
 
-- http://localhost:8080
-- http://localhost:8080/api/hello
+この手順は HTTPS 対応前の名残です。現在は `docker-compose.local-prod.yml` と `pnpm local-prod:deploy` を利用してください。
 
 ## 停止とクリーンアップ
 
@@ -155,8 +171,9 @@ docker run -d \
 docker compose down
 ```
 
-本番検証コンテナ停止:
+ローカル本番相当の停止:
 
 ```bash
-docker rm -f tracen-nginx tracen-frontend-bff tracen-backend tracen-db
+pnpm local-prod:down
 ```
+
