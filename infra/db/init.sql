@@ -1,1 +1,1 @@
-CREATE DATABASE IF NOT EXISTS tracen;
+-- POSTGRES_DB=tracen により DB は自動作成されるため、ここでは追加初期化のみを行う。

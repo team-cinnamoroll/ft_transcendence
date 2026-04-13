@@ -42,18 +42,17 @@ services:
       - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
   db:
-    image: mariadb:11.7
+    image: postgres:17-alpine
     environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: tracen
-      MARIADB_USER: tracen
-      MARIADB_PASSWORD: tracen
+      POSTGRES_DB: tracen
+      POSTGRES_USER: tracen
+      POSTGRES_PASSWORD: tracen
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
       - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 volumes:
   workspace_node_modules:
-  mariadb_data:
+  postgres_data:
