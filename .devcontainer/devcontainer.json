@@ -5,7 +5,8 @@
   "workspaceFolder": "/workspace",
   "runServices": ["dev-container", "backend", "frontend", "nginx", "db"],
   "forwardPorts": [3000, 8000, 8080, 5432],
-  "postCreateCommand": "corepack enable && pnpm install",
+  "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
+  "postStartCommand": "bash .devcontainer/scripts/fix-node-modules-perms.sh",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "pnpmVersion": "10.33.0"

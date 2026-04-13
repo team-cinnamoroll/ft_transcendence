@@ -15,7 +15,7 @@ services:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
     working_dir: /workspace
-    command: sh -lc "corepack enable && pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
+    command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
     depends_on:
       - backend
     ports:
@@ -27,7 +27,7 @@ services:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
     working_dir: /workspace
-    command: sh -lc "corepack enable && pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
+    command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
 
