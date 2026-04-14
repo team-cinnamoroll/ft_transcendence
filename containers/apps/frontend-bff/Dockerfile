@@ -3,6 +3,9 @@ WORKDIR /workspace
 
 RUN corepack enable
 
+ARG NEXT_PUBLIC_BFF_API_BASE_URL
+ENV NEXT_PUBLIC_BFF_API_BASE_URL=$NEXT_PUBLIC_BFF_API_BASE_URL
+
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY containers/apps/backend/package.json containers/apps/backend/package.json
 COPY containers/apps/frontend-bff/package.json containers/apps/frontend-bff/package.json

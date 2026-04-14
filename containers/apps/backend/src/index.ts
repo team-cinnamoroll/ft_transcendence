@@ -5,6 +5,8 @@ import { createServer as createHttpsServer } from 'node:https';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { parseEnv } from './env';
+
 const app = new Hono();
 const _route = app.get('/hello', (c) => {
   return c.json({ message: 'Hello from Hono!' });
@@ -18,10 +20,11 @@ const isDirectRun = process.argv[1]
   : false;
 
 if (isDirectRun) {
-  const port = Number(process.env.PORT ?? 8000);
+  const env = parseEnv(process.env);
+  const port = env.PORT;
 
-  const tlsCertPath = process.env.TLS_CERT_PATH;
-  const tlsKeyPath = process.env.TLS_KEY_PATH;
+  const tlsCertPath = env.TLS_CERT_PATH;
+  const tlsKeyPath = env.TLS_KEY_PATH;
 
   if (tlsCertPath && tlsKeyPath) {
     serve({

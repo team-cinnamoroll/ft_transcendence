@@ -5,11 +5,18 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="tracen-local-prod"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
+env_file="$repo_root/.env.local-prod"
 
 cd "$repo_root"
 
 if [[ ! -f "$compose_file" ]]; then
   echo "Compose ファイルが見つかりません: $compose_file" >&2
+  exit 1
+fi
+
+if [[ ! -f "$env_file" ]]; then
+  echo "環境変数ファイルが見つかりません: $env_file" >&2
+  echo "次を作成してください: cp .env.local-prod.example .env.local-prod" >&2
   exit 1
 fi
 
@@ -50,7 +57,7 @@ for p in \
 done
 
 if [[ "$docker_ca_installed" != "yes" ]]; then
-  echo "警告: Docker の registry CA 設定が見つかりません。push/pull で TLS エラーになる場合は README の手順 3 を確認してください。" >&2
+  echo "警告: Docker の registry CA 設定が見つかりません。push/pull で TLS エラーになる場合は README の『Docker がローカルレジストリの TLS を信頼するように設定』を確認してください。" >&2
 fi
 
 tag=""
@@ -67,16 +74,16 @@ export TRACEN_IMAGE_TAG="$tag"
 echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local-prod.local"
 
 echo "[1/5] Start local registry (https://registry.tracen.local:5000)"
-docker compose -p "$project_name" -f "$compose_file" up -d registry
+docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" up -d registry
 
 echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
-docker compose -p "$project_name" -f "$compose_file" build backend frontend
+docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" build backend frontend
 
 echo "[3/5] Push images to local registry"
-docker compose -p "$project_name" -f "$compose_file" push backend frontend
+docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" push backend frontend
 
 echo "[4/5] Start services"
-docker compose -p "$project_name" -f "$compose_file" up -d --remove-orphans
+docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" up -d --remove-orphans
 
 echo "[5/5] Smoke test"
 if command -v curl >/dev/null 2>&1; then
@@ -118,7 +125,7 @@ if command -v curl >/dev/null 2>&1; then
       curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
     fi
 
-    echo "docker compose -p $project_name -f $compose_file logs --tail=200" >&2
+    echo "docker compose --env-file $env_file -p $project_name -f $compose_file logs --tail=200" >&2
     exit 1
   fi
 

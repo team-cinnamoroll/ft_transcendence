@@ -4,9 +4,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
-      REGISTRY_HTTP_TLS_CERTIFICATE: /etc/registry/tls/tls.crt
-      REGISTRY_HTTP_TLS_KEY: /etc/registry/tls/tls.key
+      REGISTRY_HTTP_ADDR: ${REGISTRY_HTTP_ADDR}
+      REGISTRY_HTTP_TLS_CERTIFICATE: ${REGISTRY_HTTP_TLS_CERTIFICATE}
+      REGISTRY_HTTP_TLS_KEY: ${REGISTRY_HTTP_TLS_KEY}
     volumes:
       - registry_data:/var/lib/registry
       - ./containers/infra/local-prod/certs/tls.crt:/etc/registry/tls/tls.crt:ro
@@ -15,9 +15,9 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: tracen
-      POSTGRES_USER: tracen
-      POSTGRES_PASSWORD: tracen
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./containers/infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -28,10 +28,10 @@ services:
       context: .
       dockerfile: containers/apps/backend/Dockerfile
     environment:
-      NODE_ENV: production
-      PORT: "8443"
-      TLS_CERT_PATH: /etc/tracen/certs/tls.crt
-      TLS_KEY_PATH: /etc/tracen/certs/tls.key
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${BACKEND_PORT}
+      TLS_CERT_PATH: ${BACKEND_TLS_CERT_PATH}
+      TLS_KEY_PATH: ${BACKEND_TLS_KEY_PATH}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -47,13 +47,16 @@ services:
     build:
       context: .
       dockerfile: containers/apps/frontend-bff/Dockerfile
+      args:
+        NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
     environment:
-      NODE_ENV: production
-      PORT: "3443"
-      TLS_CERT_PATH: /etc/tracen/certs/tls.crt
-      TLS_KEY_PATH: /etc/tracen/certs/tls.key
-      NODE_EXTRA_CA_CERTS: /etc/tracen/certs/ca.crt
-      API_BASE_URL: https://tracen.local/api
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${FRONTEND_PORT}
+      TLS_CERT_PATH: ${FRONTEND_TLS_CERT_PATH}
+      TLS_KEY_PATH: ${FRONTEND_TLS_KEY_PATH}
+      NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS}
+      APP_API_BASE_URL: ${APP_API_BASE_URL}
+      NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro

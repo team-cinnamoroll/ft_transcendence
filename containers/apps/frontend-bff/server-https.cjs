@@ -1,16 +1,26 @@
 const https = require('node:https');
 const fs = require('node:fs');
 const next = require('next');
+const { z } = require('zod');
 
-const port = Number(process.env.PORT ?? 3443);
-const hostname = process.env.HOSTNAME ?? '0.0.0.0';
+const EnvSchema = z.object({
+  PORT: z.coerce.number().int().min(1).max(65535).default(3443),
+  HOSTNAME: z.string().min(1).default('0.0.0.0'),
+  TLS_CERT_PATH: z.string().min(1),
+  TLS_KEY_PATH: z.string().min(1),
+});
 
-const tlsCertPath = process.env.TLS_CERT_PATH;
-const tlsKeyPath = process.env.TLS_KEY_PATH;
+const env = EnvSchema.parse({
+  PORT: process.env.PORT,
+  HOSTNAME: process.env.HOSTNAME,
+  TLS_CERT_PATH: process.env.TLS_CERT_PATH,
+  TLS_KEY_PATH: process.env.TLS_KEY_PATH,
+});
 
-if (!tlsCertPath || !tlsKeyPath) {
-  throw new Error('TLS_CERT_PATH と TLS_KEY_PATH は必須です');
-}
+const port = env.PORT;
+const hostname = env.HOSTNAME;
+const tlsCertPath = env.TLS_CERT_PATH;
+const tlsKeyPath = env.TLS_KEY_PATH;
 
 const app = next({ dev: false, dir: __dirname });
 const handle = app.getRequestHandler();

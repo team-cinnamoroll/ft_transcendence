@@ -11,6 +11,8 @@ services:
 
   frontend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
+    env_file:
+      - .env.dev
     volumes:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
@@ -43,10 +45,8 @@ services:
 
   db:
     image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: tracen
-      POSTGRES_USER: tracen
-      POSTGRES_PASSWORD: tracen
+    env_file:
+      - .env.dev
     ports:
       - "5432:5432"
     volumes:

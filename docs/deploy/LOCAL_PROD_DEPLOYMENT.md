@@ -69,6 +69,12 @@ sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tr
 
 5) デプロイ
 
+事前に環境変数ファイルを用意します。
+
+```bash
+cp .env.local-prod.example .env.local-prod
+```
+
 ```bash
 pnpm local-prod:deploy
 # または
@@ -90,7 +96,7 @@ bash scripts/down-local-prod.sh
   - backend/frontend のイメージを push/pull するために使用
 - **nginx**: 入口
   - `https://tracen.local` を受ける
-  - `/api/*` → backend、`/*` → frontend
+  - `/api/*` → frontend（BFF API）、`/*` → frontend
   - upstream への接続も HTTPS + 証明書検証 ON
 - **frontend**: Next.js（production build）
   - `.next/standalone` を使い、`server-https.cjs` で HTTPS サーバとして起動
@@ -147,7 +153,7 @@ bash scripts/down-local-prod.sh
   - ブラウザ（ホストOSの信頼ストア）: `https://tracen.local` を警告なしで開くため
   - Docker（レジストリ用）: `docker push/pull` が `registry.tracen.local:5000` を信頼するため
   - Nginx（upstream 検証用）: backend/frontend への `proxy_ssl_verify on` を通すため
-  - frontend（Node の outbound HTTPS 用）: SSR/サーバ側から `https://tracen.local/api` へアクセスする場合に備え、`NODE_EXTRA_CA_CERTS` を設定
+  - frontend（Node の outbound HTTPS 用）: BFF(server) が `APP_API_BASE_URL`（例: `https://backend.tracen.local:8443`）へ HTTPS アクセスするため、`NODE_EXTRA_CA_CERTS` を設定
 
 ## トラブルシューティング（よくあるもの）
 

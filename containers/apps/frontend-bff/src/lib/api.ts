@@ -1,7 +1,21 @@
-import { hc } from 'hono/client';
-import type { AppType } from '@tracen/backend';
+import { publicEnv } from './env/public';
 
-const baseUrl =
-  process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://backend:8000';
+export type HelloResponse = {
+  message: string;
+};
 
-export const client = hc<AppType>(baseUrl);
+function getBffApiBaseUrl(): string {
+  return publicEnv.NEXT_PUBLIC_BFF_API_BASE_URL.replace(/\/+$/, '');
+}
+
+export async function fetchHelloFromBff(): Promise<HelloResponse> {
+  const res = await fetch(`${getBffApiBaseUrl()}/hello`, {
+    headers: { Accept: 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error(`BFF /hello failed: ${res.status} ${res.statusText}`);
+  }
+
+  return (await res.json()) as HelloResponse;
+}

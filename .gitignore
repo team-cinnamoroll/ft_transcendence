@@ -23,10 +23,10 @@ pnpm-debug.log*
 .prettierignore
 
 
-# Environment files (keep examples if needed)
-.env
-.env.local
-.env.*.local
+# Environment files
+.env*
+!.env.dev.example
+!.env.local-prod.example
 
 # OS / Editor
 .DS_Store
