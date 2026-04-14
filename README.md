@@ -11,12 +11,12 @@
 
 ## ディレクトリ構成
 
-- apps/frontend-bff: Next.js アプリ
-- apps/backend: Hono API
+- containers/apps/frontend-bff: Next.js アプリ
+- containers/apps/backend: Hono API
 	- src: backend の実装コード
 	- test: Vitest のテストコード
-- infra/nginx: Nginx 設定
-- infra/db: PostgreSQL 初期化 SQL
+- containers/infra/nginx: Nginx 設定
+- containers/infra/db: PostgreSQL 初期化 SQL
 - .devcontainer: VS Code Dev Container 設定
 
 ## 開発環境の実行方法
@@ -64,20 +64,20 @@ Nginx 経由では、以下のルーティングです。
 - 直アクセスは OK で nginx だけ 502 の場合は nginx を再起動する（IP 変化・名前解決の影響を受けることがあります）
 
 ```bash
-docker compose restart nginx
+docker compose -f docker-compose.dev.yml restart nginx
 ```
 
 - 原因が分からない場合はログと状態を見る
 
 ```bash
-docker compose ps
-docker compose logs -f --tail=200 nginx frontend backend
+docker compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml logs -f --tail=200 nginx frontend backend
 ```
 
 補足:
 
-- `infra/nginx/nginx.conf` を編集した場合、反映には `docker compose restart nginx` が必要です。
-- `infra/nginx/nginx.conf` は Docker DNS（127.0.0.11）を使って upstream を再解決する設定を入れてあります。ローカルで設定を差し替えている場合は、同等の設定になっているか確認してください。
+- `containers/infra/nginx/nginx.conf` を編集した場合、反映には `docker compose -f docker-compose.dev.yml restart nginx` が必要です。
+- `containers/infra/nginx/nginx.conf` は Docker DNS（127.0.0.11）を使って upstream を再解決する設定を入れてあります。ローカルで設定を差し替えている場合は、同等の設定になっているか確認してください。
 
 ### 補足: 開発時の起動コマンド
 
@@ -131,7 +131,7 @@ pnpm local-prod:setup-tls
 
 ```bash
 sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
-sudo cp infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
+sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
 ```
 
 環境によっては Docker の再起動が必要な場合があります。
@@ -168,7 +168,7 @@ pnpm local-prod:down
 開発環境停止:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.dev.yml down
 ```
 
 ローカル本番相当の停止:

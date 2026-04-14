@@ -4,10 +4,10 @@ WORKDIR /workspace
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-COPY apps/backend/package.json apps/backend/package.json
-COPY apps/frontend-bff/package.json apps/frontend-bff/package.json
-COPY apps/backend apps/backend
-COPY apps/frontend-bff apps/frontend-bff
+COPY containers/apps/backend/package.json containers/apps/backend/package.json
+COPY containers/apps/frontend-bff/package.json containers/apps/frontend-bff/package.json
+COPY containers/apps/backend containers/apps/backend
+COPY containers/apps/frontend-bff containers/apps/frontend-bff
 
 RUN pnpm install
 RUN pnpm --filter @tracen/frontend-bff build
@@ -17,17 +17,17 @@ RUN pnpm --filter @tracen/frontend-bff build
 # `MODULE_NOT_FOUND` で起動に失敗することがある。
 # builder 側のフルインストールから `dist/compiled` を退避して runtime に持ち込む。
 RUN set -eux; \
-	next_dir="$(node -p "require('path').dirname(require.resolve('next/package.json', { paths: ['/workspace/apps/frontend-bff'] }))")"; \
+	next_dir="$(node -p "require('path').dirname(require.resolve('next/package.json', { paths: ['/workspace/containers/apps/frontend-bff'] }))")"; \
 	mkdir -p /workspace/.next-runtime-deps; \
 	cp -a "$next_dir/dist/compiled" /workspace/.next-runtime-deps/next-dist-compiled
 
 FROM node:24-alpine
 WORKDIR /app
 
-COPY --from=builder /workspace/apps/frontend-bff/.next/standalone ./
-COPY --from=builder /workspace/apps/frontend-bff/.next/static ./apps/frontend-bff/.next/static
-COPY --from=builder /workspace/apps/frontend-bff/public ./apps/frontend-bff/public
-COPY --from=builder /workspace/apps/frontend-bff/server-https.cjs ./apps/frontend-bff/server-https.cjs
+COPY --from=builder /workspace/containers/apps/frontend-bff/.next/standalone ./
+COPY --from=builder /workspace/containers/apps/frontend-bff/.next/static ./containers/apps/frontend-bff/.next/static
+COPY --from=builder /workspace/containers/apps/frontend-bff/public ./containers/apps/frontend-bff/public
+COPY --from=builder /workspace/containers/apps/frontend-bff/server-https.cjs ./containers/apps/frontend-bff/server-https.cjs
 
 COPY --from=builder /workspace/.next-runtime-deps/next-dist-compiled /tmp/next-dist-compiled
 
@@ -54,7 +54,7 @@ RUN set -eux; \
 	fi; \
 	rm -rf /tmp/next-dist-compiled
 
-WORKDIR /app/apps/frontend-bff
+WORKDIR /app/containers/apps/frontend-bff
 
 EXPOSE 3443
 CMD ["node", "server-https.cjs"]

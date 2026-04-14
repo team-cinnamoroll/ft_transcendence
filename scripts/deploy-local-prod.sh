@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="tracen-local-prod"
-cert_dir="$repo_root/infra/local-prod/certs"
+cert_dir="$repo_root/containers/infra/local-prod/certs"
 
 cd "$repo_root"
 

@@ -7,8 +7,8 @@
 このプロジェクトではESLint 9.0の**フラット設定形式**を採用しており、モダンで拡張性の高いコード品質管理を実現しています。
 
 - **ルート設定**: `/eslint.config.js` - 共有ルール
-- **Backend設定**: `/apps/backend/eslint.config.js` - Node.js + TypeScript
-- **Frontend設定**: `/apps/frontend-bff/eslint.config.js` - React + Next.js + TypeScript
+- **Backend設定**: `/containers/apps/backend/eslint.config.js` - Node.js + TypeScript
+- **Frontend設定**: `/containers/apps/frontend-bff/eslint.config.js` - React + Next.js + TypeScript
 
 ## セットアップ
 
@@ -63,7 +63,7 @@ pnpm -F @tracen/backend lint
 出力例：
 
 ```
-/workspace/apps/backend/index.ts
+/workspace/containers/apps/backend/src/index.ts
   5:1  warning  Unexpected console statement  no-console
 
 ✖ 1 problem (0 errors, 1 warning)
@@ -91,7 +91,7 @@ pnpm -F @tracen/frontend-bff lint:fix
 | `@typescript-eslint/no-unused-vars`  | error   | 未使用変数を禁止（`_`プレフィックスは許可） |
 | `@typescript-eslint/no-explicit-any` | warning | `any`型の使用を警告                         |
 
-### Backend固有の設定 (`/apps/backend/eslint.config.js`)
+### Backend固有の設定 (`/containers/apps/backend/eslint.config.js`)
 
 **対応環境:**
 
@@ -103,7 +103,7 @@ pnpm -F @tracen/frontend-bff lint:fix
 - `dist/`, `build/`, `node_modules/`
 - `*.config.js`, `*.config.ts`
 
-### Frontend固有の設定 (`/apps/frontend-bff/eslint.config.js`)
+### Frontend固有の設定 (`/containers/apps/frontend-bff/eslint.config.js`)
 
 **対応環境:**
 
@@ -165,7 +165,7 @@ pnpm lint
 
 ```bash
 # キャッシュファイルを削除
-rm -rf .eslintcache apps/**/.eslintcache
+rm -rf .eslintcache containers/apps/**/.eslintcache
 ```
 
 **3. 依存関係の再インストール**

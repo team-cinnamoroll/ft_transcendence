@@ -41,4 +41,4 @@ tmp/
 temp/
 
 # Local production (mkcert)
-infra/local-prod/certs/
+containers/infra/local-prod/certs/

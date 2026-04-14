@@ -64,7 +64,7 @@ bash scripts/setup-local-prod-tls.sh
 
 ```bash
 sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
-sudo cp infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
+sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
 ```
 
 5) デプロイ
@@ -103,24 +103,24 @@ bash scripts/down-local-prod.sh
 - `docker-compose.local-prod.yml`
   - local-prod 全体の Compose 定義（registry/db/backend/frontend/nginx）
   - `TRACEN_IMAGE_TAG` でイメージタグを切り替え
-  - backend/frontend/nginx に証明書（`infra/local-prod/certs/*`）をマウント
-- `infra/nginx/nginx.https.conf`
+  - backend/frontend/nginx に証明書（`containers/infra/local-prod/certs/*`）をマウント
+- `containers/infra/nginx/nginx.https.conf`
   - `tracen.local` の TLS 終端
   - upstream へ HTTPS 接続し、`proxy_ssl_verify on` で検証
 - `scripts/setup-local-prod-tls.sh`
-  - mkcert で `tracen.local` / `*.tracen.local` の証明書を生成し、CA を `infra/local-prod/certs/ca.crt` にコピー
+  - mkcert で `tracen.local` / `*.tracen.local` の証明書を生成し、CA を `containers/infra/local-prod/certs/ca.crt` にコピー
 - `scripts/deploy-local-prod.sh`
   - registry 起動 → backend/frontend build → push → 全サービス起動 → `curl` スモークテスト
 - `scripts/down-local-prod.sh`
   - local-prod の Compose を停止
-- `apps/backend/src/index.ts`
+- `containers/apps/backend/src/index.ts`
   - 直実行時に `TLS_CERT_PATH` / `TLS_KEY_PATH` があれば HTTPS で listen
-- `apps/frontend-bff/server-https.cjs`
+- `containers/apps/frontend-bff/server-https.cjs`
   - Next.js（`output: 'standalone'`）を HTTPS で起動する custom server
-- `apps/frontend-bff/Dockerfile`
+- `containers/apps/frontend-bff/Dockerfile`
   - `standalone + pnpm` で起きやすい runtime 依存欠落を回避するための補助（symlink 復元 / `next/dist/compiled` 補完）
 - `.gitignore`
-  - `infra/local-prod/certs/` をコミット対象外にして鍵素材が混入しないようにする
+  - `containers/infra/local-prod/certs/` をコミット対象外にして鍵素材が混入しないようにする
 
 ## デプロイの流れ（scripts/deploy-local-prod.sh）
 
@@ -129,9 +129,10 @@ bash scripts/down-local-prod.sh
 3. backend/frontend のイメージをビルド
 4. 3 で作ったイメージを local registry に push
 5. local-prod の Compose 全体を起動（`--remove-orphans`）
-6. `curl --cacert infra/local-prod/certs/ca.crt` でスモークテスト
+6. `curl --cacert containers/infra/local-prod/certs/ca.crt` でスモークテスト
    - `https://tracen.local/api/hello`
    - `https://tracen.local/`
+
 
 補足:
 

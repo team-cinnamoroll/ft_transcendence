@@ -21,7 +21,7 @@ importers:
         specifier: ^3.0.0
         version: 3.8.1
 
-  apps/backend:
+  containers/apps/backend:
     dependencies:
       '@hono/node-server':
         specifier: ^1.19.13
@@ -58,7 +58,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.12.2)(lightningcss@1.32.0)
 
-  apps/frontend-bff:
+  containers/apps/frontend-bff:
     dependencies:
       '@tracen/backend':
         specifier: workspace:*

@@ -39,7 +39,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./containers/infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
   db:
     image: postgres:17-alpine
@@ -51,7 +51,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./containers/infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 volumes:
   workspace_node_modules:
