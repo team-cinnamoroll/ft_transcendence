@@ -84,13 +84,13 @@ if command -v curl >/dev/null 2>&1; then
   ok_root=""
   for _ in {1..30}; do
     if [[ "$ok_api" != "yes" ]]; then
-      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/hello" >/dev/null; then
+      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/hello" >/dev/null 2>/dev/null; then
         ok_api="yes"
       fi
     fi
 
     if [[ "$ok_root" != "yes" ]]; then
-      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null; then
+      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null 2>/dev/null; then
         ok_root="yes"
       fi
     fi
@@ -109,6 +109,15 @@ if command -v curl >/dev/null 2>&1; then
     if [[ "$ok_root" != "yes" ]]; then
       echo "- NG: https://tracen.local/" >&2
     fi
+
+    echo "curl のエラー詳細:" >&2
+    if [[ "$ok_api" != "yes" ]]; then
+      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/hello" >/dev/null || true
+    fi
+    if [[ "$ok_root" != "yes" ]]; then
+      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
+    fi
+
     echo "docker compose -p $project_name -f $compose_file logs --tail=200" >&2
     exit 1
   fi

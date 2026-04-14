@@ -123,6 +123,26 @@ pnpm -F @tracen/frontend-bff lint:fix
 - `dist/`, `build/`, `node_modules/`, `.next/`
 - `*.config.js`, `*.config.ts`
 
+#### CommonJS スクリプト (`server-https.cjs`) について
+
+Frontend には `server-https.cjs`（Next.js を HTTPS で起動するための Node.js スクリプト）があり、以下の特徴があります：
+
+- CommonJS（`.cjs`）のため `require()` / `__dirname` / `process` などの Node.js グローバルを使用します
+- 一方で、TypeScript ESLint の推奨設定では `require()` が `@typescript-eslint/no-require-imports` によりエラーになります
+- また、フラット設定では Node.js グローバルが未定義だと `no-undef` でエラーになります
+
+そのため、`/containers/apps/frontend-bff/eslint.config.js` に **`server-https.cjs` のみ**に効く override を追加しています：
+
+- `files: ["server-https.cjs"]`
+- `languageOptions.sourceType: "script"`（CommonJS スクリプト扱い）
+- Node.js グローバル（`require`, `process`, `__dirname`, `console` など）を `globals` として定義
+- `@typescript-eslint/no-require-imports` を当該ファイルのみ `off`
+
+**注意事項:**
+
+- 同様の Node.js スクリプト（`.cjs`）を増やす場合は、対象ファイルを ESM/TypeScript 化するか、override を「必要なファイルだけ」に限定して追加してください（全体に広げると React/ブラウザ側コードまで緩くなります）。
+- `pnpm lint` 実行時に Node の `[MODULE_TYPELESS_PACKAGE_JSON]` 警告が出ることがあります。これは `eslint.config.js` が ESM 構文なのに `package.json` に `type` 指定が無いことが原因で、lint の成否には影響しません（必要なら `package.json` に `"type": "module"` を追加するか、設定ファイル名を ESM として解釈される形式に変更して解消できます）。
+
 ## VS Code統合
 
 ### ESLint拡張機能のインストール
