@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Linting
+.eslintcache
+# Formatting
+.prettierignore
+
+
+# Environment files
+.env*
+!.env.dev.example
+!.env.local-prod.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Docker / temp
+*.pid
+*.seed
+*.pid.lock
+tmp/
+temp/
+
+# Local production (mkcert)
+containers/infra/local-prod/certs/

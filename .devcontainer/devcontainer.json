@@ -1,0 +1,41 @@
+{
+  "name": "tracen Workspace",
+  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "service": "dev-container",
+  "workspaceFolder": "/workspace",
+  "runServices": ["dev-container", "backend", "frontend", "nginx", "db"],
+  "forwardPorts": [3000, 8000, 8080, 5432],
+  "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
+  "postStartCommand": "bash .devcontainer/scripts/fix-node-modules-perms.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "pnpmVersion": "10.33.0"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // 基本・品質管理
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "usernamehw.errorlens",
+        "github.copilot-chat",
+
+        // Next.js / React / Tailwind
+        "bradlc.vscode-tailwindcss",
+        "dsznajder.es7-react-js-snippets",
+        "formulahendry.auto-rename-tag",
+
+        // Hono / Backend 開発
+        "humao.rest-client",
+        "wallabyjs.console-ninja",
+
+        // Git / チーム開発
+        "eamodio.gitlens",
+        "mhutchie.git-graph"
+      ]
+    }
+  },
+  "remoteUser": "node"
+}
