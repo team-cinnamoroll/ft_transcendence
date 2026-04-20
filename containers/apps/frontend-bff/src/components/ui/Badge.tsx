@@ -5,10 +5,7 @@ type BadgeProps = {
 
 const Badge = ({ emoji, className }: BadgeProps) => {
   return (
-    <span
-      aria-label="バッジ"
-      className={className}
-    >
+    <span aria-label="バッジ" className={className}>
       {emoji}
     </span>
   );

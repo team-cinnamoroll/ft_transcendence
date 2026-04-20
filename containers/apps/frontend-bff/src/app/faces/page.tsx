@@ -1,11 +1,8 @@
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import FacesClient from "@/components/face/FacesClient";
+import FacesClient from '@/components/face/FacesClient';
+import { getViewerContext } from '@/server/usecases/viewer';
 
-const FacesPage = () => {
-  const currentUser = userRepository.getCurrentUser();
-  const myFaces = faceRepository.listByUserId(currentUser.id);
-
+const FacesPage = async () => {
+  const { myFaces } = await getViewerContext();
   return <FacesClient initialFaces={myFaces} />;
 };
 

@@ -1,17 +1,13 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import type { Activity } from "@/types/activity";
-import type { Face } from "@/types/face";
-import type { User } from "@/types/user";
-import { createLookupMap } from "@/lib/display";
-import SearchBar from "@/components/search/SearchBar";
-import SearchScopeSelector, {
-  type SearchScope,
-} from "@/components/search/SearchScopeSelector";
-import SearchResults, {
-  type SearchActivityResultItem,
-} from "@/components/search/SearchResults";
+import { useMemo, useState } from 'react';
+import type { Activity } from '@/types/activity';
+import type { Face } from '@/types/face';
+import type { User } from '@/types/user';
+import { createLookupMap } from '@/lib/display';
+import SearchBar from '@/components/search/SearchBar';
+import SearchScopeSelector, { type SearchScope } from '@/components/search/SearchScopeSelector';
+import SearchResults, { type SearchActivityResultItem } from '@/components/search/SearchResults';
 
 type SearchClientProps = {
   allActivities: Activity[];
@@ -28,8 +24,8 @@ const SearchClient = ({
   currentUserId,
   subscribedFaceIds,
 }: SearchClientProps) => {
-  const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<SearchScope>("all");
+  const [query, setQuery] = useState('');
+  const [scope, setScope] = useState<SearchScope>('all');
 
   const faceMap = useMemo(() => createLookupMap(allFaces, (face) => face.id), [allFaces]);
   const userMap = useMemo(() => createLookupMap(allUsers, (user) => user.id), [allUsers]);
@@ -40,8 +36,8 @@ const SearchClient = ({
 
     const lowerQuery = trimmedQuery.toLowerCase();
     const scopedActivities = allActivities.filter((activity) => {
-      if (scope === "mine") return activity.userId === currentUserId;
-      if (scope === "subscribed") {
+      if (scope === 'mine') return activity.userId === currentUserId;
+      if (scope === 'subscribed') {
         return subscribedFaceIds.includes(activity.faceId);
       }
       return true;
@@ -72,7 +68,7 @@ const SearchClient = ({
     return allFaces.filter(
       (face) =>
         face.name.toLowerCase().includes(lowerQuery) ||
-        (face.description ?? "").toLowerCase().includes(lowerQuery),
+        (face.description ?? '').toLowerCase().includes(lowerQuery)
     );
   }, [allFaces, query]);
 

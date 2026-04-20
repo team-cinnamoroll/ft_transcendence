@@ -1,19 +1,25 @@
-import { activityRepository } from "@/repositories/activity-repository";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import { subscriptionRepository } from "@/repositories/subscription-repository";
-import SearchClient from "@/components/search/SearchClient";
+import SearchClient from '@/components/search/SearchClient';
+import { listAllActivities } from '@/server/usecases/activities';
+import { listAllFaces } from '@/server/usecases/faces';
+import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
+import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
 
-export default function SearchPage() {
-  const currentUser = userRepository.getCurrentUser();
+export default async function SearchPage() {
+  const [currentUser, allActivities, allFaces, allUsers, subscribedFaceIds] = await Promise.all([
+    getCurrentUser(),
+    listAllActivities(),
+    listAllFaces(),
+    listAllUsers(),
+    getSubscribedFaceIds(),
+  ]);
 
   return (
     <SearchClient
-      allActivities={activityRepository.listAll()}
-      allFaces={faceRepository.listAll()}
-      allUsers={userRepository.listAll()}
+      allActivities={allActivities}
+      allFaces={allFaces}
+      allUsers={allUsers}
       currentUserId={currentUser.id}
-      subscribedFaceIds={subscriptionRepository.getSubscribedFaceIds()}
+      subscribedFaceIds={subscribedFaceIds}
     />
   );
 }

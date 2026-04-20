@@ -1,13 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { activityRepository } from "@/repositories/activity-repository";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import { subscriptionRepository } from "@/repositories/subscription-repository";
-import ActivityCard from "@/components/ui/ActivityCard";
-import { useDetailPanel } from "@/lib/detail-panel-context";
-import { createLookupMap, getFaceTitle } from "@/lib/display";
+import Link from 'next/link';
+import type { Activity } from '@/types/activity';
+import type { Face } from '@/types/face';
+import type { User } from '@/types/user';
+import ActivityCard from '@/components/ui/ActivityCard';
+import { useDetailPanel } from '@/lib/detail-panel-context';
+import { createLookupMap, getFaceTitle } from '@/lib/display';
 
 /**
  * サブスク画面フィード。
@@ -16,32 +15,28 @@ import { createLookupMap, getFaceTitle } from "@/lib/display";
  *
  * 各カードには「誰の・何のフェイスの投稿か」を明示する。
  */
-const SubscriptionFeed = () => {
+type Props = {
+  subscribedFaceIds: string[];
+  subscribedActivities: Activity[];
+  faces: Face[];
+  users: User[];
+};
+
+const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users }: Props) => {
   const { openActivity } = useDetailPanel();
-
-  // サブスクライブ中フェイスID一覧をリポジトリ経由で取得
-  const subscribedFaceIds = subscriptionRepository.getSubscribedFaceIds();
-
-  // サブスクライブ中フェイスのアクティビティを新しい順に取得
-  const subscribedActivities = activityRepository.listByFaceIds(subscribedFaceIds);
 
   // O(1) で引けるようにマップ化
   const faceMap = createLookupMap(
-    subscribedFaceIds.flatMap((faceId) => {
-      const face = faceRepository.findById(faceId);
-      return face ? [face] : [];
-    }),
-    (face) => face.id,
+    faces.filter((face) => subscribedFaceIds.includes(face.id)),
+    (face) => face.id
   );
-  const userMap = createLookupMap(userRepository.listAll(), (user) => user.id);
+  const userMap = createLookupMap(users, (user) => user.id);
 
   if (subscribedActivities.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <p className="text-4xl">🔔</p>
-        <p className="text-sm text-zinc-400">
-          まだサブスクしているフェイスがありません
-        </p>
+        <p className="text-sm text-zinc-400">まだサブスクしているフェイスがありません</p>
         <Link
           href="/search"
           className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 active:bg-violet-700"

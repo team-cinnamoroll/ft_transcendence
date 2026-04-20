@@ -7,9 +7,4 @@
  * - face-3-2: 鈴木 一郎の「アニメ感想」
  * - face-4-3: 田中 美咲の「植物育成」
  */
-export const subscribedFaceIds: string[] = [
-  "face-2-1",
-  "face-2-2",
-  "face-3-2",
-  "face-4-3",
-];
+export const subscribedFaceIds: string[] = ['face-2-1', 'face-2-2', 'face-3-2', 'face-4-3'];

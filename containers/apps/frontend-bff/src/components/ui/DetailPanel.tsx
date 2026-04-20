@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useDetailPanel } from "@/lib/detail-panel-context";
-import ActivityDetail from "./ActivityDetail";
-import FaceDetail from "./FaceDetail";
+import { useDetailPanel } from '@/lib/detail-panel-context';
+import ActivityDetail from './ActivityDetail';
+import FaceDetail from './FaceDetail';
 
 type DetailPanelPlaceholderProps = {
   emoji?: string;
@@ -12,10 +12,7 @@ type DetailPanelPlaceholderProps = {
 /**
  * DetailPanel 未選択時のプレースホルダー
  */
-const DetailPanelPlaceholder = ({
-  emoji = "🗂️",
-  message,
-}: DetailPanelPlaceholderProps) => {
+const DetailPanelPlaceholder = ({ emoji = '🗂️', message }: DetailPanelPlaceholderProps) => {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
       <span className="text-4xl text-zinc-700">{emoji}</span>
@@ -33,25 +30,20 @@ const DetailPanel = () => {
   const { state } = useDetailPanel();
 
   const contentKey =
-    state.type === "activity"
+    state.type === 'activity'
       ? `activity-${state.activityId}`
-      : state.type === "face"
+      : state.type === 'face'
         ? `face-${state.faceId}`
-        : "none";
+        : 'none';
 
   const renderContent = () => {
     switch (state.type) {
-      case "activity":
+      case 'activity':
         return <ActivityDetail activityId={state.activityId} />;
-      case "face":
+      case 'face':
         return <FaceDetail faceId={state.faceId} />;
       default:
-        return (
-          <DetailPanelPlaceholder
-            emoji="🗂️"
-            message="← 左のリストから選択してください"
-          />
-        );
+        return <DetailPanelPlaceholder emoji="🗂️" message="← 左のリストから選択してください" />;
     }
   };
 
