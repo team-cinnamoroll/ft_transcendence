@@ -5,6 +5,7 @@ import { createDrizzleUserRepository } from '../../infra/repositories/drizzle-us
 
 export type UserRepositorySpec = {
   findById: (id: UserId) => Promise<User | null>;
+  deleteById: (id: UserId) => Promise<boolean>;
   findByEmail: (email: string) => Promise<User | null>;
   create: (data: CreateUserInput) => Promise<User>;
 };

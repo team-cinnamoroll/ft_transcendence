@@ -33,6 +33,12 @@ export class UserDBRepositoryImpl implements UserRepositorySpec {
     return mapUser(rows[0]);
   }
 
+  async deleteById(id: UserId): Promise<boolean> {
+    const rows = await this.db.delete(users).where(eq(users.id, id)).returning({ id: users.id });
+
+    return rows.length > 0;
+  }
+
   async create(data: CreateUserInput): Promise<User> {
     const id = crypto.randomUUID();
 

@@ -21,3 +21,7 @@ export async function createUser(repo: UserRepositorySpec, input: CreateUserInpu
 export async function getUserById(repo: UserRepositorySpec, id: UserId): Promise<User | null> {
   return repo.findById(id);
 }
+
+export async function deleteUserById(repo: UserRepositorySpec, id: UserId): Promise<boolean> {
+  return repo.deleteById(id);
+}
