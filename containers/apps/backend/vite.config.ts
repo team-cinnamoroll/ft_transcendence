@@ -8,7 +8,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: ['hono', '@hono/node-server'],
+    noExternal: true,
   },
   server: {
     host: '0.0.0.0',

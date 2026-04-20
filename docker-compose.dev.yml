@@ -25,11 +25,16 @@ services:
 
   backend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
+    env_file:
+      - .env.dev
     volumes:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
     working_dir: /workspace
     command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
 
@@ -52,6 +57,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./containers/infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
 
 volumes:
   workspace_node_modules:

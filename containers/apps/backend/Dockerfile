@@ -14,6 +14,7 @@ FROM node:24-alpine
 WORKDIR /app
 
 COPY --from=builder /workspace/containers/apps/backend/dist ./dist
+COPY --from=builder /workspace/containers/apps/backend/drizzle ./drizzle
 COPY --from=builder /workspace/containers/apps/backend/package.json ./package.json
 
 EXPOSE 8443
