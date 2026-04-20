@@ -1,8 +1,18 @@
-import SubscriptionFeed from "@/components/subscriptions/SubscriptionFeed";
-import { subscriptionRepository } from "@/repositories/subscription-repository";
-import FAB from "@/components/ui/FAB";
+import SubscriptionFeed from '@/components/subscriptions/SubscriptionFeed';
+import FAB from '@/components/ui/FAB';
+import { listActivitiesByFaceIds } from '@/server/usecases/activities';
+import { listAllFaces } from '@/server/usecases/faces';
+import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
+import { listAllUsers } from '@/server/usecases/users';
 
-export default function SubscriptionsPage() {
+export default async function SubscriptionsPage() {
+  const subscribedFaceIds = await getSubscribedFaceIds();
+  const [subscribedActivities, faces, users] = await Promise.all([
+    listActivitiesByFaceIds(subscribedFaceIds),
+    listAllFaces(),
+    listAllUsers(),
+  ]);
+
   return (
     <div className="flex flex-col">
       {/* スティッキーヘッダー */}
@@ -10,13 +20,18 @@ export default function SubscriptionsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-zinc-100">サブスク</h1>
           <span className="text-xs text-zinc-500">
-            {subscriptionRepository.getSubscribedFaceIds().length} フェイスをサブスク中
+            {subscribedFaceIds.length} フェイスをサブスク中
           </span>
         </div>
       </header>
 
       <main className="px-4 py-4">
-        <SubscriptionFeed />
+        <SubscriptionFeed
+          subscribedFaceIds={subscribedFaceIds}
+          subscribedActivities={subscribedActivities}
+          faces={faces}
+          users={users}
+        />
       </main>
 
       <FAB />

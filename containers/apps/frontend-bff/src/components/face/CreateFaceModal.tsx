@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { Face } from "@/types/face";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
+import { useState, useTransition } from 'react';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { Face } from '@/types/face';
+import { createFaceAction } from '@/server/actions/faces';
 
 type Props = {
   isOpen: boolean;
@@ -14,32 +13,33 @@ type Props = {
 };
 
 const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
-  const [name, setName] = useState("");
-  const [emoji, setEmoji] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState('');
+  const [emoji, setEmoji] = useState('');
+  const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const isValid = name.trim().length > 0;
 
   const handleSubmit = () => {
-    if (!isValid) return;
+    if (!isValid || isPending) return;
 
-    const currentUser = userRepository.getCurrentUser();
-    const newFace: Face = faceRepository.create(currentUser.id, {
-      name: name.trim(),
-      emoji: emoji.trim() || undefined,
-      description: description.trim() || undefined,
-      isPrivate,
+    startTransition(async () => {
+      const newFace: Face = await createFaceAction({
+        name: name.trim(),
+        emoji: emoji.trim() || undefined,
+        description: description.trim() || undefined,
+        isPrivate,
+      });
+      onCreate(newFace);
+      handleClose();
     });
-
-    onCreate(newFace);
-    handleClose();
   };
 
   const handleClose = () => {
-    setName("");
-    setEmoji("");
-    setDescription("");
+    setName('');
+    setEmoji('');
+    setDescription('');
     setIsPrivate(false);
     onClose();
   };
@@ -78,10 +78,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
         <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
           {/* 名前（必須） */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="face-name"
-              className="text-xs font-medium text-zinc-400"
-            >
+            <label htmlFor="face-name" className="text-xs font-medium text-zinc-400">
               名前
               <span className="ml-1 text-violet-400">*</span>
             </label>
@@ -92,19 +89,16 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="例：読書"
               className={cn(
-                "w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5",
-                "text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors",
-                "focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50",
+                'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
+                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
+                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
               )}
             />
           </div>
 
           {/* 絵文字（任意） */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="face-emoji"
-              className="text-xs font-medium text-zinc-400"
-            >
+            <label htmlFor="face-emoji" className="text-xs font-medium text-zinc-400">
               絵文字
               <span className="ml-1 text-zinc-600">（任意）</span>
             </label>
@@ -115,19 +109,16 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               onChange={(e) => setEmoji(e.target.value)}
               placeholder="例：📚"
               className={cn(
-                "w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5",
-                "text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors",
-                "focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50",
+                'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
+                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
+                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
               )}
             />
           </div>
 
           {/* 説明文（任意） */}
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="face-description"
-              className="text-xs font-medium text-zinc-400"
-            >
+            <label htmlFor="face-description" className="text-xs font-medium text-zinc-400">
               説明文
               <span className="ml-1 text-zinc-600">（任意）</span>
             </label>
@@ -138,9 +129,9 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               placeholder="このフェイスについて説明してください"
               rows={3}
               className={cn(
-                "w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5",
-                "text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors",
-                "focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50",
+                'w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
+                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
+                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
               )}
             />
           </div>
@@ -149,9 +140,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           <div className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium text-zinc-100">非公開</span>
-              <span className="text-xs text-zinc-500">
-                オンにすると自分だけが閲覧できます
-              </span>
+              <span className="text-xs text-zinc-500">オンにすると自分だけが閲覧できます</span>
             </div>
             <button
               type="button"
@@ -159,14 +148,14 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               aria-checked={isPrivate}
               onClick={() => setIsPrivate((prev) => !prev)}
               className={cn(
-                "relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200",
-                isPrivate ? "bg-violet-600" : "bg-zinc-600",
+                'relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200',
+                isPrivate ? 'bg-violet-600' : 'bg-zinc-600'
               )}
             >
               <span
                 className={cn(
-                  "absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200",
-                  isPrivate ? "translate-x-5" : "translate-x-0",
+                  'absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200',
+                  isPrivate ? 'translate-x-5' : 'translate-x-0'
                 )}
               />
             </button>
@@ -176,12 +165,12 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!isValid}
+            disabled={!isValid || isPending}
             className={cn(
-              "w-full rounded-xl py-2.5 text-sm font-semibold transition-colors",
-              isValid
-                ? "bg-violet-600 text-white hover:bg-violet-500 active:bg-violet-700"
-                : "cursor-not-allowed bg-zinc-700 text-zinc-500",
+              'w-full rounded-xl py-2.5 text-sm font-semibold transition-colors',
+              isValid && !isPending
+                ? 'bg-violet-600 text-white hover:bg-violet-500 active:bg-violet-700'
+                : 'cursor-not-allowed bg-zinc-700 text-zinc-500'
             )}
           >
             作成する

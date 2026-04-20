@@ -1,20 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import FaceFilterBar from "./FaceFilterBar";
-import ActivityFeed from "./ActivityFeed";
+import { useState } from 'react';
+import type { Activity } from '@/types/activity';
+import type { Face } from '@/types/face';
+import type { User } from '@/types/user';
+import FaceFilterBar from './FaceFilterBar';
+import ActivityFeed from './ActivityFeed';
 
 /**
  * フェイスフィルタ状態を管理する Client Component。
  * FaceFilterBar と ActivityFeed を束ね、フィルタ連携を担う。
  */
-const HomeClient = () => {
-  const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
+type Props = {
+  currentUser: User;
+  faces: Face[];
+  activities: Activity[];
+};
 
-  const user = userRepository.getCurrentUser();
-  const faces = faceRepository.listByUserId(user.id);
+const HomeClient = ({ currentUser, faces, activities }: Props) => {
+  const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
 
   const handleSelectFace = (faceId: string | null) => {
     setSelectedFaceId(faceId);
@@ -23,15 +27,16 @@ const HomeClient = () => {
   return (
     <div className="flex flex-col">
       {/* フェイスフィルタバー */}
-      <FaceFilterBar
-        faces={faces}
-        selectedFaceId={selectedFaceId}
-        onSelect={handleSelectFace}
-      />
+      <FaceFilterBar faces={faces} selectedFaceId={selectedFaceId} onSelect={handleSelectFace} />
 
       {/* アクティビティフィード */}
       <div className="px-4 py-4">
-        <ActivityFeed selectedFaceId={selectedFaceId} />
+        <ActivityFeed
+          currentUser={currentUser}
+          faces={faces}
+          activities={activities}
+          selectedFaceId={selectedFaceId}
+        />
       </div>
     </div>
   );

@@ -1,14 +1,28 @@
-# MultiFace フロントエンド設計書
+# MultiFace フロントエンド設計書（Next.js + BFF）
 
 > 対象読者: フロントエンドを担当するメンバー（初学者含む）
-> 目的: バックエンド統合時にスムーズに差し替えられるモックを作るための設計方針を共有する
+> 目的: バックエンド統合時にスムーズに差し替えられるモック/実装を作るための設計方針を共有する
+
+以降、パスは `containers/apps/frontend-bff/src/` を `src/` として表記します。
+
+## 0. この設計で守りたいこと（要点）
+
+1. **UI から「どこからデータを取るか」を剥がす**（モック→APIの差し替えを小さくする）
+2. **契約（interface）は `xxSpec`、実装は `xxImpl`**（命名で役割が分かるようにする）
+3. **契約（Spec）は async（Promise）をデフォルト**（モックでも必ず `async` 実装）
+4. **依存解決（DI）は Repository の Provider に閉じ込める**（Factory + Provider）
+5. **共通ロジックは `src/server/usecases` に集約**し、**Server Actions / Route Handler は薄い入口**にする
+
+---
 
 ## 1. このドキュメントの目的
 
 現在のプロジェクトは **「モックデータで動く UI の再現」** を目標にしています。
-しかし将来的には `ARCHITECTURE.md` に記載された Hono バックエンドと統合する予定です。
+ただし将来的には [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) に記載された Hono バックエンドと統合する予定です。
 
 統合のときに「全部書き直し」になるのを防ぐために、**今のうちから「差し替えやすい設計」** で書いておくのがこのドキュメントの目的です。
+
+---
 
 ## 2. 全体アーキテクチャの中でフロントエンドはどこにいるか
 
@@ -18,7 +32,7 @@
     [ Nginx ]
      /       \
 [Next.js]  [Hono バックエンド]
-(フロントエンド)  (バックエンド)
+(フロントエンド+BFF)  (バックエンド)
 ```
 
 フロントエンド（Next.js）の仕事は大きく2つです：
@@ -26,322 +40,430 @@
 | 役割 | 説明 |
 |---|---|
 | **UI の描画** | React コンポーネントでユーザーに見える画面を作る |
-| **BFF（Backend For Frontend）** | バックエンドの API を呼んでデータを取得し、画面に渡す |
+| **BFF（Backend For Frontend）** | 画面に必要な形にデータを集約/整形して UI に渡す |
 
-> **BFF とは?**  
-> UI が使いやすい形にデータを整形する「フロントエンドの専用サーバー」機能です。  
-> Next.js の Server Component や Route Handler がこの役割を担います。
+> **BFF とは?**
+> UI が使いやすい形にデータを整形する「フロントエンドの専用サーバー」機能です。
+> このプロジェクトでは、Next.js の **Server Component / Route Handler / Server Actions** が BFF の役割を担います。
+
+---
 
 ## 3. フロントエンドのレイヤー構造（最重要）
 
-設計の核心は **「データをどこから取るか」をコンポーネントから切り離す** ことです。
+設計の核心は **「データをどこから取るか」を UI から切り離す** ことです。
 
 ```
-┌───────────────────────────────────────┐
-│  UI Layer（見た目）                    │
-│  src/components/                       │
-│  Server Component / Client Component   │
-└───────────────┬───────────────────────┘
-                │ データを要求
-┌───────────────▼───────────────────────┐
-│  Repository Layer（データ取得の窓口）  │
-│  src/repositories/                     │
-│  「モックから取る」か「APIから取る」かを│
-│  ここだけで切り替える                  │
-└───────────────┬───────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│ UI Layer（見た目）                                      │
+│  src/app/ , src/components/                             │
+│  - Server Component: usecase を直呼びして props 注入     │
+│  - Client Component: Server Action / Route Handler を利用│
+└───────────────┬────────────────────────────────────────┘
                 │
-       ┌────────┴────────┐
-       ▼                 ▼
-┌────────────┐    ┌─────────────────┐
-│ Mock 実装  │    │ API 実装（将来） │
-│ src/mocks/ │    │ Hono RPC Client │
-└────────────┘    └─────────────────┘
+                │（Server では usecase を直接呼べる）
+                ▼
+┌────────────────────────────────────────────────────────┐
+│ Usecase Layer（server-only / 画面向け共通ロジック）       │
+│  src/server/usecases/                                   │
+│  - 複数 Repository をまたぐ集約・整形・権限/前提チェック   │
+└───────────────┬────────────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────────────────────────────┐
+│ Repository Layer（server-only / データ取得の窓口）        │
+│  src/repositories/                                      │
+│  - Spec（契約） + Impl（実装） + Provider（DI 入口）       │
+└───────────────┬────────────────────────────────────────┘
+                │
+      ┌────────┴────────┐
+      ▼                 ▼
+┌───────────────┐   ┌───────────────────────────┐
+│ Mock 実装      │   │ API 実装（将来）            │
+│ src/mocks/     │   │ Hono RPC Client / fetch    │
+└───────────────┘   └───────────────────────────┘
+
+（Client Component から server-only を直接 import できないため、下記の入口を使う）
+
+┌────────────────────────────────────────────────────────┐
+│ Entry Points（薄い入口）                                 │
+│  - Server Actions: src/server/actions/（主に更新系）      │
+│  - Route Handler : src/app/api/**/route.ts（主に取得系）  │
+└────────────────────────────────────────────────────────┘
 ```
 
-### なぜこれが重要か？
+### 重要: server-only の境界
 
-**今（モック期）：**
-```
-コンポーネント → src/mocks/faces.ts から直接データを読む
-```
+`src/repositories/*` と `src/server/usecases/*` は `import "server-only";` を付け、**Client Component から import できない**ようにしています。
 
-**この設計だと統合時に：**
-```
-コンポーネント → src/repositories/face-repository.ts
-               └→ 中身だけ「モック→API呼び出し」に差し替え
-```
+- Server Component（`page.tsx` / `layout.tsx` など）は server-only を直接呼べる
+- Client Component（`"use client"`）は server-only を直接呼べない
+  - 代わりに **Server Actions を関数として呼ぶ**
+  - もしくは **Route Handler を `fetch('/api/...')` で呼ぶ**
 
-コンポーネント側は一切変えなくてよくなります。
+---
 
-## 4. ディレクトリ構成（推奨）
+## 4. ディレクトリ構成（現行）
 
 ```
 src/
-├── app/                        # Next.js App Router のページ定義
-│   ├── layout.tsx              # 全体レイアウト（BottomNavなど）
-│   ├── page.tsx                # ホームタブ
-│   ├── subscriptions/          # サブスクタブ
-│   │   └── page.tsx
-│   ├── search/                 # 検索タブ
-│   │   └── page.tsx
-│   ├── notifications/          # 通知タブ（MultiFace新規）
-│   │   └── page.tsx
-│   └── faces/                  # フェイス一覧タブ（MultiFace新規）
-│       └── page.tsx
+├── app/                          # Next.js App Router
+│   ├── layout.tsx                # 全体レイアウト（Server Component）
+│   ├── page.tsx                  # ホーム（Server Component）
+│   └── api/                      # Route Handlers（BFF の HTTP 入口）
+│       ├── viewer/route.ts
+│       └── detail/
+│           ├── face/[faceId]/route.ts
+│           └── activity/[activityId]/route.ts
 │
-├── components/                 # UI コンポーネント
-│   ├── ui/                     # 汎用（ボタン、アバター等）
-│   ├── home/                   # ホームタブ専用
-│   ├── face/                   # フェイス関連
-│   ├── activity/               # アクティビティ関連
-│   ├── subscriptions/          # サブスクタブ専用
-│   ├── search/                 # 検索タブ専用
-│   └── notifications/          # 通知タブ専用
+├── components/                   # UI コンポーネント
+│   ├── ui/
+│   ├── home/
+│   ├── face/
+│   ├── subscriptions/
+│   ├── search/
+│   └── notifications/
 │
-├── repositories/               # ★ データ取得レイヤー（今回の設計の核心）
-│   ├── face-repository.ts      # フェイスのCRUD
-│   ├── activity-repository.ts  # アクティビティのCRUD
-│   ├── user-repository.ts      # ユーザー情報の取得
-│   └── subscription-repository.ts # サブスクライブ操作
+├── server/                       # ★ server-only
+│   ├── usecases/                 # 画面向けの集約・整形ロジック（Repository を呼ぶ）
+│   └── actions/                  # Server Actions（Client から呼べる更新入口）
 │
-├── mocks/                      # モックデータ（Repository が参照する）
-│   ├── faces.ts
-│   ├── activities.ts
-│   ├── users.ts
-│   └── subscriptions.ts
+├── repositories/                 # ★ server-only: Spec/Impl/Provider
+│   ├── provider.ts               # Provider 共通ヘルパー
+│   ├── face-repository.ts
+│   ├── activity-repository.ts
+│   ├── user-repository.ts
+│   ├── subscription-repository.ts
+│   └── notification-repository.ts
 │
-├── types/                      # 型定義
-│   ├── activity.ts
-│   ├── face.ts                 # topic.ts からリネーム
-│   └── user.ts
-│
-└── lib/                        # ユーティリティ
-    └── utils.ts
+├── mocks/                        # モックデータ（Repository が参照）
+├── types/                        # 型定義
+└── lib/                          # ユーティリティ
 ```
 
-## 5. Repository パターンの実践
+---
 
-### 5-1. まず「インターフェース」を定義する
+## 5. 命名規則（Spec/Impl）と async デフォルト（全レイヤー共通）
 
-インターフェースとは「**この Repository は必ずこれらのメソッドを持つ**」という約束書きです。
+この章のルールは **Repository だけでなく**、将来追加される可能性がある **Worker / Service / Client（外部APIクライアント）** など、
+「契約（interface/type）を定義して、複数の具体実装を差し替える」あらゆる箇所に適用します。
 
-```typescript
-// src/repositories/face-repository.ts
+### 5-1. 契約（Spec）と実装（Impl）の命名
+
+- 契約（インターフェース/型）: `XxxSpec`
+  - 例: `FaceRepositorySpec` / `NotificationWorkerSpec` / `BackendClientSpec`
+  - **末尾が `Spec` であること**がルール（`Repository` や `Worker` は役割が分かるように付けてOK）
+- 具体実装（値）: `xxx...Impl`
+  - 例: `faceMockRepositoryImpl` / `faceApiRepositoryImpl`
+  - 例: `notificationMockWorkerImpl`（将来の Worker 例）
+  - **末尾が `Impl` であること**がルール
+- Factory（実装生成）: `createXxx...Impl()`
+  - 例: `createFaceMockRepositoryImpl()`
+  - 例: `createNotificationMockWorkerImpl()`（将来の Worker 例）
+- Provider（DI 入口）: `getXxx...()`
+  - 例: `getFaceRepository()` / `getNotificationWorker()`
+  - Provider は「どの Impl を使うか」を閉じ込める場所（呼び出し側は `getXxx...(): XxxSpec` だけ知っていれば良い）
+
+### 5-2. async（Promise）をデフォルトにする理由
+
+モック期は同期っぽく実装できても、将来的に API 呼び出しや I/O が入ると **必ず非同期**になります。
+そこで **Spec の段階で Promise を返す契約に統一**し、モックも必ず `async` で実装します。
+
+- 呼び出し側（Usecase/Server Actions/Route Handler/UI）から見ると常に `await` するだけ
+- 「モック期→API期」で呼び出し側の書き換えが最小になる
+
+### 5-3. 例：Repository 以外（Worker）の場合（将来像）
+
+たとえば「通知を送る Worker」を追加する場合も、同じルールで作れます。
+
+```ts
+import "server-only";
+
+import { createSingletonProvider } from "@/repositories/provider";
+
+export type NotificationWorkerSpec = {
+  send: (message: string) => Promise<void>;
+};
+
+export function createNotificationMockWorkerImpl(): NotificationWorkerSpec {
+  return {
+    send: async (_message) => {
+      // モック: 何もしない
+    },
+  };
+}
+
+export const notificationMockWorkerImpl: NotificationWorkerSpec =
+  createNotificationMockWorkerImpl();
+
+export const getNotificationWorker =
+  createSingletonProvider<NotificationWorkerSpec>(() => notificationMockWorkerImpl);
+```
+
+> 補足: `createSingletonProvider` は現在 `src/repositories/provider.ts` に置いています。
+> Provider パターンを Repository 以外でも多用するようになったら、より一般的な場所へ移すことも検討します。
+
+---
+
+## 6. Repository パターン（Factory + Provider）
+
+Repository は「データ取得の窓口」です。
+ポイントは **実装の選択（モック/API）を Provider に閉じ込める** ことです。
+
+### 6-1. Spec（契約）と Impl（実装）
+
+例: `src/repositories/face-repository.ts` の抜粋イメージ
+
+```ts
+import "server-only";
 
 import type { Face } from "@/types/face";
+import { faces } from "@/mocks/faces";
+import { createSingletonProvider } from "@/repositories/provider";
 
-// 約束書き（インターフェース）
-type FaceRepository = {
-  // 指定ユーザーのフェイス一覧を取得する
+export type CreateFaceInput = Omit<Face, "id" | "userId">;
+
+// 契約（Spec）: 必ず Promise を返す
+export type FaceRepositorySpec = {
   listByUserId: (userId: string) => Promise<Face[]>;
-  // IDでフェイスを1件取得する
   findById: (faceId: string) => Promise<Face | null>;
-  // フェイスを作成する
-  create: (input: Omit<Face, "id">) => Promise<Face>;
+  create: (userId: string, input: CreateFaceInput) => Promise<Face>;
+  listAll: () => Promise<Face[]>;
 };
+
+// モック実装（Impl）: モックでも async
+export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
+  return {
+    listByUserId: async (userId) => faces.filter((face) => face.userId === userId),
+    findById: async (faceId) => faces.find((face) => face.id === faceId) ?? null,
+    create: async (userId, input) => ({ id: `face-mock-${Date.now()}`, userId, ...input }),
+    listAll: async () => faces,
+  };
+}
+
+// 具体実装（Impl）
+export const faceMockRepositoryImpl: FaceRepositorySpec = createFaceMockRepositoryImpl();
+
+// Provider（DI の入口）: 実装の選択はここに閉じ込める
+export const getFaceRepository = createSingletonProvider<FaceRepositorySpec>(
+  () => faceMockRepositoryImpl
+);
 ```
 
-### 5-2. 今はモックで実装する
+### 6-2. Provider 共通ヘルパー
 
-```typescript
-// src/repositories/face-repository.ts（続き）
+Provider の「キャッシュ付き singleton」を毎回同じ形で書けるように、共通化ヘルパーを用意しています。
 
-import { mockFaces } from "@/mocks/faces"; // モックデータ
+- `src/repositories/provider.ts`
+  - `createSingletonProvider<T>(createImpl: () => T)`
 
-// 実際の処理（今はモックから取る）
-export const faceRepository: FaceRepository = {
-  listByUserId: async (userId) => {
-    // 本来は await fetch(...) だが、今はモックをフィルタするだけ
-    return mockFaces.filter((f) => f.userId === userId);
-  },
+---
 
-  findById: async (faceId) => {
-    return mockFaces.find((f) => f.id === faceId) ?? null;
-  },
+## 7. Usecase 層（server-only / 推奨の呼び出し口）
 
-  create: async (input) => {
-    // モックなので実際には保存せずダミーを返す
-    return { ...input, id: crypto.randomUUID() };
-  },
-};
+Usecase は、UI が欲しい形にデータを **集約・整形** する層です。
+
+- Repository 呼び出しの **順序・並列化**
+- 複数 Repository をまたぐ **集約**
+- 画面向けに必要な形への **変換**
+
+例: viewer context（`src/server/usecases/viewer.ts` のイメージ）
+
+```ts
+import "server-only";
+
+import { getCurrentUser } from "./users";
+import { listFacesByUserId } from "./faces";
+
+export async function getViewerContext() {
+  const currentUser = await getCurrentUser();
+  const myFaces = await listFacesByUserId(currentUser.id);
+  return { currentUser, myFaces };
+}
 ```
 
-### 5-3. コンポーネント（Server Component）での使い方
+> ルール: **UI から直接 Repository を呼ばず、基本は Usecase を呼ぶ**
 
-```typescript
-// src/app/faces/page.tsx（Server Component のまま）
+---
 
-import { faceRepository } from "@/repositories/face-repository";
+## 8. UI からの使い方（Server Component / Server Actions / Route Handler）
 
-const FacesPage = async () => {
-  // Repository 経由でデータを取得（モックでも API でも呼び方は同じ）
-  const faces = await faceRepository.listByUserId("current-user-id");
+### 8-1. Server Component から（推奨）: Usecase を直呼びして props 注入
 
-  return (
-    <div>
-      {faces.map((face) => (
-        <FaceCard key={face.id} face={face} />
-      ))}
-    </div>
-  );
-};
-```
-
-### 5-4. 将来の API 統合時の変更イメージ
-
-バックエンドと繋ぐときは **`faceRepository` の中身だけ** を書き換えます。
-
-```typescript
-// src/repositories/face-repository.ts（将来の API 版）
-
-import { honoClient } from "@/lib/hono-client"; // Hono RPC クライアント
-
-export const faceRepository: FaceRepository = {
-  listByUserId: async (userId) => {
-    // ← ここだけ変わる
-    const res = await honoClient.faces.$get({ query: { userId } });
-    return res.json();
-  },
-  // ...
-};
-```
-
-**コンポーネント側（`FacesPage`）は一切変えなくてよい** のがこのパターンの利点です。
-
-## 6. 型の共有戦略
-
-### 現在（モック期）
-
-フロントエンドが独自に `src/types/` で型を定義します。
-
-```typescript
-// src/types/face.ts
-export type Face = {
-  id: string;
-  userId: string;
-  name: string;          // フェイス名
-  emoji?: string;        // アイコン絵文字
-  description?: string;  // 詳細説明
-  imageUrl?: string;     // フェイス画像
-  isPrivate: boolean;    // 公開/非公開
-};
-```
-
-### 将来（バックエンド統合後）
-
-Hono バックエンドは `src/index.ts` から RPC 型定義をエクスポートします（ARCHITECTURE.md 参照）。
-フロントエンドはそれを `import` するだけで型の二重定義がなくなります。
-
-```typescript
-// 将来のイメージ（今は実装しない）
-import type { AppType } from "../../backend/src/index"; // バックエンドの型を直接参照
-import { hc } from "hono/client";
-
-export const honoClient = hc<AppType>("http://localhost:3001");
-// honoClient は全 API エンドポイントに対して型安全にアクセスできる
-```
-
-> **今やること**: `src/types/` の型定義をバックエンドの設計（DB スキーマ）と**できるだけ揃えておく**。
-> 後で「型が全然違う」という事態を防ぐためです。
-
-## 7. MultiFace の画面構成とページ責務
-
-`MULTI_FACE.md` の画面仕様をもとに、各ページの責務を整理します。
-
-| タブ | ファイル | Server / Client | 主な責務 |
-|---|---|---|---|
-| フェイス一覧 | `app/faces/page.tsx` | Server | 自分のフェイス一覧を取得して表示 |
-| ホーム | `app/page.tsx` | Server | 自分の全アクティビティを取得して表示 |
-| サブスク | `app/subscriptions/page.tsx` | Server | サブスク中フェイスのアクティビティを取得 |
-| 通知 | `app/notifications/page.tsx` | Server | リンク・サブスク通知を取得して表示 |
-| 検索 | `app/search/page.tsx` | Server + Client | 入力 UI は Client、結果取得は Server |
-
-### Server Component と Client Component の使い分け
-
-```
-Server Component（デフォルト）       Client Component（"use client" が必要）
-─────────────────────────────────    ─────────────────────────────────────
-・データ取得（Repository 呼び出し）  ・useState / useEffect を使う
-・SEO やパフォーマンスに有利          ・ボタンクリック等のイベント処理
-・API キーなど秘匿情報を扱える        ・モーダル開閉などのインタラクション
-                                      ・フォーム入力
-```
-
-**基本方針: ページ（`page.tsx`）は Server Component のまま保つ。**
-インタラクティブな部分だけ Client Component として切り出す。
+例: `src/app/layout.tsx`
 
 ```tsx
-// 良い例: Server と Client を適切に分離
-// app/page.tsx（Server Component）
-const HomePage = async () => {
-  const activities = await activityRepository.listByUserId("current-user-id");
+import SideNav from "@/components/ui/SideNav";
+import { getViewerContext } from "@/server/usecases/viewer";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { myFaces } = await getViewerContext();
   return (
-    <>
-      {/* データ取得は Server 側で完了 */}
-      <ActivityFeed activities={activities} />
-      {/* インタラクティブな部分だけ Client Component */}
-      <NewActivityFAB />
-    </>
+    <html lang="ja">
+      <body>
+        <SideNav faces={myFaces} />
+        {children}
+      </body>
+    </html>
   );
-};
+}
 ```
 
-## 8. 現在のモックからの移行ロードマップ
+- 初期表示（SSR）で必要なデータは Server Component 側で揃える
+- Client Component には **props として渡す**
 
-### Phase 1（現在）: モックで UI を完成させる
+### 8-2. Client Component から更新する: Server Actions
 
-- `src/mocks/` にモックデータを充実させる
-- `src/repositories/` を作成し、**モックを呼ぶ Repository** を実装する
-- `src/components/` の UI を仕様通りに作り込む
-- Tricle の命名（`Topic`）を MultiFace の命名（`Face`）に統一する
+例: `src/components/face/CreateFaceModal.tsx`（Client） → `src/server/actions/faces.ts`（Server）
 
-```
-優先タスク:
-[ ] src/types/face.ts を作成（topic.ts をベースにリネーム・拡張）
-[ ] src/repositories/ を作成し、各 Repository の mock 実装を用意
-[ ] ページコンポーネントが mocks/ を直接 import している箇所を
-    repositories/ 経由に置き換える
-[ ] MultiFace の新画面（フェイス一覧・通知タブ）を追加する
-```
+```tsx
+"use client";
 
-### Phase 2（バックエンド統合時）: Repository の中身だけ差し替える
+import { useTransition } from "react";
+import { createFaceAction } from "@/server/actions/faces";
 
-- `src/lib/hono-client.ts` を作成し、Hono RPC クライアントを初期化
-- 各 `src/repositories/*.ts` の実装を「モック→API呼び出し」に変える
-- `src/types/` の型をバックエンドのエクスポート型に差し替える
+export function CreateFaceModal() {
+  const [isPending, startTransition] = useTransition();
 
-```
-変更範囲:
-[ ] src/lib/hono-client.ts（新規）
-[ ] src/repositories/*.ts（中身の差し替えのみ）
-[ ] src/types/*.ts（バックエンドの型に合わせて調整 コンポーネント・ページは原則変更なし ---
+  const onSubmit = () => {
+    startTransition(async () => {
+      await createFaceAction({ name: "読書", isPrivate: false });
+    });
+  };
+
+  return <button onClick={onSubmit} disabled={isPending}>作成</button>;
+}
 ```
 
-## 9. 命名の統一ルール（Tricle → MultiFace）
+`src/server/actions/faces.ts`（イメージ）
 
-既存コードは Tricle の命名（`topic`）を使っています。MultiFace では `face` に統一します。
+```ts
+"use server";
 
-| Tricle（旧） | MultiFace（新） | 備考 |
+import { revalidatePath } from "next/cache";
+import { createFaceForCurrentUser } from "@/server/usecases/faces";
+
+export async function createFaceAction(input) {
+  const face = await createFaceForCurrentUser(input);
+  revalidatePath("/");
+  revalidatePath("/faces");
+  return face;
+}
+```
+
+- **Server Action は「関数として呼べるサーバー処理」**
+- 主に **作成/更新/削除** などの「更新系」に使う
+
+### 8-3. Client Component から読み取る: Route Handler + fetch
+
+Client Component は server-only を import できないため、必要に応じて `/api/*` を `fetch` します。
+
+例: DetailPanel のデータ取得（`src/app/api/detail/.../route.ts`）
+
+```ts
+import { NextResponse } from "next/server";
+import { getFaceDetailPanelData } from "@/server/usecases/detail-panel";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(_req: Request, { params }: { params: Promise<{ faceId: string }> }) {
+  const { faceId } = await params;
+  const data = await getFaceDetailPanelData(faceId);
+  return NextResponse.json(data);
+}
+```
+
+Client 側（イメージ）
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+export function FaceDetail({ faceId }: { faceId: string }) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/detail/face/${faceId}`)
+      .then((res) => res.json())
+      .then(setData);
+  }, [faceId]);
+
+  return <div>{data ? "loaded" : "loading"}</div>;
+}
+```
+
+---
+
+## 9. Server Actions と Route Handler の違い（初学者向け）
+
+どちらも「サーバーで動く処理」ですが、**呼び出し方と用途**が違います。
+
+| 観点 | Server Actions | Route Handler（/api） |
 |---|---|---|
-| `Topic` 型 | `Face` 型 | `src/types/face.ts` |
-| `topicId` | `faceId` | フィールド名 |
-| `src/mocks/topics.ts` | `src/mocks/faces.ts` | ファイルリネーム |
-| `src/components/topic/` | `src/components/face/` | ディレクトリ |
-| `TopicChip` | `FaceChip` | コンポーネント名 |
-| `/topics/` | `/faces/` | URL パス |
+| 呼び出し方 | Client から **関数呼び出し**（Next.js が裏でリクエスト化） | Client/外部 から **HTTP リクエスト**（`fetch('/api/...')`） |
+| 主な用途 | **更新系**（作成/更新/削除） + `revalidatePath` などと相性が良い | **取得系**（Client で後から読むデータ）/ 外部連携も可能 |
+| 返り値 | 直列化できる値（オブジェクト等） | `Response`（JSON を返すのが一般的） |
+| URL の有無 | URL を意識しない（関数として扱える） | URL が存在する（`/api/...` が入口） |
 
-> 一気にリネームせず、**新機能から順次 MultiFace の命名で作る** のが現実的です。
+### 使い分けの目安（迷ったらこれ）
 
-## 10. まとめ：今日から意識すること
+1. **Server Component で完結できる読み取り** → Usecase を直呼び（Route Handler 不要）
+2. **Client がボタン押下などで更新する** → Server Actions
+3. **Client が任意タイミングで読み取る必要がある**（DetailPanel など） → Route Handler + fetch
 
-1. **コンポーネントの中でモックを直接 import しない**
-   → 必ず `src/repositories/` を経由する
+> ルール: Server Actions / Route Handler は **薄い入口**にする（中身は Usecase を呼ぶだけ）
 
-2. **`page.tsx` は Server Component のまま保つ**
-   → `"use client"` はインタラクティブな子コンポーネントにだけ付ける
+---
 
-3. **型は `src/types/` で一元管理し、バックエンドの設計と揃えておく**
-   → 後で型の乖離が起きないようにする
+## 10. 新しい契約インターフェース（RepositorySpec）を追加するときの手順
 
-4. **命名は MultiFace に合わせて新規ファイルから統一する**
-   → `Face`・`faceId` を使い、`Topic`・`topicId` は段階的に移行する
+新しいデータ種別（例: `Post`）を増やすときは、次の順番で作ると迷いません。
+
+### 10-1. 実装チェックリスト
+
+1. **型を追加**
+   - `src/types/post.ts` を追加
+2. **モックデータを追加**
+   - `src/mocks/posts.ts` を追加（モック期のみ）
+3. **Repository を追加（Spec/Impl/Provider）**
+   - `src/repositories/post-repository.ts` を追加
+   - `PostRepositorySpec` を定義（全メソッド `Promise`）
+   - `createPostMockRepositoryImpl()` を実装（モックでも `async`）
+   - `postMockRepositoryImpl` を用意（`xxImpl` 命名）
+   - `getPostRepository()` を Provider として公開（実装選択をここに閉じ込める）
+4. **Usecase を追加**
+   - `src/server/usecases/posts.ts` を追加
+   - UI が欲しい粒度の関数（例: `listPostsForTimeline()`）を作る
+5. **UI からの入口を決める**
+   - 更新が必要 → `src/server/actions/posts.ts` に Server Actions
+   - Client で fetch が必要 → `src/app/api/posts/**/route.ts` に Route Handler
+   - Server Component で十分 → `page.tsx/layout.tsx` から Usecase 直呼び
+6. **UI をつなぐ**
+   - Server Component: Usecase 結果を props として Client に渡す
+   - Client Component: Server Actions / Route Handler を使う（Repository/usecase は import しない）
+7. **検証**
+   - `pnpm --filter @tracen/frontend-bff typecheck`
+   - `pnpm --filter @tracen/frontend-bff lint`
+
+---
+
+## 11. モックからバックエンド統合時の差し替え方（将来）
+
+バックエンド統合時は Repository の **Impl を増やして Provider の選択を変える**のが基本です。
+
+- 追加: `createXxxApiRepositoryImpl()`（`xxImpl` 命名）
+- 変更: `getXxxRepository()` 内で「どの Impl を使うか」を切り替える
+
+こうしておくと、Usecase や UI は **基本的に変更せず**に済みます。
+
+---
+
+## 12. まとめ：今日から意識すること
+
+1. **Client Component から `src/repositories` / `src/server/usecases` を import しない**
+   - 読み取り: Route Handler + fetch（または props 注入）
+   - 更新: Server Actions
+
+2. **契約は `xxSpec`、実装は `xxImpl`、モックでも async**
+
+3. **Provider に DI を閉じ込め、Usecase に集約し、入口は薄く保つ**

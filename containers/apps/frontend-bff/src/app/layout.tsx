@@ -6,6 +6,7 @@ import SideNav from '@/components/ui/SideNav';
 import TopBar from '@/components/ui/TopBar';
 import DetailPanel from '@/components/ui/DetailPanel';
 import { DetailPanelProvider } from '@/lib/detail-panel-context';
+import { getViewerContext } from '@/server/usecases/viewer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
   description: 'フェイス（多面性）で記録する SNS',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { myFaces } = await getViewerContext();
+
   return (
     <html
       lang="ja"
@@ -31,7 +34,7 @@ export default function RootLayout({
       <body className="min-h-full bg-zinc-950 text-zinc-100">
         <DetailPanelProvider>
           <div className="flex h-screen w-full overflow-hidden">
-            <SideNav />
+            <SideNav faces={myFaces} />
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
               <TopBar />
               <div className="flex flex-1 min-h-0 overflow-hidden">

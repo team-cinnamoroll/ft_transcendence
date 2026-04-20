@@ -1,8 +1,13 @@
-import HomeProfile from "@/components/home/HomeProfile";
-import HomeClient from "@/components/home/HomeClient";
-import FAB from "@/components/ui/FAB";
+import HomeProfile from '@/components/home/HomeProfile';
+import HomeClient from '@/components/home/HomeClient';
+import FAB from '@/components/ui/FAB';
+import { listActivitiesByUserId } from '@/server/usecases/activities';
+import { getViewerContext } from '@/server/usecases/viewer';
 
-export default function Home() {
+export default async function Home() {
+  const { currentUser, myFaces } = await getViewerContext();
+  const activities = await listActivitiesByUserId(currentUser.id);
+
   return (
     <div className="flex flex-col">
       {/* スティッキーヘッダー */}
@@ -12,10 +17,10 @@ export default function Home() {
 
       <main>
         {/* 上部: プロフィールエリア（Server Component） */}
-        <HomeProfile />
+        <HomeProfile user={currentUser} faces={myFaces} activities={activities} />
 
         {/* 中部〜下部: フェイスフィルタ + アクティビティフィード（Client Component） */}
-        <HomeClient />
+        <HomeClient currentUser={currentUser} faces={myFaces} activities={activities} />
       </main>
 
       <FAB />
