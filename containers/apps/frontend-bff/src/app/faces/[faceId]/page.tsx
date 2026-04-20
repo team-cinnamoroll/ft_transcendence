@@ -1,10 +1,11 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import FaceHeader from "@/components/face/FaceHeader";
-import FaceActivityFeed from "@/components/face/FaceActivityFeed";
-import FAB from "@/components/ui/FAB";
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import FaceHeader from '@/components/face/FaceHeader';
+import FaceActivityFeed from '@/components/face/FaceActivityFeed';
+import FAB from '@/components/ui/FAB';
+import { listActivitiesByFaceId } from '@/server/usecases/activities';
+import { findFaceById } from '@/server/usecases/faces';
+import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
 
 type Props = {
   params: Promise<{ faceId: string }>;
@@ -12,13 +13,17 @@ type Props = {
 
 const FaceDetailPage = async ({ params }: Props) => {
   const { faceId } = await params;
-  const face = faceRepository.findById(faceId);
+  const face = await findFaceById(faceId);
 
   if (!face) {
     notFound();
   }
 
-  const currentUser = userRepository.getCurrentUser();
+  const [currentUser, activities, users] = await Promise.all([
+    getCurrentUser(),
+    listActivitiesByFaceId(faceId),
+    listAllUsers(),
+  ]);
 
   return (
     <div className="flex flex-col">
@@ -57,14 +62,12 @@ const FaceDetailPage = async ({ params }: Props) => {
 
         {/* アクティビティ一覧 */}
         <section className="px-4 py-4">
-          <FaceActivityFeed face={face} />
+          <FaceActivityFeed face={face} activities={activities} users={users} />
         </section>
       </main>
 
       {/* 自分のフェイスのみ投稿FABを表示 */}
-      {face.userId === currentUser.id && (
-        <FAB defaultFaceId={face.id} />
-      )}
+      {face.userId === currentUser.id && <FAB defaultFaceId={face.id} />}
     </div>
   );
 };
