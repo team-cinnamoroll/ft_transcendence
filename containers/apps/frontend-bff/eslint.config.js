@@ -20,6 +20,7 @@ export default [
       sourceType: 'module',
       parserOptions: {
         project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         React: 'readonly',
