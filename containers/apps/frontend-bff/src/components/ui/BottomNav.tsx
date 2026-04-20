@@ -50,7 +50,7 @@ const BottomNav = () => {
                   <Icon
                     size={22}
                     strokeWidth={isActive ? 2.5 : 2}
-                    className={cn('transition-all duration-200', isActive && '[&>*]:fill-current')}
+                    className={cn('transition-all duration-200', isActive && '*:fill-current')}
                   />
                   <span className="whitespace-nowrap transition-all duration-200">
                     {item.label}
