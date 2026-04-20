@@ -1,32 +1,32 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { type Activity } from "@/types/activity";
-import { cn } from "@/lib/utils";
+import { useState, useMemo } from 'react';
+import { type Activity } from '@/types/activity';
+import { cn } from '@/lib/utils';
 
 type ActivityTileCalendarProps = {
   activities: Activity[];
 };
 
 // カレンダーの基準日（モックデータの「現在」 = 2026/04/01）
-const REFERENCE_DATE = new Date("2026-04-01");
+const REFERENCE_DATE = new Date('2026-04-01');
 
-const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const;
 
 /** 1日の投稿数に応じた 5 段階カラークラスを返す */
 const getColorClass = (count: number): string => {
-  if (count === 0) return "bg-zinc-800";
-  if (count === 1) return "bg-green-200";
-  if (count <= 3) return "bg-green-400";
-  if (count <= 5) return "bg-green-500";
-  return "bg-green-700";
+  if (count === 0) return 'bg-zinc-800';
+  if (count === 1) return 'bg-green-200';
+  if (count <= 3) return 'bg-green-400';
+  if (count <= 5) return 'bg-green-500';
+  return 'bg-green-700';
 };
 
 /** Date を "yyyy-MM-dd" キーへ変換 */
 const toDateKey = (date: Date): string => {
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 };
 
@@ -62,7 +62,7 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
 
     const result: WeekData[] = [];
     for (let w = 0; w < 52; w++) {
-      const days: WeekData["days"] = [];
+      const days: WeekData['days'] = [];
       for (let d = 0; d < 7; d++) {
         const date = new Date(startSunday);
         date.setDate(startSunday.getDate() + w * 7 + d);
@@ -121,14 +121,9 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
         {/* 月ラベル行 */}
         <div className="flex gap-[2px] mb-1 pl-[26px]">
           {weeks.map((_, wIdx) => (
-            <div
-              key={wIdx}
-              className="flex-shrink-0 w-[13px]"
-            >
+            <div key={wIdx} className="flex-shrink-0 w-[13px]">
               {monthLabels[wIdx] && (
-                <span className="text-[9px] leading-none text-zinc-500">
-                  {monthLabels[wIdx]}
-                </span>
+                <span className="text-[9px] leading-none text-zinc-500">{monthLabels[wIdx]}</span>
               )}
             </div>
           ))}
@@ -139,14 +134,9 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
           {/* 曜日ラベル（月・水・金 のみ表示） */}
           <div className="flex flex-col flex-shrink-0 gap-[2px]">
             {DAY_LABELS.map((label, i) => (
-              <div
-                key={i}
-                className="w-[18px] h-[11px] flex items-center justify-end"
-              >
+              <div key={i} className="w-[18px] h-[11px] flex items-center justify-end">
                 {(i === 1 || i === 3 || i === 5) && (
-                  <span className="text-[9px] leading-none text-zinc-500">
-                    {label}
-                  </span>
+                  <span className="text-[9px] leading-none text-zinc-500">{label}</span>
                 )}
               </div>
             ))}
@@ -169,11 +159,11 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
                       key={day.key}
                       title={`${day.key}: ${day.count}件`}
                       className={cn(
-                        "w-[11px] h-[11px] rounded-sm transition-all",
+                        'w-[11px] h-[11px] rounded-sm transition-all',
                         getColorClass(day.count),
                         isSelected
-                          ? "ring-1 ring-violet-400 ring-offset-1 ring-offset-zinc-900"
-                          : "hover:brightness-110",
+                          ? 'ring-1 ring-violet-400 ring-offset-1 ring-offset-zinc-900'
+                          : 'hover:brightness-110'
                       )}
                     />
                   ))}
@@ -186,14 +176,11 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
         {/* 凡例 */}
         <div className="flex items-center justify-end gap-[3px] mt-2.5">
           <span className="text-[9px] text-zinc-500 mr-1">少</span>
-          {(["bg-zinc-800", "bg-green-200", "bg-green-400", "bg-green-500", "bg-green-700"] as const).map(
-            (cls, i) => (
-              <div
-                key={i}
-                className={cn("w-[11px] h-[11px] rounded-sm", cls)}
-              />
-            ),
-          )}
+          {(
+            ['bg-zinc-800', 'bg-green-200', 'bg-green-400', 'bg-green-500', 'bg-green-700'] as const
+          ).map((cls, i) => (
+            <div key={i} className={cn('w-[11px] h-[11px] rounded-sm', cls)} />
+          ))}
           <span className="text-[9px] text-zinc-500 ml-1">多</span>
         </div>
       </div>
@@ -202,9 +189,8 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
       {selectedWeekIdx !== null && (
         <div className="mt-4">
           <p className="mb-2 text-xs text-zinc-500">
-            {toDateKey(weeks[selectedWeekIdx].startDate).replace(/-/g, "/")}{" "}
-            〜{" "}
-            {toDateKey(weeks[selectedWeekIdx].endDate).replace(/-/g, "/")}
+            {toDateKey(weeks[selectedWeekIdx].startDate).replace(/-/g, '/')} 〜{' '}
+            {toDateKey(weeks[selectedWeekIdx].endDate).replace(/-/g, '/')}
             の記録
           </p>
           {selectedWeekActivities.length === 0 ? (
@@ -214,16 +200,11 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
           ) : (
             <ul className="flex flex-col gap-2">
               {selectedWeekActivities.map((act) => (
-                <li
-                  key={act.id}
-                  className="rounded-xl bg-zinc-800/60 p-3 text-sm"
-                >
+                <li key={act.id} className="rounded-xl bg-zinc-800/60 p-3 text-sm">
                   <p className="mb-1 text-xs text-zinc-500">
-                    {isoToDateKey(act.createdAt).replace(/-/g, "/")}
+                    {isoToDateKey(act.createdAt).replace(/-/g, '/')}
                   </p>
-                  <p className="line-clamp-3 leading-relaxed text-zinc-200">
-                    {act.body}
-                  </p>
+                  <p className="line-clamp-3 leading-relaxed text-zinc-200">{act.body}</p>
                 </li>
               ))}
             </ul>

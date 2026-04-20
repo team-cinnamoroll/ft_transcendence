@@ -7,14 +7,14 @@ export const formatRelativeTime = (isoString: string): string => {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
-  if (diffMin < 1) return "たった今";
+  if (diffMin < 1) return 'たった今';
   if (diffMin < 60) return `${diffMin}分前`;
   if (diffHour < 24) return `${diffHour}時間前`;
   if (diffDay < 30) return `${diffDay}日前`;
 
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  return date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };

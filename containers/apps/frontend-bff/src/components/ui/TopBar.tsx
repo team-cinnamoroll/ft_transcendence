@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Pencil } from "lucide-react";
-import { usePathname } from "next/navigation";
-import PostModal from "@/components/ui/PostModal";
+import { useState } from 'react';
+import { Pencil } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import PostModal from '@/components/ui/PostModal';
 
 type TopBarProps = {
   pageTitle?: string;
 };
 
 const PAGE_TITLES: Record<string, string> = {
-  "/": "ホーム",
-  "/faces": "フェイス",
-  "/notifications": "通知",
-  "/search": "検索",
-  "/subscriptions": "サブスク",
+  '/': 'ホーム',
+  '/faces': 'フェイス',
+  '/notifications': '通知',
+  '/search': '検索',
+  '/subscriptions': 'サブスク',
 };
 
 /**
@@ -30,7 +30,7 @@ const TopBar = ({ pageTitle }: TopBarProps) => {
   const resolvedPageTitle =
     pageTitle ??
     PAGE_TITLES[pathname] ??
-    (pathname.startsWith("/faces/") ? "フェイス詳細" : "MultiFace");
+    (pathname.startsWith('/faces/') ? 'フェイス詳細' : 'MultiFace');
 
   return (
     <>
@@ -49,9 +49,7 @@ const TopBar = ({ pageTitle }: TopBarProps) => {
         </button>
       </header>
 
-      {isPostModalOpen && (
-        <PostModal isOpen={isPostModalOpen} onClose={handleClose} />
-      )}
+      {isPostModalOpen && <PostModal isOpen={isPostModalOpen} onClose={handleClose} />}
     </>
   );
 };

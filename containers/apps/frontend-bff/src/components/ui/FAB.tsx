@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Pencil } from "lucide-react";
-import PostModal from "@/components/ui/PostModal";
+import { useState } from 'react';
+import { Pencil } from 'lucide-react';
+import PostModal from '@/components/ui/PostModal';
 
 type Props = {
   /** モーダルを開いた時点で選択済みにするフェイスID（省略可） */
@@ -26,11 +26,7 @@ const FAB = ({ defaultFaceId }: Props) => {
         <Pencil size={22} strokeWidth={2.5} />
       </button>
 
-      <PostModal
-        isOpen={isModalOpen}
-        onClose={handleClose}
-        defaultFaceId={defaultFaceId}
-      />
+      <PostModal isOpen={isModalOpen} onClose={handleClose} defaultFaceId={defaultFaceId} />
     </>
   );
 };

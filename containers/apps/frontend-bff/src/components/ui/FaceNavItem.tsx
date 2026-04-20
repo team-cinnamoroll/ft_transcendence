@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import type { Face } from "@/types/face";
+import { cn } from '@/lib/utils';
+import type { Face } from '@/types/face';
 
 type Props = {
   face: Face;
@@ -24,10 +24,10 @@ const FaceNavItem = ({ face, activeFaceId, onClick }: Props) => {
         type="button"
         onClick={handleClick}
         className={cn(
-          "flex items-center gap-2.5 w-full rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+          'flex items-center gap-2.5 w-full rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200',
           isActive
-            ? "bg-violet-500/20 text-violet-400"
-            : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100",
+            ? 'bg-violet-500/20 text-violet-400'
+            : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
         )}
       >
         {/* 絵文字 or 頭文字フォールバック */}

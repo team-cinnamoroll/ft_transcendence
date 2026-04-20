@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { type Activity } from "@/types/activity";
-import { type User } from "@/types/user";
-import { type Face } from "@/types/face";
-import ActivityCard from "@/components/ui/ActivityCard";
-import { getFaceTitle } from "@/lib/display";
-import { cn } from "@/lib/utils";
-import { useDetailPanel } from "@/lib/detail-panel-context";
+import { type Activity } from '@/types/activity';
+import { type User } from '@/types/user';
+import { type Face } from '@/types/face';
+import ActivityCard from '@/components/ui/ActivityCard';
+import { getFaceTitle } from '@/lib/display';
+import { cn } from '@/lib/utils';
+import { useDetailPanel } from '@/lib/detail-panel-context';
 
 export type SearchActivityResultItem = {
   activity: Activity;
@@ -38,9 +38,7 @@ const SearchResults = ({
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <p className="text-3xl">🔍</p>
-        <p className="text-sm text-zinc-400">
-          キーワードを入力して検索してください
-        </p>
+        <p className="text-sm text-zinc-400">キーワードを入力して検索してください</p>
         <p className="text-xs text-zinc-600">
           フェイス名・アクティビティ本文をスコープに応じて絞り込みます
         </p>
@@ -54,12 +52,8 @@ const SearchResults = ({
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <p className="text-3xl">😶</p>
-        <p className="text-sm text-zinc-400">
-          「{query}」に一致する結果が見つかりませんでした
-        </p>
-        <p className="text-xs text-zinc-600">
-          別のキーワードやスコープで試してみてください
-        </p>
+        <p className="text-sm text-zinc-400">「{query}」に一致する結果が見つかりませんでした</p>
+        <p className="text-xs text-zinc-600">別のキーワードやスコープで試してみてください</p>
       </div>
     );
   }
@@ -76,7 +70,7 @@ const SearchResults = ({
           <ul className="flex flex-col gap-2">
             {faceResults.map((face) => {
               const isSubscribed = subscribedFaceIds.includes(face.id);
-              const isSelected = state.type === "face" && state.faceId === face.id;
+              const isSelected = state.type === 'face' && state.faceId === face.id;
               return (
                 <li
                   key={face.id}
@@ -84,41 +78,31 @@ const SearchResults = ({
                     if (window.innerWidth >= 768) openFace(face.id);
                   }}
                   className={cn(
-                    "flex items-center justify-between gap-3 rounded-2xl bg-zinc-800/60 px-4 py-3 transition md:cursor-pointer",
-                    isSelected
-                      ? "ring-1 ring-violet-500/40 bg-zinc-800"
-                      : "hover:bg-zinc-800",
+                    'flex items-center justify-between gap-3 rounded-2xl bg-zinc-800/60 px-4 py-3 transition md:cursor-pointer',
+                    isSelected ? 'ring-1 ring-violet-500/40 bg-zinc-800' : 'hover:bg-zinc-800'
                   )}
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    {face.emoji && (
-                      <span className="text-2xl">{face.emoji}</span>
-                    )}
+                    {face.emoji && <span className="text-2xl">{face.emoji}</span>}
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-zinc-100">
-                        {face.name}
-                      </p>
+                      <p className="truncate text-sm font-semibold text-zinc-100">{face.name}</p>
                       {face.description && (
-                        <p className="truncate text-xs text-zinc-400">
-                          {face.description}
-                        </p>
+                        <p className="truncate text-xs text-zinc-400">{face.description}</p>
                       )}
                     </div>
                   </div>
                   <button
                     className={
                       isSubscribed
-                        ? "shrink-0 rounded-full border border-violet-500 px-3 py-1 text-xs font-medium text-violet-400"
-                        : "shrink-0 rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-500"
+                        ? 'shrink-0 rounded-full border border-violet-500 px-3 py-1 text-xs font-medium text-violet-400'
+                        : 'shrink-0 rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-500'
                     }
                     disabled
                     aria-label={
-                      isSubscribed
-                        ? `${face.name}のサブスクを解除`
-                        : `${face.name}をサブスクする`
+                      isSubscribed ? `${face.name}のサブスクを解除` : `${face.name}をサブスクする`
                     }
                   >
-                    {isSubscribed ? "サブスク中" : "サブスクする"}
+                    {isSubscribed ? 'サブスク中' : 'サブスクする'}
                   </button>
                 </li>
               );

@@ -1,4 +1,4 @@
 export type DetailPanelState =
-  | { type: "none" }
-  | { type: "activity"; activityId: string }
-  | { type: "face"; faceId: string };
+  | { type: 'none' }
+  | { type: 'activity'; activityId: string }
+  | { type: 'face'; faceId: string };
