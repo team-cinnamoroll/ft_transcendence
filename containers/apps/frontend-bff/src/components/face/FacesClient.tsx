@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import type { Face } from "@/types/face";
-import CreateFaceModal from "./CreateFaceModal";
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
+import type { Face } from '@/types/face';
+import CreateFaceModal from './CreateFaceModal';
 
 type Props = {
   initialFaces: Face[];
@@ -38,9 +38,7 @@ const FacesClient = ({ initialFaces }: Props) => {
 
       <div className="px-4 pt-4">
         {faces.length === 0 ? (
-          <p className="py-12 text-center text-sm text-zinc-500">
-            フェイスがありません
-          </p>
+          <p className="py-12 text-center text-sm text-zinc-500">フェイスがありません</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {faces.map((face) => (
@@ -82,9 +80,7 @@ const FacesClient = ({ initialFaces }: Props) => {
                     </span>
                   </div>
                   {face.description && (
-                    <span className="line-clamp-2 text-xs text-zinc-400">
-                      {face.description}
-                    </span>
+                    <span className="line-clamp-2 text-xs text-zinc-400">{face.description}</span>
                   )}
                   {face.isPrivate && (
                     <span className="mt-0.5 self-start rounded-full bg-zinc-700 px-2 py-0.5 text-[10px] text-zinc-400">

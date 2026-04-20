@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState } from "react";
-import type { DetailPanelState } from "@/types/detail-panel";
+import { createContext, useContext, useState } from 'react';
+import type { DetailPanelState } from '@/types/detail-panel';
 
 type DetailPanelContextValue = {
   state: DetailPanelState;
@@ -12,23 +12,19 @@ type DetailPanelContextValue = {
 
 const DetailPanelContext = createContext<DetailPanelContextValue | null>(null);
 
-export const DetailPanelProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [state, setState] = useState<DetailPanelState>({ type: "none" });
+export const DetailPanelProvider = ({ children }: { children: React.ReactNode }) => {
+  const [state, setState] = useState<DetailPanelState>({ type: 'none' });
 
   const openActivity = (activityId: string) => {
-    setState({ type: "activity", activityId });
+    setState({ type: 'activity', activityId });
   };
 
   const openFace = (faceId: string) => {
-    setState({ type: "face", faceId });
+    setState({ type: 'face', faceId });
   };
 
   const close = () => {
-    setState({ type: "none" });
+    setState({ type: 'none' });
   };
 
   return (
@@ -41,7 +37,7 @@ export const DetailPanelProvider = ({
 export const useDetailPanel = (): DetailPanelContextValue => {
   const context = useContext(DetailPanelContext);
   if (!context) {
-    throw new Error("useDetailPanel は DetailPanelProvider の内側で使用してください");
+    throw new Error('useDetailPanel は DetailPanelProvider の内側で使用してください');
   }
   return context;
 };
