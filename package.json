@@ -8,6 +8,8 @@
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
     "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
     "local-prod:down": "bash scripts/down-local-prod.sh",
+    "local-ci:fast": "bash scripts/local-ci-local-prod.sh fast",
+    "local-ci:full": "bash scripts/local-ci-local-prod.sh full",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "format": "pnpm -r format",

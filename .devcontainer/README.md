@@ -56,6 +56,19 @@ docker compose -f docker-compose.dev.yml down -v
 
 ## 注意点（今後拡張する場合）
 
+## 2. Dev Container のビルドで `docker-outside-of-docker` が失敗する問題
+
+### 症状
+Dev Container のビルド中に、次のようなエラーで落ちることがあります。
+
+- `The 'moby' option is not supported on Debian 'trixie' ...`
+
+### 原因
+Dev Container のベースイメージが Debian `trixie` 系になると、`docker-outside-of-docker` feature の既定設定（`moby=true`）が非対応になり、feature のインストールに失敗します。
+
+### 対策（このリポジトリに実装済み）
+`.devcontainer/Dockerfile` のベースイメージを `bookworm` 系に固定しています。
+
 - `remoteUser` を変更する場合
   - UID/GID が変わると同じ問題が再発しやすいので、`postStartCommand` の権限修正は残すのが安全です。
 - `sudo` 前提

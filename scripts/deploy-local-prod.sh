@@ -2,17 +2,32 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-compose_file="$repo_root/docker-compose.local-prod.yml"
-project_name="tracen-local-prod"
+default_compose_file="$repo_root/docker-compose.local-prod.yml"
+project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
 env_file="$repo_root/.env.local-prod"
 
+mode="${TRACEN_LOCAL_PROD_MODE:-full}" # full | fast
+smoke_strategy="${TRACEN_LOCAL_PROD_SMOKE_STRATEGY:-host}" # host | container
+smoke_max_time="${TRACEN_LOCAL_PROD_SMOKE_MAX_TIME:-3}"
+smoke_attempts="${TRACEN_LOCAL_PROD_SMOKE_ATTEMPTS:-30}"
+
+compose_files=()
+if [[ -n "${TRACEN_LOCAL_PROD_COMPOSE_FILES:-}" ]]; then
+  # shellcheck disable=SC2206
+  compose_files=(${TRACEN_LOCAL_PROD_COMPOSE_FILES})
+else
+  compose_files=("$default_compose_file")
+fi
+
 cd "$repo_root"
 
-if [[ ! -f "$compose_file" ]]; then
-  echo "Compose ファイルが見つかりません: $compose_file" >&2
-  exit 1
-fi
+for f in "${compose_files[@]}"; do
+  if [[ ! -f "$f" ]]; then
+    echo "Compose ファイルが見つかりません: $f" >&2
+    exit 1
+  fi
+done
 
 if [[ ! -f "$env_file" ]]; then
   echo "環境変数ファイルが見つかりません: $env_file" >&2
@@ -38,12 +53,16 @@ for f in ca.crt tls.crt tls.key; do
   fi
 done
 
-if ! getent hosts tracen.local >/dev/null 2>&1; then
-  echo "警告: tracen.local が名前解決できません。/etc/hosts に 127.0.0.1 tracen.local を追加してください。" >&2
+if [[ "$smoke_strategy" != "container" ]]; then
+  if ! getent hosts tracen.local >/dev/null 2>&1; then
+    echo "警告: tracen.local が名前解決できません。/etc/hosts に 127.0.0.1 tracen.local を追加してください。" >&2
+  fi
 fi
 
-if ! getent hosts registry.tracen.local >/dev/null 2>&1; then
-  echo "警告: registry.tracen.local が名前解決できません。/etc/hosts に 127.0.0.1 registry.tracen.local を追加してください。" >&2
+if [[ "$mode" == "full" ]]; then
+  if ! getent hosts registry.tracen.local >/dev/null 2>&1; then
+    echo "警告: registry.tracen.local が名前解決できません。/etc/hosts に 127.0.0.1 registry.tracen.local を追加してください。" >&2
+  fi
 fi
 
 docker_ca_installed=""
@@ -56,8 +75,10 @@ for p in \
   fi
 done
 
-if [[ "$docker_ca_installed" != "yes" ]]; then
-  echo "警告: Docker の registry CA 設定が見つかりません。push/pull で TLS エラーになる場合は README の『Docker がローカルレジストリの TLS を信頼するように設定』を確認してください。" >&2
+if [[ "$mode" == "full" ]]; then
+  if [[ "$docker_ca_installed" != "yes" ]]; then
+    echo "警告: Docker の registry CA 設定が見つかりません。push/pull で TLS エラーになる場合は README の『Docker がローカルレジストリの TLS を信頼するように設定』を確認してください。" >&2
+  fi
 fi
 
 tag=""
@@ -73,32 +94,85 @@ fi
 export TRACEN_IMAGE_TAG="$tag"
 echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local-prod.local"
 
-echo "[1/5] Start local registry (https://registry.tracen.local:5000)"
-docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" up -d registry
+compose_cmd=(docker compose --env-file "$env_file" -p "$project_name")
+for f in "${compose_files[@]}"; do
+  compose_cmd+=( -f "$f" )
+done
+
+if [[ "$mode" == "full" ]]; then
+  echo "[1/5] Start local registry (https://registry.tracen.local:5000)"
+  "${compose_cmd[@]}" up -d registry
+else
+  echo "[1/5] Skip registry (mode=$mode)"
+fi
 
 echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
-docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" build backend frontend
+"${compose_cmd[@]}" build backend frontend
 
-echo "[3/5] Push images to local registry"
-docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" push backend frontend
+if [[ "$mode" == "full" ]]; then
+  echo "[3/5] Push images to local registry"
+  "${compose_cmd[@]}" push backend frontend
+else
+  echo "[3/5] Skip push (mode=$mode)"
+fi
 
 echo "[4/5] Start services"
-docker compose --env-file "$env_file" -p "$project_name" -f "$compose_file" up -d --remove-orphans
+if [[ "$mode" == "full" ]]; then
+  "${compose_cmd[@]}" up -d --remove-orphans
+else
+  # fast では registry を起動しない（起動確認のスコープ外・ホスト競合も避けたい）
+  "${compose_cmd[@]}" up -d --remove-orphans db backend frontend nginx
+fi
 
 echo "[5/5] Smoke test"
-if command -v curl >/dev/null 2>&1; then
+if [[ "$smoke_strategy" == "container" ]]; then
+  echo "Smoke strategy: container (network=${project_name}_local-prod)" >&2
+  if ! docker image inspect curlimages/curl:latest >/dev/null 2>&1; then
+    echo "Pull curl image (curlimages/curl:latest) ..." >&2
+    docker pull curlimages/curl:latest >/dev/null
+  fi
+
+  container_curl() {
+    local url="$1"
+    cat "$cert_dir/ca.crt" \
+      | docker run -i --rm --network "${project_name}_local-prod" curlimages/curl:latest \
+          sh -lc "cat > /tmp/ca.crt && curl -fsS --connect-timeout ${smoke_max_time} --max-time ${smoke_max_time} --cacert /tmp/ca.crt '$url'"
+  }
+
+  container_curl_debug() {
+    local url="$1"
+    cat "$cert_dir/ca.crt" \
+      | docker run -i --rm --network "${project_name}_local-prod" curlimages/curl:latest \
+          sh -lc "cat > /tmp/ca.crt && curl -vk --connect-timeout ${smoke_max_time} --max-time ${smoke_max_time} --cacert /tmp/ca.crt '$url' >/dev/null"
+  }
+fi
+
+if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; then
   ok_api=""
   ok_root=""
-  for _ in {1..30}; do
+  for _ in $(seq 1 "$smoke_attempts"); do
+    printf '.' >&2
     if [[ "$ok_api" != "yes" ]]; then
-      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null 2>/dev/null; then
-        ok_api="yes"
+      if [[ "$smoke_strategy" == "container" ]]; then
+        if container_curl "https://tracen.local/api/health" >/dev/null 2>/dev/null; then
+          ok_api="yes"
+        fi
+      else
+        if curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null 2>/dev/null; then
+          ok_api="yes"
+        fi
       fi
     fi
 
     if [[ "$ok_root" != "yes" ]]; then
-      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null 2>/dev/null; then
-        ok_root="yes"
+      if [[ "$smoke_strategy" == "container" ]]; then
+        if container_curl "https://tracen.local/" >/dev/null 2>/dev/null; then
+          ok_root="yes"
+        fi
+      else
+        if curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null 2>/dev/null; then
+          ok_root="yes"
+        fi
       fi
     fi
 
@@ -107,6 +181,8 @@ if command -v curl >/dev/null 2>&1; then
     fi
     sleep 0.5
   done
+
+  echo >&2
 
   if [[ "$ok_api" != "yes" || "$ok_root" != "yes" ]]; then
     echo "スモークテストに失敗しました。ログを確認してください:" >&2
@@ -119,13 +195,22 @@ if command -v curl >/dev/null 2>&1; then
 
     echo "curl のエラー詳細:" >&2
     if [[ "$ok_api" != "yes" ]]; then
-      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null || true
+      if [[ "$smoke_strategy" == "container" ]]; then
+        container_curl_debug "https://tracen.local/api/health" || true
+      else
+        curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null || true
+      fi
     fi
     if [[ "$ok_root" != "yes" ]]; then
-      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
+      if [[ "$smoke_strategy" == "container" ]]; then
+        container_curl_debug "https://tracen.local/" || true
+      else
+        curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
+      fi
     fi
 
-    echo "docker compose --env-file $env_file -p $project_name -f $compose_file logs --tail=200" >&2
+    echo "compose logs (tail=200):" >&2
+    "${compose_cmd[@]}" logs --tail=200 || true
     exit 1
   fi
 

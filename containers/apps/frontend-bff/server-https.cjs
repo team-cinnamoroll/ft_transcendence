@@ -1,26 +1,28 @@
 const https = require('node:https');
 const fs = require('node:fs');
 const next = require('next');
-const { z } = require('zod');
 
-const EnvSchema = z.object({
-  PORT: z.coerce.number().int().min(1).max(65535).default(3443),
-  HOSTNAME: z.string().min(1).default('0.0.0.0'),
-  TLS_CERT_PATH: z.string().min(1),
-  TLS_KEY_PATH: z.string().min(1),
-});
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is required`);
+  }
+  return value;
+}
 
-const env = EnvSchema.parse({
-  PORT: process.env.PORT,
-  HOSTNAME: process.env.HOSTNAME,
-  TLS_CERT_PATH: process.env.TLS_CERT_PATH,
-  TLS_KEY_PATH: process.env.TLS_KEY_PATH,
-});
+function parsePort(value, fallback) {
+  if (!value) return fallback;
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`PORT must be an integer between 1 and 65535 (got: ${value})`);
+  }
+  return port;
+}
 
-const port = env.PORT;
-const hostname = env.HOSTNAME;
-const tlsCertPath = env.TLS_CERT_PATH;
-const tlsKeyPath = env.TLS_KEY_PATH;
+const port = parsePort(process.env.PORT, 3443);
+const hostname = process.env.HOSTNAME || '0.0.0.0';
+const tlsCertPath = requireEnv('TLS_CERT_PATH');
+const tlsKeyPath = requireEnv('TLS_KEY_PATH');
 
 const app = next({ dev: false, dir: __dirname });
 const handle = app.getRequestHandler();

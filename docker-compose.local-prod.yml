@@ -26,6 +26,10 @@ services:
       interval: 2s
       timeout: 5s
       retries: 30
+    networks:
+      local-prod:
+        aliases:
+          - db
 
   backend:
     image: registry.tracen.local:5000/tracen-backend:${TRACEN_IMAGE_TAG:-local}

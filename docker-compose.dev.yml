@@ -6,6 +6,7 @@ services:
     volumes:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /workspace
     command: sleep infinity
 

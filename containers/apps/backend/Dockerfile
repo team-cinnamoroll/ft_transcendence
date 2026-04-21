@@ -4,7 +4,9 @@ WORKDIR /workspace
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY containers/apps/contracts/package.json containers/apps/contracts/package.json
 COPY containers/apps/backend/package.json containers/apps/backend/package.json
+COPY containers/apps/contracts containers/apps/contracts
 COPY containers/apps/backend containers/apps/backend
 
 RUN pnpm install
