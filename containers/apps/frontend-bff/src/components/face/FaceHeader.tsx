@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useState } from "react";
-import { type Face } from "@/types/face";
-import { cn } from "@/lib/utils";
+import Image from 'next/image';
+import { useState } from 'react';
+import { type Face } from '@/types/face';
+import { cn } from '@/lib/utils';
 
 type FaceHeaderProps = {
   face: Face;
@@ -31,7 +31,7 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
             priority
           />
           {/* グラデーションオーバーレイ */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
           {/* コンテンツ（画像上に重ねる） */}
           <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 py-6 text-center">
             {face.emoji && (
@@ -55,13 +55,13 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
                 type="button"
                 onClick={handleSubscribe}
                 className={cn(
-                  "mt-1 rounded-full px-6 py-2 text-sm font-semibold transition-colors",
+                  'mt-1 rounded-full px-6 py-2 text-sm font-semibold transition-colors',
                   subscribed
-                    ? "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
-                    : "bg-violet-600 text-white hover:bg-violet-500",
+                    ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                    : 'bg-violet-600 text-white hover:bg-violet-500'
                 )}
               >
-                {subscribed ? "✓ サブスク中" : "サブスクする"}
+                {subscribed ? '✓ サブスク中' : 'サブスクする'}
               </button>
             )}
           </div>
@@ -93,13 +93,13 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
                 type="button"
                 onClick={handleSubscribe}
                 className={cn(
-                  "rounded-full px-6 py-2 text-sm font-semibold transition-colors",
+                  'rounded-full px-6 py-2 text-sm font-semibold transition-colors',
                   subscribed
-                    ? "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
-                    : "bg-violet-600 text-white hover:bg-violet-500",
+                    ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                    : 'bg-violet-600 text-white hover:bg-violet-500'
                 )}
               >
-                {subscribed ? "✓ サブスク中" : "サブスクする"}
+                {subscribed ? '✓ サブスク中' : 'サブスクする'}
               </button>
             </div>
           )}

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { type Face } from "@/types/face";
-import { cn } from "@/lib/utils";
+import { type Face } from '@/types/face';
+import { cn } from '@/lib/utils';
 
 type FaceFilterBarProps = {
   faces: Face[];
@@ -31,25 +31,22 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
         <button
           type="button"
           onClick={handleSelectAll}
-          className={cn(
-            "flex flex-col items-center gap-1 flex-shrink-0",
-            "focus:outline-none",
-          )}
+          className={cn('flex flex-col items-center gap-1 flex-shrink-0', 'focus:outline-none')}
         >
           <span
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all",
+              'flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all',
               selectedFaceId === null
-                ? "bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950"
-                : "bg-zinc-800 hover:bg-zinc-700",
+                ? 'bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950'
+                : 'bg-zinc-800 hover:bg-zinc-700'
             )}
           >
             🌐
           </span>
           <span
             className={cn(
-              "text-[10px] leading-none max-w-[44px] truncate",
-              selectedFaceId === null ? "text-violet-400" : "text-zinc-500",
+              'text-[10px] leading-none max-w-[44px] truncate',
+              selectedFaceId === null ? 'text-violet-400' : 'text-zinc-500'
             )}
           >
             すべて
@@ -66,25 +63,22 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
               key={face.id}
               type="button"
               onClick={() => handleSelectFace(face.id)}
-              className={cn(
-                "flex flex-col items-center gap-1 flex-shrink-0",
-                "focus:outline-none",
-              )}
+              className={cn('flex flex-col items-center gap-1 flex-shrink-0', 'focus:outline-none')}
             >
               <span
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all",
+                  'flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all',
                   isActive
-                    ? "bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950"
-                    : "bg-zinc-800 hover:bg-zinc-700",
+                    ? 'bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950'
+                    : 'bg-zinc-800 hover:bg-zinc-700'
                 )}
               >
                 {icon}
               </span>
               <span
                 className={cn(
-                  "text-[10px] leading-none max-w-[44px] truncate",
-                  isActive ? "text-violet-400" : "text-zinc-500",
+                  'text-[10px] leading-none max-w-[44px] truncate',
+                  isActive ? 'text-violet-400' : 'text-zinc-500'
                 )}
               >
                 {face.name}

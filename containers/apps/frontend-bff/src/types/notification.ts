@@ -1,14 +1,14 @@
 export type Notification =
   | {
       id: string;
-      type: "link";
+      type: 'link';
       fromUserId: string;
       activityId: string;
       createdAt: string;
     }
   | {
       id: string;
-      type: "subscribe";
+      type: 'subscribe';
       fromUserId: string;
       faceId: string;
       createdAt: string;

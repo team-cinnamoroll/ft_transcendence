@@ -1,16 +1,14 @@
-"use client";
+'use client';
 
-import Avatar from "@/components/ui/Avatar";
-import { notificationRepository } from "@/repositories/notification-repository";
-import { userRepository } from "@/repositories/user-repository";
-import { faceRepository } from "@/repositories/face-repository";
-import { activityRepository } from "@/repositories/activity-repository";
-import { type Notification } from "@/types/notification";
-import { type User } from "@/types/user";
-import { formatRelativeTime } from "@/lib/format-relative-time";
-import { createLookupMap, getFaceTitle } from "@/lib/display";
-import { cn } from "@/lib/utils";
-import { useDetailPanel } from "@/lib/detail-panel-context";
+import Avatar from '@/components/ui/Avatar';
+import type { Activity } from '@/types/activity';
+import type { Face } from '@/types/face';
+import { type Notification } from '@/types/notification';
+import { type User } from '@/types/user';
+import { formatRelativeTime } from '@/lib/format-relative-time';
+import { createLookupMap, getFaceTitle } from '@/lib/display';
+import { cn } from '@/lib/utils';
+import { useDetailPanel } from '@/lib/detail-panel-context';
 
 // ─── 通知アイテム ──────────────────────────────────────────────
 
@@ -32,10 +30,10 @@ const NotificationItem = ({
   activityId,
 }: NotificationItemProps) => {
   const { openActivity, state } = useDetailPanel();
-  const isLink = notification.type === "link";
+  const isLink = notification.type === 'link';
 
   const isSelected =
-    state.type === "activity" && activityId !== undefined && state.activityId === activityId;
+    state.type === 'activity' && activityId !== undefined && state.activityId === activityId;
 
   const handleClick = () => {
     if (activityId) openActivity(activityId);
@@ -45,9 +43,9 @@ const NotificationItem = ({
     <li
       onClick={handleClick}
       className={cn(
-        "flex gap-3 rounded-2xl bg-zinc-800/60 p-4 transition",
-        activityId && "md:cursor-pointer hover:bg-zinc-800",
-        isSelected && "ring-1 ring-violet-500/40 bg-zinc-800",
+        'flex gap-3 rounded-2xl bg-zinc-800/60 p-4 transition',
+        activityId && 'md:cursor-pointer hover:bg-zinc-800',
+        isSelected && 'ring-1 ring-violet-500/40 bg-zinc-800'
       )}
     >
       {/* アバター */}
@@ -61,7 +59,7 @@ const NotificationItem = ({
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm text-zinc-200 leading-snug">
             <span className="font-semibold text-zinc-100">{fromUser.name}</span>
-            {" さんが "}
+            {' さんが '}
             <span className="text-violet-400">{detail}</span>
           </p>
           <span className="shrink-0 text-xs text-zinc-500">
@@ -78,7 +76,7 @@ const NotificationItem = ({
 
         {/* 通知種別バッジ */}
         <span className="self-start rounded-full bg-zinc-700/60 px-2 py-0.5 text-xs text-zinc-400">
-          {isLink ? "🔗 リンク" : "📥 サブスク"}
+          {isLink ? '🔗 リンク' : '📥 サブスク'}
         </span>
       </div>
     </li>
@@ -92,14 +90,17 @@ const NotificationItem = ({
  * notificationRepository から全通知を取得し、時系列降順で表示する。
  * リンク通知のアイテムをクリックすると DetailPanel に紐づくアクティビティを表示する。
  */
-const NotificationList = () => {
-  const notifications = notificationRepository.listAll();
+type Props = {
+  notifications: Notification[];
+  users: User[];
+  faces: Face[];
+  activities: Activity[];
+};
 
-  // ユーザー情報をマップ化
-  const userMap = createLookupMap(userRepository.listAll(), (user) => user.id);
-
-  // アクティビティをマップ化（リンク通知のスニペット表示用）
-  const activityMap = createLookupMap(activityRepository.listAll(), (activity) => activity.id);
+const NotificationList = ({ notifications, users, faces, activities }: Props) => {
+  const userMap = createLookupMap(users, (user) => user.id);
+  const faceMap = createLookupMap(faces, (face) => face.id);
+  const activityMap = createLookupMap(activities, (activity) => activity.id);
 
   if (notifications.length === 0) {
     return (
@@ -116,9 +117,9 @@ const NotificationList = () => {
         const fromUser = userMap.get(notification.fromUserId);
         if (!fromUser) return null;
 
-        if (notification.type === "link") {
+        if (notification.type === 'link') {
           const activity = activityMap.get(notification.activityId);
-          const detail = "あなたの投稿をリンクしました";
+          const detail = 'あなたの投稿をリンクしました';
           return (
             <NotificationItem
               key={notification.id}
@@ -132,7 +133,7 @@ const NotificationList = () => {
         }
 
         // subscribe
-        const face = faceRepository.findById(notification.faceId);
+        const face = faceMap.get(notification.faceId);
         const faceName = face ? getFaceTitle(face) : notification.faceId;
         const detail = `${faceName} をサブスクライブしました`;
         return (

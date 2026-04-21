@@ -1,16 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Home, Bell, Search, Rss, Plus, type LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import FaceNavItem from "@/components/ui/FaceNavItem";
-import CreateFaceModal from "@/components/face/CreateFaceModal";
-import { faceRepository } from "@/repositories/face-repository";
-import { userRepository } from "@/repositories/user-repository";
-import { useDetailPanel } from "@/lib/detail-panel-context";
-import type { Face } from "@/types/face";
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, Bell, Search, Rss, Plus, type LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import FaceNavItem from '@/components/ui/FaceNavItem';
+import CreateFaceModal from '@/components/face/CreateFaceModal';
+import { useDetailPanel } from '@/lib/detail-panel-context';
+import type { Face } from '@/types/face';
 
 type NavItem = {
   href: string;
@@ -19,25 +17,24 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "ホーム", icon: Home },
-  { href: "/subscriptions", label: "サブスク", icon: Rss },
-  { href: "/notifications", label: "通知", icon: Bell },
-  { href: "/search", label: "検索", icon: Search },
+  { href: '/', label: 'ホーム', icon: Home },
+  { href: '/subscriptions', label: 'サブスク', icon: Rss },
+  { href: '/notifications', label: '通知', icon: Bell },
+  { href: '/search', label: '検索', icon: Search },
 ];
 
-const SideNav = () => {
+type Props = {
+  faces: Face[];
+};
+
+const SideNav = ({ faces }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  const currentUser = userRepository.getCurrentUser();
-  const faces = faceRepository.listByUserId(currentUser.id);
   const { openFace } = useDetailPanel();
 
   // パス名からアクティブなフェイスIDを導出
-  const activeFaceId = pathname.startsWith("/faces/")
-    ? pathname.split("/")[2]
-    : undefined;
+  const activeFaceId = pathname.startsWith('/faces/') ? pathname.split('/')[2] : undefined;
 
   const handleOpenCreateModal = () => setIsCreateModalOpen(true);
   const handleCloseCreateModal = () => setIsCreateModalOpen(false);
@@ -56,37 +53,34 @@ const SideNav = () => {
       <nav className="hidden md:flex flex-col w-60 shrink-0 sticky top-0 h-screen overflow-y-auto pt-6 pb-6 px-3 border-r border-zinc-800">
         {/* ロゴ・アプリ名 */}
         <div className="px-3 pb-4">
-          <span className="text-xl font-bold text-violet-400 tracking-tight">
-            MultiFace
-          </span>
+          <span className="text-xl font-bold text-violet-400 tracking-tight">MultiFace</span>
         </div>
 
         {/* ナビゲーションアイテム */}
         <ul className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
+              item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href || pathname.startsWith(item.href + '/');
             const Icon = item.icon;
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? "bg-violet-500/20 text-violet-400"
-                      : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100",
+                      ? 'bg-violet-500/20 text-violet-400'
+                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
                   )}
                 >
                   <Icon
                     size={20}
                     strokeWidth={isActive ? 2.5 : 2}
                     className={cn(
-                      "shrink-0 transition-all duration-200",
-                      isActive && "[&>*]:fill-current",
+                      'shrink-0 transition-all duration-200',
+                      isActive && '[&>*]:fill-current'
                     )}
                   />
                   <span>{item.label}</span>
