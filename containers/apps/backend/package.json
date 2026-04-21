@@ -15,6 +15,7 @@
     "dev": "vite",
     "build": "vite build",
     "start": "node dist/index.js",
+    "db:generate": "drizzle-kit generate",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -25,13 +26,18 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.13",
+    "@hono/zod-validator": "^0.7.3",
+    "@tracen/contracts": "workspace:*",
+    "drizzle-orm": "^0.44.5",
     "hono": "^4.12.12",
+    "postgres": "^3.4.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@hono/vite-dev-server": "^0.25.1",
     "@types/node": "^24.1.0",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "typescript": "^6.0.2",

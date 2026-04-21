@@ -8,6 +8,8 @@
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
     "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
     "local-prod:down": "bash scripts/down-local-prod.sh",
+    "local-ci:fast": "bash scripts/local-ci-local-prod.sh fast",
+    "local-ci:full": "bash scripts/local-ci-local-prod.sh full",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "format": "pnpm -r format",
@@ -16,7 +18,8 @@
   "devDependencies": {
     "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "typescript-eslint": "^8.0.0"
   },
   "pnpm": {
     "overrides": {

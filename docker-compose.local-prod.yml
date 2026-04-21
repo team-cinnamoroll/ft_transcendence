@@ -21,6 +21,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./containers/infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks:
+      local-prod:
+        aliases:
+          - db
 
   backend:
     image: registry.tracen.local:5000/tracen-backend:${TRACEN_IMAGE_TAG:-local}
@@ -32,11 +41,14 @@ services:
       PORT: ${BACKEND_PORT}
       TLS_CERT_PATH: ${BACKEND_TLS_CERT_PATH}
       TLS_KEY_PATH: ${BACKEND_TLS_KEY_PATH}
+      DATABASE_URL: ${DATABASE_URL}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       local-prod:
         aliases:
