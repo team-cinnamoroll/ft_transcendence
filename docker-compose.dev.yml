@@ -9,6 +9,34 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /workspace
     command: sleep infinity
+    extra_hosts:
+      - "tracen.local:127.0.0.1"
+      - "registry.tracen.local:127.0.0.1"
+
+  ci-docker:
+    image: docker:27-dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - ci_docker_data:/var/lib/docker
+      - .:/workspace:cached
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ -f /workspace/containers/infra/local-prod/certs/ca.crt ]; then
+          mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
+          cp /workspace/containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
+        fi
+        exec dockerd-entrypoint.sh --host=tcp://0.0.0.0:2375 --host=unix:///var/run/docker.sock
+    extra_hosts:
+      - "tracen.local:127.0.0.1"
+      - "registry.tracen.local:127.0.0.1"
+    healthcheck:
+      test: ["CMD-SHELL", "docker info >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
 
   frontend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
@@ -67,3 +95,4 @@ services:
 volumes:
   workspace_node_modules:
   postgres_data:
+  ci_docker_data:

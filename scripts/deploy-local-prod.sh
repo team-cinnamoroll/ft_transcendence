@@ -8,7 +8,17 @@ cert_dir="$repo_root/containers/infra/local-prod/certs"
 env_file="$repo_root/.env.local-prod"
 
 mode="${TRACEN_LOCAL_PROD_MODE:-full}" # full | fast
-smoke_strategy="${TRACEN_LOCAL_PROD_SMOKE_STRATEGY:-host}" # host | container
+
+default_smoke_strategy="host"
+if [[ -f /.dockerenv ]]; then
+  # Dev Container や CI コンテナ内では、ホストにポート公開しても 127.0.0.1 で到達できないことが多い。
+  default_smoke_strategy="container"
+fi
+if [[ -n "${DOCKER_HOST:-}" && "${DOCKER_HOST:-}" != unix:///var/run/docker.sock ]]; then
+  default_smoke_strategy="container"
+fi
+
+smoke_strategy="${TRACEN_LOCAL_PROD_SMOKE_STRATEGY:-$default_smoke_strategy}" # host | container
 smoke_max_time="${TRACEN_LOCAL_PROD_SMOKE_MAX_TIME:-3}"
 smoke_attempts="${TRACEN_LOCAL_PROD_SMOKE_ATTEMPTS:-30}"
 
@@ -65,17 +75,17 @@ if [[ "$mode" == "full" ]]; then
   fi
 fi
 
-docker_ca_installed=""
-for p in \
-  "/etc/docker/certs.d/registry.tracen.local:5000/ca.crt" \
-  "${HOME:-}/.config/docker/certs.d/registry.tracen.local:5000/ca.crt"; do
-  if [[ -n "$p" && -f "$p" ]]; then
-    docker_ca_installed="yes"
-    break
-  fi
-done
+if [[ "$mode" == "full" && ! -f /.dockerenv ]]; then
+  docker_ca_installed=""
+  for p in \
+    "/etc/docker/certs.d/registry.tracen.local:5000/ca.crt" \
+    "${HOME:-}/.config/docker/certs.d/registry.tracen.local:5000/ca.crt"; do
+    if [[ -n "$p" && -f "$p" ]]; then
+      docker_ca_installed="yes"
+      break
+    fi
+  done
 
-if [[ "$mode" == "full" ]]; then
   if [[ "$docker_ca_installed" != "yes" ]]; then
     echo "警告: Docker の registry CA 設定が見つかりません。push/pull で TLS エラーになる場合は README の『Docker がローカルレジストリの TLS を信頼するように設定』を確認してください。" >&2
   fi
