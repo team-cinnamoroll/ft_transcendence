@@ -56,6 +56,15 @@
 - BFF は `@tracen/backend` の `AppType` を `import type` し、`hc<AppType>(APP_API_BASE_URL)` でクライアントを生成する
 - backend のルート変更は `AppType` に反映されるため、BFF 側で **コンパイル時に破壊的変更を検知**できる
 
+Tips: `hc<AppType>()` で期待したルート（例: `client.users`）が型として見えない場合
+
+- backend 側で `AppType` に「ルート定義の型（Schema）」が含まれていない可能性があります。
+  - ルーター実装で `router.get(...); router.post(...);` の **戻り値（型更新）を捨てていないか**
+  - `createXxxRouter()` に `: Hono<Env>` のような **戻り値型注釈で Schema を潰していないか**
+  - `src/index.ts` の Composition Root で `.route('/xxx', createXxxRouter(...))` まで含んだ値を `AppType` にしているか
+
+詳細は backend 側の設計書（`AppType` の Tips）も参照してください。
+
 ### 5) 入力バリデーションは `@tracen/contracts` の Zod schema を再利用する
 
 - BFF の Route Handler / Server Actions の入口で `@tracen/contracts` の schema を使って検証する

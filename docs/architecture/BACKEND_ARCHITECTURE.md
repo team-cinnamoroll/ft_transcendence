@@ -156,7 +156,9 @@ src/
 例: `POST /users`（抜粋イメージ）
 
 ```ts
-router.post('/', zValidator('json', createUserSchema), async (c) => {
+// NOTE: AppType（Hono RPC の型共有）を壊さないため、router.* の戻り値は
+// チェーンするか再代入して「型の更新」を保持します。
+return new Hono<DatabaseUrlEnv>().post('/', zValidator('json', createUserSchema), async (c) => {
   const input = c.req.valid('json');
   const repo = getUserRepository(c.get('databaseUrl'));
 
@@ -264,7 +266,7 @@ backend の入力検証は「境界（handler）」で行います。
 例: `GET /users/:id`
 
 ```ts
-router.get('/:id', zValidator('param', userIdParamSchema), async (c) => {
+return new Hono<DatabaseUrlEnv>().get('/:id', zValidator('param', userIdParamSchema), async (c) => {
   const { id } = c.req.valid('param');
   // id は uuid として検証済み
 });
@@ -307,6 +309,66 @@ const client = hc<AppType>(APP_API_BASE_URL);
 ```
 
 > 重要: `AppType` の生成元（ルート合成した Hono app）を崩すと、BFF 側の型が壊れます。
+
+### 9-1. Tips: `AppType` の型が欠けないようにする（重要）
+
+このリポジトリでは frontend-bff が `hc<AppType>()` で backend を型安全に呼ぶため、
+backend 側の「ルート定義の型（Schema）」が `AppType` に正しく含まれている必要があります。
+
+Hono の `.get()/.post()/.use()/.route()` は fluent interface で、**型レベルでは「ルートが追加された新しい型」を返します**。
+実装パターン次第でその型更新が落ちると、ランタイムでは動いていても **BFF 側にルート（例: `.users`）が型として出ません**。
+
+守るべきこと:
+
+1) ルート登録は **チェーンする**か **戻り値を再代入する**
+
+```ts
+// ✅ 推奨（チェーン）
+export function createUserRouter(env: AppEnv) {
+  return new Hono<DatabaseUrlEnv>()
+    .use('*', requireDatabaseUrl(env))
+    .get('/:id', ...)
+    .post('/', ...);
+}
+
+// ✅ どうしても変数に分けたい場合（再代入）
+export function createUserRouter(env: AppEnv) {
+  let router = new Hono<DatabaseUrlEnv>();
+  router = router.use('*', requireDatabaseUrl(env));
+  router = router.get('/:id', ...);
+  router = router.post('/', ...);
+  return router;
+}
+```
+
+```ts
+// ⚠️ 非推奨（型更新を捨てるため、Schema が落ちて AppType に反映されないことがある）
+export function createUserRouter(env: AppEnv) {
+  const router = new Hono<DatabaseUrlEnv>();
+  router.use('*', requireDatabaseUrl(env));
+  router.get('/:id', ...);
+  router.post('/', ...);
+  return router;
+}
+```
+
+2) `createXxxRouter()` の **戻り値型注釈で `Hono<Env>` に丸めない**
+
+```ts
+// ⚠️ これを付けると Schema 型が潰れて AppType が痩せることがある
+export function createUserRouter(env: AppEnv): Hono<DatabaseUrlEnv> {
+  ...
+}
+```
+
+原則は **戻り値型注釈を付けずに推論に任せる**のが安全です。
+
+3) Composition Root（`src/index.ts`）の `Hono<...>` は `Context Variables` の契約を揃えるため
+
+`new Hono<DatabaseUrlEnv>()` のように `Env` を付けておくと、middleware が注入する変数（例: `databaseUrl`）を
+`c.get('databaseUrl')` で型安全に扱えます。
+
+> 補足: `Hono<...>` は主に TypeScript の型情報であり、ランタイムの挙動そのものを変える意図ではありません。
 
 ---
 

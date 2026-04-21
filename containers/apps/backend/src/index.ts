@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url';
 import { runMigrationsOnce } from './infra/db/migrate';
 import { parseEnv } from './env';
 import { createUserRouter } from './features/auth/user.handler';
+import type { DatabaseUrlEnv } from './shared/types/hono';
 
-const app = new Hono();
+const app = new Hono<DatabaseUrlEnv>();
 
 const env = parseEnv(process.env);
 

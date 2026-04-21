@@ -91,7 +91,7 @@ if command -v curl >/dev/null 2>&1; then
   ok_root=""
   for _ in {1..30}; do
     if [[ "$ok_api" != "yes" ]]; then
-      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/hello" >/dev/null 2>/dev/null; then
+      if curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null 2>/dev/null; then
         ok_api="yes"
       fi
     fi
@@ -111,7 +111,7 @@ if command -v curl >/dev/null 2>&1; then
   if [[ "$ok_api" != "yes" || "$ok_root" != "yes" ]]; then
     echo "スモークテストに失敗しました。ログを確認してください:" >&2
     if [[ "$ok_api" != "yes" ]]; then
-      echo "- NG: https://tracen.local/api/hello" >&2
+      echo "- NG: https://tracen.local/api/health" >&2
     fi
     if [[ "$ok_root" != "yes" ]]; then
       echo "- NG: https://tracen.local/" >&2
@@ -119,7 +119,7 @@ if command -v curl >/dev/null 2>&1; then
 
     echo "curl のエラー詳細:" >&2
     if [[ "$ok_api" != "yes" ]]; then
-      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/hello" >/dev/null || true
+      curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/api/health" >/dev/null || true
     fi
     if [[ "$ok_root" != "yes" ]]; then
       curl -fsS --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
@@ -130,7 +130,7 @@ if command -v curl >/dev/null 2>&1; then
   fi
 
   echo "OK: https://tracen.local"
-  echo "OK: https://tracen.local/api/hello"
+  echo "OK: https://tracen.local/api/health"
 else
   echo "curl が無いためスモークテストをスキップしました。" >&2
   echo "ブラウザで https://tracen.local を開いて確認してください。" >&2
