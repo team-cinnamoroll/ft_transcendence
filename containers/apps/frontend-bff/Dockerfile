@@ -7,8 +7,10 @@ ARG NEXT_PUBLIC_BFF_API_BASE_URL
 ENV NEXT_PUBLIC_BFF_API_BASE_URL=$NEXT_PUBLIC_BFF_API_BASE_URL
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY containers/apps/contracts/package.json containers/apps/contracts/package.json
 COPY containers/apps/backend/package.json containers/apps/backend/package.json
 COPY containers/apps/frontend-bff/package.json containers/apps/frontend-bff/package.json
+COPY containers/apps/contracts containers/apps/contracts
 COPY containers/apps/backend containers/apps/backend
 COPY containers/apps/frontend-bff containers/apps/frontend-bff
 

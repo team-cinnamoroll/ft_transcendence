@@ -5,12 +5,19 @@
   "workspaceFolder": "/workspace",
   "runServices": ["dev-container", "backend", "frontend", "nginx", "db"],
   "forwardPorts": [3000, 8000, 8080, 5432],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached"
+  ],
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
   "postStartCommand": "bash .devcontainer/scripts/fix-node-modules-perms.sh",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "pnpmVersion": "10.33.0"
-    }
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "remoteEnv": {
+    "TRACEN_LOCAL_CI_HOST_WORKSPACE": "${localWorkspaceFolder}"
   },
   "customizations": {
     "vscode": {

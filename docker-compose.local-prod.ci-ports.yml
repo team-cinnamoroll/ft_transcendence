@@ -1,0 +1,8 @@
+services:
+  nginx:
+    # docker compose の複数ファイル merge では list(ports) が append されがちなので、
+    # base の `443:443` を確実に置き換えるため `!override` を使用します。
+    # - docker compose v2 の比較的新しいバージョンが必要です。
+    ports: !override
+      - "${TRACEN_LOCAL_CI_HTTP_PORT:-8081}:80"
+      - "${TRACEN_LOCAL_CI_HTTPS_PORT:-8443}:443"
