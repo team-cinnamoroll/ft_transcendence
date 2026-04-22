@@ -40,7 +40,9 @@
 
         // Git / チーム開発
         "eamodio.gitlens",
-        "mhutchie.git-graph"
+        "mhutchie.git-graph",
+        "github.vscode-pull-request-github",
+        "github.vscode-github-actions"
       ]
     }
   },
