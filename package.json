@@ -14,12 +14,15 @@
     "local-ci:full": "bash scripts/local-ci-local-prod.sh full",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
+    "secrets:scan": "gitleaks-secret-scanner --diff-mode staged",
+    "osv:scan-lockfiles": "bash scripts/osv-scan-lockfiles.sh",
     "format": "pnpm -r format",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
+    "gitleaks-secret-scanner": "^2.1.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.0.0",
@@ -28,7 +31,8 @@
   "pnpm": {
     "overrides": {
       "vite@7.3.1": "7.3.2",
-      "esbuild": "^0.25.0"
+      "esbuild": "^0.25.0",
+      "tar": "^7.5.11"
     }
   },
   "lint-staged": {
