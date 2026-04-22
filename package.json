@@ -5,6 +5,7 @@
   "scripts": {
     "install:all": "pnpm install",
     "dev": "pnpm -r --parallel dev",
+    "typecheck": "pnpm -r typecheck",
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
     "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
     "local-prod:down": "bash scripts/down-local-prod.sh",
