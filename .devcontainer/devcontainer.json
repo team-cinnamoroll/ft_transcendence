@@ -9,7 +9,7 @@
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached"
   ],
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
-  "postStartCommand": "bash .devcontainer/scripts/fix-docker-sock-perms.sh && bash .devcontainer/scripts/fix-node-modules-perms.sh",
+  "postStartCommand": "bash .devcontainer/scripts/fix-docker-sock-perms.sh || true; bash .devcontainer/scripts/fix-node-modules-perms.sh",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "pnpmVersion": "10.33.0"

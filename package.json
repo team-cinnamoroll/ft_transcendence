@@ -3,9 +3,10 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "install:all": "pnpm install",
+    "install:all": "pnpm install && pnpm run husky:install",
     "dev": "pnpm -r --parallel dev",
     "prepare": "husky",
+    "husky:install": "pnpm exec husky",
     "typecheck": "pnpm -r typecheck",
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
     "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
@@ -31,6 +32,7 @@
   "pnpm": {
     "overrides": {
       "vite@7.3.1": "7.3.2",
+      "postcss": "^8.5.10",
       "esbuild": "^0.25.0",
       "tar": "^7.5.11"
     }

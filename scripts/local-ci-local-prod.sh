@@ -24,7 +24,9 @@ if [[ -z "$host_ws" ]]; then
   exit 1
 fi
 
-bash "$repo_root/.devcontainer/scripts/fix-docker-sock-perms.sh"
+if ! bash "$repo_root/.devcontainer/scripts/fix-docker-sock-perms.sh"; then
+  echo "[local-ci] warning: fix-docker-sock-perms.sh に失敗しました。docker.sock が bind mount の場合は想定内のため、処理を継続します。" >&2
+fi
 
 # CI/Dev Container 環境では、ホスト（例: Docker Desktop / OrbStack）の DNS/CA 設定に依存すると
 # `registry.tracen.local` の解決や CA 信頼で失敗しやすい。
