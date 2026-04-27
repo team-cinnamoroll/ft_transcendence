@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "mcp-figma-toolkit"]
+    }
+  }
+}

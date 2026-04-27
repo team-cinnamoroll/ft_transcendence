@@ -1,0 +1,13 @@
+{
+  "name": "MCP Figma Toolkit",
+  "id": "mcp-figma-toolkit",
+  "api": "1.0.0",
+  "main": "plugin.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "permissions": ["teamlibrary"],
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "This plugin needs network access to communicate with the MCP server running on your local machine."
+  }
+}
