@@ -24,6 +24,8 @@ if [[ -z "$host_ws" ]]; then
   exit 1
 fi
 
+bash "$repo_root/.devcontainer/scripts/fix-docker-sock-perms.sh"
+
 # CI/Dev Container 環境では、ホスト（例: Docker Desktop / OrbStack）の DNS/CA 設定に依存すると
 # `registry.tracen.local` の解決や CA 信頼で失敗しやすい。
 # そのため DinD を立てて、その Docker daemon に対して build/push する。

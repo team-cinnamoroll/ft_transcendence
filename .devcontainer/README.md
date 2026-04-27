@@ -29,6 +29,8 @@ Dev Container の作成時/起動時に、`/workspace/node_modules` の書き込
 
 - `.devcontainer/scripts/fix-node-modules-perms.sh`
   - `node_modules` が書き込み不可の場合に `sudo chown -R <current uid>:<current gid> /workspace/node_modules` を実施
+- `.devcontainer/scripts/fix-docker-sock-perms.sh`
+  - `/var/run/docker.sock` の group が `docker` 以外なら `sudo chown root:docker /var/run/docker.sock` を実施
 - `.devcontainer/scripts/postCreateCommand.sh`
   - 上記の権限修正 → `corepack enable` → `pnpm install`
 - `.devcontainer/devcontainer.json`
@@ -71,6 +73,7 @@ Dev Container のベースイメージが Debian `trixie` 系になると、`doc
 
 - `remoteUser` を変更する場合
   - UID/GID が変わると同じ問題が再発しやすいので、`postStartCommand` の権限修正は残すのが安全です。
+- `docker.sock` は Docker デーモンの再起動や Docker Desktop の再起動で作り直されるため、`local-ci` 実行直前にも権限修正を入れています。
 - `sudo` 前提
   - `fix-node-modules-perms.sh` は `sudo` が使える前提で最短復旧します。
     `sudo` を無効化/削除するイメージに変える場合は、代替手段（root での起動、init 時の chown 等）を検討してください。
