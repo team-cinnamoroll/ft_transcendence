@@ -3,8 +3,11 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "install:all": "pnpm install",
+    "install:all": "pnpm install && pnpm run husky:install",
     "dev": "pnpm -r --parallel dev",
+    "prepare": "husky",
+    "husky:install": "pnpm exec husky",
+    "typecheck": "pnpm -r typecheck",
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
     "local-prod:deploy": "bash scripts/deploy-local-prod.sh",
     "local-prod:down": "bash scripts/down-local-prod.sh",
@@ -12,18 +15,35 @@
     "local-ci:full": "bash scripts/local-ci-local-prod.sh full",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
+    "secrets:scan": "gitleaks-secret-scanner --diff-mode staged",
+    "osv:scan-lockfiles": "bash scripts/osv-scan-lockfiles.sh",
     "format": "pnpm -r format",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "gitleaks-secret-scanner": "^2.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.0.0",
     "typescript-eslint": "^8.0.0"
   },
   "pnpm": {
     "overrides": {
-      "vite@7.3.1": "7.3.2"
+      "vite@7.3.1": "7.3.2",
+      "postcss": "^8.5.10",
+      "esbuild": "^0.25.0",
+      "tar": "^7.5.11"
     }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "pnpm exec eslint --fix",
+      "pnpm exec prettier --write"
+    ],
+    "**/*.{json,md,css,yml,yaml}": [
+      "pnpm exec prettier --write"
+    ]
   }
 }

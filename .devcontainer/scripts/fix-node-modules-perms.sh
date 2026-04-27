@@ -45,3 +45,4 @@ fi
 if [ "$NEEDS_FIX" -eq 1 ]; then
 	chown_recursive "$NODE_MODULES_DIR"
 fi
+
