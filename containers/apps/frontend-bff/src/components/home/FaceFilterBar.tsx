@@ -31,7 +31,7 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
         <button
           type="button"
           onClick={handleSelectAll}
-          className={cn('flex flex-col items-center gap-1 flex-shrink-0', 'focus:outline-none')}
+          className={cn('flex flex-col items-center gap-1 shrink-0', 'focus:outline-none')}
         >
           <span
             className={cn(
@@ -45,7 +45,7 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
           </span>
           <span
             className={cn(
-              'text-[10px] leading-none max-w-[44px] truncate',
+              'text-[10px] leading-none max-w-11 truncate',
               selectedFaceId === null ? 'text-violet-400' : 'text-zinc-500'
             )}
           >
@@ -63,7 +63,7 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
               key={face.id}
               type="button"
               onClick={() => handleSelectFace(face.id)}
-              className={cn('flex flex-col items-center gap-1 flex-shrink-0', 'focus:outline-none')}
+              className={cn('flex flex-col items-center gap-1 shrink-0', 'focus:outline-none')}
             >
               <span
                 className={cn(
@@ -77,7 +77,7 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
               </span>
               <span
                 className={cn(
-                  'text-[10px] leading-none max-w-[44px] truncate',
+                  'text-[10px] leading-none max-w-11 truncate',
                   isActive ? 'text-violet-400' : 'text-zinc-500'
                 )}
               >

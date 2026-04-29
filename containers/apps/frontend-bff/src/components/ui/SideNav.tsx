@@ -94,7 +94,7 @@ const SideNav = ({ faces }: Props) => {
         <hr className="my-3 border-t border-zinc-800" />
 
         {/* フェイス一覧ラベル */}
-        <p className="px-3 mb-1 text-[12px] font-semibold uppercase tracking-wider text-zinc-600">
+        <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-600">
           フェイス
         </p>
 
