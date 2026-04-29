@@ -16,6 +16,12 @@ const meta: Meta<typeof PostModal> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 600,
+      },
+    },
   },
   decorators: [
     (Story) => {

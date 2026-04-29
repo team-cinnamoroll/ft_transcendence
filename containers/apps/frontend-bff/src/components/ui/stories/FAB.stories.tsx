@@ -5,15 +5,6 @@ import FAB from '../FAB';
 import { currentUser } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
 
-// FAB は md:hidden のため、強制表示用スタイルを注入
-const FAB_OVERRIDE_STYLE = `
-  /* Storybook: FAB の md:hidden / position:fixed を上書き */
-  .storybook-fab-wrapper button[aria-label="投稿する"] {
-    display: flex !important;
-    position: static !important;
-  }
-`;
-
 // モジュールロード時点（モック適用前）の fetch を保存する
 const originalFetch = window.fetch;
 
@@ -21,6 +12,16 @@ const meta: Meta<typeof FAB> = {
   title: 'UI/FAB',
   component: FAB,
   tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    viewport: { defaultViewport: 'mobile' },
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 700,
+      },
+    },
+  },
   decorators: [
     (Story) => {
       // fetch モック: PostModal が /api/viewer を呼ぶため（Story 初回レンダリング前に設定）
@@ -37,22 +38,22 @@ const meta: Meta<typeof FAB> = {
       }, []);
 
       return (
-        <>
-          <style>{FAB_OVERRIDE_STYLE}</style>
-          <div
-            className="storybook-fab-wrapper"
-            style={{
-              position: 'relative',
-              height: '200px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              padding: '1rem',
-            }}
-          >
-            <Story />
-          </div>
-        </>
+        <div
+          style={{
+            width: '375px',
+            height: '667px',
+            position: 'relative',
+            margin: '0 auto',
+            border: '1px solid #3f3f46',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            backgroundColor: '#18181b', // ダークモードの背景色に近い色
+            // fixed要素（BottomNavなど）をこの枠内に閉じ込める指定
+            transform: 'translateZ(0)',
+          }}
+        >
+          <Story />
+        </div>
       );
     },
   ],

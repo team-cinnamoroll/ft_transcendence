@@ -6,7 +6,15 @@ const meta: Meta<typeof CreateFaceModal> = {
   title: 'Face/CreateFaceModal',
   component: CreateFaceModal,
   tags: ['autodocs'],
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 600,
+      },
+    },
+  },
 };
 
 export default meta;
