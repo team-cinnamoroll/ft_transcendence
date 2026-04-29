@@ -20,8 +20,8 @@ frontend-bff を編集するときは、次のドキュメントを確認し、�
 設計判断が迷う場合は、まず `FRONTEND_ARCHITECTURE.md` と `BFF_API_GUIDE.md` を優先し、機能コンセプトは `MULTI_FACE.md` と `NEW_CONCEPT.md` を参照する。
 
 ## 制約事項
-- containers/apps/frontend-bff、docs/frontend-bff以外のファイルは絶対に編集しない。
-- どうしてもcontainers/apps/frontend-bff、docs/frontend-bff以外のファイルを編集する必要がある場合は、必ず確認を取ること。確認なしで編集しないこと。
+- 変更は原則として `containers/apps/frontend-bff` と `docs/frontend-bff` 配下に限定する。
+- それ以外のファイルを編集する必要がある場合は、事前に確認を取ること。確認なしで編集しないこと。
 
 ## 実装方針
 

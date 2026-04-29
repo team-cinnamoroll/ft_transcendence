@@ -7,7 +7,7 @@
   "editorType": ["figma"],
   "permissions": ["teamlibrary"],
   "networkAccess": {
-    "allowedDomains": ["*"],
-    "reasoning": "This plugin needs network access to communicate with the MCP server running on your local machine."
+    "allowedDomains": ["http://127.0.0.1:3055", "ws://127.0.0.1:3055"],
+    "reasoning": "This plugin communicates with the MCP server running locally on 127.0.0.1:3055."
   }
 }

@@ -2,11 +2,11 @@
   "servers": {
     "figma": {
       "command": "npx",
-      "args": ["-y", "mcp-figma-toolkit"]
+      "args": ["-y", "mcp-figma-toolkit@1.0.17"]
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp"]
+      "args": ["-y", "chrome-devtools-mcp@0.23.0"]
     }
   }
 }

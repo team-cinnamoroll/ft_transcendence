@@ -20,11 +20,20 @@ const meta: Meta<typeof FAB> = {
   tags: ['autodocs'],
   decorators: [
     (Story) => {
-      // fetch モック: PostModal が /api/viewer を呼ぶため
+      const [originalFetch] = React.useState<typeof window.fetch>(() => window.fetch);
+
+      // fetch モック: PostModal が /api/viewer を呼ぶため（Story 初回レンダリング前に設定）
       window.fetch = fn().mockResolvedValue({
         ok: true,
         json: async () => ({ currentUser, myFaces: faces.filter((f) => f.userId === 'user-1') }),
       } as unknown as Response);
+
+      // アンマウント時に元の fetch を復元し、他ストーリーへの副作用を防ぐ
+      React.useEffect(() => {
+        return () => {
+          window.fetch = originalFetch;
+        };
+      }, [originalFetch]);
 
       return (
         <>

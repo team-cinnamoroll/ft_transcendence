@@ -16,11 +16,20 @@ const meta: Meta<typeof PostModal> = {
   },
   decorators: [
     (Story) => {
-      // /api/viewer モック
+      const [originalFetch] = React.useState<typeof window.fetch>(() => window.fetch);
+
+      // /api/viewer モック（Story 初回レンダリング前に設定）
       window.fetch = fn().mockResolvedValue({
         ok: true,
         json: async () => ({ currentUser, myFaces }),
       } as unknown as Response);
+
+      // アンマウント時に元の fetch を復元し、他ストーリーへの副作用を防ぐ
+      React.useEffect(() => {
+        return () => {
+          window.fetch = originalFetch;
+        };
+      }, [originalFetch]);
 
       return <Story />;
     },
