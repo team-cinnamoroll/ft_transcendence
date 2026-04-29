@@ -29,7 +29,17 @@ const meta: Meta<typeof FAB> = {
       return (
         <>
           <style>{FAB_OVERRIDE_STYLE}</style>
-          <div className="storybook-fab-wrapper" style={{ position: 'relative', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '1rem' }}>
+          <div
+            className="storybook-fab-wrapper"
+            style={{
+              position: 'relative',
+              height: '200px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              padding: '1rem',
+            }}
+          >
             <Story />
           </div>
         </>
