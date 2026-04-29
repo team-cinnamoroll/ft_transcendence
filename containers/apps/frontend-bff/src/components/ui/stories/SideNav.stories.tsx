@@ -8,6 +8,7 @@ const meta: Meta<typeof SideNav> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    viewport: { defaultViewport: 'pc' },
   },
 };
 

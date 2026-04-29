@@ -95,13 +95,13 @@ containers/apps/frontend-bff/
 このプロジェクトは Next.js 16 を使用しているが、`@storybook/nextjs` は Next.js 15 までしか対応していない。  
 そのため `@storybook/react-vite` を採用し、Next.js / サーバー専用モジュールは `.storybook/mocks/` 配下のダミー実装に差し替えている。
 
-| モック対象 | 差し替え内容 |
-|---|---|
-| `next/image` | 通常の `<img>` タグ |
-| `next/link` | 通常の `<a>` タグ |
-| `next/navigation` | `usePathname` は常に `'/'`、`useRouter` は no-op |
-| `@/server/actions/faces` | `createFaceAction` がダミーの Face を返す |
-| `server-only` | 何もしないスタブ（`export {}`） |
+| モック対象               | 差し替え内容                                     |
+| ------------------------ | ------------------------------------------------ |
+| `next/image`             | 通常の `<img>` タグ                              |
+| `next/link`              | 通常の `<a>` タグ                                |
+| `next/navigation`        | `usePathname` は常に `'/'`、`useRouter` は no-op |
+| `@/server/actions/faces` | `createFaceAction` がダミーの Face を返す        |
+| `server-only`            | 何もしないスタブ（`export {}`）                  |
 
 ## グローバルデコレーターについて
 
@@ -171,8 +171,10 @@ git pull
 # 2. コンテナ内で手動で pnpm install を実行
 pnpm install
 
-# 3. Storybook を起動
-pnpm storybook
+# 3. Storybook を起動 (frontend-bffディレクトリに移動して実行、またはルートからコマンド実行)
+cd containers/apps/frontend-bff && pnpm storybook
+# または
+pnpm --filter @tracen/frontend-bff storybook
 ```
 
 コンテナ起動時の自動 `pnpm install` はすでに終わっているため、  
@@ -187,8 +189,8 @@ git pull
 # 2. コンテナを起動（自動で pnpm install が走る）
 # → devcontainer を開き直す、または docker compose up する
 
-# 3. コンテナ起動後に Storybook を起動
-pnpm storybook
+# 3. コンテナ起動後に Storybook を起動 (frontend-bffディレクトリに移動するか、ルートから実行)
+pnpm --filter @tracen/frontend-bff storybook
 ```
 
 コンテナ起動時に自動で `pnpm install` が実行されるため、手動での実行は不要。
