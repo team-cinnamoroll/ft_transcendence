@@ -119,9 +119,9 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
       {/* カレンダー本体（横スクロール） */}
       <div className="overflow-x-auto rounded-xl bg-zinc-800/40 p-3 pb-4">
         {/* 月ラベル行 */}
-        <div className="flex gap-0.5 mb-1 pl-[26px]">
+        <div className="flex gap-0.5 mb-1 pl-6.5">
           {weeks.map((_, wIdx) => (
-            <div key={wIdx} className="shrink-0 w-[13px]">
+            <div key={wIdx} className="shrink-0 w-3.25">
               {monthLabels[wIdx] && (
                 <span className="text-[9px] leading-none text-zinc-500">{monthLabels[wIdx]}</span>
               )}
@@ -134,7 +134,7 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
           {/* 曜日ラベル（月・水・金 のみ表示） */}
           <div className="flex flex-col shrink-0 gap-0.5">
             {DAY_LABELS.map((label, i) => (
-              <div key={i} className="w-[18px] h-[11px] flex items-center justify-end">
+              <div key={i} className="w-4.5 h-2.75 flex items-center justify-end">
                 {(i === 1 || i === 3 || i === 5) && (
                   <span className="text-[9px] leading-none text-zinc-500">{label}</span>
                 )}
@@ -152,14 +152,14 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
                   type="button"
                   aria-label={`${toDateKey(week.startDate)} の週`}
                   onClick={() => handleWeekClick(wIdx)}
-                  className="flex flex-col shrink-0 gap-0.5 w-[11px] focus:outline-none"
+                  className="flex flex-col shrink-0 gap-0.5 w-2.75 focus:outline-none"
                 >
                   {week.days.map((day) => (
                     <div
                       key={day.key}
                       title={`${day.key}: ${day.count}件`}
                       className={cn(
-                        'w-[11px] h-[11px] rounded-sm transition-all',
+                        'w-2.75 h-2.75 rounded-sm transition-all',
                         getColorClass(day.count),
                         isSelected
                           ? 'ring-1 ring-violet-400 ring-offset-1 ring-offset-zinc-900'
@@ -174,12 +174,12 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
         </div>
 
         {/* 凡例 */}
-        <div className="flex items-center justify-end gap-[3px] mt-2.5">
+        <div className="flex items-center justify-end gap-0.75 mt-2.5">
           <span className="text-[9px] text-zinc-500 mr-1">少</span>
           {(
             ['bg-zinc-800', 'bg-green-200', 'bg-green-400', 'bg-green-500', 'bg-green-700'] as const
           ).map((cls, i) => (
-            <div key={i} className={cn('w-[11px] h-[11px] rounded-sm', cls)} />
+            <div key={i} className={cn('w-2.75 h-2.75 rounded-sm', cls)} />
           ))}
           <span className="text-[9px] text-zinc-500 ml-1">多</span>
         </div>
