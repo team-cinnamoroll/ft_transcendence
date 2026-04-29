@@ -34,7 +34,7 @@ export default async function SubscriptionsPage() {
         />
       </main>
 
-      <FAB />
+      <FAB className="md:hidden" />
     </div>
   );
 }

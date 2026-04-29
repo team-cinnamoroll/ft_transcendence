@@ -19,11 +19,20 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/search', label: '検索', icon: Search },
 ];
 
-const BottomNav = () => {
+type Props = {
+  className?: string;
+};
+
+const BottomNav = ({ className }: Props = {}) => {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-zinc-700/60 bg-zinc-900/95 backdrop-blur-sm">
+    <nav
+      className={cn(
+        'fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-zinc-700/60 bg-zinc-900/95 backdrop-blur-sm',
+        className
+      )}
+    >
       <ul className="flex w-full max-w-sm items-center">
         {NAV_ITEMS.map((item) => {
           const isActive =

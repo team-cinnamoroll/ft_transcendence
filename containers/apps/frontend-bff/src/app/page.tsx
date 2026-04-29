@@ -23,7 +23,7 @@ export default async function Home() {
         <HomeClient currentUser={currentUser} faces={myFaces} activities={activities} />
       </main>
 
-      <FAB />
+      <FAB className="md:hidden" />
     </div>
   );
 }

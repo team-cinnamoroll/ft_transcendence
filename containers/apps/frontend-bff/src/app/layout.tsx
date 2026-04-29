@@ -45,7 +45,7 @@ export default async function RootLayout({
               </div>
             </div>
           </div>
-          <BottomNav />
+          <BottomNav className="md:hidden" />
         </DetailPanelProvider>
       </body>
     </html>
