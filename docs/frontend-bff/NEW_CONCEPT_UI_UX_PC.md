@@ -30,4 +30,3 @@
 
 - PC比率の画面が Figma に追加・確定した時点で、このドキュメントへ反映する
 - それまでは [docs/frontend-bff/NEW_CONCEPT_UI_UX.md](docs/frontend-bff/NEW_CONCEPT_UI_UX.md) と [docs/frontend-bff/NEW_CONCEPT_UI_UX_MOBILE.md](docs/frontend-bff/NEW_CONCEPT_UI_UX_MOBILE.md) を参照する
-
