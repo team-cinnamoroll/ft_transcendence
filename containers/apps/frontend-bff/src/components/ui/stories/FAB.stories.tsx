@@ -14,14 +14,15 @@ const FAB_OVERRIDE_STYLE = `
   }
 `;
 
+// モジュールロード時点（モック適用前）の fetch を保存する
+const originalFetch = window.fetch;
+
 const meta: Meta<typeof FAB> = {
   title: 'UI/FAB',
   component: FAB,
   tags: ['autodocs'],
   decorators: [
     (Story) => {
-      const [originalFetch] = React.useState<typeof window.fetch>(() => window.fetch);
-
       // fetch モック: PostModal が /api/viewer を呼ぶため（Story 初回レンダリング前に設定）
       window.fetch = fn().mockResolvedValue({
         ok: true,
@@ -33,7 +34,7 @@ const meta: Meta<typeof FAB> = {
         return () => {
           window.fetch = originalFetch;
         };
-      }, [originalFetch]);
+      }, []);
 
       return (
         <>

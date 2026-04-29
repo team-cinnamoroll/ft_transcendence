@@ -7,6 +7,9 @@ import { faces } from '@/mocks/faces';
 
 const myFaces = faces.filter((f) => f.userId === 'user-1');
 
+// モジュールロード時点（モック適用前）の fetch を保存する
+const originalFetch = window.fetch;
+
 const meta: Meta<typeof PostModal> = {
   title: 'UI/PostModal',
   component: PostModal,
@@ -16,8 +19,6 @@ const meta: Meta<typeof PostModal> = {
   },
   decorators: [
     (Story) => {
-      const [originalFetch] = React.useState<typeof window.fetch>(() => window.fetch);
-
       // /api/viewer モック（Story 初回レンダリング前に設定）
       window.fetch = fn().mockResolvedValue({
         ok: true,
@@ -29,7 +30,7 @@ const meta: Meta<typeof PostModal> = {
         return () => {
           window.fetch = originalFetch;
         };
-      }, [originalFetch]);
+      }, []);
 
       return <Story />;
     },
