@@ -3,7 +3,7 @@
 ## 概要
 
 `containers/apps/frontend-bff` に Storybook を導入済み。  
-`src/components/ui/` 配下のコンポーネントをカタログとして確認できる。
+全コンポーネント（ui・face・home・notifications・search・subscriptions）をカタログとして確認できる。
 
 ## 起動方法
 
@@ -35,47 +35,101 @@ pnpm --filter @tracen/frontend-bff storybook
 ```
 containers/apps/frontend-bff/
 ├── .storybook/
-│   ├── main.ts               ← Storybook 設定（@/ エイリアス・Next.js モック設定）
-│   ├── preview.ts            ← 全 Story 共通の設定（ダークテーマをデフォルト化）
+│   ├── main.ts               ← Storybook 設定（@/ エイリアス・モック設定）
+│   ├── preview.tsx           ← 全 Story 共通設定（ダークテーマ・DetailPanelProvider）
 │   └── mocks/
 │       ├── next-image.tsx    ← next/image → <img> に置き換え
 │       ├── next-link.tsx     ← next/link → <a> に置き換え
-│       └── next-navigation.ts← usePathname / useRouter 等をダミー実装
-└── src/components/ui/
-    ├── Avatar.tsx
-    ├── Badge.tsx
-    ├── ...（その他のコンポーネント）
-    └── stories/               ← Story ファイルをここに集約
-        ├── Avatar.stories.tsx
-        ├── Badge.stories.tsx
-        ├── BottomNav.stories.tsx
-        ├── FaceChip.stories.tsx
-        ├── FaceNavItem.stories.tsx
-        └── TopBar.stories.tsx
+│       ├── next-navigation.ts← usePathname / useRouter 等をダミー実装
+│       ├── server-actions.ts ← createFaceAction をダミー実装
+│       └── server-only.ts    ← 'server-only' をスタブ化
+└── src/components/
+    ├── ui/
+    │   ├── ActivityCard.tsx
+    │   ├── Avatar.tsx
+    │   ├── Badge.tsx
+    │   ├── BottomNav.tsx
+    │   ├── FAB.tsx
+    │   ├── FaceChip.tsx
+    │   ├── FaceNavItem.tsx
+    │   ├── PostModal.tsx
+    │   ├── SideNav.tsx
+    │   ├── TopBar.tsx
+    │   └── stories/
+    │       ├── ActivityCard.stories.tsx
+    │       ├── Avatar.stories.tsx
+    │       ├── Badge.stories.tsx
+    │       ├── BottomNav.stories.tsx
+    │       ├── FAB.stories.tsx
+    │       ├── FaceChip.stories.tsx
+    │       ├── FaceNavItem.stories.tsx
+    │       ├── PostModal.stories.tsx
+    │       ├── SideNav.stories.tsx
+    │       └── TopBar.stories.tsx
+    ├── face/
+    │   └── stories/
+    │       ├── CreateFaceModal.stories.tsx
+    │       ├── FaceActivityFeed.stories.tsx
+    │       └── FaceHeader.stories.tsx
+    ├── home/
+    │   └── stories/
+    │       ├── ActivityFeed.stories.tsx
+    │       ├── ActivityTileCalendar.stories.tsx
+    │       ├── FaceFilterBar.stories.tsx
+    │       └── HomeProfile.stories.tsx
+    ├── notifications/
+    │   └── stories/
+    │       └── NotificationList.stories.tsx
+    ├── search/
+    │   └── stories/
+    │       ├── SearchBar.stories.tsx
+    │       ├── SearchResults.stories.tsx
+    │       └── SearchScopeSelector.stories.tsx
+    └── subscriptions/
+        └── stories/
+            └── SubscriptionFeed.stories.tsx
 ```
 
 ## Next.js モックについて
 
 このプロジェクトは Next.js 16 を使用しているが、`@storybook/nextjs` は Next.js 15 までしか対応していない。  
-そのため `@storybook/react-vite` を採用し、Next.js 固有のモジュール（`next/image`・`next/link`・`next/navigation`）は `.storybook/mocks/` 配下のダミー実装に差し替えている。
+そのため `@storybook/react-vite` を採用し、Next.js / サーバー専用モジュールは `.storybook/mocks/` 配下のダミー実装に差し替えている。
+
+| モック対象 | 差し替え内容 |
+|---|---|
+| `next/image` | 通常の `<img>` タグ |
+| `next/link` | 通常の `<a>` タグ |
+| `next/navigation` | `usePathname` は常に `'/'`、`useRouter` は no-op |
+| `@/server/actions/faces` | `createFaceAction` がダミーの Face を返す |
+| `server-only` | 何もしないスタブ（`export {}`） |
+
+## グローバルデコレーターについて
+
+`useDetailPanel()` を内部で使うコンポーネントが多いため、`preview.tsx` で `DetailPanelProvider` をグローバルデコレーターとして登録している。  
+全 Story が自動的にこのプロバイダーで囲まれるため、個別の Story 側で設定する必要はない。
 
 ## Story ファイルの配置ルール
 
-コンポーネントのディレクトリ直下に `stories/` サブディレクトリを作り、そこに `*.stories.tsx` をまとめる。
-ファイルが増えても本体のコンポーネントと混在せず見通しが保ちやすい。
-将来 `home/stories/`・`face/stories/` と同じ規則で横展開できる。
+コンポーネントのディレクトリ直下に `stories/` サブディレクトリを作り、そこに `*.stories.tsx` をまとめる。  
+コンポーネント本体と混在せず見通しが保ちやすい。
 
 ```
 src/components/
 ├── ui/
 │   ├── Avatar.tsx
-│   └── stories/         ← ここに story ファイルを置く
+│   └── stories/              ← 同ディレクトリ内の stories/ に置く
 │       └── Avatar.stories.tsx
+├── face/
+│   ├── FaceHeader.tsx
+│   └── stories/
+│       └── FaceHeader.stories.tsx
 ├── home/
 │   ├── ActivityFeed.tsx
 │   └── stories/
 │       └── ActivityFeed.stories.tsx
 ```
+
+インポートは親ディレクトリへの相対パス（`'../ComponentName'`）を使う。
 
 ## Story ファイルの追加方法
 
