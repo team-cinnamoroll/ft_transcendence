@@ -119,9 +119,9 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
       {/* カレンダー本体（横スクロール） */}
       <div className="overflow-x-auto rounded-xl bg-zinc-800/40 p-3 pb-4">
         {/* 月ラベル行 */}
-        <div className="flex gap-[2px] mb-1 pl-[26px]">
+        <div className="flex gap-0.5 mb-1 pl-6.5">
           {weeks.map((_, wIdx) => (
-            <div key={wIdx} className="flex-shrink-0 w-[13px]">
+            <div key={wIdx} className="shrink-0 w-[13px]">
               {monthLabels[wIdx] && (
                 <span className="text-[9px] leading-none text-zinc-500">{monthLabels[wIdx]}</span>
               )}
@@ -130,9 +130,9 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
         </div>
 
         {/* 曜日ラベル + セルグリッド */}
-        <div className="flex items-start gap-[6px]">
+        <div className="flex items-start gap-1.5">
           {/* 曜日ラベル（月・水・金 のみ表示） */}
-          <div className="flex flex-col flex-shrink-0 gap-[2px]">
+          <div className="flex flex-col shrink-0 gap-0.5">
             {DAY_LABELS.map((label, i) => (
               <div key={i} className="w-[18px] h-[11px] flex items-center justify-end">
                 {(i === 1 || i === 3 || i === 5) && (

@@ -80,7 +80,7 @@ const SideNav = ({ faces }: Props) => {
                     strokeWidth={isActive ? 2.5 : 2}
                     className={cn(
                       'shrink-0 transition-all duration-200',
-                      isActive && '[&>*]:fill-current'
+                      isActive && '*:fill-current'
                     )}
                   />
                   <span>{item.label}</span>
