@@ -2,7 +2,7 @@
 
 ## 概要
 
-`containers/apps/frontend-bff` に対して、日本語（`ja`）・英語（`en`）の多言語対応を実装した。  
+`containers/apps/frontend-bff` に対して、日本語（`ja`）・英語（`en`）・フランス語（`fr`）の多言語対応を実装した。  
 対象ブランチ: `feat/frontend-bff-i18n`
 
 ## 使用ライブラリ
@@ -32,6 +32,7 @@
 | `faa439a` | feat  | UI コンポーネントを `useTranslations` に対応             |
 | `9ce0064` | feat  | Storybook に `NextIntlClientProvider` デコレーターを追加 |
 | `00d45b7` | feat  | i18n翻訳キーを全コンポーネント向けに追加                 |
+| `67cb063` | feat  | フランス語（fr）ロケールを追加                           |
 
 ## 変更ファイルツリー
 
@@ -47,15 +48,17 @@ containers/apps/frontend-bff/
 │   │                                        #   createMiddleware(routing) で /[locale]/* への振り分けを自動処理
 │   │
 │   ├── i18n/                               # [新規ディレクトリ] i18n 基盤ファイル群
-│   │   ├── routing.ts                      # [新規] ロケール一覧（ja/en）とデフォルトロケール（ja）を定義
+│   │   ├── routing.ts                      # [新規] ロケール一覧（ja/en/fr）とデフォルトロケール（ja）を定義
 │   │   ├── request.ts                      # [新規] サーバー側のロケール検出・メッセージ取得設定
 │   │   └── messages/
 │   │       ├── ja.json                     # [新規+更新] 日本語メッセージ定義（25 ネームスペース）
-│   │       └── en.json                     # [新規+更新] 英語メッセージ定義（25 ネームスペース）
+│   │       ├── en.json                     # [新規+更新] 英語メッセージ定義（25 ネームスペース）
+│   │       └── fr.json                     # [新規] フランス語メッセージ定義（25 ネームスペース）
 │   │
 │   ├── lib/
 │   │   ├── format-relative-time.ts         # [更新] RelativeTimeMessages 型を受け取れるよう拡張
 │   │   │                                    #   第2・第3引数（locale, messages）を追加（後方互換あり）
+│   │   │                                    #   ロケールマップに fr → fr-FR を追加
 │   │   └── use-relative-time.ts            # [新規] useTranslations('relativeTime') を用いた
 │   │                                        #   相対時間フォーマットフック。Client Component 向け
 │   │
@@ -167,8 +170,11 @@ middleware.ts  ← createMiddleware(routing)
 ```
 src/i18n/messages/
 ├── ja.json  (25 ネームスペース)
-└── en.json  (25 ネームスペース)
+├── en.json  (25 ネームスペース)
+└── fr.json  (25 ネームスペース)
 ```
+
+新しいロケールを追加する場合は、このディレクトリに `{locale}.json` を追加し、`routing.ts` の `locales` 配列に追記するだけで対応できる。
 
 主なネームスペース一覧:
 
