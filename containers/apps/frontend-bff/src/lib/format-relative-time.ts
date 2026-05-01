@@ -35,14 +35,11 @@ export const formatRelativeTime = (
   if (diffHour < 24) return messages.hoursAgo(diffHour);
   if (diffDay < 30) return messages.daysAgo(diffDay);
 
-  return date.toLocaleDateString(
-    locale === 'en' ? 'en-US' : locale === 'fr' ? 'fr-FR' : 'ja-JP',
-    {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    },
-  );
+  return date.toLocaleDateString(locale === 'en' ? 'en-US' : locale === 'fr' ? 'fr-FR' : 'ja-JP', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 };
 
 export type { RelativeTimeMessages };
