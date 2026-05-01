@@ -7,6 +7,7 @@ import ActivityCard from '@/components/ui/ActivityCard';
 import { getFaceTitle } from '@/lib/display';
 import { cn } from '@/lib/utils';
 import { useDetailPanel } from '@/lib/detail-panel-context';
+import { useTranslations } from 'next-intl';
 
 export type SearchActivityResultItem = {
   activity: Activity;
@@ -34,14 +35,13 @@ const SearchResults = ({
   subscribedFaceIds,
 }: SearchResultsProps) => {
   const { state, openActivity, openFace } = useDetailPanel();
+  const t = useTranslations('searchResults');
   if (!query) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <p className="text-3xl">🔍</p>
-        <p className="text-sm text-zinc-400">キーワードを入力して検索してください</p>
-        <p className="text-xs text-zinc-600">
-          フェイス名・アクティビティ本文をスコープに応じて絞り込みます
-        </p>
+        <p className="text-sm text-zinc-400">{t('emptyTitle')}</p>
+        <p className="text-xs text-zinc-600">{t('emptyHint')}</p>
       </div>
     );
   }
@@ -52,8 +52,8 @@ const SearchResults = ({
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
         <p className="text-3xl">😶</p>
-        <p className="text-sm text-zinc-400">「{query}」に一致する結果が見つかりませんでした</p>
-        <p className="text-xs text-zinc-600">別のキーワードやスコープで試してみてください</p>
+        <p className="text-sm text-zinc-400">{t('noResultsTitle', { query })}</p>
+        <p className="text-xs text-zinc-600">{t('noResultsHint')}</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ const SearchResults = ({
       {faceResults.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            フェイス
+            {t('facesSection')}
             <span className="ml-2 text-violet-400">{faceResults.length}</span>
           </h2>
           <ul className="flex flex-col gap-2">
@@ -99,10 +99,12 @@ const SearchResults = ({
                     }
                     disabled
                     aria-label={
-                      isSubscribed ? `${face.name}のサブスクを解除` : `${face.name}をサブスクする`
+                      isSubscribed
+                        ? t('unsubscribeAriaLabel', { name: face.name })
+                        : t('subscribeAriaLabel', { name: face.name })
                     }
                   >
-                    {isSubscribed ? 'サブスク中' : 'サブスクする'}
+                    {isSubscribed ? t('subscribed') : t('subscribe')}
                   </button>
                 </li>
               );
@@ -115,7 +117,7 @@ const SearchResults = ({
       {activityResults.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            アクティビティ
+            {t('activitiesSection')}
             <span className="ml-2 text-violet-400">{activityResults.length}</span>
           </h2>
           <ul className="flex flex-col gap-3">

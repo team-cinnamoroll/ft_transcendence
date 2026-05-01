@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import PostModal from '@/components/ui/PostModal';
-
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   /** モーダルを開いた時点で選択済みにするフェイスID（省略可） */
@@ -14,6 +14,7 @@ type Props = {
 
 const FAB = ({ defaultFaceId, className }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const t = useTranslations('fab');
 
   const handleOpen = () => setIsModalOpen(true);
   const handleClose = () => setIsModalOpen(false);
@@ -23,7 +24,7 @@ const FAB = ({ defaultFaceId, className }: Props) => {
       <button
         type="button"
         onClick={handleOpen}
-        aria-label="投稿する"
+        aria-label={t('ariaLabel')}
         className={cn(
           'fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg shadow-violet-900/50 transition-all duration-200 hover:bg-violet-500 active:scale-95 active:bg-violet-700',
           className

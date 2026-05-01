@@ -22,9 +22,14 @@
     "title": "Post",
     "ariaLabel": "Post",
     "close": "Close",
-    "faceSelect": "Select a Face",
-    "textPlaceholder": "What are you up to?",
-    "attachImage": "Attach image",
+    "faceLabel": "Face",
+    "loading": "Loading…",
+    "noFaces": "No faces available",
+    "contentLabel": "Content",
+    "textareaPlaceholder": "Jot something down…",
+    "addPhoto": "Add photo",
+    "attachedImageAlt": "Attached image {n}",
+    "removeImageAriaLabel": "Remove image {n}",
     "submit": "Post",
     "submitting": "Posting..."
   },
@@ -50,6 +55,97 @@
     "subscribe": "Subscribe",
     "subscribed": "✓ Subscribed"
   },
+  "fab": {
+    "ariaLabel": "Post"
+  },
+  "faceDetail": {
+    "title": "Face Detail",
+    "close": "Close",
+    "loading": "Loading…",
+    "notFound": "Face not found",
+    "activitiesHeading": "Activities in this face",
+    "noActivities": "No activities yet"
+  },
+  "activityDetail": {
+    "title": "Activity Detail",
+    "close": "Close",
+    "loading": "Loading…",
+    "notFound": "Activity not found",
+    "unknownFace": "Unknown face",
+    "imageAlt": "Image {n}",
+    "viewFace": "→ View this face"
+  },
+  "activityCard": {
+    "showMore": "Show more",
+    "collapse": "Collapse",
+    "imageAlt": "Image {n}"
+  },
+  "detailPanel": {
+    "placeholder": "← Select an item from the list"
+  },
+  "facesClient": {
+    "title": "Faces",
+    "createNew": "New",
+    "noFaces": "No faces yet",
+    "private": "Private"
+  },
+  "faceActivityFeed": {
+    "noActivities": "No activities yet"
+  },
+  "activityFeed": {
+    "noActivities": "No activities yet"
+  },
+  "homeProfile": {
+    "faces": "Faces",
+    "activities": "Activities"
+  },
+  "faceFilterBar": {
+    "all": "All"
+  },
+  "activityTileCalendar": {
+    "title": "Review",
+    "weekAriaLabel": "Week of {date}",
+    "dayCount": "{count}",
+    "few": "Less",
+    "many": "More",
+    "weekRecord": "record",
+    "noRecord": "No activity this week"
+  },
+  "subscriptionFeed": {
+    "noSubscriptions": "You haven't subscribed to any faces yet",
+    "searchLink": "Search for faces"
+  },
+  "notificationList": {
+    "noNotifications": "No notifications yet",
+    "linkedBadge": "🔗 Link",
+    "subscribedBadge": "📥 Subscribe",
+    "linkedAction": "linked your post",
+    "subscribedAction": "subscribed to {faceName}",
+    "actionConnector": " "
+  },
+  "searchBar": {
+    "placeholder": "Search by keyword..."
+  },
+  "searchScopeSelector": {
+    "all": "All",
+    "mine": "Mine",
+    "subscribed": "Subscribed"
+  },
+  "searchResults": {
+    "emptyTitle": "Enter a keyword to search",
+    "emptyHint": "Search face names and activity content by scope",
+    "noResultsTitle": "No results for \"{query}\"",
+    "noResultsHint": "Try a different keyword or scope",
+    "facesSection": "Faces",
+    "activitiesSection": "Activities",
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed",
+    "subscribeAriaLabel": "Subscribe to {name}",
+    "unsubscribeAriaLabel": "Unsubscribe from {name}"
+  },
+  "searchClient": {
+    "title": "Search"
+  },
   "home": {
     "title": "Home"
   },
@@ -57,13 +153,24 @@
     "title": "Faces"
   },
   "notifications": {
-    "title": "Notifications"
+    "title": "Notifications",
+    "count": "{count}"
   },
   "search": {
     "title": "Search",
     "placeholder": "Search..."
   },
   "subscriptions": {
-    "title": "Subscriptions"
+    "title": "Subscriptions",
+    "subscribedCount": "{count} faces subscribed"
+  },
+  "faceDetailPage": {
+    "backAriaLabel": "Back to faces list"
+  },
+  "relativeTime": {
+    "justNow": "Just now",
+    "minutesAgo": "{n}m ago",
+    "hoursAgo": "{n}h ago",
+    "daysAgo": "{n}d ago"
   }
 }

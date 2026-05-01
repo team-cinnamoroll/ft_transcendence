@@ -6,6 +6,7 @@ import FAB from '@/components/ui/FAB';
 import { listActivitiesByFaceId } from '@/server/usecases/activities';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
+import { getTranslations } from 'next-intl/server';
 
 type Props = {
   params: Promise<{ faceId: string }>;
@@ -24,6 +25,7 @@ const FaceDetailPage = async ({ params }: Props) => {
     listActivitiesByFaceId(faceId),
     listAllUsers(),
   ]);
+  const t = await getTranslations('faceDetailPage');
 
   return (
     <div className="flex flex-col">
@@ -32,7 +34,7 @@ const FaceDetailPage = async ({ params }: Props) => {
         <Link
           href="/faces"
           className="flex items-center justify-center rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-          aria-label="フェイス一覧に戻る"
+          aria-label={t('backAriaLabel')}
         >
           {/* 左矢印アイコン */}
           <svg

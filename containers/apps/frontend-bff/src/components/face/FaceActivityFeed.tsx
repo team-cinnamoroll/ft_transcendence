@@ -6,6 +6,7 @@ import type { User } from '@/types/user';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import UIActivityCard from '@/components/ui/ActivityCard';
+import { useTranslations } from 'next-intl';
 
 type FaceActivityFeedProps = {
   face: Face;
@@ -18,12 +19,13 @@ type FaceActivityFeedProps = {
  */
 const FaceActivityFeed = ({ face, activities, users }: FaceActivityFeedProps) => {
   const { openActivity } = useDetailPanel();
+  const t = useTranslations('faceActivityFeed');
 
   const userMap = createLookupMap(users, (user) => user.id);
   const faceTitle = getFaceTitle(face);
 
   if (activities.length === 0) {
-    return <p className="py-16 text-center text-sm text-zinc-500">アクティビティがありません</p>;
+    return <p className="py-16 text-center text-sm text-zinc-500">{t('noActivities')}</p>;
   }
 
   return (

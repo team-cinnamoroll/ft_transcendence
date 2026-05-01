@@ -22,9 +22,14 @@
     "title": "投稿する",
     "ariaLabel": "投稿",
     "close": "閉じる",
-    "faceSelect": "フェイスを選択",
-    "textPlaceholder": "いま何してる？",
-    "attachImage": "画像を添付",
+    "faceLabel": "フェイス",
+    "loading": "読み込み中…",
+    "noFaces": "フェイスがありません",
+    "contentLabel": "内容",
+    "textareaPlaceholder": "気軽に書き留めてみましょう…",
+    "addPhoto": "写真を追加",
+    "attachedImageAlt": "添付画像{n}",
+    "removeImageAriaLabel": "画像{n}を削除",
     "submit": "投稿する",
     "submitting": "投稿中..."
   },
@@ -50,6 +55,97 @@
     "subscribe": "サブスクする",
     "subscribed": "✓ サブスク中"
   },
+  "fab": {
+    "ariaLabel": "投稿する"
+  },
+  "faceDetail": {
+    "title": "フェイス詳細",
+    "close": "閉じる",
+    "loading": "読み込み中…",
+    "notFound": "フェイスが見つかりませんでした",
+    "activitiesHeading": "このフェイスのアクティビティ",
+    "noActivities": "まだアクティビティがありません"
+  },
+  "activityDetail": {
+    "title": "アクティビティ詳細",
+    "close": "閉じる",
+    "loading": "読み込み中…",
+    "notFound": "アクティビティが見つかりませんでした",
+    "unknownFace": "不明なフェイス",
+    "imageAlt": "画像 {n}",
+    "viewFace": "→ このフェイスを見る"
+  },
+  "activityCard": {
+    "showMore": "もっと見る",
+    "collapse": "折りたたむ",
+    "imageAlt": "画像 {n}"
+  },
+  "detailPanel": {
+    "placeholder": "← 左のリストから選択してください"
+  },
+  "facesClient": {
+    "title": "フェイス",
+    "createNew": "新規作成",
+    "noFaces": "フェイスがありません",
+    "private": "非公開"
+  },
+  "faceActivityFeed": {
+    "noActivities": "アクティビティがありません"
+  },
+  "activityFeed": {
+    "noActivities": "アクティビティがありません"
+  },
+  "homeProfile": {
+    "faces": "フェイス",
+    "activities": "アクティビティ"
+  },
+  "faceFilterBar": {
+    "all": "すべて"
+  },
+  "activityTileCalendar": {
+    "title": "振り返り",
+    "weekAriaLabel": "{date} の週",
+    "dayCount": "{count}件",
+    "few": "少",
+    "many": "多",
+    "weekRecord": "の記録",
+    "noRecord": "この週には記録がありません"
+  },
+  "subscriptionFeed": {
+    "noSubscriptions": "まだサブスクしているフェイスがありません",
+    "searchLink": "検索してフェイスを探す"
+  },
+  "notificationList": {
+    "noNotifications": "まだ通知はありません",
+    "linkedBadge": "🔗 リンク",
+    "subscribedBadge": "📥 サブスク",
+    "linkedAction": "あなたの投稿をリンクしました",
+    "subscribedAction": "{faceName} をサブスクライブしました",
+    "actionConnector": " さんが "
+  },
+  "searchBar": {
+    "placeholder": "キーワードで検索..."
+  },
+  "searchScopeSelector": {
+    "all": "全体",
+    "mine": "自分",
+    "subscribed": "サブスクフェイス"
+  },
+  "searchResults": {
+    "emptyTitle": "キーワードを入力して検索してください",
+    "emptyHint": "フェイス名・アクティビティ本文をスコープに応じて絞り込みます",
+    "noResultsTitle": "「{query}」に一致する結果が見つかりませんでした",
+    "noResultsHint": "別のキーワードやスコープで試してみてください",
+    "facesSection": "フェイス",
+    "activitiesSection": "アクティビティ",
+    "subscribe": "サブスクする",
+    "subscribed": "サブスク中",
+    "subscribeAriaLabel": "{name}をサブスクする",
+    "unsubscribeAriaLabel": "{name}のサブスクを解除"
+  },
+  "searchClient": {
+    "title": "検索"
+  },
   "home": {
     "title": "ホーム"
   },
@@ -57,13 +153,24 @@
     "title": "フェイス"
   },
   "notifications": {
-    "title": "通知"
+    "title": "通知",
+    "count": "{count} 件"
   },
   "search": {
     "title": "検索",
     "placeholder": "検索..."
   },
   "subscriptions": {
-    "title": "サブスク"
+    "title": "サブスク",
+    "subscribedCount": "{count} フェイスをサブスク中"
+  },
+  "faceDetailPage": {
+    "backAriaLabel": "フェイス一覧に戻る"
+  },
+  "relativeTime": {
+    "justNow": "たった今",
+    "minutesAgo": "{n}分前",
+    "hoursAgo": "{n}時間前",
+    "daysAgo": "{n}日前"
   }
 }
