@@ -4,19 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Bell, Search, Rss, Layers, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/faces', label: 'フェイス', icon: Layers },
-  { href: '/', label: 'ホーム', icon: Home },
-  { href: '/subscriptions', label: 'サブスク', icon: Rss },
-  { href: '/notifications', label: '通知', icon: Bell },
-  { href: '/search', label: '検索', icon: Search },
+  { href: '/faces', labelKey: 'nav.faces', icon: Layers },
+  { href: '/', labelKey: 'nav.home', icon: Home },
+  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: Rss },
+  { href: '/notifications', labelKey: 'nav.notifications', icon: Bell },
+  { href: '/search', labelKey: 'nav.search', icon: Search },
 ];
 
 type Props = {
@@ -25,6 +26,7 @@ type Props = {
 
 const BottomNav = ({ className }: Props = {}) => {
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <nav
@@ -62,7 +64,7 @@ const BottomNav = ({ className }: Props = {}) => {
                     className={cn('transition-all duration-200', isActive && '*:fill-current')}
                   />
                   <span className="whitespace-nowrap transition-all duration-200">
-                    {item.label}
+                    {t(item.labelKey)}
                   </span>
                 </span>
               </Link>
