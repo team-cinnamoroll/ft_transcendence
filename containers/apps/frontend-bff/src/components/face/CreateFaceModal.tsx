@@ -148,7 +148,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               aria-checked={isPrivate}
               onClick={() => setIsPrivate((prev) => !prev)}
               className={cn(
-                'relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200',
+                'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200',
                 isPrivate ? 'bg-violet-600' : 'bg-zinc-600'
               )}
             >

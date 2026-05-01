@@ -80,7 +80,7 @@ const SideNav = ({ faces }: Props) => {
                     strokeWidth={isActive ? 2.5 : 2}
                     className={cn(
                       'shrink-0 transition-all duration-200',
-                      isActive && '[&>*]:fill-current'
+                      isActive && '*:fill-current'
                     )}
                   />
                   <span>{item.label}</span>
@@ -94,7 +94,7 @@ const SideNav = ({ faces }: Props) => {
         <hr className="my-3 border-t border-zinc-800" />
 
         {/* フェイス一覧ラベル */}
-        <p className="px-3 mb-1 text-[12px] font-semibold uppercase tracking-wider text-zinc-600">
+        <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-600">
           フェイス
         </p>
 

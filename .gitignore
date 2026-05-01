@@ -9,6 +9,7 @@ build/
 out/
 coverage/
 *.tsbuildinfo
+storybook-static/
 
 # Logs
 *.log
