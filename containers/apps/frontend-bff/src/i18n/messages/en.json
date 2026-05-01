@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "title": "MultiFace",
+    "description": "A short-text SNS to record your many faces"
+  },
+  "nav": {
+    "home": "Home",
+    "faces": "Faces",
+    "subscriptions": "Subscriptions",
+    "notifications": "Notifications",
+    "search": "Search",
+    "faceDetail": "Face Detail"
+  },
+  "sideNav": {
+    "facesSection": "Faces",
+    "createFace": "New Face"
+  },
+  "topBar": {
+    "post": "Post"
+  },
+  "postModal": {
+    "title": "Post",
+    "ariaLabel": "Post",
+    "close": "Close",
+    "faceSelect": "Select a Face",
+    "textPlaceholder": "What are you up to?",
+    "attachImage": "Attach image",
+    "submit": "Post",
+    "submitting": "Posting..."
+  },
+  "createFaceModal": {
+    "title": "Create New Face",
+    "ariaLabel": "Create New Face",
+    "close": "Close",
+    "name": "Name",
+    "required": "*",
+    "nameExample": "e.g. Reading",
+    "emoji": "Emoji",
+    "optional": "(optional)",
+    "emojiExample": "e.g. 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe this face",
+    "privateLabel": "Private",
+    "privateDescription": "Only you can view this face",
+    "submit": "Create",
+    "submitting": "Creating..."
+  },
+  "face": {
+    "private": "Private",
+    "subscribe": "Subscribe",
+    "subscribed": "✓ Subscribed"
+  },
+  "home": {
+    "title": "Home"
+  },
+  "faces": {
+    "title": "Faces"
+  },
+  "notifications": {
+    "title": "Notifications"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search..."
+  },
+  "subscriptions": {
+    "title": "Subscriptions"
+  }
+}

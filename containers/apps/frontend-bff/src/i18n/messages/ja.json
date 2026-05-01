@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "title": "MultiFace",
+    "description": "フェイス（多面性）で記録する SNS"
+  },
+  "nav": {
+    "home": "ホーム",
+    "faces": "フェイス",
+    "subscriptions": "サブスク",
+    "notifications": "通知",
+    "search": "検索",
+    "faceDetail": "フェイス詳細"
+  },
+  "sideNav": {
+    "facesSection": "フェイス",
+    "createFace": "新規フェイス作成"
+  },
+  "topBar": {
+    "post": "投稿する"
+  },
+  "postModal": {
+    "title": "投稿する",
+    "ariaLabel": "投稿",
+    "close": "閉じる",
+    "faceSelect": "フェイスを選択",
+    "textPlaceholder": "いま何してる？",
+    "attachImage": "画像を添付",
+    "submit": "投稿する",
+    "submitting": "投稿中..."
+  },
+  "createFaceModal": {
+    "title": "新規フェイスを作成",
+    "ariaLabel": "新規フェイスを作成",
+    "close": "閉じる",
+    "name": "名前",
+    "required": "*",
+    "nameExample": "例：読書",
+    "emoji": "絵文字",
+    "optional": "（任意）",
+    "emojiExample": "例：📚",
+    "description": "説明文",
+    "descriptionPlaceholder": "このフェイスについて説明してください",
+    "privateLabel": "非公開",
+    "privateDescription": "オンにすると自分だけが閲覧できます",
+    "submit": "作成する",
+    "submitting": "作成中..."
+  },
+  "face": {
+    "private": "非公開",
+    "subscribe": "サブスクする",
+    "subscribed": "✓ サブスク中"
+  },
+  "home": {
+    "title": "ホーム"
+  },
+  "faces": {
+    "title": "フェイス"
+  },
+  "notifications": {
+    "title": "通知"
+  },
+  "search": {
+    "title": "検索",
+    "placeholder": "検索..."
+  },
+  "subscriptions": {
+    "title": "サブスク"
+  }
+}
