@@ -65,7 +65,7 @@ const NotificationItem = ({
             {t('actionConnector')}
             <span className="text-violet-400">{detail}</span>
           </p>
-          <span className="shrink-0 text-xs text-zinc-500">
+          <span className="shrink-0 text-xs text-zinc-500" suppressHydrationWarning>
             {relativeTime(notification.createdAt)}
           </span>
         </div>

@@ -39,6 +39,7 @@ export const formatRelativeTime = (
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'UTC',
   });
 };
 
