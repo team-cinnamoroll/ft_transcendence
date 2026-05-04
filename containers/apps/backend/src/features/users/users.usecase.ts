@@ -1,5 +1,5 @@
-import type { CreateUserInput, User, UserId } from './user.entity';
-import type { UserRepositorySpec } from './user.repository';
+import type { CreateUserInput, User, UserId } from './users.entity';
+import type { UserRepositorySpec } from './users.repository';
 
 export class EmailAlreadyExistsError extends Error {
   override name = 'EmailAlreadyExistsError';

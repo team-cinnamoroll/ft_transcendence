@@ -1,4 +1,4 @@
-import type { CreateUserInput, User, UserId } from './user.entity';
+import type { CreateUserInput, User, UserId } from './users.entity';
 
 import { getDb, type TracenDb } from '../../infra/db/client';
 import { createDrizzleUserRepository } from '../../infra/repositories/drizzle-user.repo';

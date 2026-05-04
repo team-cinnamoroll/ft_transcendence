@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { runMigrationsOnce } from './infra/db/migrate';
 import { parseEnv } from './env';
-import { createUserRouter } from './features/auth/user.handler';
+import { createUserRouter } from './features/users/users.handler';
 import type { DatabaseUrlEnv } from './shared/types/hono';
 
 const env = parseEnv(process.env);

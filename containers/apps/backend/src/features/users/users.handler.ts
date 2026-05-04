@@ -7,8 +7,8 @@ import type { AppEnv } from '../../env';
 import { requireDatabaseUrl } from '../../shared/middleware/require-database-url';
 import type { DatabaseUrlEnv } from '../../shared/types/hono';
 
-import { getUserRepository } from './user.repository';
-import { createUser, deleteUserById, EmailAlreadyExistsError, getUserById } from './user.usecase';
+import { getUserRepository } from './users.repository';
+import { createUser, deleteUserById, EmailAlreadyExistsError, getUserById } from './users.usecase';
 
 export function createUserRouter(env: AppEnv) {
   return new Hono<DatabaseUrlEnv>()

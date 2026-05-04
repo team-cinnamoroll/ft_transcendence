@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 
 import type { CreateUserInput, User, UserId } from '@tracen/contracts';
 
-import type { UserRepositorySpec } from '../../features/auth/user.repository';
+import type { UserRepositorySpec } from '../../features/users/users.repository';
 import type { TracenDb } from '../db/client';
 import { users, type UserRow } from '../db/schema';
 
