@@ -13,6 +13,7 @@ const EnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).optional(),
     PORT: z.coerce.number().int().min(1).max(65535).default(8000),
+    APP_API_BASE_PATH: z.string().min(1).default('/api/v1'),
     TLS_CERT_PATH: z.string().min(1).optional(),
     TLS_KEY_PATH: z.string().min(1).optional(),
     DATABASE_URL: z.string().url().optional(),
@@ -61,6 +62,7 @@ export function parseEnv(raw: NodeJS.ProcessEnv): AppEnv {
   return EnvSchema.parse({
     NODE_ENV: raw.NODE_ENV,
     PORT: raw.PORT,
+    APP_API_BASE_PATH: raw.APP_API_BASE_PATH,
     TLS_CERT_PATH: raw.TLS_CERT_PATH,
     TLS_KEY_PATH: raw.TLS_KEY_PATH,
     DATABASE_URL: raw.DATABASE_URL,

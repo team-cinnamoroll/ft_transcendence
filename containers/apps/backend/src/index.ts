@@ -10,9 +10,9 @@ import { parseEnv } from './env';
 import { createUserRouter } from './features/auth/user.handler';
 import type { DatabaseUrlEnv } from './shared/types/hono';
 
-const app = new Hono<DatabaseUrlEnv>();
-
 const env = parseEnv(process.env);
+
+const app = new Hono<DatabaseUrlEnv>().basePath(env.APP_API_BASE_PATH);
 
 if (env.RUN_MIGRATIONS) {
   await runMigrationsOnce(env.DATABASE_URL!);
