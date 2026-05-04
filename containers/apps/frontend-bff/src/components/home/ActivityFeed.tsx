@@ -6,6 +6,7 @@ import type { User } from '@/types/user';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import ActivityCard from '@/components/ui/ActivityCard';
+import { useTranslations } from 'next-intl';
 
 type ActivityFeedProps = {
   currentUser: User;
@@ -22,6 +23,7 @@ type ActivityFeedProps = {
  */
 const ActivityFeed = ({ currentUser, faces, activities, selectedFaceId }: ActivityFeedProps) => {
   const { openActivity } = useDetailPanel();
+  const t = useTranslations('activityFeed');
   const displayActivities = selectedFaceId
     ? activities.filter((a) => a.faceId === selectedFaceId)
     : activities;
@@ -29,7 +31,7 @@ const ActivityFeed = ({ currentUser, faces, activities, selectedFaceId }: Activi
   const faceCache = createLookupMap(faces, (face) => face.id);
 
   if (displayActivities.length === 0) {
-    return <p className="text-center text-sm text-zinc-500 py-16">アクティビティがありません</p>;
+    return <p className="text-center text-sm text-zinc-500 py-16">{t('noActivities')}</p>;
   }
 
   return (

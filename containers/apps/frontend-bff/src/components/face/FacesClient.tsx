@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import type { Face } from '@/types/face';
 import CreateFaceModal from './CreateFaceModal';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   initialFaces: Face[];
@@ -14,6 +15,7 @@ type Props = {
 const FacesClient = ({ initialFaces }: Props) => {
   const [faces, setFaces] = useState<Face[]>(initialFaces);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const t = useTranslations('facesClient');
 
   const handleCreate = (newFace: Face) => {
     setFaces((prev) => [newFace, ...prev]);
@@ -24,21 +26,21 @@ const FacesClient = ({ initialFaces }: Props) => {
       {/* ページヘッダー */}
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-between">
-          <h1 className="text-base font-bold text-zinc-100">フェイス</h1>
+          <h1 className="text-base font-bold text-zinc-100">{t('title')}</h1>
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-1.5 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-semibold text-white shadow-md shadow-violet-900/40 transition-all hover:bg-violet-500 hover:shadow-violet-700/50 active:scale-95 active:bg-violet-700"
           >
             <Plus size={14} aria-hidden="true" strokeWidth={2.5} />
-            新規作成
+            {t('createNew')}
           </button>
         </div>
       </header>
 
       <div className="px-4 pt-4">
         {faces.length === 0 ? (
-          <p className="py-12 text-center text-sm text-zinc-500">フェイスがありません</p>
+          <p className="py-12 text-center text-sm text-zinc-500">{t('noFaces')}</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {faces.map((face) => (
@@ -84,7 +86,7 @@ const FacesClient = ({ initialFaces }: Props) => {
                   )}
                   {face.isPrivate && (
                     <span className="mt-0.5 self-start rounded-full bg-zinc-700 px-2 py-0.5 text-[10px] text-zinc-400">
-                      非公開
+                      {t('private')}
                     </span>
                   )}
                 </div>

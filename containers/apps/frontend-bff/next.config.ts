@@ -1,8 +1,11 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 if (!process.env.NEXT_PUBLIC_BFF_API_BASE_URL) {
   throw new Error('NEXT_PUBLIC_BFF_API_BASE_URL is required');
 }
+
+const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -21,4 +24,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

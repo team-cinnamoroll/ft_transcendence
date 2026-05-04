@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { User } from '@/types/user';
@@ -26,6 +27,7 @@ const SearchClient = ({
 }: SearchClientProps) => {
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState<SearchScope>('all');
+  const t = useTranslations('searchClient');
 
   const faceMap = useMemo(() => createLookupMap(allFaces, (face) => face.id), [allFaces]);
   const userMap = useMemo(() => createLookupMap(allUsers, (user) => user.id), [allUsers]);
@@ -75,7 +77,7 @@ const SearchClient = ({
   return (
     <div className="flex flex-col">
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <h1 className="mb-3 text-lg font-bold text-zinc-100">検索</h1>
+        <h1 className="mb-3 text-lg font-bold text-zinc-100">{t('title')}</h1>
         <div className="flex flex-col gap-2">
           <SearchBar value={query} onChange={setQuery} />
           <SearchScopeSelector scope={scope} onScopeChange={setScope} />

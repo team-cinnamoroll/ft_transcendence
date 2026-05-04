@@ -3,6 +3,7 @@
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import ActivityDetail from './ActivityDetail';
 import FaceDetail from './FaceDetail';
+import { useTranslations } from 'next-intl';
 
 type DetailPanelPlaceholderProps = {
   emoji?: string;
@@ -28,6 +29,7 @@ const DetailPanelPlaceholder = ({ emoji = '🗂️', message }: DetailPanelPlace
  */
 const DetailPanel = () => {
   const { state } = useDetailPanel();
+  const t = useTranslations('detailPanel');
 
   const contentKey =
     state.type === 'activity'
@@ -43,7 +45,7 @@ const DetailPanel = () => {
       case 'face':
         return <FaceDetail faceId={state.faceId} />;
       default:
-        return <DetailPanelPlaceholder emoji="🗂️" message="← 左のリストから選択してください" />;
+        return <DetailPanelPlaceholder emoji="🗂️" message={t('placeholder')} />;
     }
   };
 

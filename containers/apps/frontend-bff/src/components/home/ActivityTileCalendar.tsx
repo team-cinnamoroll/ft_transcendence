@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { type Activity } from '@/types/activity';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type ActivityTileCalendarProps = {
   activities: Activity[];
@@ -41,6 +42,7 @@ type WeekData = {
 
 const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
   const [selectedWeekIdx, setSelectedWeekIdx] = useState<number | null>(null);
+  const t = useTranslations('activityTileCalendar');
 
   // 52 週分のデータを構築
   const weeks = useMemo<WeekData[]>(() => {
@@ -113,7 +115,7 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
   return (
     <section className="px-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-500">
-        振り返り
+        {t('title')}
       </h2>
 
       {/* カレンダー本体（横スクロール） */}
@@ -150,14 +152,14 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
                 <button
                   key={wIdx}
                   type="button"
-                  aria-label={`${toDateKey(week.startDate)} の週`}
+                  aria-label={t('weekAriaLabel', { date: toDateKey(week.startDate) })}
                   onClick={() => handleWeekClick(wIdx)}
                   className="flex flex-col shrink-0 gap-0.5 w-2.75 focus:outline-none"
                 >
                   {week.days.map((day) => (
                     <div
                       key={day.key}
-                      title={`${day.key}: ${day.count}件`}
+                      title={`${day.key}: ${t('dayCount', { count: day.count })}`}
                       className={cn(
                         'w-2.75 h-2.75 rounded-sm transition-all',
                         getColorClass(day.count),
@@ -175,13 +177,13 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
 
         {/* 凡例 */}
         <div className="flex items-center justify-end gap-0.75 mt-2.5">
-          <span className="text-[9px] text-zinc-500 mr-1">少</span>
+          <span className="text-[9px] text-zinc-500 mr-1">{t('few')}</span>
           {(
             ['bg-zinc-800', 'bg-green-200', 'bg-green-400', 'bg-green-500', 'bg-green-700'] as const
           ).map((cls, i) => (
             <div key={i} className={cn('w-2.75 h-2.75 rounded-sm', cls)} />
           ))}
-          <span className="text-[9px] text-zinc-500 ml-1">多</span>
+          <span className="text-[9px] text-zinc-500 ml-1">{t('many')}</span>
         </div>
       </div>
 
@@ -190,12 +192,11 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
         <div className="mt-4">
           <p className="mb-2 text-xs text-zinc-500">
             {toDateKey(weeks[selectedWeekIdx].startDate).replace(/-/g, '/')} 〜{' '}
-            {toDateKey(weeks[selectedWeekIdx].endDate).replace(/-/g, '/')}
-            の記録
+            {toDateKey(weeks[selectedWeekIdx].endDate).replace(/-/g, '/')} {t('weekRecord')}
           </p>
           {selectedWeekActivities.length === 0 ? (
             <p className="rounded-xl bg-zinc-800/40 p-4 text-center text-sm text-zinc-500">
-              この週には記録がありません
+              {t('noRecord')}
             </p>
           ) : (
             <ul className="flex flex-col gap-2">

@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "title": "MultiFace",
+    "description": "Un SNS pour enregistrer vos multiples facettes"
+  },
+  "nav": {
+    "home": "Accueil",
+    "faces": "Facettes",
+    "subscriptions": "Abonnements",
+    "notifications": "Notifications",
+    "search": "Recherche",
+    "faceDetail": "Détail de la facette"
+  },
+  "sideNav": {
+    "facesSection": "Facettes",
+    "createFace": "Nouvelle facette"
+  },
+  "topBar": {
+    "post": "Publier"
+  },
+  "postModal": {
+    "title": "Nouvelle publication",
+    "ariaLabel": "Publier",
+    "close": "Fermer",
+    "faceLabel": "Facette",
+    "loading": "Chargement…",
+    "noFaces": "Aucune facette disponible",
+    "contentLabel": "Contenu",
+    "textareaPlaceholder": "Notez quelque chose…",
+    "addPhoto": "Ajouter une photo",
+    "attachedImageAlt": "Image jointe {n}",
+    "removeImageAriaLabel": "Supprimer l'image {n}",
+    "submit": "Publier",
+    "submitting": "Publication…"
+  },
+  "createFaceModal": {
+    "title": "Créer une nouvelle facette",
+    "ariaLabel": "Créer une nouvelle facette",
+    "close": "Fermer",
+    "name": "Nom",
+    "required": "*",
+    "nameExample": "ex : Lecture",
+    "emoji": "Emoji",
+    "optional": "(facultatif)",
+    "emojiExample": "ex : 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez cette facette",
+    "privateLabel": "Privé",
+    "privateDescription": "Seul vous pouvez voir cette facette",
+    "submit": "Créer",
+    "submitting": "Création…"
+  },
+  "face": {
+    "private": "Privé",
+    "subscribe": "S'abonner",
+    "subscribed": "✓ Abonné"
+  },
+  "fab": {
+    "ariaLabel": "Publier"
+  },
+  "faceDetail": {
+    "title": "Détail de la facette",
+    "close": "Fermer",
+    "loading": "Chargement…",
+    "notFound": "Facette introuvable",
+    "activitiesHeading": "Activités de cette facette",
+    "noActivities": "Aucune activité pour l'instant"
+  },
+  "activityDetail": {
+    "title": "Détail de l'activité",
+    "close": "Fermer",
+    "loading": "Chargement…",
+    "notFound": "Activité introuvable",
+    "unknownFace": "Facette inconnue",
+    "imageAlt": "Image {n}",
+    "viewFace": "→ Voir cette facette"
+  },
+  "activityCard": {
+    "showMore": "Voir plus",
+    "collapse": "Réduire",
+    "imageAlt": "Image {n}"
+  },
+  "detailPanel": {
+    "placeholder": "← Sélectionnez un élément dans la liste"
+  },
+  "facesClient": {
+    "title": "Facettes",
+    "createNew": "Nouveau",
+    "noFaces": "Aucune facette pour l'instant",
+    "private": "Privé"
+  },
+  "faceActivityFeed": {
+    "noActivities": "Aucune activité pour l'instant"
+  },
+  "activityFeed": {
+    "noActivities": "Aucune activité pour l'instant"
+  },
+  "homeProfile": {
+    "faces": "Facettes",
+    "activities": "Activités"
+  },
+  "faceFilterBar": {
+    "all": "Tout"
+  },
+  "activityTileCalendar": {
+    "title": "Bilan",
+    "weekAriaLabel": "Semaine du {date}",
+    "dayCount": "{count}",
+    "few": "Peu",
+    "many": "Beaucoup",
+    "weekRecord": "enregistrement(s)",
+    "noRecord": "Aucune activité cette semaine"
+  },
+  "subscriptionFeed": {
+    "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
+    "searchLink": "Rechercher des facettes"
+  },
+  "notificationList": {
+    "noNotifications": "Aucune notification pour l'instant",
+    "linkedBadge": "🔗 Lien",
+    "subscribedBadge": "📥 Abonnement",
+    "linkedAction": "a lié votre publication",
+    "subscribedAction": "s'est abonné à {faceName}",
+    "actionConnector": " "
+  },
+  "searchBar": {
+    "placeholder": "Rechercher par mot-clé..."
+  },
+  "searchScopeSelector": {
+    "all": "Tout",
+    "mine": "Le mien",
+    "subscribed": "Abonnements"
+  },
+  "searchResults": {
+    "emptyTitle": "Saisissez un mot-clé pour rechercher",
+    "emptyHint": "Recherche dans les noms de facettes et le contenu des activités selon la portée",
+    "noResultsTitle": "Aucun résultat pour « {query} »",
+    "noResultsHint": "Essayez un autre mot-clé ou une autre portée",
+    "facesSection": "Facettes",
+    "activitiesSection": "Activités",
+    "subscribe": "S'abonner",
+    "subscribed": "Abonné",
+    "subscribeAriaLabel": "S'abonner à {name}",
+    "unsubscribeAriaLabel": "Se désabonner de {name}"
+  },
+  "searchClient": {
+    "title": "Recherche"
+  },
+  "home": {
+    "title": "Accueil"
+  },
+  "faces": {
+    "title": "Facettes"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "count": "{count}"
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher..."
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "subscribedCount": "{count} facette(s) suivie(s)"
+  },
+  "faceDetailPage": {
+    "backAriaLabel": "Retour à la liste des facettes"
+  },
+  "relativeTime": {
+    "justNow": "À l'instant",
+    "minutesAgo": "il y a {n} min",
+    "hoursAgo": "il y a {n} h",
+    "daysAgo": "il y a {n} j"
+  }
+}

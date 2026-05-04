@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { fetchHelloFromBff } from '../lib/api';
+import { fetchHelloFromBff } from '@/lib/api';
 
 export default function HelloFromBff() {
   const [message, setMessage] = useState<string>('loading...');

@@ -9,8 +9,9 @@ import Avatar from './Avatar';
 import Badge from './Badge';
 import FaceChip from './FaceChip';
 import { cn } from '@/lib/utils';
-import { formatRelativeTime } from '@/lib/format-relative-time';
 import { useDetailPanel } from '@/lib/detail-panel-context';
+import { useRelativeTime } from '@/lib/use-relative-time';
+import { useTranslations } from 'next-intl';
 
 type ActivityCardProps = {
   activity: Activity;
@@ -37,6 +38,8 @@ const ActivityCard = ({
   onClick,
 }: ActivityCardProps) => {
   const { state } = useDetailPanel();
+  const t = useTranslations('activityCard');
+  const relativeTime = useRelativeTime();
   const isSelected = state.type === 'activity' && state.activityId === activity.id;
 
   const isLong = activity.body.length > COLLAPSE_THRESHOLD;
@@ -100,7 +103,7 @@ const ActivityCard = ({
               />
             </Link>
             <time dateTime={activity.createdAt} className="text-xs text-zinc-500">
-              {formatRelativeTime(activity.createdAt)}
+              {relativeTime(activity.createdAt)}
             </time>
           </div>
         </div>
@@ -119,7 +122,7 @@ const ActivityCard = ({
           }}
           className="self-start text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors"
         >
-          {expanded ? '折りたたむ' : 'もっと見る'}
+          {expanded ? t('collapse') : t('showMore')}
         </button>
       )}
 
@@ -135,7 +138,7 @@ const ActivityCard = ({
             <div key={i} className="relative aspect-video w-full overflow-hidden rounded-lg">
               <Image
                 src={url}
-                alt={`画像 ${i + 1}`}
+                alt={t('imageAlt', { n: i + 1 })}
                 fill
                 className="object-cover"
                 sizes="(max-width: 384px) 100vw, 192px"

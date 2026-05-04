@@ -2,6 +2,7 @@
 
 import { type Face } from '@/types/face';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type FaceFilterBarProps = {
   faces: Face[];
@@ -15,6 +16,7 @@ type FaceFilterBarProps = {
  * 「すべて」ボタンでフィルタを解除できる。
  */
 const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) => {
+  const t = useTranslations('faceFilterBar');
   const handleSelectAll = () => {
     onSelect(null);
   };
@@ -49,7 +51,7 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
               selectedFaceId === null ? 'text-violet-400' : 'text-zinc-500'
             )}
           >
-            すべて
+            {t('all')}
           </span>
         </button>
 

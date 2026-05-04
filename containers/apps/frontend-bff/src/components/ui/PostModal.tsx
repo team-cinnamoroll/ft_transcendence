@@ -5,6 +5,7 @@ import { X, ChevronDown, ImagePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Face } from '@/types/face';
 import type { User } from '@/types/user';
+import { useTranslations } from 'next-intl';
 
 const MAX_IMAGES = 4;
 
@@ -28,6 +29,7 @@ type ViewerApiResponse = {
 const EMPTY_FACES: Face[] = [];
 
 const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
+  const t = useTranslations('postModal');
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
 
@@ -136,17 +138,17 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="投稿"
+        aria-label={t('ariaLabel')}
         className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-zinc-900 shadow-xl"
       >
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h2 className="text-base font-bold text-zinc-100">投稿する</h2>
+          <h2 className="text-base font-bold text-zinc-100">{t('title')}</h2>
           <button
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-            aria-label="閉じる"
+            aria-label={t('close')}
           >
             <X size={18} />
           </button>
@@ -156,7 +158,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           {/* フェイス選択 */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="face-select" className="text-xs font-medium text-zinc-400">
-              フェイス
+              {t('faceLabel')}
             </label>
             <div className="relative">
               <select
@@ -176,7 +178,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
                 ))}
                 {myFaces.length === 0 && (
                   <option value="" disabled>
-                    {isViewerLoading ? '読み込み中…' : 'フェイスがありません'}
+                    {isViewerLoading ? t('loading') : t('noFaces')}
                   </option>
                 )}
               </select>
@@ -193,7 +195,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           {/* テキストエリア */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="post-text" className="text-xs font-medium text-zinc-400">
-              内容
+              {t('contentLabel')}
             </label>
             <textarea
               id="post-text"
@@ -201,7 +203,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               onChange={(e) => setText(e.target.value)}
               maxLength={MAX_LENGTH}
               rows={5}
-              placeholder="気軽に書き留めてみましょう…"
+              placeholder={t('textareaPlaceholder')}
               className={cn(
                 'w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3',
                 'text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors',
@@ -237,7 +239,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               )}
             >
               <ImagePlus size={15} />
-              写真を追加
+              {t('addPhoto')}
               {images.length > 0 && (
                 <span
                   className={cn(
@@ -258,14 +260,14 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
                   <div key={img.objectUrl} className="relative aspect-square">
                     <img
                       src={img.objectUrl}
-                      alt={`添付画像${index + 1}`}
+                      alt={t('attachedImageAlt', { n: index + 1 })}
                       className="h-full w-full rounded-lg object-cover"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(index)}
                       className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black"
-                      aria-label={`画像${index + 1}を削除`}
+                      aria-label={t('removeImageAriaLabel', { n: index + 1 })}
                     >
                       <X size={12} />
                     </button>
@@ -286,7 +288,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
                 : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
             )}
           >
-            投稿する
+            {t('submit')}
           </button>
         </div>
       </div>

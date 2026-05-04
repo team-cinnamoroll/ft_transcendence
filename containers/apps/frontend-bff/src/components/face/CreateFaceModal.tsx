@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Face } from '@/types/face';
 import { createFaceAction } from '@/server/actions/faces';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('createFaceModal');
 
   const isValid = name.trim().length > 0;
 
@@ -59,17 +61,17 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="新規フェイスを作成"
+        aria-label={t('ariaLabel')}
         className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-zinc-900 shadow-xl"
       >
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h2 className="text-base font-bold text-zinc-100">新規フェイスを作成</h2>
+          <h2 className="text-base font-bold text-zinc-100">{t('title')}</h2>
           <button
             type="button"
             onClick={handleClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-            aria-label="閉じる"
+            aria-label={t('close')}
           >
             <X size={18} />
           </button>
@@ -79,15 +81,15 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           {/* 名前（必須） */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="face-name" className="text-xs font-medium text-zinc-400">
-              名前
-              <span className="ml-1 text-violet-400">*</span>
+              {t('name')}
+              <span className="ml-1 text-violet-400">{t('required')}</span>
             </label>
             <input
               id="face-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="例：読書"
+              placeholder={t('nameExample')}
               className={cn(
                 'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
                 'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
@@ -99,15 +101,15 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           {/* 絵文字（任意） */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="face-emoji" className="text-xs font-medium text-zinc-400">
-              絵文字
-              <span className="ml-1 text-zinc-600">（任意）</span>
+              {t('emoji')}
+              <span className="ml-1 text-zinc-600">{t('optional')}</span>
             </label>
             <input
               id="face-emoji"
               type="text"
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
-              placeholder="例：📚"
+              placeholder={t('emojiExample')}
               className={cn(
                 'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
                 'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
@@ -119,14 +121,14 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           {/* 説明文（任意） */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="face-description" className="text-xs font-medium text-zinc-400">
-              説明文
-              <span className="ml-1 text-zinc-600">（任意）</span>
+              {t('description')}
+              <span className="ml-1 text-zinc-600">{t('optional')}</span>
             </label>
             <textarea
               id="face-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="このフェイスについて説明してください"
+              placeholder={t('descriptionPlaceholder')}
               rows={3}
               className={cn(
                 'w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
@@ -139,8 +141,8 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           {/* 公開/非公開トグル */}
           <div className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
             <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-zinc-100">非公開</span>
-              <span className="text-xs text-zinc-500">オンにすると自分だけが閲覧できます</span>
+              <span className="text-sm font-medium text-zinc-100">{t('privateLabel')}</span>
+              <span className="text-xs text-zinc-500">{t('privateDescription')}</span>
             </div>
             <button
               type="button"
@@ -173,7 +175,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
                 : 'cursor-not-allowed bg-zinc-700 text-zinc-500'
             )}
           >
-            作成する
+            {isPending ? t('submitting') : t('submit')}
           </button>
         </div>
       </div>
