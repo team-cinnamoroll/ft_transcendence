@@ -15,19 +15,19 @@ export type BackendHealthRepositorySpec = {
 export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec {
   return {
     backendHealth: async () => {
-      return await getBackendClient().health.$get();
+      return await getBackendClient().api.v1.health.$get();
     },
 
     createUser: async (input) => {
-      return await getBackendClient().users.$post({ json: input });
+      return await getBackendClient().api.v1.users.$post({ json: input });
     },
 
     getUserById: async (id) => {
-      return await getBackendClient().users[':id'].$get({ param: { id } });
+      return await getBackendClient().api.v1.users[':id'].$get({ param: { id } });
     },
 
     deleteUserById: async (id) => {
-      return await getBackendClient().users[':id'].$delete({ param: { id } });
+      return await getBackendClient().api.v1.users[':id'].$delete({ param: { id } });
     },
   };
 }

@@ -5,7 +5,6 @@ import { z } from 'zod';
 const ServerEnvSchema = z
   .object({
     APP_API_BASE_URL: z.string().url(),
-    APP_API_BASE_PATH: z.string().min(1),
     NODE_EXTRA_CA_CERTS: z.string().min(1).optional(),
   })
   .superRefine((val, ctx) => {
@@ -26,7 +25,6 @@ export function getServerEnv(): ServerEnv {
   if (!cached) {
     cached = ServerEnvSchema.parse({
       APP_API_BASE_URL: process.env.APP_API_BASE_URL,
-      APP_API_BASE_PATH: process.env.APP_API_BASE_PATH,
       NODE_EXTRA_CA_CERTS: process.env.NODE_EXTRA_CA_CERTS,
     });
   }
