@@ -28,6 +28,7 @@
     "@hono/node-server": "^1.19.13",
     "@hono/zod-validator": "^0.7.3",
     "@tracen/contracts": "workspace:*",
+    "argon2": "^0.44.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.14",
     "postgres": "^3.4.7",
