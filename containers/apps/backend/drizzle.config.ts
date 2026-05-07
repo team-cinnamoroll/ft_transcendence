@@ -1,6 +1,8 @@
 import { defineConfig } from 'drizzle-kit';
 
-const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://tracen:tracen@localhost:5432/tracen';
+import { getDatabaseUrl } from './src/infra/db/database-url';
+
+const databaseUrl = getDatabaseUrl();
 
 export default defineConfig({
   dialect: 'postgresql',
