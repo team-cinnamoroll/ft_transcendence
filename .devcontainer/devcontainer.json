@@ -4,7 +4,7 @@
   "service": "dev-container",
   "workspaceFolder": "/workspace",
   "runServices": ["dev-container", "backend", "frontend", "nginx", "db"],
-  "forwardPorts": [3000, 8000, 8080, 5432],
+  "forwardPorts": [3000, 8000, 8080, 5432, 4983],
   "mounts": [
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached"
   ],
@@ -37,6 +37,9 @@
         // Hono / Backend 開発
         "humao.rest-client",
         "wallabyjs.console-ninja",
+
+        // DB
+        "dbcode.dbcode",
 
         // Git / チーム開発
         "eamodio.gitlens",

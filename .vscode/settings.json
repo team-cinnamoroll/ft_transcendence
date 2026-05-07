@@ -1,12 +1,7 @@
 {
   // ESLint設定
   "eslint.enable": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 
   // 保存時にESLintで自動修正
   "editor.codeActionsOnSave": {
@@ -64,5 +59,28 @@
     "**/dist": true,
     "**/build": true,
     ".eslintcache": true
-  }
+  },
+  "dbcode.connections": [
+    {
+      "connectionId": "hYG7CvMrr2GVZ7ibUlu9g",
+      "name": "tracen",
+      "driver": "postgres",
+      "connectionType": "host",
+      "host": "db",
+      "port": 5432,
+      "ssl": false,
+      "authMethod": "password",
+      "username": "tracen",
+      "password": "",
+      "savePassword": "secretStorage",
+      "database": "tracen",
+      "readOnly": false,
+      "postConnectionSqlType": "inline",
+      "connectionTimeout": 30,
+      "pinnedConnectionTimeout": "0",
+      "introspection": {
+        "progressive": false
+      }
+    }
+  ]
 }
