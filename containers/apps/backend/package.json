@@ -16,6 +16,7 @@
     "build": "vite build",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:reset": "tsx scripts/reset-db.ts",

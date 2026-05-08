@@ -20,6 +20,7 @@
 ## 1. このドキュメントの目的
 
 このプロジェクトのバックエンドは、
+
 - **Hono**（HTTP ルーティング）
 - **Drizzle + postgres.js**（DB）
 - **Zod**（入力検証）
@@ -47,6 +48,7 @@
 ```
 
 ポイント:
+
 - ブラウザから backend を **直接**呼ぶ前提ではありません（BFF が窓口）。
 - ローカル本番相当構成の詳細は [docs/deploy/LOCAL_PROD_DEPLOYMENT.md](../deploy/LOCAL_PROD_DEPLOYMENT.md) を参照してください。
 
@@ -91,6 +93,7 @@ Feature-First の基本構造は次です。
 ```
 
 依存方向のルール:
+
 - `handler → usecase → repository(spec)` の方向に依存する
 - `usecase` は `infra` を import しない（DB 事情を知らない）
 - `infra` は `repository(spec)` を実装して差し込む
@@ -211,6 +214,7 @@ export async function createUser(repo: UserRepositorySpec, input: CreateUserInpu
   - 例: プロフィール（ユーザー情報 + 投稿一覧の統合）
 
 services のルール:
+
 - `services/*/*.usecase.ts` は **オーケストレーション専用**
   - 原則として「既存 feature の usecase / repository」を呼び出して組み立てる
   - feature のビジネスルールを複製しない（重複しそうなら feature 側へ寄せる）
@@ -224,6 +228,7 @@ services のルール:
 ## 6. contracts（型 + Zod schema）共有の考え方
 
 `@tracen/contracts` は **型と Zod schema を同居**させ、
+
 - backend: 入力検証・DTO 型
 - frontend-bff:（将来）入力検証・DTO 型
 
@@ -237,7 +242,7 @@ contracts/src/
 ├── users/
 │   ├── create-user.ts     # createUserSchema + CreateUserInput
 │   ├── user.ts            # userSchema + User
-│   ├── params.ts          # userIdParamSchema + UserIdParam
+│   ├── params.ts          # UserIdParamSchema + UserIdParam
 │   └── ids.ts             # UserId（uuid の alias）
 └── shared/
     └── primitives/
@@ -266,7 +271,7 @@ backend の入力検証は「境界（handler）」で行います。
 例: `GET /users/:id`
 
 ```ts
-return new Hono<DatabaseUrlEnv>().get('/:id', zValidator('param', userIdParamSchema), async (c) => {
+return new Hono<DatabaseUrlEnv>().get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
   const { id } = c.req.valid('param');
   // id は uuid として検証済み
 });
@@ -320,7 +325,7 @@ Hono の `.get()/.post()/.use()/.route()` は fluent interface で、**型レベ
 
 守るべきこと:
 
-1) ルート登録は **チェーンする**か **戻り値を再代入する**
+1. ルート登録は **チェーンする**か **戻り値を再代入する**
 
 ```ts
 // ✅ 推奨（チェーン）
@@ -352,7 +357,7 @@ export function createUserRouter(env: AppEnv) {
 }
 ```
 
-2) `createXxxRouter()` の **戻り値型注釈で `Hono<Env>` に丸めない**
+2. `createXxxRouter()` の **戻り値型注釈で `Hono<Env>` に丸めない**
 
 ```ts
 // ⚠️ これを付けると Schema 型が潰れて AppType が痩せることがある
@@ -363,7 +368,7 @@ export function createUserRouter(env: AppEnv): Hono<DatabaseUrlEnv> {
 
 原則は **戻り値型注釈を付けずに推論に任せる**のが安全です。
 
-3) Composition Root（`src/index.ts`）の `Hono<...>` は `Context Variables` の契約を揃えるため
+3. Composition Root（`src/index.ts`）の `Hono<...>` は `Context Variables` の契約を揃えるため
 
 `new Hono<DatabaseUrlEnv>()` のように `Env` を付けておくと、middleware が注入する変数（例: `databaseUrl`）を
 `c.get('databaseUrl')` で型安全に扱えます。
@@ -441,6 +446,7 @@ export function createUserRouter(env: AppEnv): Hono<DatabaseUrlEnv> {
 `src/env.ts` で Zod により環境変数を検証します。
 
 主な変数:
+
 - `PORT`（default: 8000）
 - `DATABASE_URL`（DB 利用時に必要）
 - `RUN_MIGRATIONS`（起動時に migration を流す）

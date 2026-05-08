@@ -1,13 +1,13 @@
 import 'server-only';
 
-import type { CreateUserInput } from '@tracen/contracts';
+import type { CreateUserRequest } from '@tracen/contracts';
 
 import { getBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 
 export type BackendHealthRepositorySpec = {
   backendHealth: () => Promise<Response>;
-  createUser: (input: CreateUserInput) => Promise<Response>;
+  createUser: (input: CreateUserRequest) => Promise<Response>;
   getUserById: (id: string) => Promise<Response>;
   deleteUserById: (id: string) => Promise<Response>;
 };

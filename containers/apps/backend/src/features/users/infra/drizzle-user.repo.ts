@@ -1,32 +1,34 @@
 import { eq } from 'drizzle-orm';
-import crypto from 'node:crypto';
 
-import type { CreateUserInput, User, UserId } from '@tracen/contracts';
+import type { UserId, UserEntity } from '../domain/users.entity';
+import { UserEntitySchema } from '../domain/users.entity';
 
-import type { UserRepositorySpec } from '../../features/users/users.repository';
-import type { TracenDb } from '../db/client';
-import { users, type UserRow } from '../db/schema';
+import type { UserRepositorySpec } from '../domain/users.repository';
+import type { TracenDb } from '../../../infra/db/client';
+import { users, type UserRow } from '../../../infra/db/schema';
+import { Email } from '@tracen/contracts';
 
-function mapUser(row: UserRow): User {
-  return {
+function mapUser(row: UserRow): UserEntity {
+  return UserEntitySchema.parse({
     id: row.id,
     email: row.email,
     name: row.name,
+    password_hash: row.passwordHash,
     createdAt: row.createdAt.toISOString(),
-  };
+  });
 }
 
 export class UserDBRepositoryImpl implements UserRepositorySpec {
   constructor(private readonly db: TracenDb) {}
 
-  async findById(id: UserId): Promise<User | null> {
+  async findById(id: UserId): Promise<UserEntity | null> {
     const rows = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
 
     if (rows.length === 0) return null;
     return mapUser(rows[0]);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: Email): Promise<UserEntity | null> {
     const rows = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (rows.length === 0) return null;
@@ -39,15 +41,14 @@ export class UserDBRepositoryImpl implements UserRepositorySpec {
     return rows.length > 0;
   }
 
-  async create(data: CreateUserInput): Promise<User> {
-    const id = crypto.randomUUID();
-
+  async create(data: UserEntity): Promise<UserEntity> {
     const rows = await this.db
       .insert(users)
       .values({
-        id,
+        id: data.id,
         email: data.email,
         name: data.name,
+        passwordHash: data.password_hash,
       })
       .returning();
 

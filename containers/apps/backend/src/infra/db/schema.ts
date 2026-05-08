@@ -6,6 +6,7 @@ export const users = pgTable(
     id: uuid('id').primaryKey(),
     email: text('email').notNull(),
     name: text('name').notNull(),
+    passwordHash: text('password_hash').notNull(),
     createdAt: timestamp('created_at', { withTimezone: false, mode: 'date' })
       .notNull()
       .defaultNow(),

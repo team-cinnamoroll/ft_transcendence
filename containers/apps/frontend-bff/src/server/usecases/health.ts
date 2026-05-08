@@ -2,7 +2,7 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 
-import { createUserSchema, type User } from '@tracen/contracts';
+import { CreateUserRequestSchema, type UserResponse } from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
 
@@ -120,8 +120,13 @@ export async function runApiHealthCheck(
     const nonce = crypto.randomUUID();
     const email = `healthcheck+${Date.now()}-${nonce.slice(0, 8)}@example.com`;
     const name = `healthcheck-${nonce.slice(0, 8)}`;
+    const password = 'password1234567890';
 
-    const createUserInput = createUserSchema.parse({ email, name });
+    const createUserInput = CreateUserRequestSchema.parse({
+      email: email,
+      name: name,
+      password: password,
+    });
 
     log('STEP 2/5: backend POST /users (create test user)');
     const createRes = await repo.createUser(createUserInput);
@@ -152,7 +157,7 @@ export async function runApiHealthCheck(
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
 
-    const user = (await getExistsRes.json()) as User;
+    const user = (await getExistsRes.json()) as UserResponse;
     if (user.id !== createdUserId) {
       log(
         `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${user.id})`

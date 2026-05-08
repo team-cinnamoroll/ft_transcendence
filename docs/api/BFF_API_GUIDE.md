@@ -169,15 +169,15 @@ export async function POST(req: Request) {
 }
 ```
 
-例: param の検証（`userIdParamSchema`）
+例: param の検証（`UserIdParamSchema`）
 
 ```ts
 import { NextResponse } from 'next/server';
-import { userIdParamSchema } from '@tracen/contracts';
+import { UserIdParamSchema } from '@tracen/contracts';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
-  const parsed = userIdParamSchema.safeParse({ id: userId });
+  const parsed = UserIdParamSchema.safeParse({ id: userId });
   if (!parsed.success) {
     return NextResponse.json(
       { message: 'invalid userId', issues: parsed.error.issues },
