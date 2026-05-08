@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "next dev",
+    "dev:start": "docker compose -f ../../../docker-compose.dev.yml -p ft_transcendence start frontend",
+    "dev:restart": "rm -fr .next && docker compose -f ../../../docker-compose.dev.yml -p ft_transcendence restart frontend",
+    "dev:stop": "docker compose -f ../../../docker-compose.dev.yml -p ft_transcendence stop frontend",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
