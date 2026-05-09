@@ -68,7 +68,7 @@
 #### 【contracts パッケージ】
 
 ```typescript
-// containers/apps/contracts/src/domain/users/user.ts
+// containers/apps/contracts/src/domain/user/user.ts
 
 import { z } from 'zod';
 
@@ -113,7 +113,7 @@ export type SignUpRequest = z.infer<typeof SignUpRequestSchema>;
 #### 【backend パッケージ】
 
 ```typescript
-// containers/apps/backend/src/features/users/domain/users.entity.ts
+// containers/apps/backend/src/features/user/domain/users.entity.ts
 import { z } from 'zod';
 import { UserResponseSchema } from '@tracen/contracts';
 
@@ -160,7 +160,7 @@ export type UserEntity = z.infer<typeof UserEntitySchema>;
 **実装例:**
 
 ```typescript
-// containers/apps/backend/src/features/users/domain/users.entity.ts
+// containers/apps/backend/src/features/user/domain/users.entity.ts
 import { z } from 'zod';
 import { UserResponseSchema } from '@tracen/contracts';
 
@@ -236,7 +236,7 @@ export type UserViewModel = UserResponse & {
 
 - 各ディレクトリに `index.ts` を配置し、ディレクトリ単位で export します。
   - `src/index.ts` は `domain` と `shared` をまとめて export
-  - `src/domain/index.ts` は `auth` / `users` を export
-  - `src/domain/auth/index.ts` / `src/domain/users/index.ts` は各契約ファイルを export
+  - `src/domain/index.ts` は `auth` / `user` を export
+  - `src/domain/auth/index.ts` / `src/domain/user/index.ts` は各契約ファイルを export
   - `src/shared/index.ts` は shared 内の定義を export
 - これにより、利用側は原則として `@tracen/contracts` から必要な型・スキーマを import できます。
