@@ -2,7 +2,7 @@ services:
   registry:
     image: registry:2
     ports:
-      - "5000:5000"
+      - '5000:5000'
     environment:
       REGISTRY_HTTP_ADDR: ${REGISTRY_HTTP_ADDR}
       REGISTRY_HTTP_TLS_CERTIFICATE: ${REGISTRY_HTTP_TLS_CERTIFICATE}
@@ -22,7 +22,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./containers/infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
       interval: 2s
       timeout: 5s
       retries: 30
@@ -43,6 +43,7 @@ services:
       TLS_KEY_PATH: ${BACKEND_TLS_KEY_PATH}
       DATABASE_URL: ${DATABASE_URL}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS}
+      PEPPER: ${PEPPER}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -86,7 +87,7 @@ services:
       - frontend
       - backend
     ports:
-      - "443:443"
+      - '443:443'
     volumes:
       - ./containers/infra/nginx/nginx.https.conf:/etc/nginx/conf.d/default.conf:ro
       - ./containers/infra/local-prod/certs/tls.crt:/etc/nginx/certs/tls.crt:ro
