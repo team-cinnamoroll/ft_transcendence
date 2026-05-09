@@ -16,6 +16,7 @@ const EnvSchema = z
     TLS_CERT_PATH: z.string().min(1).optional(),
     TLS_KEY_PATH: z.string().min(1).optional(),
     DATABASE_URL: z.string().url(),
+    PEPPER: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
   })
   .superRefine((val, ctx) => {
@@ -65,6 +66,7 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     TLS_CERT_PATH: raw.TLS_CERT_PATH,
     TLS_KEY_PATH: raw.TLS_KEY_PATH,
     DATABASE_URL: raw.DATABASE_URL,
+    PEPPER: raw.PEPPER,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
   });
 }
