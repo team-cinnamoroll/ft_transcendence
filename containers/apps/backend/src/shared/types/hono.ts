@@ -1,5 +1,8 @@
-export type DatabaseUrlEnv = {
+import { RawEnv, Config } from '../../env';
+
+export type AppEnv = {
+  Bindings: RawEnv;
   Variables: {
-    databaseUrl: string;
+    config: Config;
   };
 };

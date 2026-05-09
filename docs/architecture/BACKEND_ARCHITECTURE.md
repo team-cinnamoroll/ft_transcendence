@@ -329,7 +329,7 @@ Hono の `.get()/.post()/.use()/.route()` は fluent interface で、**型レベ
 
 ```ts
 // ✅ 推奨（チェーン）
-export function createUserRouter(env: AppEnv) {
+export function createUserRouter(env: Config) {
   return new Hono<DatabaseUrlEnv>()
     .use('*', requireDatabaseUrl(env))
     .get('/:id', ...)
@@ -337,7 +337,7 @@ export function createUserRouter(env: AppEnv) {
 }
 
 // ✅ どうしても変数に分けたい場合（再代入）
-export function createUserRouter(env: AppEnv) {
+export function createUserRouter(env: Config) {
   let router = new Hono<DatabaseUrlEnv>();
   router = router.use('*', requireDatabaseUrl(env));
   router = router.get('/:id', ...);
@@ -348,7 +348,7 @@ export function createUserRouter(env: AppEnv) {
 
 ```ts
 // ⚠️ 非推奨（型更新を捨てるため、Schema が落ちて AppType に反映されないことがある）
-export function createUserRouter(env: AppEnv) {
+export function createUserRouter(env: Config) {
   const router = new Hono<DatabaseUrlEnv>();
   router.use('*', requireDatabaseUrl(env));
   router.get('/:id', ...);
@@ -361,7 +361,7 @@ export function createUserRouter(env: AppEnv) {
 
 ```ts
 // ⚠️ これを付けると Schema 型が潰れて AppType が痩せることがある
-export function createUserRouter(env: AppEnv): Hono<DatabaseUrlEnv> {
+export function createUserRouter(env: Config): Hono<DatabaseUrlEnv> {
   ...
 }
 ```

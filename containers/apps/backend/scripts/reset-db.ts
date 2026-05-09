@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 
-import { getDatabaseUrl } from '../src/infra/db/database-url';
+import { getDatabaseUrl } from '../src/shared/infra/db/database-url';
 
 export async function reset() {
   const sql = postgres(getDatabaseUrl());

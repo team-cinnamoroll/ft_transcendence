@@ -1,5 +1,6 @@
 import * as argon2 from 'argon2';
-import { AuthPassWorkerSpec } from '../../domain/auth.gateway';
+
+import { AuthPassWorkerSpec } from '../../domain/auth.worker';
 
 class AuthPassWorkerImpl implements AuthPassWorkerSpec {
   constructor(private readonly pepper: string) {}

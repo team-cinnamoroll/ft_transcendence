@@ -1,10 +1,6 @@
-import {
-  type UserId,
-  type UserResponse,
-  type UserEntity,
-  UserResponseSchema,
-  type UserRepositorySpec,
-} from './users.entity';
+import { type UserId, type UserResponse, UserResponseSchema } from '@tracen/contracts';
+import { type UserEntity } from './users.entity';
+import type { UserRepositorySpec } from './users.repository';
 import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
 
 export async function createUser(

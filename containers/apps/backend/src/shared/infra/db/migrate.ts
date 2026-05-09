@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { retry } from '../../shared/utils/async';
+import { retry } from '../../utils/async';
 import { getDb } from './client';
 
 type GlobalMigrateCache = {

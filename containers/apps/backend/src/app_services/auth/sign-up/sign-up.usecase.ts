@@ -2,13 +2,11 @@ import {
   type SignUpRequest,
   type AuthSignUpResponse,
   AuthSignUpResponseSchema,
-} from '@tracen/contracts';
-import { type AuthPassWorkerSpec } from '../../../features/auth/domain/auth.gateway';
-import {
   UserResponseSchema,
-  createUserEntity,
-  type UserRepositorySpec,
-} from '../../../features/users/domain/users.entity';
+} from '@tracen/contracts';
+import type { UserRepositorySpec } from '../../../features/users/domain/users.repository';
+import { type AuthPassWorkerSpec } from '../../../features/auth/domain/auth.worker';
+import { createUserEntity } from '../../../features/users/domain/users.entity';
 import { createUser } from '../../../features/users/domain/users.usecase';
 
 export async function signUp(

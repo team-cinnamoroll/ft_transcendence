@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 
-import type { UserId, UserEntity, UserRepositorySpec } from '../../domain/users.entity';
-import { UserEntitySchema } from '../../domain/users.entity';
+import type { UserId, Email } from '@tracen/contracts';
+import { type UserEntity, UserEntitySchema } from '../../domain/users.entity';
+import type { UserRepositorySpec } from '../../domain/users.repository';
 
-import type { TracenDb } from '../../../../infra/db/client';
-import { users, type UserRow } from '../../../../infra/db/schema';
-import { Email } from '@tracen/contracts';
+import type { TracenDb } from '../../../../shared/infra/db/client';
+import { users, type UserRow } from '../../../../shared/infra/db/schema';
 
 function mapUser(row: UserRow): UserEntity {
   return UserEntitySchema.parse({
