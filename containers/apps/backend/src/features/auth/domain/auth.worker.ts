@@ -1,4 +1,4 @@
 export type AuthPassWorkerSpec = {
   createHash: (password: string) => Promise<string>;
-  verifyPassword: (password: string) => Promise<boolean>;
+  verifyPassword: (password: string, storedHash: string) => Promise<boolean>;
 };

@@ -14,9 +14,8 @@ class AuthPassWorkerImpl implements AuthPassWorkerSpec {
     return hash;
   }
 
-  async verifyPassword(password: string): Promise<boolean> {
-    const hash = await this.createHash(password);
-    const isValid = await argon2.verify(hash, password + this.pepper);
+  async verifyPassword(password: string, storedHash: string): Promise<boolean> {
+    const isValid = await argon2.verify(storedHash, password + this.pepper);
     return isValid;
   }
 }

@@ -1,5 +1,5 @@
 import type { Email, UserId } from '@tracen/contracts';
-import { UserEntity } from './users.entity';
+import type { UserEntity } from './users.entity';
 
 export type UserRepositorySpec = {
   findById: (id: UserId) => Promise<UserEntity | null>;

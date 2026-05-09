@@ -14,10 +14,24 @@ export function signUpRouter() {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
       const authPassWorker = c.get('authPassWorker');
-      const response = await signUp(userRepo, authPassWorker, request);
-      if (response.success) {
-        return c.json(response, 201);
+      try {
+        const response = await signUp(userRepo, authPassWorker, request);
+        if (response.success) {
+          return c.json(response, 201);
+        }
+        // success: false の場合はドメインエラー（例：email重複）→ 409 Conflict
+        return c.json(response, 409);
+      } catch (err) {
+        // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
+        console.error('SignUp error:', err);
+        return c.json(
+          {
+            success: false,
+            message: 'Internal server error',
+            user: undefined,
+          },
+          500
+        );
       }
-      return c.json(response, 409);
     });
 }

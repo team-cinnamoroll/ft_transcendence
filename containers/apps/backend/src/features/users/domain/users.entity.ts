@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import crypto from 'crypto';
 import { UserResponseSchema } from '@tracen/contracts';
 
 // UserEntityのスキーマと型
