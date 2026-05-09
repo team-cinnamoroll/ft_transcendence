@@ -1,11 +1,10 @@
 import { eq } from 'drizzle-orm';
 
-import type { UserId, UserEntity } from '../domain/users.entity';
-import { UserEntitySchema } from '../domain/users.entity';
+import type { UserId, UserEntity, UserRepositorySpec } from '../../domain/users.entity';
+import { UserEntitySchema } from '../../domain/users.entity';
 
-import type { UserRepositorySpec } from '../domain/users.repository';
-import type { TracenDb } from '../../../infra/db/client';
-import { users, type UserRow } from '../../../infra/db/schema';
+import type { TracenDb } from '../../../../infra/db/client';
+import { users, type UserRow } from '../../../../infra/db/schema';
 import { Email } from '@tracen/contracts';
 
 function mapUser(row: UserRow): UserEntity {
@@ -18,7 +17,7 @@ function mapUser(row: UserRow): UserEntity {
   });
 }
 
-export class UserDBRepositoryImpl implements UserRepositorySpec {
+class UserDBRepositoryImpl implements UserRepositorySpec {
   constructor(private readonly db: TracenDb) {}
 
   async findById(id: UserId): Promise<UserEntity | null> {

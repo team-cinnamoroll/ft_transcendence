@@ -1,34 +1,24 @@
 import {
-  type CreateUserRequest,
   type UserId,
   type UserResponse,
+  type UserEntity,
   UserResponseSchema,
-  createUserEntity,
+  type UserRepositorySpec,
 } from './users.entity';
-import type { UserRepositorySpec } from './users.repository';
-
-export class EmailAlreadyExistsError extends Error {
-  override name = 'EmailAlreadyExistsError';
-
-  constructor() {
-    super('email already exists');
-  }
-}
+import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
 
 export async function createUser(
   repo: UserRepositorySpec,
-  request: CreateUserRequest
+  newUser: UserEntity
 ): Promise<UserResponse> {
-  const existing = await repo.findByEmail(request.email);
-  if (existing) {
+  const existingUser = await repo.findById(newUser.id);
+  if (existingUser) {
+    throw new UserAlreadyExistsError();
+  }
+  const existingEmail = await repo.findByEmail(newUser.email);
+  if (existingEmail) {
     throw new EmailAlreadyExistsError();
   }
-  const password_hash = request.password;
-  const newUser = createUserEntity({
-    email: request.email,
-    name: request.name,
-    password_hash: password_hash,
-  });
   const created = await repo.create(newUser);
   return UserResponseSchema.parse({
     id: created.id,

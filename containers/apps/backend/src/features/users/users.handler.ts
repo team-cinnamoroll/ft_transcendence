@@ -1,23 +1,18 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
-import { CreateUserRequestSchema, UserIdParamSchema } from '@tracen/contracts';
+import { UserIdParamSchema } from '@tracen/contracts';
 
 import type { AppEnv } from '../../env';
 import { requireDatabaseUrl } from '../../shared/middleware/require-database-url';
 import type { DatabaseUrlEnv } from '../../shared/types/hono';
 
-import { getUserRepository } from './domain/users.repository';
-import {
-  createUser,
-  deleteUserById,
-  EmailAlreadyExistsError,
-  getUserResponseById,
-} from './domain/users.usecase';
+import { getUserRepository } from './infra/users.repository';
+import { deleteUserById, getUserResponseById } from './domain/users.usecase';
 
 // handlerでは入力に対してのバリデーションしかしない。出力のバリデーションはドメイン層で行う。
 
-export function createUserRouter(env: AppEnv) {
+export function usersRouter(env: AppEnv) {
   return new Hono<DatabaseUrlEnv>()
     .use('*', requireDatabaseUrl(env))
     .get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
@@ -37,18 +32,5 @@ export function createUserRouter(env: AppEnv) {
         return c.json({ message: 'user not found' }, 404);
       }
       return c.body(null, 204);
-    })
-    .post('/', zValidator('json', CreateUserRequestSchema), async (c) => {
-      const request = c.req.valid('json');
-      const repo = getUserRepository(c.get('databaseUrl'));
-      try {
-        const created = await createUser(repo, request);
-        return c.json({ id: created.id }, 201);
-      } catch (err) {
-        if (err instanceof EmailAlreadyExistsError) {
-          return c.json({ message: 'email already exists' }, 409);
-        }
-        throw err;
-      }
     });
 }

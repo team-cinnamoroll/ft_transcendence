@@ -14,7 +14,7 @@ export type UserId = Uuid;
 // ユーザーデータのレスポンススキーマと型
 export const UserResponseSchema = z
   .object({
-    id: UuidSchema,
+    id: UserIdSchema,
     email: EmailSchema,
     name: z.string().min(1),
     createdAt: IsoDateTimeStringSchema,

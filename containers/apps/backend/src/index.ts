@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 import { runMigrationsOnce } from './infra/db/migrate';
 import { parseEnv } from './env';
-import { createUserRouter } from './features/users/users.handler';
+import { usersRouter } from './features/users/users.handler';
+import { signUpRouter } from './app_services/auth/sign-up/sign-up.handler';
 import type { DatabaseUrlEnv } from './shared/types/hono';
 
 const env = parseEnv(process.env);
@@ -25,7 +26,8 @@ const routes = app
   .get('/health', (c) => {
     return c.json({ ok: true });
   })
-  .route('/users', createUserRouter(env));
+  .route('/users', usersRouter(env))
+  .route('/auth/sign-up', signUpRouter(env));
 
 export type AppType = typeof routes;
 export default routes;
@@ -44,6 +46,7 @@ if (isDirectRun) {
     serve({
       fetch: routes.fetch,
       port,
+      hostname: '0.0.0.0',
       createServer: createHttpsServer,
       serverOptions: {
         key: readFileSync(tlsKeyPath),
@@ -51,6 +54,10 @@ if (isDirectRun) {
       },
     });
   } else {
-    serve({ fetch: routes.fetch, port });
+    serve({
+      fetch: routes.fetch,
+      port,
+      hostname: '0.0.0.0',
+    });
   }
 }

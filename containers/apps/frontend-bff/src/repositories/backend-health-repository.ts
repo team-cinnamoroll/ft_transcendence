@@ -1,13 +1,13 @@
 import 'server-only';
 
-import type { CreateUserRequest } from '@tracen/contracts';
+import type { SignUpRequest } from '@tracen/contracts';
 
 import { getBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 
 export type BackendHealthRepositorySpec = {
   backendHealth: () => Promise<Response>;
-  createUser: (input: CreateUserRequest) => Promise<Response>;
+  signUpUser: (input: SignUpRequest) => Promise<Response>;
   getUserById: (id: string) => Promise<Response>;
   deleteUserById: (id: string) => Promise<Response>;
 };
@@ -18,8 +18,8 @@ export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec
       return await getBackendClient().api.v1.health.$get();
     },
 
-    createUser: async (input) => {
-      return await getBackendClient().api.v1.users.$post({ json: input });
+    signUpUser: async (input) => {
+      return await getBackendClient().api.v1.auth['sign-up'].$post({ json: input });
     },
 
     getUserById: async (id) => {
