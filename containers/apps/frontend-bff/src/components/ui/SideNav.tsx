@@ -9,18 +9,19 @@ import FaceNavItem from '@/components/ui/FaceNavItem';
 import CreateFaceModal from '@/components/face/CreateFaceModal';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import type { Face } from '@/types/face';
+import { useTranslations } from 'next-intl';
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'ホーム', icon: Home },
-  { href: '/subscriptions', label: 'サブスク', icon: Rss },
-  { href: '/notifications', label: '通知', icon: Bell },
-  { href: '/search', label: '検索', icon: Search },
+  { href: '/', labelKey: 'nav.home', icon: Home },
+  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: Rss },
+  { href: '/notifications', labelKey: 'nav.notifications', icon: Bell },
+  { href: '/search', labelKey: 'nav.search', icon: Search },
 ];
 
 type Props = {
@@ -32,13 +33,14 @@ const SideNav = ({ faces }: Props) => {
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { openFace } = useDetailPanel();
+  const t = useTranslations();
 
   // パス名からアクティブなフェイスIDを導出
   const activeFaceId = pathname.startsWith('/faces/') ? pathname.split('/')[2] : undefined;
 
   const handleOpenCreateModal = () => setIsCreateModalOpen(true);
   const handleCloseCreateModal = () => setIsCreateModalOpen(false);
-  const handleCreateFace = (_face: Face) => {
+  const handleCreateFace = () => {
     // モック実装: 作成後はモーダルを閉じるだけ（実際の永続化は行わない）
     setIsCreateModalOpen(false);
   };
@@ -83,7 +85,7 @@ const SideNav = ({ faces }: Props) => {
                       isActive && '*:fill-current'
                     )}
                   />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </Link>
               </li>
             );
@@ -95,7 +97,7 @@ const SideNav = ({ faces }: Props) => {
 
         {/* フェイス一覧ラベル */}
         <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-600">
-          フェイス
+          {t('sideNav.facesSection')}
         </p>
 
         {/* フェイスリスト */}
@@ -117,7 +119,7 @@ const SideNav = ({ faces }: Props) => {
           className="flex items-center gap-2 w-full rounded-xl px-3 py-2 mt-2 text-sm font-medium text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 border border-dashed border-zinc-700"
         >
           <Plus size={14} />
-          新規フェイス作成
+          {t('sideNav.createFace')}
         </button>
       </nav>
 

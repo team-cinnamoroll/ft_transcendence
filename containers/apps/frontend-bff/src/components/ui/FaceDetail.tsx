@@ -9,6 +9,7 @@ import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import FaceHeader from '@/components/face/FaceHeader';
 import ActivityCard from './ActivityCard';
+import { useTranslations } from 'next-intl';
 
 type FaceDetailProps = {
   faceId: string;
@@ -23,6 +24,7 @@ type FaceDetailApiResponse = {
 
 const FaceDetail = ({ faceId }: FaceDetailProps) => {
   const { close, openActivity } = useDetailPanel();
+  const t = useTranslations('faceDetail');
 
   const [data, setData] = useState<FaceDetailApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,10 +69,10 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
     return (
       <div className="flex flex-col h-full">
         <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">フェイス詳細</h2>
+          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
           <button
             type="button"
-            aria-label="閉じる"
+            aria-label={t('close')}
             onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
@@ -78,7 +80,7 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
           </button>
         </div>
         <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">読み込み中…</p>
+          <p className="text-sm text-zinc-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -95,10 +97,10 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
     return (
       <div className="flex flex-col h-full">
         <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">フェイス詳細</h2>
+          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
           <button
             type="button"
-            aria-label="閉じる"
+            aria-label={t('close')}
             onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
@@ -106,7 +108,7 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
           </button>
         </div>
         <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">フェイスが見つかりませんでした</p>
+          <p className="text-sm text-zinc-600">{t('notFound')}</p>
         </div>
       </div>
     );
@@ -120,10 +122,10 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
     <div className="flex flex-col h-full overflow-y-auto">
       {/* ヘッダー */}
       <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <h2 className="text-sm font-semibold text-zinc-400">フェイス詳細</h2>
+        <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
         <button
           type="button"
-          aria-label="閉じる"
+          aria-label={t('close')}
           onClick={close}
           className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
         >
@@ -140,10 +142,10 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
       {/* アクティビティ一覧 */}
       <div className="px-4 py-4 flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-          このフェイスのアクティビティ
+          {t('activitiesHeading')}
         </p>
         {activities.length === 0 ? (
-          <p className="text-sm text-zinc-600">まだアクティビティがありません</p>
+          <p className="text-sm text-zinc-600">{t('noActivities')}</p>
         ) : (
           activities.map((activity, i) => {
             const activityUser = userMap.get(activity.userId) ?? user;

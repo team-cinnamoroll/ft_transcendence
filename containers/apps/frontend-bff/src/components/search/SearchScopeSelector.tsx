@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export type SearchScope = 'all' | 'mine' | 'subscribed';
 
@@ -7,12 +8,6 @@ type ScopeOption = {
   label: string;
 };
 
-const SCOPE_OPTIONS: ScopeOption[] = [
-  { value: 'all', label: '全体' },
-  { value: 'mine', label: '自分' },
-  { value: 'subscribed', label: 'サブスクフェイス' },
-];
-
 type SearchScopeSelectorProps = {
   scope: SearchScope;
   onScopeChange: (scope: SearchScope) => void;
@@ -20,9 +15,14 @@ type SearchScopeSelectorProps = {
 
 /**
  * 検索スコープ切り替えタブ。
- * 「全体 / 自分 / サブスクフェイス」の 3 種類から選択する。
  */
 const SearchScopeSelector = ({ scope, onScopeChange }: SearchScopeSelectorProps) => {
+  const t = useTranslations('searchScopeSelector');
+  const SCOPE_OPTIONS: ScopeOption[] = [
+    { value: 'all', label: t('all') },
+    { value: 'mine', label: t('mine') },
+    { value: 'subscribed', label: t('subscribed') },
+  ];
   return (
     <div className="flex gap-1 rounded-lg bg-zinc-800/60 p-1">
       {SCOPE_OPTIONS.map((option) => (

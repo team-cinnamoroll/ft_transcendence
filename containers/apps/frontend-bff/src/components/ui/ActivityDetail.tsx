@@ -13,7 +13,8 @@ import Avatar from './Avatar';
 import Badge from './Badge';
 import FaceChip from './FaceChip';
 import { cn } from '@/lib/utils';
-import { formatRelativeTime } from '@/lib/format-relative-time';
+import { useRelativeTime } from '@/lib/use-relative-time';
+import { useTranslations } from 'next-intl';
 
 type ActivityDetailProps = {
   activityId: string;
@@ -27,6 +28,8 @@ type ActivityDetailApiResponse = {
 
 const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
   const { close } = useDetailPanel();
+  const t = useTranslations('activityDetail');
+  const relativeTime = useRelativeTime();
 
   const [data, setData] = useState<ActivityDetailApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,10 +74,10 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
     return (
       <div className="flex flex-col h-full">
         <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">アクティビティ詳細</h2>
+          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
           <button
             type="button"
-            aria-label="閉じる"
+            aria-label={t('close')}
             onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
@@ -82,7 +85,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
           </button>
         </div>
         <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">読み込み中…</p>
+          <p className="text-sm text-zinc-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -96,10 +99,10 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
     return (
       <div className="flex flex-col h-full">
         <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">アクティビティ詳細</h2>
+          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
           <button
             type="button"
-            aria-label="閉じる"
+            aria-label={t('close')}
             onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
@@ -107,24 +110,24 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
           </button>
         </div>
         <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">アクティビティが見つかりませんでした</p>
+          <p className="text-sm text-zinc-600">{t('notFound')}</p>
         </div>
       </div>
     );
   }
 
   const resolvedFaceTitle = face ? getFaceTitle(face) : '';
-  const faceTitle = resolvedFaceTitle || activity.faceId || '不明なフェイス';
-  const relativeTime = formatRelativeTime(activity.createdAt);
+  const faceTitle = resolvedFaceTitle || activity.faceId || t('unknownFace');
+  const formattedTime = relativeTime(activity.createdAt);
 
   return (
     <div className="flex flex-col h-full">
       {/* ヘッダー */}
       <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <h2 className="text-sm font-semibold text-zinc-400">アクティビティ詳細</h2>
+        <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
         <button
           type="button"
-          aria-label="閉じる"
+          aria-label={t('close')}
           onClick={close}
           className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
         >
@@ -145,7 +148,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
             <div className="flex items-center gap-2">
               <FaceChip title={faceTitle} faceId={activity.faceId} />
               <time dateTime={activity.createdAt} className="text-xs text-zinc-500">
-                {relativeTime}
+                {formattedTime}
               </time>
             </div>
           </div>
@@ -166,7 +169,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
               <div key={i} className="relative aspect-video w-full overflow-hidden rounded-lg">
                 <Image
                   src={url}
-                  alt={`画像 ${i + 1}`}
+                  alt={t('imageAlt', { n: i + 1 })}
                   fill
                   className="object-cover"
                   sizes="(max-width: 384px) 100vw, 192px"
@@ -181,7 +184,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
           href={`/faces/${activity.faceId}`}
           className="mt-2 self-start text-xs text-violet-400 hover:text-violet-300 transition-colors"
         >
-          → このフェイスを見る
+          {t('viewFace')}
         </Link>
       </div>
     </div>

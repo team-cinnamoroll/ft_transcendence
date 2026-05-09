@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { type Face } from '@/types/face';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type FaceHeaderProps = {
   face: Face;
@@ -12,6 +13,7 @@ type FaceHeaderProps = {
 
 const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
   const [subscribed, setSubscribed] = useState(false);
+  const t = useTranslations('face');
 
   const handleSubscribe = () => {
     setSubscribed((prev) => !prev);
@@ -43,7 +45,7 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
               <h1 className="text-2xl font-bold text-white">{face.name}</h1>
               {face.isPrivate && (
                 <span className="rounded-full bg-black/40 px-2 py-0.5 text-xs text-white/80">
-                  非公開
+                  {t('private')}
                 </span>
               )}
             </div>
@@ -79,7 +81,7 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
               <h1 className="text-2xl font-bold text-zinc-100">{face.name}</h1>
               {face.isPrivate && (
                 <span className="rounded-full bg-zinc-700 px-2 py-0.5 text-xs text-zinc-400">
-                  非公開
+                  {t('private')}
                 </span>
               )}
             </div>
@@ -99,7 +101,7 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
                     : 'bg-violet-600 text-white hover:bg-violet-500'
                 )}
               >
-                {subscribed ? '✓ サブスク中' : 'サブスクする'}
+                {subscribed ? t('subscribed') : t('subscribe')}
               </button>
             </div>
           )}

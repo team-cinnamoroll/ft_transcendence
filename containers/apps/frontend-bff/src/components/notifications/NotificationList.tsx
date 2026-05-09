@@ -5,10 +5,11 @@ import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
 import { type User } from '@/types/user';
-import { formatRelativeTime } from '@/lib/format-relative-time';
+import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import { cn } from '@/lib/utils';
 import { useDetailPanel } from '@/lib/detail-panel-context';
+import { useTranslations } from 'next-intl';
 
 // ─── 通知アイテム ──────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ const NotificationItem = ({
   activityId,
 }: NotificationItemProps) => {
   const { openActivity, state } = useDetailPanel();
+  const t = useTranslations('notificationList');
+  const relativeTime = useRelativeTime();
   const isLink = notification.type === 'link';
 
   const isSelected =
@@ -59,11 +62,11 @@ const NotificationItem = ({
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm text-zinc-200 leading-snug">
             <span className="font-semibold text-zinc-100">{fromUser.name}</span>
-            {' さんが '}
+            {t('actionConnector')}
             <span className="text-violet-400">{detail}</span>
           </p>
-          <span className="shrink-0 text-xs text-zinc-500">
-            {formatRelativeTime(notification.createdAt)}
+          <span className="shrink-0 text-xs text-zinc-500" suppressHydrationWarning>
+            {relativeTime(notification.createdAt)}
           </span>
         </div>
 
@@ -76,7 +79,7 @@ const NotificationItem = ({
 
         {/* 通知種別バッジ */}
         <span className="self-start rounded-full bg-zinc-700/60 px-2 py-0.5 text-xs text-zinc-400">
-          {isLink ? '🔗 リンク' : '📥 サブスク'}
+          {isLink ? t('linkedBadge') : t('subscribedBadge')}
         </span>
       </div>
     </li>
@@ -101,12 +104,13 @@ const NotificationList = ({ notifications, users, faces, activities }: Props) =>
   const userMap = createLookupMap(users, (user) => user.id);
   const faceMap = createLookupMap(faces, (face) => face.id);
   const activityMap = createLookupMap(activities, (activity) => activity.id);
+  const t = useTranslations('notificationList');
 
   if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <p className="text-4xl">🔔</p>
-        <p className="text-sm text-zinc-400">まだ通知はありません</p>
+        <p className="text-sm text-zinc-400">{t('noNotifications')}</p>
       </div>
     );
   }
@@ -119,7 +123,7 @@ const NotificationList = ({ notifications, users, faces, activities }: Props) =>
 
         if (notification.type === 'link') {
           const activity = activityMap.get(notification.activityId);
-          const detail = 'あなたの投稿をリンクしました';
+          const detail = t('linkedAction');
           return (
             <NotificationItem
               key={notification.id}
@@ -135,7 +139,7 @@ const NotificationList = ({ notifications, users, faces, activities }: Props) =>
         // subscribe
         const face = faceMap.get(notification.faceId);
         const faceName = face ? getFaceTitle(face) : notification.faceId;
-        const detail = `${faceName} をサブスクライブしました`;
+        const detail = t('subscribedAction', { faceName });
         return (
           <NotificationItem
             key={notification.id}

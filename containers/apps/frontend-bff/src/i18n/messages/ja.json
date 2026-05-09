@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "title": "MultiFace",
+    "description": "フェイス（多面性）で記録する SNS"
+  },
+  "nav": {
+    "home": "ホーム",
+    "faces": "フェイス",
+    "subscriptions": "サブスク",
+    "notifications": "通知",
+    "search": "検索",
+    "faceDetail": "フェイス詳細"
+  },
+  "sideNav": {
+    "facesSection": "フェイス",
+    "createFace": "新規フェイス作成"
+  },
+  "topBar": {
+    "post": "投稿する"
+  },
+  "postModal": {
+    "title": "投稿する",
+    "ariaLabel": "投稿",
+    "close": "閉じる",
+    "faceLabel": "フェイス",
+    "loading": "読み込み中…",
+    "noFaces": "フェイスがありません",
+    "contentLabel": "内容",
+    "textareaPlaceholder": "気軽に書き留めてみましょう…",
+    "addPhoto": "写真を追加",
+    "attachedImageAlt": "添付画像{n}",
+    "removeImageAriaLabel": "画像{n}を削除",
+    "submit": "投稿する",
+    "submitting": "投稿中..."
+  },
+  "createFaceModal": {
+    "title": "新規フェイスを作成",
+    "ariaLabel": "新規フェイスを作成",
+    "close": "閉じる",
+    "name": "名前",
+    "required": "*",
+    "nameExample": "例：読書",
+    "emoji": "絵文字",
+    "optional": "（任意）",
+    "emojiExample": "例：📚",
+    "description": "説明文",
+    "descriptionPlaceholder": "このフェイスについて説明してください",
+    "privateLabel": "非公開",
+    "privateDescription": "オンにすると自分だけが閲覧できます",
+    "submit": "作成する",
+    "submitting": "作成中..."
+  },
+  "face": {
+    "private": "非公開",
+    "subscribe": "サブスクする",
+    "subscribed": "✓ サブスク中"
+  },
+  "fab": {
+    "ariaLabel": "投稿する"
+  },
+  "faceDetail": {
+    "title": "フェイス詳細",
+    "close": "閉じる",
+    "loading": "読み込み中…",
+    "notFound": "フェイスが見つかりませんでした",
+    "activitiesHeading": "このフェイスのアクティビティ",
+    "noActivities": "まだアクティビティがありません"
+  },
+  "activityDetail": {
+    "title": "アクティビティ詳細",
+    "close": "閉じる",
+    "loading": "読み込み中…",
+    "notFound": "アクティビティが見つかりませんでした",
+    "unknownFace": "不明なフェイス",
+    "imageAlt": "画像 {n}",
+    "viewFace": "→ このフェイスを見る"
+  },
+  "activityCard": {
+    "showMore": "もっと見る",
+    "collapse": "折りたたむ",
+    "imageAlt": "画像 {n}"
+  },
+  "detailPanel": {
+    "placeholder": "← 左のリストから選択してください"
+  },
+  "facesClient": {
+    "title": "フェイス",
+    "createNew": "新規作成",
+    "noFaces": "フェイスがありません",
+    "private": "非公開"
+  },
+  "faceActivityFeed": {
+    "noActivities": "アクティビティがありません"
+  },
+  "activityFeed": {
+    "noActivities": "アクティビティがありません"
+  },
+  "homeProfile": {
+    "faces": "フェイス",
+    "activities": "アクティビティ"
+  },
+  "faceFilterBar": {
+    "all": "すべて"
+  },
+  "activityTileCalendar": {
+    "title": "振り返り",
+    "weekAriaLabel": "{date} の週",
+    "dayCount": "{count}件",
+    "few": "少",
+    "many": "多",
+    "weekRecord": "の記録",
+    "noRecord": "この週には記録がありません"
+  },
+  "subscriptionFeed": {
+    "noSubscriptions": "まだサブスクしているフェイスがありません",
+    "searchLink": "検索してフェイスを探す"
+  },
+  "notificationList": {
+    "noNotifications": "まだ通知はありません",
+    "linkedBadge": "🔗 リンク",
+    "subscribedBadge": "📥 サブスク",
+    "linkedAction": "あなたの投稿をリンクしました",
+    "subscribedAction": "{faceName} をサブスクライブしました",
+    "actionConnector": " さんが "
+  },
+  "searchBar": {
+    "placeholder": "キーワードで検索..."
+  },
+  "searchScopeSelector": {
+    "all": "全体",
+    "mine": "自分",
+    "subscribed": "サブスクフェイス"
+  },
+  "searchResults": {
+    "emptyTitle": "キーワードを入力して検索してください",
+    "emptyHint": "フェイス名・アクティビティ本文をスコープに応じて絞り込みます",
+    "noResultsTitle": "「{query}」に一致する結果が見つかりませんでした",
+    "noResultsHint": "別のキーワードやスコープで試してみてください",
+    "facesSection": "フェイス",
+    "activitiesSection": "アクティビティ",
+    "subscribe": "サブスクする",
+    "subscribed": "サブスク中",
+    "subscribeAriaLabel": "{name}をサブスクする",
+    "unsubscribeAriaLabel": "{name}のサブスクを解除"
+  },
+  "searchClient": {
+    "title": "検索"
+  },
+  "home": {
+    "title": "ホーム"
+  },
+  "faces": {
+    "title": "フェイス"
+  },
+  "notifications": {
+    "title": "通知",
+    "count": "{count} 件"
+  },
+  "search": {
+    "title": "検索",
+    "placeholder": "検索..."
+  },
+  "subscriptions": {
+    "title": "サブスク",
+    "subscribedCount": "{count} フェイスをサブスク中"
+  },
+  "faceDetailPage": {
+    "backAriaLabel": "フェイス一覧に戻る"
+  },
+  "relativeTime": {
+    "justNow": "たった今",
+    "minutesAgo": "{n}分前",
+    "hoursAgo": "{n}時間前",
+    "daysAgo": "{n}日前"
+  }
+}
