@@ -48,7 +48,8 @@ start_ci_docker() {
 
   echo "[local-ci] Wait for DinD daemon ($ci_docker_host)" >&2
   for _ in $(seq 1 30); do
-    if DOCKER_HOST="$ci_docker_host" docker info >/dev/null 2>&1; then
+    if no_proxy="${no_proxy},ci-docker" NO_PROXY="${NO_PROXY},ci-docker" \
+       DOCKER_HOST="$ci_docker_host" docker info >/dev/null 2>&1; then
       return 0
     fi
     sleep 1
@@ -121,5 +122,7 @@ ensure_tls_assets
 
 start_ci_docker
 export DOCKER_HOST="$ci_docker_host"
+export no_proxy="${no_proxy},ci-docker"
+export NO_PROXY="${NO_PROXY},ci-docker"
 
 bash "$repo_root/scripts/deploy-local-prod.sh"
