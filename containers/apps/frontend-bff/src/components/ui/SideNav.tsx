@@ -40,7 +40,7 @@ const SideNav = ({ faces }: Props) => {
 
   const handleOpenCreateModal = () => setIsCreateModalOpen(true);
   const handleCloseCreateModal = () => setIsCreateModalOpen(false);
-  const handleCreateFace = (_face: Face) => {
+  const handleCreateFace = () => {
     // モック実装: 作成後はモーダルを閉じるだけ（実際の永続化は行わない）
     setIsCreateModalOpen(false);
   };

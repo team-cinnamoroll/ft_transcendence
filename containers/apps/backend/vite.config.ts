@@ -8,7 +8,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: true,
+    external: ['argon2'],
   },
   server: {
     host: '0.0.0.0',

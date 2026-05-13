@@ -2,7 +2,7 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 
-import { createUserSchema, type User } from '@tracen/contracts';
+import { SignUpRequestSchema, type UserResponse, type AuthSignUpResponse } from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
 
@@ -120,11 +120,16 @@ export async function runApiHealthCheck(
     const nonce = crypto.randomUUID();
     const email = `healthcheck+${Date.now()}-${nonce.slice(0, 8)}@example.com`;
     const name = `healthcheck-${nonce.slice(0, 8)}`;
+    const password = 'password1234567890';
 
-    const createUserInput = createUserSchema.parse({ email, name });
+    const createUserInput = SignUpRequestSchema.parse({
+      email: email,
+      name: name,
+      password: password,
+    });
 
-    log('STEP 2/5: backend POST /users (create test user)');
-    const createRes = await repo.createUser(createUserInput);
+    log('STEP 2/5: backend POST /auth/sign-up (create test user)');
+    const createRes = await repo.signUpUser(createUserInput);
     if (createRes.status === 409) {
       // Should be unlikely with randomized email, but keep message clear.
       return await failWithResponse('create-user', createRes, 'email already exists (conflict)');
@@ -133,8 +138,8 @@ export async function runApiHealthCheck(
       return await failWithResponse('create-user', createRes, 'user creation returned non-2xx');
     }
 
-    const created = (await createRes.json()) as { id?: string };
-    const createdUserId = created.id;
+    const created = (await createRes.json()) as AuthSignUpResponse;
+    const createdUserId = created.user?.id;
     if (!createdUserId) {
       log('FAIL (create-user): response JSON missing id');
       return {
@@ -152,7 +157,7 @@ export async function runApiHealthCheck(
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
 
-    const user = (await getExistsRes.json()) as User;
+    const user = (await getExistsRes.json()) as UserResponse;
     if (user.id !== createdUserId) {
       log(
         `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${user.id})`

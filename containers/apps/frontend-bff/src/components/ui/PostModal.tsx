@@ -32,6 +32,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
   const t = useTranslations('postModal');
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
+  const imagesRef = useRef<AttachedImage[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -76,6 +77,10 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const MAX_LENGTH = 5000;
 
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
   const selectedFace = myFaces.find((f) => f.id === selectedFaceId);
 
   useEffect(() => {
@@ -98,9 +103,8 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
   // アンマウント時の残存 objectURL クリーンアップ
   useEffect(() => {
     return () => {
-      images.forEach((img) => URL.revokeObjectURL(img.objectUrl));
+      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.objectUrl));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

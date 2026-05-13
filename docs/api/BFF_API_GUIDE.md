@@ -10,6 +10,7 @@
 - backend をそのまま外部に公開するための **汎用プロキシ（`/api/* -> backend/*` の透過転送）は実装しない**
 
 補足（型・バリデーション共有）:
+
 - backend は `@tracen/backend` から **Hono の `AppType`（ルート型）**を export しており、BFF は Hono RPC（`hc<AppType>`）で **型安全に backend を呼び出します**。
 - `@tracen/contracts` は **Zod schema と型を同居**させた共有パッケージで、BFF でも **同じ schema を使って入力検証**できます（backend 側でも検証するので二重になりますが、BFF の入口で弾ける利点があります）。
 
@@ -87,7 +88,7 @@ Tips: `hc<AppType>()` で期待したルート（例: `client.users`）が型と
   - **ビルド時注入が必須**
   - local-prod では compose の `build.args` → Dockerfile の `ARG/ENV` で `next build` に渡す
   - `containers/apps/frontend-bff/next.config.ts` で未設定ならエラーにする
-- `APP_API_BASE_URL`（server）
+- `APP_API_BASE_URL`, `APP_API_BASE_PATH`（server）
   - BFF が backend を呼ぶために使用
 - `NODE_EXTRA_CA_CERTS`（server, 任意だが推奨）
   - `APP_API_BASE_URL` が `https://` の場合は必須（mkcert CA を Node が信頼するため）
@@ -139,6 +140,7 @@ export function getBackendClient() {
   - 返却: `{ message: backendMessage + " (via BFF)" }`
 
 ポイント:
+
 - `hello.$get()` は `AppType` に基づいて型付けされます
 - backend のルートやレスポンスが変わった場合、BFF 側で型エラーとして検知できます
 
@@ -167,18 +169,15 @@ export async function POST(req: Request) {
 }
 ```
 
-例: param の検証（`userIdParamSchema`）
+例: param の検証（`UserIdParamSchema`）
 
 ```ts
 import { NextResponse } from 'next/server';
-import { userIdParamSchema } from '@tracen/contracts';
+import { UserIdParamSchema } from '@tracen/contracts';
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
-  const parsed = userIdParamSchema.safeParse({ id: userId });
+  const parsed = UserIdParamSchema.safeParse({ id: userId });
   if (!parsed.success) {
     return NextResponse.json(
       { message: 'invalid userId', issues: parsed.error.issues },
@@ -202,6 +201,7 @@ backend 呼び出しを Route Handler から直に行うこともできますが
 - エラー変換やレスポンス整形を 1 箇所に閉じ込めやすい
 
 Repository パターンの詳細は以下も参照してください:
+
 - [FRONTEND_ARCHITECTURE.md](../frontend-bff/FRONTEND_ARCHITECTURE.md)
 - [BACKEND_ARCHITECTURE.md](../architecture/BACKEND_ARCHITECTURE.md)
 
@@ -238,6 +238,7 @@ docker compose -f docker-compose.dev.yml restart nginx
 ## 新しい API を追加する手順（チェックリスト）
 
 目的別に 2 つの追加パスがあります:
+
 - **BFF の公開 API（`/api/*`）を増やす**（ブラウザが呼ぶ入口）
 - **backend 呼び出しの実装を増やす**（BFF の server-only 側）
 
@@ -282,4 +283,3 @@ const res = await getBackendClient().users[':id'].$get({ param: { id } });
 
 - `pnpm --filter @tracen/frontend-bff typecheck`
 - dev で `http://localhost:8080/api/<usecase>` を curl / ブラウザで確認
-

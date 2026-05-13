@@ -15,7 +15,8 @@ const EnvSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(8000),
     TLS_CERT_PATH: z.string().min(1).optional(),
     TLS_KEY_PATH: z.string().min(1).optional(),
-    DATABASE_URL: z.string().url().optional(),
+    DATABASE_URL: z.string().url(),
+    PEPPER: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
   })
   .superRefine((val, ctx) => {
@@ -55,15 +56,17 @@ const EnvSchema = z
     }
   });
 
-export type AppEnv = z.infer<typeof EnvSchema>;
+export type RawEnv = z.input<typeof EnvSchema>;
+export type Config = z.infer<typeof EnvSchema>;
 
-export function parseEnv(raw: NodeJS.ProcessEnv): AppEnv {
+export function parseEnv(raw: NodeJS.ProcessEnv): Config {
   return EnvSchema.parse({
     NODE_ENV: raw.NODE_ENV,
     PORT: raw.PORT,
     TLS_CERT_PATH: raw.TLS_CERT_PATH,
     TLS_KEY_PATH: raw.TLS_KEY_PATH,
     DATABASE_URL: raw.DATABASE_URL,
+    PEPPER: raw.PEPPER,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
   });
 }
