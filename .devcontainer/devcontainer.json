@@ -28,6 +28,7 @@
         "editorconfig.editorconfig",
         "usernamehw.errorlens",
         "github.copilot-chat",
+        "anthropic.claude-code",
 
         // Next.js / React / Tailwind
         "bradlc.vscode-tailwindcss",
