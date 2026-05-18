@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
 import SearchBar from '@/components/search/SearchBar';
 import SearchScopeSelector, { type SearchScope } from '@/components/search/SearchScopeSelector';
@@ -13,7 +13,7 @@ import SearchResults, { type SearchActivityResultItem } from '@/components/searc
 type SearchClientProps = {
   allActivities: Activity[];
   allFaces: Face[];
-  allUsers: User[];
+  allUsers: UserProfile[];
   currentUserId: string;
   subscribedFaceIds: string[];
 };

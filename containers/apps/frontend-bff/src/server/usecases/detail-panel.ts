@@ -2,16 +2,16 @@ import 'server-only';
 
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { findActivityById, listActivitiesByFaceId } from './activities';
 import { findFaceById } from './faces';
 import { getCurrentUser, findUserById, listAllUsers } from './users';
 
 export type FaceDetailPanelData = {
-  currentUser: User;
+  currentUser: UserProfile;
   face: Face | null;
   activities: Activity[];
-  users: User[];
+  users: UserProfile[];
 };
 
 export async function getFaceDetailPanelData(faceId: string): Promise<FaceDetailPanelData> {
@@ -28,7 +28,7 @@ export async function getFaceDetailPanelData(faceId: string): Promise<FaceDetail
 
 export type ActivityDetailPanelData = {
   activity: Activity | null;
-  user: User | null;
+  user: UserProfile | null;
   face: Face | null;
 };
 

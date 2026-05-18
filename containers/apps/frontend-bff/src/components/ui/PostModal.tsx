@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ChevronDown, ImagePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 
 const MAX_IMAGES = 4;
@@ -22,7 +22,7 @@ type Props = {
 };
 
 type ViewerApiResponse = {
-  currentUser: User;
+  currentUser: UserProfile;
   myFaces: Face[];
 };
 

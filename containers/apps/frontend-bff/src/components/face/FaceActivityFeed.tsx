@@ -2,7 +2,7 @@
 
 import { type Face } from '@/types/face';
 import type { Activity } from '@/types/activity';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import UIActivityCard from '@/components/ui/ActivityCard';
@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 type FaceActivityFeedProps = {
   face: Face;
   activities: Activity[];
-  users: User[];
+  users: UserProfile[];
 };
 
 /**

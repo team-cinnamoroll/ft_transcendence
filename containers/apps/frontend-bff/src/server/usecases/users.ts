@@ -1,16 +1,16 @@
 import 'server-only';
 
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { getUserRepository } from '@/repositories/user-repository';
 
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(): Promise<UserProfile> {
   return await getUserRepository().getCurrentUser();
 }
 
-export async function findUserById(userId: string): Promise<User | null> {
+export async function findUserById(userId: string): Promise<UserProfile | null> {
   return await getUserRepository().findById(userId);
 }
 
-export async function listAllUsers(): Promise<User[]> {
+export async function listAllUsers(): Promise<UserProfile[]> {
   return await getUserRepository().listAll();
 }
