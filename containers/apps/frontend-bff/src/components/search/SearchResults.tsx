@@ -1,7 +1,7 @@
 'use client';
 
 import { type Activity } from '@/types/activity';
-import { type User } from '@/types/user';
+import { type UserProfile } from '@/types/user-profile';
 import { type Face } from '@/types/face';
 import ActivityCard from '@/components/ui/ActivityCard';
 import { getFaceTitle } from '@/lib/display';
@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 
 export type SearchActivityResultItem = {
   activity: Activity;
-  user: User;
+  user: UserProfile;
   face: Face;
 };
 

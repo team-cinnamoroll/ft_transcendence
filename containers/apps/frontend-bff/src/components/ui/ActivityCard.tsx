@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { type Activity } from '@/types/activity';
-import { type User } from '@/types/user';
+import { type UserProfile } from '@/types/user-profile';
 import Avatar from './Avatar';
 import Badge from './Badge';
 import FaceChip from './FaceChip';
@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 
 type ActivityCardProps = {
   activity: Activity;
-  user: User;
+  user: UserProfile;
   faceTitle: string;
   /** フェイスチップの色決定に使用 */
   faceId: string;

@@ -4,7 +4,7 @@ import Avatar from '@/components/ui/Avatar';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
-import { type User } from '@/types/user';
+import { type UserProfile } from '@/types/user-profile';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 
 type NotificationItemProps = {
   notification: Notification;
-  fromUser: User;
+  fromUser: UserProfile;
   detail: string;
   /** リンク通知の場合のアクティビティ本文スニペット（任意） */
   activitySnippet?: string;
@@ -95,7 +95,7 @@ const NotificationItem = ({
  */
 type Props = {
   notifications: Notification[];
-  users: User[];
+  users: UserProfile[];
   faces: Face[];
   activities: Activity[];
 };

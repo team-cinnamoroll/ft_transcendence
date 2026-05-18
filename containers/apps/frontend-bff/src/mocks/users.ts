@@ -1,13 +1,13 @@
-import { type User } from '@/types/user';
+import { type UserProfile } from '@/types/user-profile';
 
-export const currentUser: User = {
+export const currentUser: UserProfile = {
   id: 'user-1',
   name: '山田 太郎',
   avatarUrl: 'https://i.pravatar.cc/150?u=user-1',
   badge: '🌟',
 };
 
-export const users: User[] = [
+export const users: UserProfile[] = [
   currentUser,
   {
     id: 'user-2',
