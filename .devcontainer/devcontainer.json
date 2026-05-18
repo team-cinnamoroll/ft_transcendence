@@ -46,7 +46,8 @@
         "eamodio.gitlens",
         "mhutchie.git-graph",
         "github.vscode-pull-request-github",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "ms-vsliveshare.vsliveshare"
       ]
     }
   },
