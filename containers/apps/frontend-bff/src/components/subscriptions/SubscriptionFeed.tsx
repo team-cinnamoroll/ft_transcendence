@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import ActivityCard from '@/components/ui/ActivityCard';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
@@ -20,7 +20,7 @@ type Props = {
   subscribedFaceIds: string[];
   subscribedActivities: Activity[];
   faces: Face[];
-  users: User[];
+  users: UserProfile[];
 };
 
 const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users }: Props) => {

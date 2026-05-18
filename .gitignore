@@ -43,3 +43,6 @@ temp/
 
 # Local production (mkcert)
 containers/infra/local-prod/certs/
+
+# Claude Code local settings
+.claude/settings.local.json

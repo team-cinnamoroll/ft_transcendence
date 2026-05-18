@@ -1,12 +1,12 @@
 import 'server-only';
 
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { getCurrentUser } from './users';
 import { listFacesByUserId } from './faces';
 
 export type ViewerContext = {
-  currentUser: User;
+  currentUser: UserProfile;
   myFaces: Face[];
 };
 

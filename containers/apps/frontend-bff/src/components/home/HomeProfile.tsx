@@ -1,6 +1,6 @@
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import ActivityTileCalendar from './ActivityTileCalendar';
@@ -11,7 +11,7 @@ import { getTranslations } from 'next-intl/server';
  * ユーザーアイコン・名前・バッジ・フェイス数・アクティビティ数・タイルカレンダーを表示する。
  */
 type Props = {
-  user: User;
+  user: UserProfile;
   faces: Face[];
   activities: Activity[];
 };

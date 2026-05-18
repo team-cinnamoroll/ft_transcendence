@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import FaceHeader from '@/components/face/FaceHeader';
@@ -16,10 +16,10 @@ type FaceDetailProps = {
 };
 
 type FaceDetailApiResponse = {
-  currentUser: User;
+  currentUser: UserProfile;
   face: Face | null;
   activities: Activity[];
-  users: User[];
+  users: UserProfile[];
 };
 
 const FaceDetail = ({ faceId }: FaceDetailProps) => {

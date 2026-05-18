@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import FaceFilterBar from './FaceFilterBar';
 import ActivityFeed from './ActivityFeed';
 
@@ -12,7 +12,7 @@ import ActivityFeed from './ActivityFeed';
  * FaceFilterBar と ActivityFeed を束ね、フィルタ連携を担う。
  */
 type Props = {
-  currentUser: User;
+  currentUser: UserProfile;
   faces: Face[];
   activities: Activity[];
 };

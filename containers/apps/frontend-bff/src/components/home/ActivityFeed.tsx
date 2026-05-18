@@ -2,14 +2,14 @@
 
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import ActivityCard from '@/components/ui/ActivityCard';
 import { useTranslations } from 'next-intl';
 
 type ActivityFeedProps = {
-  currentUser: User;
+  currentUser: UserProfile;
   faces: Face[];
   activities: Activity[];
   /** フィルタするフェイス ID。null のときは全フェイスを表示 */

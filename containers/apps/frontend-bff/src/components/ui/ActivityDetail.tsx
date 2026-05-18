@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
-import type { User } from '@/types/user';
+import type { UserProfile } from '@/types/user-profile';
 import { useDetailPanel } from '@/lib/detail-panel-context';
 import { getFaceTitle } from '@/lib/display';
 import Avatar from './Avatar';
@@ -22,7 +22,7 @@ type ActivityDetailProps = {
 
 type ActivityDetailApiResponse = {
   activity: Activity | null;
-  user: User | null;
+  user: UserProfile | null;
   face: Face | null;
 };
 

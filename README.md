@@ -1,4 +1,5 @@
 # ft_transcendence
+
 Collaborative development repository for the ft_transcendence final project.
 tracen is another name for ft_transcendence, and they represent the same meaning.
 
@@ -15,8 +16,8 @@ tracen is another name for ft_transcendence, and they represent the same meaning
 
 - containers/apps/frontend-bff: Next.js アプリ
 - containers/apps/backend: Hono API
-	- src: backend の実装コード
-	- test: Vitest のテストコード
+  - src: backend の実装コード
+  - test: Vitest のテストコード
 - containers/infra/nginx: Nginx 設定
 - containers/infra/db: PostgreSQL 初期化 SQL
 - .devcontainer: VS Code Dev Container 設定
@@ -64,16 +65,16 @@ Dev Container 起動時に、以下のサービスが docker compose で同時�
 
 Nginx 経由では、以下のルーティングです。
 
-- /api/* -> frontend:3000（BFF API。必要に応じて backend:8000 を呼び出す）
-- /* -> frontend:3000
+- /api/\* -> frontend:3000（BFF API。必要に応じて backend:8000 を呼び出す）
+- /\* -> frontend:3000
 
 ### Tips: Nginx が 502 になる場合
 
 起動直後やコンテナ再作成後に、`http://localhost:8080` が `502 Bad Gateway` になることがあります。
 
 - まず直アクセスで切り分けする
-	- `http://localhost:3000`（Next.js）と `http://localhost:8000/hello`（API）が表示されるか確認
-	- 起動直後は dev server の起動まで 502 になることがあるため、数十秒待って再読込
+  - `http://localhost:3000`（Next.js）と `http://localhost:8000/hello`（API）が表示されるか確認
+  - 起動直後は dev server の起動まで 502 になることがあるため、数十秒待って再読込
 - 直アクセスは OK で nginx だけ 502 の場合は nginx を再起動する（IP 変化・名前解決の影響を受けることがあります）
 
 ```bash
@@ -195,4 +196,3 @@ docker compose -f docker-compose.dev.yml down
 ```bash
 pnpm local-prod:down
 ```
-

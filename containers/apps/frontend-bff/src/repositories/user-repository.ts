@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type User } from '@/types/user';
+import { type UserProfile } from '@/types/user-profile';
 import { currentUser, users } from '@/mocks/users';
 import { createSingletonProvider } from '@/repositories/provider';
 
@@ -9,11 +9,11 @@ import { createSingletonProvider } from '@/repositories/provider';
 /** UserRepository が提供するメソッドの契約（Spec） */
 export type UserRepositorySpec = {
   /** ログイン中ユーザーを取得 */
-  getCurrentUser: () => Promise<User>;
+  getCurrentUser: () => Promise<UserProfile>;
   /** ID でユーザーを1件取得（存在しない場合は null） */
-  findById: (userId: string) => Promise<User | null>;
+  findById: (userId: string) => Promise<UserProfile | null>;
   /** 全ユーザー一覧を取得 */
-  listAll: () => Promise<User[]>;
+  listAll: () => Promise<UserProfile[]>;
 };
 
 // ─── モック実装 ────────────────────────────────────────────────
