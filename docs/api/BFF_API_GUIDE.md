@@ -124,12 +124,12 @@ import type { AppType } from '@tracen/backend';
 
 import { getServerEnv } from './env/server';
 
-export function getBackendClient() {
-  return hc<AppType>(getServerEnv().APP_API_BASE_URL);
+export function createBackendClient(token?: string) {
+  return hc<AppType>(getServerEnv().APP_API_BASE_URL, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
 }
 ```
-
-> 実際の実装は `getBackendClient()` の結果をキャッシュしています（毎回 `hc()` しない）。
 
 ### サンプル: `GET /api/hello`
 

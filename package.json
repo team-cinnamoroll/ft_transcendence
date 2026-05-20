@@ -19,7 +19,8 @@
     "osv:scan-lockfiles": "bash scripts/osv-scan-lockfiles.sh",
     "format": "pnpm -r format",
     "format:check": "prettier --check .",
-    "make-env": "cp .env.dev.example .env.dev &&  cp .env.local-prod.example .env.local-prod"
+    "make-env": "bash scripts/make-env-contexts.sh",
+    "make-env:force": "bash scripts/make-env-contexts.sh force"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

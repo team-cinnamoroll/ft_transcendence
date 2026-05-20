@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import { SignUpRequestSchema, type UserResponse, type AuthSignUpResponse } from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
+import { verifyToken } from '@/lib/backend-client';
 
 export type HealthCheckLogFn = (line: string) => void;
 
@@ -129,6 +130,12 @@ export async function runApiHealthCheck(
     });
 
     log('STEP 2/5: backend POST /auth/sign-up (create test user)');
+    const publicKey = await repo.getJWKS();
+    if (!publicKey.ok) {
+      return await failWithResponse('create-user', publicKey, 'failed to retrieve JWKS');
+    }
+    log(`OK (get-jwks): retrieved JWKS successfully ${JSON.stringify(await publicKey.json())}`);
+
     const createRes = await repo.signUpUser(createUserInput);
     if (createRes.status === 409) {
       // Should be unlikely with randomized email, but keep message clear.
@@ -150,9 +157,43 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (create-user): id=${createdUserId}`);
+    const createdJwt = created.jwt;
+    if (!createdJwt) {
+      log('FAIL (create-user): response JSON missing jwt');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response missing jwt' },
+      };
+    }
+    log(`OK (create-user): jwt=${createdJwt}`);
+    const verifiedPayload = await verifyToken(createdJwt);
+    if (!verifiedPayload) {
+      log('FAIL (create-user): failed to verify returned JWT');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'failed to verify returned JWT' },
+      };
+    }
+    log(`OK (create-user): verified JWT payload ${JSON.stringify(verifiedPayload)}`);
+    if (verifiedPayload.sub !== createdUserId) {
+      log(
+        `FAIL (create-user): JWT payload sub mismatch (expected=${createdUserId}, got=${verifiedPayload.sub})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'JWT payload sub mismatch' },
+      };
+    }
+    log(`OK (create-user): JWT payload sub matches created user id`);
 
     log('STEP 3/5: backend GET /users/:id (exists check)');
-    const getExistsRes = await repo.getUserById(createdUserId);
+    const getExistsRes = await repo.getUserById(createdUserId, createdJwt);
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
@@ -181,7 +222,7 @@ export async function runApiHealthCheck(
     log(`OK (get-user-exists): id=${user.id} email=${user.email}`);
 
     log('STEP 4/5: backend DELETE /users/:id');
-    const deleteRes = await repo.deleteUserById(createdUserId);
+    const deleteRes = await repo.deleteUserById(createdUserId, createdJwt);
     if (deleteRes.status === 404) {
       return await failWithResponse('delete-user', deleteRes, 'user not found on delete');
     }
@@ -191,7 +232,7 @@ export async function runApiHealthCheck(
     log('OK (delete-user): 204');
 
     log('STEP 5/5: backend GET /users/:id (deleted check)');
-    const getDeletedRes = await repo.getUserById(createdUserId);
+    const getDeletedRes = await repo.getUserById(createdUserId, createdJwt);
     if (getDeletedRes.status !== 404) {
       return await failWithResponse(
         'get-user-deleted',
