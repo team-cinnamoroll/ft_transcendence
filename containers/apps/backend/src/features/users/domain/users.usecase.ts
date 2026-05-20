@@ -1,5 +1,5 @@
 import { type UserId, type UserResponse, UserResponseSchema } from '@tracen/contracts';
-import { type UserEntity } from './users.entity';
+import { type UserEntity, UserEntitySchema } from './users.entity';
 import type { UserRepositorySpec } from './users.repository';
 import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
 
@@ -38,6 +38,17 @@ export async function getUserResponseById(
     name: user.name,
     createdAt: user.createdAt,
   });
+}
+
+export async function getUserEntityByEmail(
+  repo: UserRepositorySpec,
+  email: string
+): Promise<UserEntity | null> {
+  const user = await repo.findByEmail(email);
+  if (!user) {
+    return null;
+  }
+  return UserEntitySchema.parse(user);
 }
 
 export async function deleteUserById(repo: UserRepositorySpec, id: UserId): Promise<boolean> {

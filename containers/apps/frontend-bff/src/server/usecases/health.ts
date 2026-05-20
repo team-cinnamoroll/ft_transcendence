@@ -35,6 +35,7 @@ type FailedStep =
   | 'get-user-exists'
   | 'delete-user'
   | 'get-user-deleted'
+  | 'sign-in-user'
   | 'unexpected';
 
 function nowIso(): string {
@@ -220,6 +221,54 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (get-user-exists): id=${user.id} email=${user.email}`);
+
+    log('STEP 3.5/5: backend POST /auth/sign-in (sign in with created user)');
+    const signInRes = await repo.signInUser({ email, password });
+    if (!signInRes.ok) {
+      return await failWithResponse(
+        'sign-in-user',
+        signInRes,
+        'sign in with created user returned non-2xx'
+      );
+    }
+    const signInJson = (await signInRes.json()) as unknown;
+    log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
+    const sginInJwt = (signInJson as AuthSignUpResponse).jwt;
+    if (!sginInJwt) {
+      log('FAIL (sign-in-user): sign in response JSON missing jwt');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'sign-in-user',
+        error: { message: 'sign in response missing jwt' },
+      };
+    }
+    log(`OK (sign-in-user): sign in returned jwt=${sginInJwt}`);
+    const signInVerifiedPayload = await verifyToken(sginInJwt);
+    if (!signInVerifiedPayload) {
+      log('FAIL (sign-in-user): failed to verify sign in returned JWT');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'sign-in-user',
+        error: { message: 'failed to verify sign in returned JWT' },
+      };
+    }
+    log(
+      `OK (sign-in-user): verified sign in returned JWT payload ${JSON.stringify(signInVerifiedPayload)}`
+    );
+    if (signInVerifiedPayload.sub !== createdUserId) {
+      log(
+        `FAIL (sign-in-user): sign in JWT payload sub mismatch (expected=${createdUserId}, got=${signInVerifiedPayload.sub})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'sign-in-user',
+        error: { message: 'sign in JWT payload sub mismatch' },
+      };
+    }
+    log(`OK (sign-in-user): sign in JWT payload sub matches created user id`);
 
     log('STEP 4/5: backend DELETE /users/:id');
     const deleteRes = await repo.deleteUserById(createdUserId, createdJwt);
