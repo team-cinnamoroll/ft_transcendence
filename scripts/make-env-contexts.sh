@@ -8,7 +8,7 @@ if [[ "$mode" != "keep" && "$mode" != "force" ]]; then
 fi
 
 # jwt-certs/の作成：Generate RSA key pair for JWT signing and verification.
-CERTS_DIR="/workspace/jwt-certs"
+CERTS_DIR="$(pwd)/jwt-certs"
 CURRENT_UID="$(id -u)"
 CURRENT_GID="$(id -g)"
 

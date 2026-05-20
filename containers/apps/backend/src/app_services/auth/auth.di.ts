@@ -25,7 +25,7 @@ export function injectAuthDeps(): MiddlewareHandler<AuthHandlerEnv> {
     }
     const userRepo = getUserRepository(config.DATABASE_URL);
     const authPassWorker = getAuthPassWorker(config.PEPPER);
-    const authTokenWorker = getAuthTokenWorker(config.JWT_SECRET);
+    const authTokenWorker = getAuthTokenWorker(config.JWT_PRIVATE_KEY_PEM);
     c.set('userRepo', userRepo);
     c.set('authPassWorker', authPassWorker);
     c.set('authTokenWorker', authTokenWorker);

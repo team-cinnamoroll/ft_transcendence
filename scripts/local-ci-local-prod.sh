@@ -44,7 +44,7 @@ start_ci_docker() {
   echo "[local-ci] Start DinD (service=ci-docker, project=$dev_project_name)" >&2
 
   # outer docker（devcontainer を起動している側）に対して ci-docker を起動する
-  (unset DOCKER_HOST; docker compose -p "$dev_project_name" -f "$outer_compose_file" up -d --force-recreate ci-docker) >/dev/null
+  (unset DOCKER_HOST; docker compose --project-directory "$host_ws" -p "$dev_project_name" -f "$outer_compose_file" up -d --force-recreate ci-docker) >/dev/null
 
   echo "[local-ci] Wait for DinD daemon ($ci_docker_host)" >&2
   for _ in $(seq 1 30); do

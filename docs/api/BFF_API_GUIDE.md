@@ -136,7 +136,7 @@ export function createBackendClient(token?: string) {
 要件サンプルとして、backend の `GET /hello` を呼んだ結果に、BFF 側のテキストを付与して返します。
 
 - Route Handler: `containers/apps/frontend-bff/src/app/api/hello/route.ts`
-  - backend: `getBackendClient().hello.$get()`
+  - backend: `createBackendClient().hello.$get()`
   - 返却: `{ message: backendMessage + " (via BFF)" }`
 
 ポイント:
@@ -254,11 +254,11 @@ docker compose -f docker-compose.dev.yml restart nginx
 1. Repository Spec を定義（`src/repositories/<name>-repository.ts`）
    - `XxxRepositorySpec`（契約）を定義（メソッドは基本 `Promise`）
 2. backend 実装（Impl）を追加
-   - `createXxxApiRepositoryImpl()` を作り、`getBackendClient()` を使って backend を呼ぶ
+   - `createXxxApiRepositoryImpl()` を作り、`createBackendClient()` を使って backend を呼ぶ
    - Hono RPC 例:
 
 ```ts
-const res = await getBackendClient().users[':id'].$get({ param: { id } });
+const res = await createBackendClient().users[':id'].$get({ param: { id } });
 ```
 
 3. Provider（DI 入口）を用意

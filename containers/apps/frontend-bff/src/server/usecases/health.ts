@@ -2,7 +2,12 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 
-import { SignUpRequestSchema, type UserResponse, type AuthSignUpResponse } from '@tracen/contracts';
+import {
+  SignUpRequestSchema,
+  type UserResponse,
+  type AuthSignUpResponse,
+  type AuthSignInResponse,
+} from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
 import { verifyToken } from '@/lib/backend-client';
@@ -233,8 +238,8 @@ export async function runApiHealthCheck(
     }
     const signInJson = (await signInRes.json()) as unknown;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
-    const sginInJwt = (signInJson as AuthSignUpResponse).jwt;
-    if (!sginInJwt) {
+    const signInJwt = (signInJson as AuthSignInResponse).jwt;
+    if (!signInJwt) {
       log('FAIL (sign-in-user): sign in response JSON missing jwt');
       return {
         ok: false,
@@ -243,8 +248,8 @@ export async function runApiHealthCheck(
         error: { message: 'sign in response missing jwt' },
       };
     }
-    log(`OK (sign-in-user): sign in returned jwt=${sginInJwt}`);
-    const signInVerifiedPayload = await verifyToken(sginInJwt);
+    log(`OK (sign-in-user): sign in returned jwt=${signInJwt}`);
+    const signInVerifiedPayload = await verifyToken(signInJwt);
     if (!signInVerifiedPayload) {
       log('FAIL (sign-in-user): failed to verify sign in returned JWT');
       return {

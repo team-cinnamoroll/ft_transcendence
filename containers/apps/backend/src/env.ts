@@ -35,7 +35,7 @@ const EnvSchema = z
     DATABASE_URL: z.string().url(),
     PEPPER: z.string().min(1),
     JWKS_PUBLIC: jwksCacheSchema,
-    JWT_SECRET: z.string().min(1),
+    JWT_PRIVATE_KEY_PEM: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
   })
   .superRefine((val, ctx) => {
@@ -79,7 +79,10 @@ export type RawEnv = z.input<typeof EnvSchema>;
 export type JWKSCache = z.infer<typeof jwksCacheSchema>;
 export type Config = z.infer<typeof EnvSchema>;
 
-const PUBLIC_KEY_PATH = '/jwt-certs/public.pem';
+let PUBLIC_KEY_PATH = '/jwt-certs/public.pem';
+if (process.env.NODE_ENV === 'development') {
+  PUBLIC_KEY_PATH = '/workspace/jwt-certs/public.pem';
+}
 let jwksCache: JWKSCache = null;
 
 console.warn('🔍 JWKS の初期化を開始します...');
@@ -116,7 +119,10 @@ try {
   console.error('❌ JWKSの生成中にエラーが発生しました:', err);
 }
 
-const PRIVATE_KEY_PATH = '/jwt-certs/private.pem';
+let PRIVATE_KEY_PATH = '/jwt-certs/private.pem';
+if (process.env.NODE_ENV === 'development') {
+  PRIVATE_KEY_PATH = '/workspace/jwt-certs/private.pem';
+}
 let privateKey: string | null = null;
 try {
   if (fs.existsSync(PRIVATE_KEY_PATH)) {
@@ -124,6 +130,7 @@ try {
   }
 } catch (err) {
   console.error('❌ 秘密鍵ファイルの読み込み中にエラーが発生しました:', err);
+  throw err; // 秘密鍵がないとサーバーは正常に動作しないため、ここで例外を投げて起動を停止します
 }
 
 export function parseEnv(raw: NodeJS.ProcessEnv): Config {
@@ -135,7 +142,7 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     DATABASE_URL: raw.DATABASE_URL,
     PEPPER: raw.PEPPER,
     JWKS_PUBLIC: jwksCache,
-    JWT_SECRET: privateKey,
+    JWT_PRIVATE_KEY_PEM: privateKey,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
   });
 }

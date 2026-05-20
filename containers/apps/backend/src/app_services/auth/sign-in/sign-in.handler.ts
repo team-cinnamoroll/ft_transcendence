@@ -22,7 +22,7 @@ export function signInRouter() {
         if (response.success && response.user) {
           const payload = createJWTPayload(response.user.id, 'user');
           const jwtToken = await authTokenWorker.createJWT(payload);
-          return c.json({ ...response, jwt: jwtToken }, 201);
+          return c.json({ ...response, jwt: jwtToken }, 200);
         }
         // success: false の場合はドメインエラー（例：emailまたはパスワードが無効）→ 401 Unauthorized
         return c.json(response, 401);
