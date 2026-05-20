@@ -11,8 +11,7 @@ import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
 import { wellKnownRouter } from './app_services/well-known/well-known.handler';
 import { usersRouter } from './features/users/users.handler';
-import { signUpRouter } from './app_services/auth/sign-up/sign-up.handler';
-import { signInRouter } from './app_services/auth/sign-in/sign-in.handler';
+import { authRouter } from './app_services/auth/auth.handler';
 import type { AppEnv } from './shared/types/hono';
 
 const config = parseEnv(process.env);
@@ -25,15 +24,14 @@ const app = new Hono<AppEnv>().basePath('/api/v1');
 
 const routes = app
   .use('*', injectConfig(config))
-  .route('/.well-known', wellKnownRouter())
   .get('/hello', (c) => {
     return c.json({ message: 'Hello from Hono!' });
   })
   .get('/health', (c) => {
     return c.json({ ok: true });
   })
-  .route('/auth/sign-up', signUpRouter())
-  .route('/auth/sign-in', signInRouter())
+  .route('/.well-known', wellKnownRouter())
+  .route('/auth', authRouter())
   .use(
     '*',
     jwk({
