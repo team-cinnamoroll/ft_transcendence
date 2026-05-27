@@ -12,6 +12,7 @@ import {
   EmailAlreadyExistsError,
   UserAlreadyExistsError,
 } from '../../../features/users/domain/users.error';
+import { ZodError } from 'zod';
 
 export async function signUp(
   repo: UserRepositorySpec,
@@ -49,6 +50,13 @@ export async function signUp(
       return AuthSignUpResponseSchema.parse({
         success: false,
         message: 'user already exists',
+        user: undefined,
+      });
+    }
+    if (err instanceof ZodError) {
+      return AuthSignUpResponseSchema.parse({
+        success: false,
+        message: 'invalid request data',
         user: undefined,
       });
     }

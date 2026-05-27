@@ -47,6 +47,7 @@ services:
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
+      - ./jwt-certs:/jwt-certs:ro
     depends_on:
       db:
         condition: service_healthy

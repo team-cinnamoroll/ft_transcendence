@@ -41,6 +41,9 @@ Thumbs.db
 tmp/
 temp/
 
+#secrets
+jwt-certs/
+
 # Local production (mkcert)
 containers/infra/local-prod/certs/
 

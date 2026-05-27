@@ -7,6 +7,25 @@ project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
 env_file="$repo_root/.env.local-prod"
 
+# Dev Container から docker.sock 経由でホスト Docker を操作する場合、
+# compose の bind mount source (例: ./jwt-certs) は「ホスト側パス」で解決される。
+# そのまま /workspace を基準にするとホストに存在しないパスを指して空でマウントされるため、
+# --project-directory にホスト側ワークスペース絶対パスを指定して解決基準を揃える。
+compose_project_dir="$repo_root"
+if [[ -f /.dockerenv ]] && [[ -z "${DOCKER_HOST:-}" || "${DOCKER_HOST:-}" == "unix:///var/run/docker.sock" ]]; then
+  host_ws="${TRACEN_LOCAL_CI_HOST_WORKSPACE:-}"
+  if [[ -z "$host_ws" ]]; then
+    echo "ERROR: Dev Container からホスト Docker(docker.sock) を操作していますが、TRACEN_LOCAL_CI_HOST_WORKSPACE が未設定です。" >&2
+    echo "Dev Container の remoteEnv で localWorkspaceFolder を注入するか、環境変数を手動で設定してください。" >&2
+    exit 1
+  fi
+  if [[ ! -d "$host_ws" ]]; then
+    echo "ERROR: TRACEN_LOCAL_CI_HOST_WORKSPACE がディレクトリではありません: $host_ws" >&2
+    exit 1
+  fi
+  compose_project_dir="$host_ws"
+fi
+
 mode="${TRACEN_LOCAL_PROD_MODE:-full}" # full | fast
 
 default_smoke_strategy="host"
@@ -104,7 +123,7 @@ fi
 export TRACEN_IMAGE_TAG="$tag"
 echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local-prod.local"
 
-compose_cmd=(docker compose --env-file "$env_file" -p "$project_name")
+compose_cmd=(docker compose --project-directory "$compose_project_dir" --env-file "$env_file" -p "$project_name")
 for f in "${compose_files[@]}"; do
   compose_cmd+=( -f "$f" )
 done
