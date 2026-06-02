@@ -16,12 +16,12 @@ export function signInRouter() {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
       const authPassWorker = c.get('authPassWorker');
-      const authTokenWorker = c.get('authTokenWorker');
+      const authAccessTokenWorker = c.get('authAccessTokenWorker');
       try {
         const response = await signIn(userRepo, authPassWorker, request);
         if (response.success && response.user) {
           const payload = createJWTPayload(response.user.id, 'user');
-          const jwtToken = await authTokenWorker.createJWT(payload);
+          const jwtToken = await authAccessTokenWorker.createJWT(payload);
           return c.json({ ...response, jwt: jwtToken }, 200);
         }
         // success: false の場合はドメインエラー（例：emailまたはパスワードが無効）→ 401 Unauthorized

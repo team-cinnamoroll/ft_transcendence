@@ -1,10 +1,10 @@
 import { sign } from 'hono/jwt';
 import crypto from 'node:crypto';
 
-import { AuthTokenWorkerSpec } from '../../domain/auth.worker';
+import { AuthAccessTokenWorkerSpec } from '../../domain/auth.worker';
 import { JWTPayload } from '../../domain/auth.entity';
 
-class HonoJWTAuthTokenWorker implements AuthTokenWorkerSpec {
+class HonoJWTAuthTokenWorker implements AuthAccessTokenWorkerSpec {
   private secret: string;
   private privateJwk: crypto.JsonWebKey;
 
@@ -24,7 +24,7 @@ class HonoJWTAuthTokenWorker implements AuthTokenWorkerSpec {
   }
 }
 
-function createHonoJWTAuthTokenWorker(secret: string): AuthTokenWorkerSpec {
+function createHonoJWTAuthTokenWorker(secret: string): AuthAccessTokenWorkerSpec {
   return new HonoJWTAuthTokenWorker(secret);
 }
 

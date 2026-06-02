@@ -5,6 +5,6 @@ export type AuthPassWorkerSpec = {
   verifyPassword: (password: string, storedHash: string) => Promise<boolean>;
 };
 
-export type AuthTokenWorkerSpec = {
+export type AuthAccessTokenWorkerSpec = {
   createJWT: (payload: JWTPayload) => Promise<string>;
 };
