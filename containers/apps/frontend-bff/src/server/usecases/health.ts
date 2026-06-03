@@ -272,16 +272,22 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (refresh-token): refresh token JWT payload sub matches created user id`);
-    if (
-      !(refreshJson as AuthRefreshResponse).refreshToken &&
-      (refreshJson as AuthRefreshResponse).refreshToken !== createdRefreshToken
-    ) {
+    if (!(refreshJson as AuthRefreshResponse).refreshToken) {
       log('FAIL (refresh-token): response JSON missing refreshToken');
       return {
         ok: false,
         logs,
         failedStep: 'refresh-token',
         error: { message: 'refresh token response missing refreshToken' },
+      };
+    }
+    if ((refreshJson as AuthRefreshResponse).refreshToken !== createdRefreshToken) {
+      log('FAIL (refresh-token): response JSON refreshToken mismatch');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'refresh token response refreshToken mismatch' },
       };
     }
     log(
