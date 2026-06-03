@@ -4,9 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { type AuthHandlerEnv } from '../auth.di';
 import { SignUpRequestSchema, AuthSignUpResponseSchema } from '@tracen/contracts';
 import { signUp } from './sign-up.usecase';
-import { createJWTPayload, createNewRefreshToken } from '../../../features/auth/domain/auth.entity';
-
-// handlerでは入力に対してのバリデーションしかしない。出力のバリデーションはドメイン層で行う。
+import { makeUserTokens } from '../../../features/auth/domain/auth.usecase';
 
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv>().post(
@@ -18,22 +16,20 @@ export function signUpRouter() {
       const authPassWorker = c.get('authPassWorker');
       const authAccessTokenWorker = c.get('authAccessTokenWorker');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
-      const refreshTokenExpiresIn = c.get('config').REFRESH_TOKEN_EXPIRES_IN;
+      const config = c.get('config');
       try {
         const response = await signUp(userRepo, authPassWorker, request);
         if (response.success && response.user) {
-          const payload = createJWTPayload(response.user.id, 'user');
-          const accessToken = await authAccessTokenWorker.createJWT(payload);
-          const refreshToken = createNewRefreshToken(response.user.id);
-          await authRefreshTokenRepository.saveToken(
-            refreshToken.token,
-            refreshToken.data,
-            refreshTokenExpiresIn
+          const userTokens = await makeUserTokens(
+            authAccessTokenWorker,
+            authRefreshTokenRepository,
+            config,
+            response.user.id
           );
           const validatedResponse = AuthSignUpResponseSchema.parse({
             ...response,
-            accessToken,
-            refreshToken: refreshToken.token,
+            accessToken: userTokens.accessToken,
+            refreshToken: userTokens.refreshToken,
           });
           return c.json(validatedResponse, 201);
         }

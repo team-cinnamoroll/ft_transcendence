@@ -29,13 +29,17 @@ export const jwtPayloadSchema = z.object({
 });
 export type JWTPayload = z.infer<typeof jwtPayloadSchema>;
 
-export function createJWTPayload(userId: string, role: 'admin' | 'user'): JWTPayload {
+export function createJWTPayload(
+  userId: string,
+  role: 'admin' | 'user',
+  expiresIn: number
+): JWTPayload {
   const now = Math.floor(Date.now() / 1000); // 現在のUnixタイムスタンプ
   return {
     sub: userId,
     role,
     iat: now, // 発行時刻を現在のUnixタイムスタンプで設定
-    exp: now + 60 * 15, // 有効期限を15分後に設定
+    exp: now + expiresIn, // 有効期限を秒単位で設定
     iss: 'https://ft_transcendence.42.fr/', // 発行元を設定
   };
 }

@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { type AuthHandlerEnv } from '../auth.di';
 import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
 import { fetchExistingRefreshTokenData, logoutByRefreshToken } from './refresh.usecase';
-import { createJWTPayload, createNewRefreshToken } from '../../../features/auth/domain/auth.entity';
+import { makeUserTokens } from '../../../features/auth/domain/auth.usecase';
 
 export function refreshRouter() {
   return new Hono<AuthHandlerEnv>()
@@ -12,21 +12,20 @@ export function refreshRouter() {
       const request = c.req.valid('json');
       const authAccessTokenWorker = c.get('authAccessTokenWorker');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
-      const refreshTokenExpiresIn = c.get('config').REFRESH_TOKEN_EXPIRES_IN;
+      const config = c.get('config');
       try {
         const response = await fetchExistingRefreshTokenData(authRefreshTokenRepository, request);
         if (response && response.userId && response.familyId) {
-          const payload = createJWTPayload(response.userId, 'user');
-          const accessToken = await authAccessTokenWorker.createJWT(payload);
-          const newRefreshToken = createNewRefreshToken(response.userId, response.familyId);
-          await authRefreshTokenRepository.saveToken(
-            newRefreshToken.token,
-            newRefreshToken.data,
-            refreshTokenExpiresIn
+          const userTokens = await makeUserTokens(
+            authAccessTokenWorker,
+            authRefreshTokenRepository,
+            config,
+            response.userId,
+            response.familyId
           );
           const validatedResponse = AuthRefreshResponseSchema.parse({
-            accessToken,
-            refreshToken: newRefreshToken.token,
+            accessToken: userTokens.accessToken,
+            refreshToken: userTokens.refreshToken,
           });
           return c.json(validatedResponse, 200);
         }
