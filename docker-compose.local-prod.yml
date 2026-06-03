@@ -65,6 +65,7 @@ services:
       RUN_MIGRATIONS: ${RUN_MIGRATIONS}
       PEPPER: ${PEPPER}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro

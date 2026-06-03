@@ -1,11 +1,13 @@
 import { z } from 'zod';
+import { AccessTokenSchema, RefreshTokenSchema } from './auth.tokens';
 import { UserResponseSchema } from '../user';
 
 export const AuthSignUpResponseSchema = z
   .object({
     success: z.boolean(),
     message: z.string().optional(), // success: falseのときのエラーメッセージ
-    jwt: z.jwt().optional(), // サインアップ成功時に発行されるJWT
+    accessToken: AccessTokenSchema.optional(), // サインアップ成功時に発行されるJWT
+    refreshToken: RefreshTokenSchema.optional(), // サインアップ成功時に発行されるリフレッシュトークン
     user: UserResponseSchema.optional(),
   })
   .strict();

@@ -38,7 +38,12 @@ const EnvSchema = z
     JWT_PRIVATE_KEY_PEM: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
     REDIS_URL: z.url(),
+    REFRESH_TOKEN_EXPIRES_IN: z.string().regex(/^\d+(s|m|h|d|w|y)$/, {
+      message:
+        "REFRESH_TOKEN_EXPIRES_IN は '15m', '2h', '7d' のような形式（数値 + s/m/h/d/w/y）で指定してください",
+    }),
   })
+  .strict()
   .superRefine((val, ctx) => {
     const hasCert = Boolean(val.TLS_CERT_PATH);
     const hasKey = Boolean(val.TLS_KEY_PATH);
@@ -146,5 +151,6 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     JWT_PRIVATE_KEY_PEM: privateKey,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
     REDIS_URL: raw.REDIS_URL,
+    REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN,
   });
 }

@@ -2,9 +2,9 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
-import { SignInRequestSchema } from '@tracen/contracts';
+import { SignInRequestSchema, AuthSignInResponseSchema } from '@tracen/contracts';
 import { signIn } from './sign-in.usecase';
-import { createJWTPayload } from '../../../features/auth/domain/auth.entity';
+import { createJWTPayload, createNewRefreshToken } from '../../../features/auth/domain/auth.entity';
 
 // handlerでは入力に対してのバリデーションしかしない。出力のバリデーションはドメイン層で行う。
 
@@ -17,12 +17,25 @@ export function signInRouter() {
       const userRepo = c.get('userRepo');
       const authPassWorker = c.get('authPassWorker');
       const authAccessTokenWorker = c.get('authAccessTokenWorker');
+      const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
+      const refreshTokenExpiresIn = c.get('config').REFRESH_TOKEN_EXPIRES_IN;
       try {
         const response = await signIn(userRepo, authPassWorker, request);
         if (response.success && response.user) {
           const payload = createJWTPayload(response.user.id, 'user');
-          const jwtToken = await authAccessTokenWorker.createJWT(payload);
-          return c.json({ ...response, jwt: jwtToken }, 200);
+          const accessToken = await authAccessTokenWorker.createJWT(payload);
+          const refreshToken = createNewRefreshToken(response.user.id);
+          await authRefreshTokenRepository.saveToken(
+            refreshToken.token,
+            refreshToken.data,
+            refreshTokenExpiresIn
+          );
+          const validatedResponse = AuthSignInResponseSchema.parse({
+            ...response,
+            accessToken,
+            refreshToken: refreshToken.token,
+          });
+          return c.json(validatedResponse, 200);
         }
         // success: false の場合はドメインエラー（例：emailまたはパスワードが無効）→ 401 Unauthorized
         return c.json(response, 401);

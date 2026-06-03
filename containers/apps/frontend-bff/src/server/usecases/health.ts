@@ -7,6 +7,7 @@ import {
   type UserResponse,
   type AuthSignUpResponse,
   type AuthSignInResponse,
+  type AuthRefreshResponse,
 } from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
@@ -37,10 +38,12 @@ export type ApiHealthCheckResult =
 type FailedStep =
   | 'backend-health'
   | 'create-user'
+  | 'refresh-token'
   | 'get-user-exists'
   | 'delete-user'
   | 'get-user-deleted'
   | 'sign-in-user'
+  | 'logout'
   | 'unexpected';
 
 function nowIso(): string {
@@ -124,6 +127,18 @@ export async function runApiHealthCheck(
     const healthJson = (await healthRes.json()) as unknown;
     log(`OK (backend-health): ${JSON.stringify(healthJson)}`);
 
+    const healthRedisRes = await repo.backendHealthRedis();
+    if (!healthRedisRes.ok) {
+      return await failWithResponse(
+        'backend-health',
+        healthRedisRes,
+        'backend health redis endpoint returned non-2xx'
+      );
+    }
+
+    const healthRedisJson = (await healthRedisRes.json()) as unknown;
+    log(`OK (backend-health-redis): ${JSON.stringify(healthRedisJson)}`);
+
     const nonce = crypto.randomUUID();
     const email = `healthcheck+${Date.now()}-${nonce.slice(0, 8)}@example.com`;
     const name = `healthcheck-${nonce.slice(0, 8)}`;
@@ -163,17 +178,28 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (create-user): id=${createdUserId}`);
-    const createdJwt = created.jwt;
+    const createdJwt = created.accessToken;
     if (!createdJwt) {
-      log('FAIL (create-user): response JSON missing jwt');
+      log('FAIL (create-user): response JSON missing accessToken');
       return {
         ok: false,
         logs,
         failedStep: 'create-user',
-        error: { message: 'create user response missing jwt' },
+        error: { message: 'create user response missing accessToken' },
       };
     }
-    log(`OK (create-user): jwt=${createdJwt}`);
+    log(`OK (create-user): accessToken=${createdJwt}`);
+    const createdRefreshToken = created.refreshToken;
+    if (!createdRefreshToken) {
+      log('FAIL (create-user): response JSON missing refreshToken');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response missing refreshToken' },
+      };
+    }
+    log(`OK (create-user): refreshToken=${createdRefreshToken}`);
     const verifiedPayload = await verifyToken(createdJwt);
     if (!verifiedPayload) {
       log('FAIL (create-user): failed to verify returned JWT');
@@ -197,6 +223,70 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (create-user): JWT payload sub matches created user id`);
+
+    const refreshRes = await repo.refreshToken(createdRefreshToken);
+    if (!refreshRes.ok) {
+      return await failWithResponse(
+        'refresh-token',
+        refreshRes,
+        'refresh token endpoint returned non-2xx'
+      );
+    }
+    const refreshJson = (await refreshRes.json()) as unknown;
+    log(`OK (refresh-token): refresh token response ${JSON.stringify(refreshJson)}`);
+    const refreshedAccessToken = (refreshJson as AuthRefreshResponse).accessToken;
+    if (!refreshedAccessToken) {
+      log('FAIL (refresh-token): response JSON missing accessToken');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'refresh token response missing accessToken' },
+      };
+    }
+    log(`OK (refresh-token): refresh token returned accessToken=${refreshedAccessToken}`);
+    const refreshedVerifiedPayload = await verifyToken(refreshedAccessToken);
+    if (!refreshedVerifiedPayload) {
+      log('FAIL (refresh-token): failed to verify refresh token returned JWT');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'failed to verify refresh token returned JWT' },
+      };
+    }
+    log(
+      `OK (refresh-token): verified refresh token returned JWT payload ${JSON.stringify(
+        refreshedVerifiedPayload
+      )}`
+    );
+    if (refreshedVerifiedPayload.sub !== createdUserId) {
+      log(
+        `FAIL (refresh-token): refresh token JWT payload sub mismatch (expected=${createdUserId}, got=${refreshedVerifiedPayload.sub})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'refresh token JWT payload sub mismatch' },
+      };
+    }
+    log(`OK (refresh-token): refresh token JWT payload sub matches created user id`);
+    if (
+      !(refreshJson as AuthRefreshResponse).refreshToken &&
+      (refreshJson as AuthRefreshResponse).refreshToken !== createdRefreshToken
+    ) {
+      log('FAIL (refresh-token): response JSON missing refreshToken');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'refresh token response missing refreshToken' },
+      };
+    }
+    log(
+      `OK (refresh-token): refresh token response includes new refreshToken=${(refreshJson as AuthRefreshResponse).refreshToken}`
+    );
 
     log('STEP 3/5: backend GET /users/:id (exists check)');
     const getExistsRes = await repo.getUserById(createdUserId, createdJwt);
@@ -238,17 +328,28 @@ export async function runApiHealthCheck(
     }
     const signInJson = (await signInRes.json()) as unknown;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
-    const signInJwt = (signInJson as AuthSignInResponse).jwt;
+    const signInJwt = (signInJson as AuthSignInResponse).accessToken;
     if (!signInJwt) {
-      log('FAIL (sign-in-user): sign in response JSON missing jwt');
+      log('FAIL (sign-in-user): sign in response JSON missing accessToken');
       return {
         ok: false,
         logs,
         failedStep: 'sign-in-user',
-        error: { message: 'sign in response missing jwt' },
+        error: { message: 'sign in response missing accessToken' },
       };
     }
-    log(`OK (sign-in-user): sign in returned jwt=${signInJwt}`);
+    log(`OK (sign-in-user): sign in returned accessToken=${signInJwt}`);
+    const signInRefreshToken = (signInJson as AuthSignInResponse).refreshToken;
+    if (!signInRefreshToken) {
+      log('FAIL (sign-in-user): sign in response JSON missing refreshToken');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'sign-in-user',
+        error: { message: 'sign in response missing refreshToken' },
+      };
+    }
+    log(`OK (sign-in-user): sign in returned refreshToken=${signInRefreshToken}`);
     const signInVerifiedPayload = await verifyToken(signInJwt);
     if (!signInVerifiedPayload) {
       log('FAIL (sign-in-user): failed to verify sign in returned JWT');
@@ -295,6 +396,22 @@ export async function runApiHealthCheck(
       );
     }
     log('OK (get-user-deleted): 404');
+
+    log('STEP 6/5: backend DELETE /auth/refresh (logout)');
+    const logoutRes = await repo.logout(signInRefreshToken);
+    if (!logoutRes.ok) {
+      return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');
+    }
+    log('OK (logout): 200');
+    const unexpectedLogoutRes = await repo.refreshToken(signInRefreshToken);
+    if (unexpectedLogoutRes.ok) {
+      return await failWithResponse(
+        'logout',
+        unexpectedLogoutRes,
+        'refresh token still valid after logout'
+      );
+    }
+    log('OK (logout): refresh token invalid after logout');
 
     log('DONE: api health check success');
     return {
