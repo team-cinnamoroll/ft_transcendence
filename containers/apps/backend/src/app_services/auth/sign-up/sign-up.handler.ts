@@ -39,11 +39,10 @@ export function signUpRouter() {
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
         console.error('SignUp error:', err);
         return c.json(
-          {
+          AuthSignUpResponseSchema.parse({
             success: false,
             message: 'Internal server error',
-            user: undefined,
-          },
+          }),
           500
         );
       }
