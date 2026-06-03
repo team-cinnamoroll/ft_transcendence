@@ -49,7 +49,7 @@ export const FamilyIdSchema = UuidSchema; // トークン世代の識別子（�
 export type FamilyId = Uuid;
 export const refreshTokenDataSchema = z.object({
   userId: UserIdSchema,
-  createdAt: IsoDateTimeStringSchema, // 発行時のUnixタイムスタンプ（ミリ秒）
+  createdAt: IsoDateTimeStringSchema, // 発行時刻（ISO 8601）
   familyId: FamilyIdSchema, // トークン世代の識別子
 });
 export type RefreshTokenData = z.infer<typeof refreshTokenDataSchema>;

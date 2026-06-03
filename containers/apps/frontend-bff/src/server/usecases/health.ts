@@ -403,7 +403,7 @@ export async function runApiHealthCheck(
     }
     log('OK (get-user-deleted): 404');
 
-    log('STEP 6/5: backend DELETE /auth/refresh (logout)');
+    log('STEP: backend DELETE /auth/refresh (logout)');
     const logoutRes = await repo.logout(signInRefreshToken);
     if (!logoutRes.ok) {
       return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');

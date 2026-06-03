@@ -34,7 +34,7 @@ const routes = app
   })
   .get('/health/redis', async (c) => {
     const redis = getRedisClient(config.REDIS_URL);
-    const key = 'health_check';
+    const key = `health_check:${Date.now()}:${Math.random().toString(36).slice(2)}`;
     const value = `ok_${Date.now()}`;
     try {
       await redis.ping();

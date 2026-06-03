@@ -26,7 +26,7 @@ function parseExpiresInToSeconds(expiresIn: ExpiresIn): number {
     y: 60 * 60 * 24 * 365,
   };
 
-  return amount * multipliers[unit];
+  return Math.max(1, Math.ceil(amount * multipliers[unit]));
 }
 
 class RedisRefreshTokenRepositoryImpl implements AuthRefreshTokenRepositorySpec {
