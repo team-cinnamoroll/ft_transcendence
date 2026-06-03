@@ -77,9 +77,6 @@ importers:
       '@hono/vite-dev-server':
         specifier: ^0.25.1
         version: 0.25.3(hono@4.12.18)
-      '@types/ioredis':
-        specifier: ^5.0.0
-        version: 5.0.0
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
@@ -2523,13 +2520,6 @@ packages:
       {
         integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==,
       }
-
-  '@types/ioredis@5.0.0':
-    resolution:
-      {
-        integrity: sha512-zJbJ3FVE17CNl5KXzdeSPtdltc4tMT3TzC6fxQS0sQngkbFZ6h+0uTafsRqu+eSLIugf6Yb0Ea0SUuRr42Nk9g==,
-      }
-    deprecated: This is a stub types definition. ioredis provides its own type definitions, so you do not need this installed.
 
   '@types/json-schema@7.0.15':
     resolution:
@@ -7719,12 +7709,6 @@ snapshots:
   '@types/doctrine@0.0.9': {}
 
   '@types/estree@1.0.8': {}
-
-  '@types/ioredis@5.0.0':
-    dependencies:
-      ioredis: 5.11.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@types/json-schema@7.0.15': {}
 
