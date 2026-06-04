@@ -1,10 +1,16 @@
 import type { RefreshToken } from '@tracen/contracts';
 import { AuthRefreshTokenRepositorySpec } from '../../domain/auth.repository';
 import { RedisClient } from '../../../../shared/infra/redis/client';
-import { RefreshTokenData, ExpiresIn, FamilyId } from '../../domain/auth.entity';
+import {
+  RefreshTokenData,
+  ExpiresIn,
+  FamilyId,
+  modifyStatusToRevoked,
+} from '../../domain/auth.entity';
 
 const tokenKeyPrefix = 'refresh_token:';
 const familyKeyPrefix = 'family_token:';
+const revokedRemainingInSeconds = 3600;
 
 function parseExpiresInToSeconds(expiresIn: ExpiresIn): number {
   const value = String(expiresIn).trim();
@@ -46,6 +52,21 @@ class RedisRefreshTokenRepositoryImpl implements AuthRefreshTokenRepositorySpec 
     pipeline.sadd(familyKey, token);
     pipeline.expire(familyKey, expiresInSeconds);
     await pipeline.exec();
+  }
+
+  async revokeToken(token: RefreshToken): Promise<void> {
+    const tokenKey = `${tokenKeyPrefix}${token}`;
+    const result = await this.redisClient.get(tokenKey);
+    if (!result) return; // トークンが見つからない場合は何もしない
+
+    const data = JSON.parse(result) as RefreshTokenData;
+    const revokedData = modifyStatusToRevoked(data); // トークンの状態を「revoked」に変更
+    await this.redisClient.set(
+      tokenKey,
+      JSON.stringify(revokedData),
+      'EX',
+      revokedRemainingInSeconds
+    );
   }
 
   async findToken(token: RefreshToken): Promise<RefreshTokenData | null> {

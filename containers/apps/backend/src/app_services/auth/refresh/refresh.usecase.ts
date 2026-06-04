@@ -5,13 +5,17 @@ import {
 } from '../../../features/auth/domain/auth.entity';
 import { type AuthRefreshTokenRepositorySpec } from '../../../features/auth/domain/auth.repository';
 
-export async function fetchExistingRefreshTokenData(
+export async function acceptRefreshRequest(
   repo: AuthRefreshTokenRepositorySpec,
   request: AuthRefreshRequest
 ): Promise<RefreshTokenData | null> {
   const existingTokenData = await repo.findToken(request.refreshToken);
   if (!existingTokenData) {
     return null; // トークンが見つからない場合はnullを返す
+  }
+  if (existingTokenData.status !== 'active') {
+    await repo.deleteAllTokensByFamilyId(existingTokenData.familyId); // トークンが無効（revokedなど）の場合は同一familyIdのトークンを全て削除
+    return null; // トークンが無効（revokedなど）の場合もnullを返す
   }
   return refreshTokenDataSchema.parse(existingTokenData);
 }

@@ -3,8 +3,8 @@ import { zValidator } from '@hono/zod-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
 import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
-import { fetchExistingRefreshTokenData, logoutByRefreshToken } from './refresh.usecase';
-import { makeUserTokens } from '../../../features/auth/domain/auth.usecase';
+import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
+import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
 
 export function refreshRouter() {
   return new Hono<AuthHandlerEnv>()
@@ -14,12 +14,13 @@ export function refreshRouter() {
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
       const config = c.get('config');
       try {
-        const response = await fetchExistingRefreshTokenData(authRefreshTokenRepository, request);
+        const response = await acceptRefreshRequest(authRefreshTokenRepository, request);
         if (response && response.userId && response.familyId) {
-          const userTokens = await makeUserTokens(
+          const userTokens = await refreshUserTokens(
             authAccessTokenWorker,
             authRefreshTokenRepository,
             config,
+            request.refreshToken,
             response.userId,
             response.familyId
           );

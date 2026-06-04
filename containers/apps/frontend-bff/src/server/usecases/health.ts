@@ -115,6 +115,7 @@ export async function runApiHealthCheck(
 
   try {
     log('STEP 1/5: backend GET /health');
+    // API: ヘルスチェック
     const healthRes = await repo.backendHealth();
     if (!healthRes.ok) {
       return await failWithResponse(
@@ -123,10 +124,10 @@ export async function runApiHealthCheck(
         'backend health endpoint returned non-2xx'
       );
     }
-
     const healthJson = (await healthRes.json()) as unknown;
     log(`OK (backend-health): ${JSON.stringify(healthJson)}`);
 
+    // API: ヘルスチェック（Redis）
     const healthRedisRes = await repo.backendHealthRedis();
     if (!healthRedisRes.ok) {
       return await failWithResponse(
@@ -135,7 +136,6 @@ export async function runApiHealthCheck(
         'backend health redis endpoint returned non-2xx'
       );
     }
-
     const healthRedisJson = (await healthRedisRes.json()) as unknown;
     log(`OK (backend-health-redis): ${JSON.stringify(healthRedisJson)}`);
 
@@ -151,12 +151,14 @@ export async function runApiHealthCheck(
     });
 
     log('STEP 2/5: backend POST /auth/sign-up (create test user)');
+    // API: 公開鍵を取得する
     const publicKey = await repo.getJWKS();
     if (!publicKey.ok) {
       return await failWithResponse('create-user', publicKey, 'failed to retrieve JWKS');
     }
     log(`OK (get-jwks): retrieved JWKS successfully ${JSON.stringify(await publicKey.json())}`);
 
+    // API: サインインする
     const createRes = await repo.signUpUser(createUserInput);
     if (createRes.status === 409) {
       // Should be unlikely with randomized email, but keep message clear.
@@ -224,6 +226,7 @@ export async function runApiHealthCheck(
     }
     log(`OK (create-user): JWT payload sub matches created user id`);
 
+    // API: リフレッシュトークンを使用する
     const refreshRes = await repo.refreshToken(createdRefreshToken);
     if (!refreshRes.ok) {
       return await failWithResponse(
@@ -232,9 +235,9 @@ export async function runApiHealthCheck(
         'refresh token endpoint returned non-2xx'
       );
     }
-    const refreshJson = (await refreshRes.json()) as unknown;
+    const refreshJson = (await refreshRes.json()) as AuthRefreshResponse;
     log(`OK (refresh-token): refresh token response ${JSON.stringify(refreshJson)}`);
-    const refreshedAccessToken = (refreshJson as AuthRefreshResponse).accessToken;
+    const refreshedAccessToken = refreshJson.accessToken;
     if (!refreshedAccessToken) {
       log('FAIL (refresh-token): response JSON missing accessToken');
       return {
@@ -272,7 +275,7 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (refresh-token): refresh token JWT payload sub matches created user id`);
-    if (!(refreshJson as AuthRefreshResponse).refreshToken) {
+    if (!refreshJson.refreshToken) {
       log('FAIL (refresh-token): response JSON missing refreshToken');
       return {
         ok: false,
@@ -281,7 +284,7 @@ export async function runApiHealthCheck(
         error: { message: 'refresh token response missing refreshToken' },
       };
     }
-    if ((refreshJson as AuthRefreshResponse).refreshToken === createdRefreshToken) {
+    if (refreshJson.refreshToken === createdRefreshToken) {
       log('FAIL (refresh-token): response JSON refreshToken mismatch');
       return {
         ok: false,
@@ -291,15 +294,38 @@ export async function runApiHealthCheck(
       };
     }
     log(
-      `OK (refresh-token): refresh token response includes new refreshToken=${(refreshJson as AuthRefreshResponse).refreshToken}`
+      `OK (refresh-token): refresh token response includes new refreshToken=${refreshJson.refreshToken}`
     );
 
+    // API: 失効したリフレッシュトークンを使用する
+    const noRefreshRes = await repo.refreshToken(createdRefreshToken);
+    if (noRefreshRes.ok) {
+      return await failWithResponse(
+        'refresh-token',
+        noRefreshRes,
+        'refresh token endpoint returned 2xx for revoked token'
+      );
+    }
+    log('OK (refresh-token): revoked refresh token cannot be used');
+
+    // API: 追放したリフレッシュトークンを使用する
+    const noRefreshRes2 = await repo.refreshToken(refreshJson.refreshToken);
+    if (noRefreshRes2.ok) {
+      return await failWithResponse(
+        'refresh-token',
+        noRefreshRes,
+        'refresh token endpoint returned 2xx for revoked token'
+      );
+    }
+    log('OK (refresh-token): force revoked refresh token cannot be used');
+
     log('STEP 3/5: backend GET /users/:id (exists check)');
+
+    // API: ユーザー情報の取得（存在確認）
     const getExistsRes = await repo.getUserById(createdUserId, createdJwt);
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
-
     const user = (await getExistsRes.json()) as UserResponse;
     if (user.id !== createdUserId) {
       log(
@@ -324,6 +350,7 @@ export async function runApiHealthCheck(
     log(`OK (get-user-exists): id=${user.id} email=${user.email}`);
 
     log('STEP 3.5/5: backend POST /auth/sign-in (sign in with created user)');
+    // API: （既存ユーザーで）サインインする
     const signInRes = await repo.signInUser({ email, password });
     if (!signInRes.ok) {
       return await failWithResponse(
@@ -332,9 +359,9 @@ export async function runApiHealthCheck(
         'sign in with created user returned non-2xx'
       );
     }
-    const signInJson = (await signInRes.json()) as unknown;
+    const signInJson = (await signInRes.json()) as AuthSignInResponse;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
-    const signInJwt = (signInJson as AuthSignInResponse).accessToken;
+    const signInJwt = signInJson.accessToken;
     if (!signInJwt) {
       log('FAIL (sign-in-user): sign in response JSON missing accessToken');
       return {
@@ -345,7 +372,7 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (sign-in-user): sign in returned accessToken=${signInJwt}`);
-    const signInRefreshToken = (signInJson as AuthSignInResponse).refreshToken;
+    const signInRefreshToken = signInJson.refreshToken;
     if (!signInRefreshToken) {
       log('FAIL (sign-in-user): sign in response JSON missing refreshToken');
       return {
@@ -383,6 +410,8 @@ export async function runApiHealthCheck(
     log(`OK (sign-in-user): sign in JWT payload sub matches created user id`);
 
     log('STEP 4/5: backend DELETE /users/:id');
+
+    // API: ユーザーの削除
     const deleteRes = await repo.deleteUserById(createdUserId, createdJwt);
     if (deleteRes.status === 404) {
       return await failWithResponse('delete-user', deleteRes, 'user not found on delete');
@@ -393,6 +422,8 @@ export async function runApiHealthCheck(
     log('OK (delete-user): 204');
 
     log('STEP 5/5: backend GET /users/:id (deleted check)');
+
+    // API: ユーザー情報の取得（削除確認）
     const getDeletedRes = await repo.getUserById(createdUserId, createdJwt);
     if (getDeletedRes.status !== 404) {
       return await failWithResponse(
@@ -404,11 +435,15 @@ export async function runApiHealthCheck(
     log('OK (get-user-deleted): 404');
 
     log('STEP: backend DELETE /auth/refresh (logout)');
+
+    // API: ログアウトする
     const logoutRes = await repo.logout(signInRefreshToken);
     if (!logoutRes.ok) {
       return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');
     }
     log('OK (logout): 200');
+
+    // API: ログアウトしたリフレッシュトークンを使用する
     const unexpectedLogoutRes = await repo.refreshToken(signInRefreshToken);
     if (unexpectedLogoutRes.ok) {
       return await failWithResponse(

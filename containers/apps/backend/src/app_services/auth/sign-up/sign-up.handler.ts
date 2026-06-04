@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { type AuthHandlerEnv } from '../auth.di';
 import { SignUpRequestSchema, AuthSignUpResponseSchema } from '@tracen/contracts';
 import { signUp } from './sign-up.usecase';
-import { makeUserTokens } from '../../../features/auth/domain/auth.usecase';
+import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv>().post(
@@ -20,7 +20,7 @@ export function signUpRouter() {
       try {
         const response = await signUp(userRepo, authPassWorker, request);
         if (response.success && response.user) {
-          const userTokens = await makeUserTokens(
+          const userTokens = await makeNewUserTokens(
             authAccessTokenWorker,
             authRefreshTokenRepository,
             config,
