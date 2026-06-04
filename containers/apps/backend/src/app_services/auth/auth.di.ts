@@ -1,19 +1,26 @@
 import type { MiddlewareHandler } from 'hono';
 
 import { AppEnv } from '../../shared/types/hono';
-import { UserRepositorySpec } from '../../features/users/domain/users.repository';
+import type { UserRepositorySpec } from '../../features/users/domain/users.repository';
+import { getUserRepository } from '../../features/users/infra/users.repository.di';
 import type {
   AuthPassWorkerSpec,
-  AuthTokenWorkerSpec,
+  AuthAccessTokenWorkerSpec,
 } from '../../features/auth/domain/auth.worker';
-import { getUserRepository } from '../../features/users/infra/users.repository.di';
-import { getAuthPassWorker, getAuthTokenWorker } from '../../features/auth/infra/auth.worker.di';
+
+import {
+  getAuthPassWorker,
+  getAuthAccessTokenWorker,
+} from '../../features/auth/infra/auth.worker.di';
+import type { AuthRefreshTokenRepositorySpec } from '../../features/auth/domain/auth.repository';
+import { getAuthRefreshTokenRepository } from '../../features/auth/infra/auth.repository.di';
 
 export type AuthHandlerEnv = AppEnv & {
   Variables: {
     userRepo: UserRepositorySpec;
     authPassWorker: AuthPassWorkerSpec;
-    authTokenWorker: AuthTokenWorkerSpec;
+    authAccessTokenWorker: AuthAccessTokenWorkerSpec;
+    authRefreshTokenRepository: AuthRefreshTokenRepositorySpec;
   };
 };
 
@@ -25,10 +32,11 @@ export function injectAuthDeps(): MiddlewareHandler<AuthHandlerEnv> {
     }
     const userRepo = getUserRepository(config.DATABASE_URL);
     const authPassWorker = getAuthPassWorker(config.PEPPER);
-    const authTokenWorker = getAuthTokenWorker(config.JWT_PRIVATE_KEY_PEM);
+    const authAccessTokenWorker = getAuthAccessTokenWorker(config.JWT_PRIVATE_KEY_PEM);
     c.set('userRepo', userRepo);
     c.set('authPassWorker', authPassWorker);
-    c.set('authTokenWorker', authTokenWorker);
+    c.set('authAccessTokenWorker', authAccessTokenWorker);
+    c.set('authRefreshTokenRepository', getAuthRefreshTokenRepository(config.REDIS_URL));
     await next();
   };
 }

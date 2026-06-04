@@ -1,4 +1,14 @@
 import { z } from 'zod';
+import crypto from 'crypto';
+import {
+  RefreshToken,
+  RefreshTokenSchema,
+  UserId,
+  UserIdSchema,
+  Uuid,
+  UuidSchema,
+  IsoDateTimeStringSchema,
+} from '@tracen/contracts';
 
 export const expiresInSchema = z
   .string()
@@ -8,7 +18,7 @@ export const expiresInSchema = z
   });
 export type ExpiresIn = z.infer<typeof expiresInSchema>;
 
-// アプリケーションが期待するJWTペイロードのスキーマ
+// JWTペイロード
 export const jwtPayloadSchema = z.object({
   sub: z.string(), // ユーザーID（Subject）
   role: z.enum(['admin', 'user']), // 権限
@@ -18,16 +28,51 @@ export const jwtPayloadSchema = z.object({
   iat: z.number().optional(), // 発行時刻
   exp: z.number().optional(), // 有効期限時刻
 });
-
-// 型を抽出
 export type JWTPayload = z.infer<typeof jwtPayloadSchema>;
-export function createJWTPayload(userId: string, role: 'admin' | 'user'): JWTPayload {
+
+export function createJWTPayload(
+  userId: string,
+  role: 'admin' | 'user',
+  expiresIn: number
+): JWTPayload {
   const now = Math.floor(Date.now() / 1000); // 現在のUnixタイムスタンプ
-  return {
+  return jwtPayloadSchema.parse({
     sub: userId,
     role,
     iat: now, // 発行時刻を現在のUnixタイムスタンプで設定
-    exp: now + 60 * 15, // 有効期限を15分後に設定
+    exp: now + expiresIn, // 有効期限を秒単位で設定
     iss: 'https://ft_transcendence.42.fr/', // 発行元を設定
-  };
+  });
+}
+
+// refresh token
+export const FamilyIdSchema = UuidSchema; // トークン世代の識別子（オプション）
+export type FamilyId = Uuid;
+export const refreshTokenDataSchema = z.object({
+  userId: UserIdSchema,
+  createdAt: IsoDateTimeStringSchema, // 発行時刻（ISO 8601）
+  familyId: FamilyIdSchema, // トークン世代の識別子
+  status: z.enum(['active', 'revoked']).default('active'), // トークンの状態
+});
+export type RefreshTokenData = z.infer<typeof refreshTokenDataSchema>;
+
+export function createRefreshToken(
+  userId: UserId,
+  existingFamilyId?: FamilyId
+): { token: RefreshToken; data: RefreshTokenData } {
+  const token = RefreshTokenSchema.parse(crypto.randomUUID());
+  const data = refreshTokenDataSchema.parse({
+    userId,
+    createdAt: new Date().toISOString(),
+    familyId: existingFamilyId ?? FamilyIdSchema.parse(crypto.randomUUID()), // 新しいトークン世代の識別子を生成
+    status: 'active',
+  });
+  return { token, data };
+}
+
+export function modifyStatusToRevoked(data: RefreshTokenData): RefreshTokenData {
+  return refreshTokenDataSchema.parse({
+    ...data,
+    status: 'revoked', // トークンの状態を「revoked」に変更
+  });
 }

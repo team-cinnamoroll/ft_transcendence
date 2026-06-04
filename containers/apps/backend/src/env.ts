@@ -32,12 +32,19 @@ const EnvSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(8000),
     TLS_CERT_PATH: z.string().min(1).optional(),
     TLS_KEY_PATH: z.string().min(1).optional(),
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.url(),
     PEPPER: z.string().min(1),
     JWKS_PUBLIC: jwksCacheSchema,
     JWT_PRIVATE_KEY_PEM: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
+    REDIS_URL: z.url(),
+    ACCESS_TOKEN_EXPIRES_IN: z.coerce.number().int().positive().default(900), // デフォルトは900秒（15分）
+    REFRESH_TOKEN_EXPIRES_IN: z.string().regex(/^\d+(s|m|h|d|w|y)$/, {
+      message:
+        "REFRESH_TOKEN_EXPIRES_IN は '15m', '2h', '7d' のような形式（数値 + s/m/h/d/w/y）で指定してください",
+    }),
   })
+  .strict()
   .superRefine((val, ctx) => {
     const hasCert = Boolean(val.TLS_CERT_PATH);
     const hasKey = Boolean(val.TLS_KEY_PATH);
@@ -144,5 +151,8 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     JWKS_PUBLIC: jwksCache,
     JWT_PRIVATE_KEY_PEM: privateKey,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
+    REDIS_URL: raw.REDIS_URL,
+    ACCESS_TOKEN_EXPIRES_IN: raw.ACCESS_TOKEN_EXPIRES_IN,
+    REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN,
   });
 }
