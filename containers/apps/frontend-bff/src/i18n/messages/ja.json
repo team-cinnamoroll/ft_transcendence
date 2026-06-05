@@ -172,5 +172,43 @@
     "minutesAgo": "{n}分前",
     "hoursAgo": "{n}時間前",
     "daysAgo": "{n}日前"
+  },
+  "mobileComposeBar": {
+    "placeholder": "今、何を書く？",
+    "post": "投稿"
+  },
+  "accountMenu": {
+    "settings": "アカウント設定",
+    "settingsSub": "プロフィール · パスワード",
+    "otherSettings": "その他詳細設定",
+    "otherSettingsSub": "通知 · テーマ · データ",
+    "help": "ヘルプ",
+    "facesUnit": "フェイス",
+    "activitiesUnit": "シード",
+    "logout": "ログアウト"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "アカウントメニュー"
+  },
+  "seedRow": {
+    "readMore": "続きを読む",
+    "collapse": "折りたたむ",
+    "imageAlt": "画像 {n}",
+    "moreOptions": "その他",
+    "edit": "編集",
+    "linksCount": "{count} 件のリンク"
+  },
+  "contextRail": {
+    "onThisDay": "一年前の今日",
+    "yearsAgo": "{n}年前",
+    "onThisDayPrompt": "今のあなたは、何と返しますか",
+    "aboutFaces": "フェイスについて",
+    "aboutFacesDesc": "フェイスは「あなたの多面性」のひとつ。投稿したい内容にあったフェイスで書き、後から自分のために振り返ることができます。",
+    "activitiesThisMonth": "アクティビティ",
+    "thisMonth": "今月",
+    "noActivitiesThisMonth": "今月はまだ記録がありません",
+    "subscribedFaces": "サブスク中",
+    "noSubscriptions": "サブスクしているフェイスがありません。",
+    "findFaces": "フェイスを探す →"
   }
 }

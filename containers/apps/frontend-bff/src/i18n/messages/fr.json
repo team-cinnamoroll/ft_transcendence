@@ -172,5 +172,43 @@
     "minutesAgo": "il y a {n} min",
     "hoursAgo": "il y a {n} h",
     "daysAgo": "il y a {n} j"
+  },
+  "mobileComposeBar": {
+    "placeholder": "Qu'est-ce que vous écrivez ?",
+    "post": "Publier"
+  },
+  "accountMenu": {
+    "settings": "Paramètres du compte",
+    "settingsSub": "Profil · Mot de passe",
+    "otherSettings": "Autres paramètres",
+    "otherSettingsSub": "Notifications · Thème · Données",
+    "help": "Aide",
+    "facesUnit": "Facettes",
+    "activitiesUnit": "Seeds",
+    "logout": "Se déconnecter"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "Menu du compte"
+  },
+  "seedRow": {
+    "readMore": "Lire la suite",
+    "collapse": "Réduire",
+    "imageAlt": "Image {n}",
+    "moreOptions": "Plus d'options",
+    "edit": "Modifier",
+    "linksCount": "{count} lien(s)"
+  },
+  "contextRail": {
+    "onThisDay": "Ce jour il y a un an",
+    "yearsAgo": "Il y a {n} an(s)",
+    "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
+    "aboutFaces": "À propos des facettes",
+    "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",
+    "activitiesThisMonth": "Activité",
+    "thisMonth": "Ce mois-ci",
+    "noActivitiesThisMonth": "Aucune activité ce mois-ci",
+    "subscribedFaces": "Abonnements",
+    "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
+    "findFaces": "Chercher des facettes →"
   }
 }

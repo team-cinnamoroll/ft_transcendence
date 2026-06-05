@@ -172,5 +172,43 @@
     "minutesAgo": "{n}m ago",
     "hoursAgo": "{n}h ago",
     "daysAgo": "{n}d ago"
+  },
+  "mobileComposeBar": {
+    "placeholder": "What are you writing?",
+    "post": "Post"
+  },
+  "accountMenu": {
+    "settings": "Account Settings",
+    "settingsSub": "Profile · Password",
+    "otherSettings": "Other Settings",
+    "otherSettingsSub": "Notifications · Theme · Data",
+    "help": "Help",
+    "facesUnit": "Faces",
+    "activitiesUnit": "Seeds",
+    "logout": "Log out"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "Account menu"
+  },
+  "seedRow": {
+    "readMore": "Read more",
+    "collapse": "Collapse",
+    "imageAlt": "Image {n}",
+    "moreOptions": "More options",
+    "edit": "Edit",
+    "linksCount": "{count} links"
+  },
+  "contextRail": {
+    "onThisDay": "On This Day",
+    "yearsAgo": "{n} year(s) ago",
+    "onThisDayPrompt": "What would you say today?",
+    "aboutFaces": "About Faces",
+    "aboutFacesDesc": "A Face is one facet of who you are. Write with the face that fits what you want to express, and reflect on it later.",
+    "activitiesThisMonth": "Activity",
+    "thisMonth": "This month",
+    "noActivitiesThisMonth": "No records this month",
+    "subscribedFaces": "Subscribed",
+    "noSubscriptions": "You haven't subscribed to any faces yet.",
+    "findFaces": "Find Faces →"
   }
 }
