@@ -2,22 +2,45 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Bell, Search, Rss, Layers, type LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 
 type NavItem = {
   href: string;
   labelKey: string;
-  icon: LucideIcon;
+  icon: (active: boolean) => React.ReactNode;
 };
 
+const HomeIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path
+      d="M3 10L11 3L19 10V19H3V10Z"
+      fill={active ? 'currentColor' : 'none'}
+      fillOpacity={active ? 0.18 : 0}
+    />
+    <path d="M9 19v-5h4v5" />
+  </svg>
+);
+
+const LayersIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 3L3 7l8 4 8-4-8-4z" fill={active ? 'currentColor' : 'none'} />
+    <path d="M3 11l8 4 8-4" opacity={active ? 0.6 : 1} />
+    {!active && <path d="M3 15l8 4 8-4" />}
+  </svg>
+);
+
+const CompassIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+    <circle cx={11} cy={11} r={8} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.18 : 0} stroke="currentColor" strokeWidth={1.6} />
+    <path d="M14.5 7.5L12.5 12.5 7.5 14.5 9.5 9.5z" fill="currentColor" />
+  </svg>
+);
+
 const NAV_ITEMS: NavItem[] = [
-  { href: '/faces', labelKey: 'nav.faces', icon: Layers },
-  { href: '/', labelKey: 'nav.home', icon: Home },
-  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: Rss },
-  { href: '/notifications', labelKey: 'nav.notifications', icon: Bell },
-  { href: '/search', labelKey: 'nav.search', icon: Search },
+  { href: '/', labelKey: 'nav.home', icon: (a) => <HomeIcon active={a} /> },
+  { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
+  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: (a) => <CompassIcon active={a} /> },
 ];
 
 type Props = {
@@ -30,48 +53,50 @@ const BottomNav = ({ className }: Props = {}) => {
 
   return (
     <nav
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-zinc-700/60 bg-zinc-900/95 backdrop-blur-sm',
-        className
-      )}
+      className={cn('md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center', className)}
+      style={{
+        paddingBottom: 26,
+        paddingTop: 10,
+        background: 'rgba(248,246,241,0.92)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderTop: '0.5px solid var(--mf-line)',
+      }}
     >
-      <ul className="flex w-full max-w-sm items-center">
-        {NAV_ITEMS.map((item) => {
-          const isActive =
-            item.href === '/'
-              ? pathname === '/'
-              : pathname === item.href || pathname.startsWith(item.href + '/');
-          const Icon = item.icon;
-          return (
-            <li key={item.href} className="flex-1">
-              <Link
-                href={item.href}
-                className={cn(
-                  'flex flex-col items-center py-2 transition-colors duration-200',
-                  isActive ? 'text-violet-400' : 'text-zinc-500 hover:text-zinc-300'
-                )}
-              >
-                {/* アクティブインジケーター：背景ピル */}
-                <span
-                  className={cn(
-                    'flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200',
-                    isActive ? 'bg-violet-500/20' : 'bg-transparent'
-                  )}
-                >
-                  <Icon
-                    size={22}
-                    strokeWidth={isActive ? 2.5 : 2}
-                    className={cn('transition-all duration-200', isActive && '*:fill-current')}
-                  />
-                  <span className="whitespace-nowrap transition-all duration-200">
-                    {t(item.labelKey)}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {NAV_ITEMS.map((item) => {
+        const isActive =
+          item.href === '/'
+            ? pathname === '/' || pathname === `/${pathname.split('/')[1]}`
+            : pathname.includes(item.href);
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 3,
+              padding: '0 14px',
+              color: isActive ? 'var(--mf-brand)' : 'var(--mf-text-muted)',
+              textDecoration: 'none',
+            }}
+          >
+            {item.icon(isActive)}
+            <span
+              style={{
+                fontFamily: 'var(--mf-font-sans)',
+                fontSize: 10.5,
+                fontWeight: isActive ? 700 : 500,
+                letterSpacing: 0.4,
+              }}
+            >
+              {t(item.labelKey)}
+            </span>
+          </Link>
+        );
+      })}
     </nav>
   );
 };

@@ -4,18 +4,10 @@ import Link from 'next/link';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import ActivityCard from '@/components/ui/ActivityCard';
-import { useDetailPanel } from '@/lib/detail-panel-context';
-import { createLookupMap, getFaceTitle } from '@/lib/display';
+import SeedRow from '@/components/ui/SeedRow';
+import { createLookupMap } from '@/lib/display';
 import { useTranslations } from 'next-intl';
 
-/**
- * サブスク画面フィード。
- * currentUser がサブスクライブしているフェイスのアクティビティを
- * 時系列降順（最新が先頭）で表示する。
- *
- * 各カードには「誰の・何のフェイスの投稿か」を明示する。
- */
 type Props = {
   subscribedFaceIds: string[];
   subscribedActivities: Activity[];
@@ -24,10 +16,8 @@ type Props = {
 };
 
 const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users }: Props) => {
-  const { openActivity } = useDetailPanel();
   const t = useTranslations('subscriptionFeed');
 
-  // O(1) で引けるようにマップ化
   const faceMap = createLookupMap(
     faces.filter((face) => subscribedFaceIds.includes(face.id)),
     (face) => face.id
@@ -50,24 +40,22 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {subscribedActivities.map((activity) => {
+    <div style={{ padding: '0 16px' }}>
+      {subscribedActivities.map((activity, index) => {
         const face = faceMap.get(activity.faceId);
         const user = userMap.get(activity.userId);
         if (!face || !user) return null;
         return (
-          <li key={activity.id}>
-            <ActivityCard
-              activity={activity}
-              user={user}
-              faceTitle={getFaceTitle(face)}
-              faceId={face.id}
-              onClick={() => openActivity(activity.id)}
-            />
-          </li>
+          <SeedRow
+            key={activity.id}
+            activity={activity}
+            face={face}
+
+            noBorder={index === subscribedActivities.length - 1}
+          />
         );
       })}
-    </ul>
+    </div>
   );
 };
 

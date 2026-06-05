@@ -12,8 +12,9 @@
     "faceDetail": "Détail de la facette"
   },
   "sideNav": {
-    "facesSection": "Facettes",
-    "createFace": "Nouvelle facette"
+    "facesSection": "Mes facettes",
+    "createFace": "Nouvelle facette",
+    "newSeed": "Écrire une nouvelle graine"
   },
   "topBar": {
     "post": "Publier"
@@ -21,13 +22,22 @@
   "postModal": {
     "title": "Nouvelle publication",
     "ariaLabel": "Publier",
+    "cancel": "Annuler",
     "close": "Fermer",
     "faceLabel": "Facette",
+    "selectFace": "Sélectionner une facette",
+    "writeToThisFace": "Écrire dans cette facette",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Privé",
     "loading": "Chargement…",
     "noFaces": "Aucune facette disponible",
     "contentLabel": "Contenu",
     "textareaPlaceholder": "Notez quelque chose…",
     "addPhoto": "Ajouter une photo",
+    "addPhotoAriaLabel": "Joindre une image",
+    "addLink": "Ajouter un lien",
+    "charCount": "{n} car.",
+    "draftSaved": "Brouillon sauvegardé",
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
     "submit": "Publier",

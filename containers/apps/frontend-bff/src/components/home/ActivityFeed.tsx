@@ -3,26 +3,18 @@
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { useDetailPanel } from '@/lib/detail-panel-context';
-import { createLookupMap, getFaceTitle } from '@/lib/display';
-import ActivityCard from '@/components/ui/ActivityCard';
+import { createLookupMap } from '@/lib/display';
+import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 
 type ActivityFeedProps = {
-  currentUser: UserProfile;
+  currentUser?: UserProfile;
   faces: Face[];
   activities: Activity[];
-  /** フィルタするフェイス ID。null のときは全フェイスを表示 */
   selectedFaceId?: string | null;
 };
 
-/**
- * ホームフィード。
- * currentUser のアクティビティを時系列降順（最新が先頭）で表示する。
- * selectedFaceId が指定されている場合は該当フェイスのみに絞り込む。
- */
-const ActivityFeed = ({ currentUser, faces, activities, selectedFaceId }: ActivityFeedProps) => {
-  const { openActivity } = useDetailPanel();
+const ActivityFeed = ({ faces, activities, selectedFaceId }: ActivityFeedProps) => {
   const t = useTranslations('activityFeed');
   const displayActivities = selectedFaceId
     ? activities.filter((a) => a.faceId === selectedFaceId)
@@ -35,24 +27,20 @@ const ActivityFeed = ({ currentUser, faces, activities, selectedFaceId }: Activi
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <div style={{ padding: '0 16px' }}>
       {displayActivities.map((activity, index) => {
         const face = faceCache.get(activity.faceId);
         if (!face) return null;
         return (
-          <li key={activity.id}>
-            <ActivityCard
-              activity={activity}
-              user={currentUser}
-              faceTitle={getFaceTitle(face)}
-              faceId={face.id}
-              priority={index === 0}
-              onClick={() => openActivity(activity.id)}
-            />
-          </li>
+          <SeedRow
+            key={activity.id}
+            activity={activity}
+            face={face}
+            noBorder={index === displayActivities.length - 1}
+          />
         );
       })}
-    </ul>
+    </div>
   );
 };
 

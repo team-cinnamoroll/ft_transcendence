@@ -20,6 +20,7 @@ const meta: Meta<typeof FaceNavItem> = {
   },
   args: {
     face: SAMPLE_FACE,
+    seedCount: 5,
   },
 };
 
@@ -31,6 +32,12 @@ export const Default: Story = {};
 export const Active: Story = {
   args: {
     activeFaceId: 'face-1',
+  },
+};
+
+export const WithoutCount: Story = {
+  args: {
+    seedCount: undefined,
   },
 };
 

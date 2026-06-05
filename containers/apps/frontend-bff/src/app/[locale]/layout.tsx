@@ -48,7 +48,12 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <DetailPanelProvider>
             <div className="flex h-screen w-full overflow-hidden" style={{ background: 'var(--mf-bg-light)' }}>
-              <SideNav faces={myFaces} />
+              <SideNav
+                faces={myFaces}
+                user={currentUser}
+                faceCount={myFaces.length}
+                activityCount={myActivities.length}
+              />
               <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <AppHeader
                   user={currentUser}

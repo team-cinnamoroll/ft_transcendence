@@ -1,45 +1,71 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import FaceBadge from '@/components/ui/FaceBadge';
 import type { Face } from '@/types/face';
 
 type Props = {
   face: Face;
-  /** DetailPanel に表示中のフェイス ID（アクティブ状態の判定に使用）*/
   activeFaceId?: string;
-  /** クリック時のコールバック（Issue #79/#80 で DetailPanel と連携） */
+  seedCount?: number;
   onClick?: (face: Face) => void;
 };
 
-const FaceNavItem = ({ face, activeFaceId, onClick }: Props) => {
+const FaceNavItem = ({ face, activeFaceId, seedCount, onClick }: Props) => {
   const isActive = activeFaceId === face.id;
-
-  const handleClick = () => {
-    onClick?.(face);
-  };
 
   return (
     <li>
       <button
         type="button"
-        onClick={handleClick}
-        className={cn(
-          'flex items-center gap-2.5 w-full rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200',
-          isActive
-            ? 'bg-violet-500/20 text-violet-400'
-            : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-        )}
+        onClick={() => onClick?.(face)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          width: '100%',
+          padding: '7px 14px',
+          borderRadius: 8,
+          background: isActive ? 'rgba(30,42,74,0.07)' : 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+          transition: 'background 0.15s',
+        }}
       >
-        {/* 絵文字 or 頭文字フォールバック */}
-        {face.emoji ? (
-          <span className="text-base leading-none">{face.emoji}</span>
-        ) : (
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-xs font-bold text-zinc-300 shrink-0">
-            {face.name.slice(0, 1)}
+        <FaceBadge face={face} size={34} radius={9} />
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--mf-text)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {face.name}
+        </span>
+        {face.isPrivate && (
+          <svg
+            width={11}
+            height={11}
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="var(--mf-text-muted)"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x={2.5} y={6} width={9} height={6.5} rx={1.2} />
+            <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
+          </svg>
+        )}
+        {seedCount !== undefined && (
+          <span style={{ fontSize: 11, color: 'var(--mf-text-muted)', fontWeight: 600, flexShrink: 0 }}>
+            {seedCount}
           </span>
         )}
-
-        <span className="truncate text-sm">{face.name}</span>
       </button>
     </li>
   );

@@ -7,20 +7,13 @@ import { type Notification } from '@/types/notification';
 import { type UserProfile } from '@/types/user-profile';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
-import { cn } from '@/lib/utils';
-import { useDetailPanel } from '@/lib/detail-panel-context';
 import { useTranslations } from 'next-intl';
-
-// ─── 通知アイテム ──────────────────────────────────────────────
 
 type NotificationItemProps = {
   notification: Notification;
   fromUser: UserProfile;
   detail: string;
-  /** リンク通知の場合のアクティビティ本文スニペット（任意） */
   activitySnippet?: string;
-  /** リンク通知の場合の紐づくアクティビティID */
-  activityId?: string;
 };
 
 const NotificationItem = ({
@@ -28,29 +21,13 @@ const NotificationItem = ({
   fromUser,
   detail,
   activitySnippet,
-  activityId,
 }: NotificationItemProps) => {
-  const { openActivity, state } = useDetailPanel();
   const t = useTranslations('notificationList');
   const relativeTime = useRelativeTime();
   const isLink = notification.type === 'link';
 
-  const isSelected =
-    state.type === 'activity' && activityId !== undefined && state.activityId === activityId;
-
-  const handleClick = () => {
-    if (activityId) openActivity(activityId);
-  };
-
   return (
-    <li
-      onClick={handleClick}
-      className={cn(
-        'flex gap-3 rounded-2xl bg-zinc-800/60 p-4 transition',
-        activityId && 'md:cursor-pointer hover:bg-zinc-800',
-        isSelected && 'ring-1 ring-violet-500/40 bg-zinc-800'
-      )}
-    >
+    <li className="flex gap-3 rounded-2xl bg-zinc-800/60 p-4 transition">
       {/* アバター */}
       <div className="shrink-0">
         <Avatar src={fromUser.avatarUrl} alt={fromUser.name} size="md" />
@@ -86,13 +63,6 @@ const NotificationItem = ({
   );
 };
 
-// ─── NotificationList ──────────────────────────────────────────
-
-/**
- * 通知一覧コンポーネント（Client Component）。
- * notificationRepository から全通知を取得し、時系列降順で表示する。
- * リンク通知のアイテムをクリックすると DetailPanel に紐づくアクティビティを表示する。
- */
 type Props = {
   notifications: Notification[];
   users: UserProfile[];
@@ -131,12 +101,10 @@ const NotificationList = ({ notifications, users, faces, activities }: Props) =>
               fromUser={fromUser}
               detail={detail}
               activitySnippet={activity?.body}
-              activityId={notification.activityId}
             />
           );
         }
 
-        // subscribe
         const face = faceMap.get(notification.faceId);
         const faceName = face ? getFaceTitle(face) : notification.faceId;
         const detail = t('subscribedAction', { faceName });

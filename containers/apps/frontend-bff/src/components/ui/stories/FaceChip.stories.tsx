@@ -13,21 +13,30 @@ const meta: Meta<typeof FaceChip> = {
 export default meta;
 type Story = StoryObj<typeof FaceChip>;
 
-export const Violet: Story = {
+export const Small: Story = {
   args: {
     title: '仕事',
     faceId: 'face-1',
+    size: 'sm',
   },
 };
 
-export const Sky: Story = {
+export const Medium: Story = {
+  args: {
+    title: '仕事',
+    faceId: 'face-1',
+    size: 'md',
+  },
+};
+
+export const Water: Story = {
   args: {
     title: 'プライベート',
     faceId: 'face-2',
   },
 };
 
-export const Emerald: Story = {
+export const Wisteria: Story = {
   args: {
     title: '趣味',
     faceId: 'face-3',

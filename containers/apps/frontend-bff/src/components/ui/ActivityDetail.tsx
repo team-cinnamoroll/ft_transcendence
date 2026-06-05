@@ -7,7 +7,6 @@ import { X } from 'lucide-react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { useDetailPanel } from '@/lib/detail-panel-context';
 import { getFaceTitle } from '@/lib/display';
 import Avatar from './Avatar';
 import Badge from './Badge';
@@ -18,6 +17,7 @@ import { useTranslations } from 'next-intl';
 
 type ActivityDetailProps = {
   activityId: string;
+  onClose: () => void;
 };
 
 type ActivityDetailApiResponse = {
@@ -26,8 +26,7 @@ type ActivityDetailApiResponse = {
   face: Face | null;
 };
 
-const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
-  const { close } = useDetailPanel();
+const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
   const t = useTranslations('activityDetail');
   const relativeTime = useRelativeTime();
 
@@ -78,7 +77,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
           <button
             type="button"
             aria-label={t('close')}
-            onClick={close}
+            onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
             <X size={16} />
@@ -103,7 +102,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
           <button
             type="button"
             aria-label={t('close')}
-            onClick={close}
+            onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
             <X size={16} />
@@ -128,7 +127,7 @@ const ActivityDetail = ({ activityId }: ActivityDetailProps) => {
         <button
           type="button"
           aria-label={t('close')}
-          onClick={close}
+          onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
         >
           <X size={16} />

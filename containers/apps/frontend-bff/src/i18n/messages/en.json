@@ -12,8 +12,9 @@
     "faceDetail": "Face Detail"
   },
   "sideNav": {
-    "facesSection": "Faces",
-    "createFace": "New Face"
+    "facesSection": "My Faces",
+    "createFace": "New Face",
+    "newSeed": "Write a new seed"
   },
   "topBar": {
     "post": "Post"
@@ -21,13 +22,22 @@
   "postModal": {
     "title": "Post",
     "ariaLabel": "Post",
+    "cancel": "Cancel",
     "close": "Close",
     "faceLabel": "Face",
+    "selectFace": "Select face",
+    "writeToThisFace": "Write to this face",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Private",
     "loading": "Loading…",
     "noFaces": "No faces available",
     "contentLabel": "Content",
     "textareaPlaceholder": "Jot something down…",
     "addPhoto": "Add photo",
+    "addPhotoAriaLabel": "Attach image",
+    "addLink": "Add link",
+    "charCount": "{n} chars",
+    "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
     "submit": "Post",

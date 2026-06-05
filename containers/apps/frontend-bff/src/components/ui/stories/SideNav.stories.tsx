@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import SideNav from '../SideNav';
 import { faces } from '@/mocks/faces';
+import { currentUser } from '@/mocks/users';
+import { activities } from '@/mocks/activities';
 
 const meta: Meta<typeof SideNav> = {
   title: 'UI/SideNav',
@@ -10,12 +12,16 @@ const meta: Meta<typeof SideNav> = {
     layout: 'fullscreen',
     viewport: { defaultViewport: 'pc' },
   },
+  args: {
+    user: currentUser,
+    faceCount: faces.filter((f) => f.userId === 'user-1').length,
+    activityCount: activities.filter((a) => a.userId === 'user-1').length,
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof SideNav>;
 
-// SideNav は md 以上でのみ表示される（md:flex）
 const wrapperStyle: React.CSSProperties = {
   display: 'flex',
   minHeight: '100vh',

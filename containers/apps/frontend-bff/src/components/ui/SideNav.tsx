@@ -1,132 +1,296 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Bell, Search, Rss, Plus, type LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import FaceNavItem from '@/components/ui/FaceNavItem';
-import CreateFaceModal from '@/components/face/CreateFaceModal';
-import { useDetailPanel } from '@/lib/detail-panel-context';
-import type { Face } from '@/types/face';
 import { useTranslations } from 'next-intl';
+import Wordmark from '@/components/ui/Wordmark';
+import FaceNavItem from '@/components/ui/FaceNavItem';
+import AccountMenu from '@/components/ui/AccountMenu';
+import CreateFaceModal from '@/components/face/CreateFaceModal';
+import PostModal from '@/components/ui/PostModal';
+import type { Face } from '@/types/face';
+import type { UserProfile } from '@/types/user-profile';
 
 type NavItem = {
   href: string;
   labelKey: string;
-  icon: LucideIcon;
+  icon: (active: boolean) => React.ReactNode;
 };
 
+const HomeIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path
+      d="M3 10L11 3L19 10V19H3V10Z"
+      fill={active ? 'currentColor' : 'none'}
+      fillOpacity={active ? 0.18 : 0}
+    />
+    <path d="M9 19v-5h4v5" />
+  </svg>
+);
+
+const LayersIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 3L3 7l8 4 8-4-8-4z" fill={active ? 'currentColor' : 'none'} />
+    <path d="M3 11l8 4 8-4" opacity={active ? 0.6 : 1} />
+    {!active && <path d="M3 15l8 4 8-4" />}
+  </svg>
+);
+
+const CompassIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+    <circle cx={11} cy={11} r={8} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.18 : 0} stroke="currentColor" strokeWidth={1.6} />
+    <path d="M14.5 7.5L12.5 12.5 7.5 14.5 9.5 9.5z" fill="currentColor" />
+  </svg>
+);
+
+const BellIcon = ({ active }: { active: boolean }) => (
+  <svg width={22} height={22} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 14.5h11l-1.3-1.7c-.5-.7-.8-1.5-.8-2.3V7.8a3.4 3.4 0 00-6.8 0v2.7c0 .8-.3 1.6-.8 2.3l-1.3 1.7z" />
+    <path d="M8.5 16.5a1.5 1.5 0 003 0" />
+  </svg>
+);
+
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', labelKey: 'nav.home', icon: Home },
-  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: Rss },
-  { href: '/notifications', labelKey: 'nav.notifications', icon: Bell },
-  { href: '/search', labelKey: 'nav.search', icon: Search },
+  { href: '/', labelKey: 'nav.home', icon: (a) => <HomeIcon active={a} /> },
+  { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
+  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: (a) => <CompassIcon active={a} /> },
+  { href: '/notifications', labelKey: 'nav.notifications', icon: (a) => <BellIcon active={a} /> },
 ];
 
 type Props = {
   faces: Face[];
+  user: UserProfile;
+  faceCount: number;
+  activityCount: number;
 };
 
-const SideNav = ({ faces }: Props) => {
+const SideNav = ({ faces, user, faceCount, activityCount }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { openFace } = useDetailPanel();
   const t = useTranslations();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const userButtonRef = useRef<HTMLButtonElement>(null);
 
-  // パス名からアクティブなフェイスIDを導出
   const activeFaceId = pathname.startsWith('/faces/') ? pathname.split('/')[2] : undefined;
-
-  const handleOpenCreateModal = () => setIsCreateModalOpen(true);
-  const handleCloseCreateModal = () => setIsCreateModalOpen(false);
-  const handleCreateFace = () => {
-    // モック実装: 作成後はモーダルを閉じるだけ（実際の永続化は行わない）
-    setIsCreateModalOpen(false);
-  };
 
   const handleFaceNavItemClick = (face: Face) => {
     router.push(`/faces/${face.id}`);
-    openFace(face.id);
   };
 
   return (
     <>
-      <nav className="hidden md:flex flex-col w-60 shrink-0 sticky top-0 h-screen overflow-y-auto pt-6 pb-6 px-3 border-r border-zinc-800">
-        {/* ロゴ・アプリ名 */}
-        <div className="px-3 pb-4">
-          <span className="text-xl font-bold text-violet-400 tracking-tight">MultiFace</span>
+      <nav
+        className="hidden md:flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto mf-scroll"
+        style={{
+          width: 260,
+          padding: '24px 14px',
+          borderRight: '0.5px solid var(--mf-line)',
+        }}
+      >
+        {/* Wordmark */}
+        <div style={{ padding: '0 12px 28px' }}>
+          <Wordmark size={26} />
         </div>
 
-        {/* ナビゲーションアイテム */}
-        <ul className="flex flex-col gap-1">
+        {/* メインナビゲーション */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === '/'
-                ? pathname === '/'
-                : pathname === item.href || pathname.startsWith(item.href + '/');
-            const Icon = item.icon;
+                ? pathname === '/' || pathname === `/${pathname.split('/')[1]}`
+                : pathname.includes(item.href);
+
             return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                    isActive
-                      ? 'bg-violet-500/20 text-violet-400'
-                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-                  )}
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: '11px 14px',
+                  borderRadius: 11,
+                  background: isActive ? 'rgba(30,42,74,0.10)' : 'transparent',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s',
+                }}
+              >
+                <span
+                  style={{
+                    color: isActive ? 'var(--mf-brand)' : 'var(--mf-text-sub)',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
                 >
-                  <Icon
-                    size={20}
-                    strokeWidth={isActive ? 2.5 : 2}
-                    className={cn(
-                      'shrink-0 transition-all duration-200',
-                      isActive && '*:fill-current'
-                    )}
-                  />
-                  <span>{t(item.labelKey)}</span>
-                </Link>
-              </li>
+                  {item.icon(isActive)}
+                </span>
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: isActive ? 700 : 600,
+                    color: isActive ? 'var(--mf-brand)' : 'var(--mf-text)',
+                    letterSpacing: 0.1,
+                  }}
+                >
+                  {t(item.labelKey)}
+                </div>
+              </Link>
             );
           })}
-        </ul>
+        </div>
 
-        {/* 区切り線 */}
-        <hr className="my-3 border-t border-zinc-800" />
+        {/* 投稿ボタン */}
+        <button
+          type="button"
+          onClick={() => setIsPostModalOpen(true)}
+          style={{
+            marginTop: 18,
+            padding: '13px 16px',
+            borderRadius: 12,
+            background: 'var(--mf-accent)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: 0.3,
+            boxShadow: '0 4px 14px rgba(212,146,42,0.25)',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <svg width={16} height={16} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 17l1-3.5L13 4.5l3.5 3.5L7.5 17H3z" />
+            <path d="M12 5.5l3.5 3.5" />
+          </svg>
+          {t('sideNav.newSeed')}
+        </button>
 
-        {/* フェイス一覧ラベル */}
-        <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-600">
-          {t('sideNav.facesSection')}
-        </p>
-
-        {/* フェイスリスト */}
-        <ul className="flex flex-col gap-0.5">
-          {faces.map((face) => (
-            <FaceNavItem
-              key={face.id}
-              face={face}
-              activeFaceId={activeFaceId}
-              onClick={handleFaceNavItemClick}
-            />
-          ))}
-        </ul>
+        {/* マイフェイスセクション */}
+        <div style={{ marginTop: 28 }}>
+          <div
+            style={{
+              padding: '0 14px 8px',
+              fontSize: 10.5,
+              color: 'var(--mf-text-muted)',
+              fontWeight: 700,
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+            }}
+          >
+            {t('sideNav.facesSection')}
+          </div>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {faces.map((face) => (
+              <FaceNavItem
+                key={face.id}
+                face={face}
+                activeFaceId={activeFaceId}
+                onClick={handleFaceNavItemClick}
+              />
+            ))}
+          </ul>
+        </div>
 
         {/* 新規フェイス作成ボタン */}
         <button
           type="button"
-          onClick={handleOpenCreateModal}
-          className="flex items-center gap-2 w-full rounded-xl px-3 py-2 mt-2 text-sm font-medium text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 border border-dashed border-zinc-700"
+          onClick={() => setIsCreateModalOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+            padding: '8px 14px',
+            marginTop: 8,
+            borderRadius: 8,
+            background: 'transparent',
+            border: '1.5px dashed var(--mf-line)',
+            cursor: 'pointer',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: 'var(--mf-text-muted)',
+          }}
         >
-          <Plus size={14} />
+          <svg width={14} height={14} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+            <path d="M10 4v12M4 10h12" />
+          </svg>
           {t('sideNav.createFace')}
+        </button>
+
+        <div style={{ flex: 1 }} />
+
+        {/* ユーザーピル */}
+        <button
+          ref={userButtonRef}
+          type="button"
+          onClick={() => setMenuOpen((p) => !p)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 12px',
+            borderRadius: 12,
+            background: 'var(--mf-surface)',
+            border: '0.5px solid var(--mf-line)',
+            cursor: 'pointer',
+            width: '100%',
+          }}
+        >
+          <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <Image
+              src={user.avatarUrl}
+              alt={user.name}
+              width={44}
+              height={44}
+              style={{ objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'var(--mf-text)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                textAlign: 'left',
+              }}
+            >
+              {user.name}
+            </div>
+          </div>
+          <svg width={16} height={16} viewBox="0 0 18 18" fill="var(--mf-text-muted)">
+            <circle cx={3} cy={9} r={1.5} /><circle cx={9} cy={9} r={1.5} /><circle cx={15} cy={9} r={1.5} />
+          </svg>
         </button>
       </nav>
 
+      <AccountMenu
+        user={user}
+        faceCount={faceCount}
+        activityCount={activityCount}
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        anchorRef={userButtonRef}
+      />
+
       <CreateFaceModal
         isOpen={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-        onCreate={handleCreateFace}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreate={() => setIsCreateModalOpen(false)}
+      />
+
+      <PostModal
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
       />
     </>
   );

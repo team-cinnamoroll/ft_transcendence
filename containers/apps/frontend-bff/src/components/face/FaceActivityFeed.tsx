@@ -4,25 +4,19 @@ import { useMemo } from 'react';
 import { type Face } from '@/types/face';
 import type { Activity } from '@/types/activity';
 import type { UserProfile } from '@/types/user-profile';
-import { useDetailPanel } from '@/lib/detail-panel-context';
-import { createLookupMap, getFaceTitle } from '@/lib/display';
-import UIActivityCard from '@/components/ui/ActivityCard';
+import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 import type { SortOrder } from './FaceHeader';
 
 type FaceActivityFeedProps = {
   face: Face;
   activities: Activity[];
-  users: UserProfile[];
+  users?: UserProfile[];
   sortOrder?: SortOrder;
 };
 
-const FaceActivityFeed = ({ face, activities, users, sortOrder = 'newest' }: FaceActivityFeedProps) => {
-  const { openActivity } = useDetailPanel();
+const FaceActivityFeed = ({ face, activities, sortOrder = 'newest' }: FaceActivityFeedProps) => {
   const t = useTranslations('faceActivityFeed');
-
-  const userMap = createLookupMap(users, (user) => user.id);
-  const faceTitle = getFaceTitle(face);
 
   const sorted = useMemo(() => {
     if (sortOrder === 'oldest') return [...activities].reverse();
@@ -39,23 +33,16 @@ const FaceActivityFeed = ({ face, activities, users, sortOrder = 'newest' }: Fac
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {sorted.map((activity) => {
-        const user = userMap.get(activity.userId);
-        if (!user) return null;
-        return (
-          <li key={activity.id}>
-            <UIActivityCard
-              activity={activity}
-              user={user}
-              faceTitle={faceTitle}
-              faceId={face.id}
-              onClick={() => openActivity(activity.id)}
-            />
-          </li>
-        );
-      })}
-    </ul>
+    <div style={{ padding: '0 16px' }}>
+      {sorted.map((activity, index) => (
+        <SeedRow
+          key={activity.id}
+          activity={activity}
+          face={face}
+          noBorder={index === sorted.length - 1}
+        />
+      ))}
+    </div>
   );
 };
 

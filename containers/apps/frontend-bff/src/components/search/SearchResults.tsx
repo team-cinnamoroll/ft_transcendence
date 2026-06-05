@@ -3,10 +3,7 @@
 import { type Activity } from '@/types/activity';
 import { type UserProfile } from '@/types/user-profile';
 import { type Face } from '@/types/face';
-import ActivityCard from '@/components/ui/ActivityCard';
-import { getFaceTitle } from '@/lib/display';
-import { cn } from '@/lib/utils';
-import { useDetailPanel } from '@/lib/detail-panel-context';
+import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 
 export type SearchActivityResultItem = {
@@ -22,19 +19,12 @@ type SearchResultsProps = {
   subscribedFaceIds: string[];
 };
 
-/**
- * 検索結果一覧。
- * - クエリ未入力: 検索促進メッセージを表示
- * - クエリあり・0件: 該当なしメッセージを表示
- * - クエリあり・N件: フェイス一覧 + アクティビティ一覧を表示
- */
 const SearchResults = ({
   query,
   activityResults,
   faceResults,
   subscribedFaceIds,
 }: SearchResultsProps) => {
-  const { state, openActivity, openFace } = useDetailPanel();
   const t = useTranslations('searchResults');
   if (!query) {
     return (
@@ -70,17 +60,10 @@ const SearchResults = ({
           <ul className="flex flex-col gap-2">
             {faceResults.map((face) => {
               const isSubscribed = subscribedFaceIds.includes(face.id);
-              const isSelected = state.type === 'face' && state.faceId === face.id;
               return (
                 <li
                   key={face.id}
-                  onClick={() => {
-                    if (window.innerWidth >= 768) openFace(face.id);
-                  }}
-                  className={cn(
-                    'flex items-center justify-between gap-3 rounded-2xl bg-zinc-800/60 px-4 py-3 transition md:cursor-pointer',
-                    isSelected ? 'ring-1 ring-violet-500/40 bg-zinc-800' : 'hover:bg-zinc-800'
-                  )}
+                  className="flex items-center justify-between gap-3 rounded-2xl bg-zinc-800/60 px-4 py-3 transition hover:bg-zinc-800"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     {face.emoji && <span className="text-2xl">{face.emoji}</span>}
@@ -120,19 +103,17 @@ const SearchResults = ({
             {t('activitiesSection')}
             <span className="ml-2 text-violet-400">{activityResults.length}</span>
           </h2>
-          <ul className="flex flex-col gap-3">
-            {activityResults.map(({ activity, user, face }) => (
-              <li key={activity.id}>
-                <ActivityCard
-                  activity={activity}
-                  user={user}
-                  faceTitle={getFaceTitle(face)}
-                  faceId={face.id}
-                  onClick={() => openActivity(activity.id)}
-                />
-              </li>
+          <div style={{ padding: '0 4px' }}>
+            {activityResults.map(({ activity, face }, index) => (
+              <SeedRow
+                key={activity.id}
+                activity={activity}
+                face={face}
+
+                noBorder={index === activityResults.length - 1}
+              />
             ))}
-          </ul>
+          </div>
         </section>
       )}
     </div>

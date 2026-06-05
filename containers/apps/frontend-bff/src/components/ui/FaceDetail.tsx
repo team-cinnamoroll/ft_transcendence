@@ -5,14 +5,14 @@ import { X } from 'lucide-react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { useDetailPanel } from '@/lib/detail-panel-context';
-import { createLookupMap, getFaceTitle } from '@/lib/display';
+import { createLookupMap } from '@/lib/display';
 import FaceHeader from '@/components/face/FaceHeader';
-import ActivityCard from './ActivityCard';
+import SeedRow from './SeedRow';
 import { useTranslations } from 'next-intl';
 
 type FaceDetailProps = {
   faceId: string;
+  onClose: () => void;
 };
 
 type FaceDetailApiResponse = {
@@ -22,8 +22,7 @@ type FaceDetailApiResponse = {
   users: UserProfile[];
 };
 
-const FaceDetail = ({ faceId }: FaceDetailProps) => {
-  const { close, openActivity } = useDetailPanel();
+const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
   const t = useTranslations('faceDetail');
 
   const [data, setData] = useState<FaceDetailApiResponse | null>(null);
@@ -73,7 +72,7 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
           <button
             type="button"
             aria-label={t('close')}
-            onClick={close}
+            onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
             <X size={16} />
@@ -101,7 +100,7 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
           <button
             type="button"
             aria-label={t('close')}
-            onClick={close}
+            onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
             <X size={16} />
@@ -114,9 +113,8 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
     );
   }
 
-  const user = userMap.get(face.userId);
   const isOwner = face.userId === currentUser.id;
-  const faceTitle = getFaceTitle(face) || face.name;
+  const user = userMap.get(face.userId);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -126,14 +124,14 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
         <button
           type="button"
           aria-label={t('close')}
-          onClick={close}
+          onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
         >
           <X size={16} />
         </button>
       </div>
 
-      {/* FaceHeader（既存コンポーネントを流用） */}
+      {/* FaceHeader */}
       <FaceHeader face={face} isOwner={isOwner} />
 
       {/* 区切り */}
@@ -152,14 +150,12 @@ const FaceDetail = ({ faceId }: FaceDetailProps) => {
             if (!activityUser) return null;
 
             return (
-              <ActivityCard
+              <SeedRow
                 key={activity.id}
                 activity={activity}
-                user={activityUser}
-                faceTitle={faceTitle}
-                faceId={faceId}
-                priority={i === 0}
-                onClick={() => openActivity(activity.id)}
+                face={face}
+
+                noBorder={i === activities.length - 1}
               />
             );
           })
