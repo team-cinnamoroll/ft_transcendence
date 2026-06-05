@@ -13,7 +13,7 @@ export type LayoutData = {
   myFaces: Face[];
   myActivities: Activity[];
   subscribedFaces: Face[];
-  latestActivityByFaceId: Map<string, Activity>;
+  latestActivityByFaceId: Record<string, Activity>;
   allUsers: UserProfile[];
 };
 
@@ -31,15 +31,15 @@ export async function getLayoutData(): Promise<LayoutData> {
     await Promise.all(subscribedFaceIds.map((id) => findFaceById(id)))
   ).filter((f): f is Face => f !== null);
 
-  // 各サブスクフェイスの最新アクティビティを取得
-  const latestActivityByFaceId = new Map<string, Activity>();
-  await Promise.all(
+  // 各サブスクフェイスの最新アクティビティを取得（Record で保持 — Map は JSON 非シリアライズのため）
+  const latestActivityEntries = await Promise.all(
     subscribedFaces.map(async (face) => {
       const faceActivities = await listActivitiesByFaceId(face.id);
-      if (faceActivities.length > 0) {
-        latestActivityByFaceId.set(face.id, faceActivities[0]);
-      }
+      return faceActivities.length > 0 ? ([face.id, faceActivities[0]] as const) : null;
     })
+  );
+  const latestActivityByFaceId: Record<string, Activity> = Object.fromEntries(
+    latestActivityEntries.filter((e): e is [string, Activity] => e !== null)
   );
 
   return {

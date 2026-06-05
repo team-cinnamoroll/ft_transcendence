@@ -181,7 +181,7 @@ const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
 
 type CollectionRailProps = {
   subscribedFaces: Face[];
-  latestActivityByFaceId: Map<string, Activity>;
+  latestActivityByFaceId: Record<string, Activity>;
   users: UserProfile[];
 };
 
@@ -202,7 +202,7 @@ const CollectionRail = ({
         <RailCard title={t('subscribedFaces')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {subscribedFaces.map((face) => {
-              const lastAct = latestActivityByFaceId.get(face.id);
+              const lastAct = latestActivityByFaceId[face.id];
               const owner = userMap.get(face.userId);
               const hasUnread = lastAct && lastAct.createdAt >= UNREAD_CUTOFF;
               return (
@@ -293,7 +293,7 @@ export type ContextRailProps = {
   faces: Face[];
   activities: Activity[];
   subscribedFaces: Face[];
-  latestActivityByFaceId: Map<string, Activity>;
+  latestActivityByFaceId: Record<string, Activity>;
   users: UserProfile[];
 };
 

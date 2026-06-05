@@ -42,18 +42,15 @@ const mockSubscribedFace: Face = {
   isPrivate: false,
 };
 
-const mockLatestActivityByFaceId = new Map<string, Activity>([
-  [
-    'face-sub-1',
-    {
-      id: 'act-sub-1',
-      faceId: 'face-sub-1',
-      userId: 'user-2',
-      body: '今朝の一杯',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
-]);
+const mockLatestActivityByFaceId: Record<string, Activity> = {
+  'face-sub-1': {
+    id: 'act-sub-1',
+    faceId: 'face-sub-1',
+    userId: 'user-2',
+    body: '今朝の一杯',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+};
 
 const mockUsers: UserProfile[] = [
   mockUser,
@@ -87,7 +84,7 @@ export const WritingRail: Story = {
     faces: mockFaces,
     activities: mockActivities,
     subscribedFaces: [],
-    latestActivityByFaceId: new Map(),
+    latestActivityByFaceId: {},
     users: mockUsers,
   },
 };
