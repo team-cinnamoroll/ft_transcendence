@@ -204,6 +204,20 @@
     "edit": "Edit",
     "linksCount": "{count} links"
   },
+  "seedDetail": {
+    "title": "Seed",
+    "backAriaLabel": "Go back",
+    "moreOptions": "More options",
+    "public": "Public",
+    "private": "Private",
+    "linkToThisSeed": "Link to this seed",
+    "edit": "Edit",
+    "outgoingLinks": "Links from this seed",
+    "incomingLinks": "Links to this seed",
+    "linksUnit": "",
+    "showMore": "Show {count} more →",
+    "imageAlt": "Image {n}"
+  },
   "contextRail": {
     "onThisDay": "On This Day",
     "yearsAgo": "{n} year(s) ago",

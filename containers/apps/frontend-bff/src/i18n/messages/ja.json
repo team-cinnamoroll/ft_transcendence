@@ -204,6 +204,20 @@
     "edit": "編集",
     "linksCount": "{count} 件のリンク"
   },
+  "seedDetail": {
+    "title": "シード",
+    "backAriaLabel": "前のページに戻る",
+    "moreOptions": "その他",
+    "public": "公開",
+    "private": "非公開",
+    "linkToThisSeed": "このシードにリンク",
+    "edit": "編集",
+    "outgoingLinks": "このシードのリンク",
+    "incomingLinks": "このシードへのリンク",
+    "linksUnit": "件",
+    "showMore": "さらに {count} 件を見る →",
+    "imageAlt": "画像 {n}"
+  },
   "contextRail": {
     "onThisDay": "一年前の今日",
     "yearsAgo": "{n}年前",
