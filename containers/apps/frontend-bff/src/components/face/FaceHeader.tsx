@@ -6,14 +6,30 @@ import { type Face } from '@/types/face';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
+export type SortOrder = 'newest' | 'oldest' | 'images';
+
 type FaceHeaderProps = {
   face: Face;
   isOwner?: boolean;
+  onSortChange?: (sort: SortOrder) => void;
 };
 
-const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
+const FaceHeader = ({ face, isOwner = false, onSortChange }: FaceHeaderProps) => {
   const [subscribed, setSubscribed] = useState(false);
+  const [sort, setSort] = useState<SortOrder>('newest');
   const t = useTranslations('face');
+  const tHeader = useTranslations('faceHeader');
+
+  const handleSort = (s: SortOrder) => {
+    setSort(s);
+    onSortChange?.(s);
+  };
+
+  const SORT_OPTIONS: { key: SortOrder; label: string }[] = [
+    { key: 'newest', label: tHeader('newest') },
+    { key: 'oldest', label: tHeader('oldest') },
+    { key: 'images', label: tHeader('images') },
+  ];
 
   const handleSubscribe = () => {
     setSubscribed((prev) => !prev);
@@ -63,7 +79,7 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
                     : 'bg-violet-600 text-white hover:bg-violet-500'
                 )}
               >
-                {subscribed ? '✓ サブスク中' : 'サブスクする'}
+                {subscribed ? t('subscribed') : t('subscribe')}
               </button>
             )}
           </div>
@@ -107,6 +123,25 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
           )}
         </div>
       )}
+
+      {/* ソートピル */}
+      <div className="flex items-center gap-2 overflow-x-auto px-4 py-2.5 border-b border-zinc-800 mf-scroll">
+        {SORT_OPTIONS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handleSort(key)}
+            className={cn(
+              'shrink-0 rounded-full px-3.5 py-1 text-xs font-medium transition-colors whitespace-nowrap',
+              sort === key
+                ? 'bg-zinc-100 text-zinc-900'
+                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

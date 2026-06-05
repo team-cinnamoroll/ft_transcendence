@@ -90,7 +90,13 @@
     "private": "非公開"
   },
   "faceActivityFeed": {
-    "noActivities": "アクティビティがありません"
+    "noActivities": "アクティビティがありません",
+    "noImageActivities": "画像付きのアクティビティがありません"
+  },
+  "faceHeader": {
+    "newest": "新しい順",
+    "oldest": "古い順",
+    "images": "画像あり"
   },
   "activityFeed": {
     "noActivities": "アクティビティがありません"

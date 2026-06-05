@@ -90,7 +90,13 @@
     "private": "Private"
   },
   "faceActivityFeed": {
-    "noActivities": "No activities yet"
+    "noActivities": "No activities yet",
+    "noImageActivities": "No activities with images"
+  },
+  "faceHeader": {
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "images": "With images"
   },
   "activityFeed": {
     "noActivities": "No activities yet"
