@@ -1,6 +1,5 @@
 import HomeProfile from '@/components/home/HomeProfile';
 import HomeClient from '@/components/home/HomeClient';
-import FAB from '@/components/ui/FAB';
 import { listActivitiesByUserId } from '@/server/usecases/activities';
 import { getViewerContext } from '@/server/usecases/viewer';
 import { getTranslations } from 'next-intl/server';
@@ -25,7 +24,6 @@ export default async function Home() {
         <HomeClient currentUser={currentUser} faces={myFaces} activities={activities} />
       </main>
 
-      <FAB className="md:hidden" />
     </div>
   );
 }

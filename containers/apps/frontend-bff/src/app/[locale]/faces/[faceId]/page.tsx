@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import FaceHeader from '@/components/face/FaceHeader';
 import FaceActivityFeed from '@/components/face/FaceActivityFeed';
-import FAB from '@/components/ui/FAB';
 import { listActivitiesByFaceId } from '@/server/usecases/activities';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
@@ -68,8 +67,6 @@ const FaceDetailPage = async ({ params }: Props) => {
         </section>
       </main>
 
-      {/* 自分のフェイスのみ投稿FABを表示 */}
-      {face.userId === currentUser.id && <FAB defaultFaceId={face.id} className="md:hidden" />}
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import SubscriptionFeed from '@/components/subscriptions/SubscriptionFeed';
-import FAB from '@/components/ui/FAB';
 import { listActivitiesByFaceIds } from '@/server/usecases/activities';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
@@ -36,7 +35,6 @@ export default async function SubscriptionsPage() {
         />
       </main>
 
-      <FAB className="md:hidden" />
     </div>
   );
 }

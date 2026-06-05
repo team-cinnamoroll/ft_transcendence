@@ -41,28 +41,20 @@
   --mf-face-grass: #a89050;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ededed;
-  }
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--mf-bg-light);
+  --color-foreground: var(--mf-text);
   --font-sans: var(--mf-font-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--mf-bg-light);
+  color: var(--mf-text);
   font-family: var(--mf-font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* スクロールバーを細く・控えめに */
+/* カスタムスクロールバー（Midnight Ink） */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -72,19 +64,19 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a; /* zinc-800 */
+  background: var(--mf-line);
   border-radius: 9999px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46; /* zinc-700 */
+  background: var(--mf-text-faint);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #27272a transparent;
+  scrollbar-color: var(--mf-line) transparent;
 }
 
 /* スクロールバー非表示ユーティリティ */
