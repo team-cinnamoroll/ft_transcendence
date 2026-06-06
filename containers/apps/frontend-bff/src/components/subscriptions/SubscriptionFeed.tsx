@@ -283,6 +283,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
                 >
                   {subscribedFaces.map((face) => {
                     const isSelected = selectedFaceId === face.id;
+                    const hasUnread = subscribedActivities.some((a) => a.faceId === face.id);
                     return (
                       <button
                         key={face.id}
@@ -294,7 +295,13 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
                           border: 'none', cursor: 'pointer', textAlign: 'left',
                         }}
                       >
-                        <FaceBadge face={face} size={28} radius={8} />
+                        <div style={{
+                          position: 'relative', flexShrink: 0,
+                          boxShadow: hasUnread && !isSelected ? '0 0 0 2px var(--mf-surface), 0 0 0 3px var(--mf-accent)' : 'none',
+                          borderRadius: 9,
+                        }}>
+                          <FaceBadge face={face} size={32} radius={9} />
+                        </div>
                         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {getFaceTitle(face)}
                         </span>
