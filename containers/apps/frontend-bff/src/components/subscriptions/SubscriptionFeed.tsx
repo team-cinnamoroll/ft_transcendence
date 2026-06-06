@@ -1,12 +1,17 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import SeedRow from '@/components/ui/SeedRow';
-import { createLookupMap } from '@/lib/display';
 import { useTranslations } from 'next-intl';
+import SeedRow from '@/components/ui/SeedRow';
+import DateBar from '@/components/ui/DateBar';
+import FaceBadge from '@/components/ui/FaceBadge';
+import { createLookupMap, getFaceTitle, getFaceColor } from '@/lib/display';
+
+type Tab = 'timeline' | 'subscriptions';
 
 type Props = {
   subscribedFaceIds: string[];
@@ -15,46 +20,353 @@ type Props = {
   users: UserProfile[];
 };
 
-const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users }: Props) => {
+const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users: _users }: Props) => {
+  const [activeTab, setActiveTab] = useState<Tab>('timeline');
+  const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
+  const [showFaceFilter, setShowFaceFilter] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('subscriptionFeed');
 
-  const faceMap = createLookupMap(
-    faces.filter((face) => subscribedFaceIds.includes(face.id)),
-    (face) => face.id
+  const subscribedFaces = useMemo(
+    () => faces.filter((f) => subscribedFaceIds.includes(f.id)),
+    [faces, subscribedFaceIds]
   );
-  const userMap = createLookupMap(users, (user) => user.id);
 
-  if (subscribedActivities.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-4xl">🔔</p>
-        <p className="text-sm text-zinc-400">{t('noSubscriptions')}</p>
-        <Link
-          href="/search"
-          className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 active:bg-violet-700"
-        >
-          {t('searchLink')}
-        </Link>
-      </div>
+  const faceMap = useMemo(() => createLookupMap(subscribedFaces, (face) => face.id), [subscribedFaces]);
+
+  const filteredActivities = useMemo(() => {
+    let result = selectedFaceId
+      ? subscribedActivities.filter((a) => a.faceId === selectedFaceId)
+      : subscribedActivities;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((a) => {
+        const face = faceMap.get(a.faceId);
+        return (
+          a.body.toLowerCase().includes(q) ||
+          (face && getFaceTitle(face).toLowerCase().includes(q))
+        );
+      });
+    }
+    return result;
+  }, [subscribedActivities, selectedFaceId, searchQuery, faceMap]);
+
+  const matchingFaces = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return subscribedFaces.filter(
+      (f) =>
+        getFaceTitle(f).toLowerCase().includes(q) ||
+        f.description?.toLowerCase().includes(q)
     );
-  }
+  }, [searchQuery, subscribedFaces]);
+
+  const matchingSeeds = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return subscribedActivities.filter((a) => a.body.toLowerCase().includes(q));
+  }, [searchQuery, subscribedActivities]);
+
+  // タイムラインを日付でグループ化
+  const grouped = useMemo(() => {
+    const groups: { dateKey: string; activities: Activity[] }[] = [];
+    let lastKey = '';
+    for (const act of filteredActivities) {
+      const dateKey = act.createdAt.slice(0, 10);
+      if (dateKey !== lastKey) {
+        groups.push({ dateKey, activities: [act] });
+        lastKey = dateKey;
+      } else {
+        groups[groups.length - 1].activities.push(act);
+      }
+    }
+    return groups;
+  }, [filteredActivities]);
+
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'timeline', label: t('timelineTab') },
+    { key: 'subscriptions', label: t('subscriptionsTab') },
+  ];
 
   return (
-    <div style={{ padding: '0 16px' }}>
-      {subscribedActivities.map((activity, index) => {
-        const face = faceMap.get(activity.faceId);
-        const user = userMap.get(activity.userId);
-        if (!face || !user) return null;
-        return (
-          <SeedRow
-            key={activity.id}
-            activity={activity}
-            face={face}
-
-            noBorder={index === subscribedActivities.length - 1}
+    <div onClick={() => setShowFaceFilter(false)}>
+      {/* 検索バー */}
+      <div style={{ padding: '20px 18px 14px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 14px',
+            background: 'var(--mf-surface)',
+            borderRadius: 12,
+            border: '0.5px solid var(--mf-line)',
+          }}
+        >
+          <svg width={16} height={16} viewBox="0 0 18 18" fill="none" stroke="var(--mf-text-muted)" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx={8} cy={8} r={5.5} /><path d="M12.2 12.2L16 16" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('filterPlaceholder')}
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              fontSize: 13,
+              color: 'var(--mf-text)',
+              outline: 'none',
+              fontFamily: 'var(--mf-font-sans)',
+            }}
           />
-        );
-      })}
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mf-text-muted)', padding: 0 }}
+            >
+              <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+                <path d="M2 2l10 10M12 2L2 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* タブ */}
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '0.5px solid var(--mf-line)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          background: 'var(--mf-bg-light)',
+        }}
+      >
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setActiveTab(key)}
+            style={{
+              padding: '11px 14px',
+              fontSize: 13.5,
+              fontWeight: activeTab === key ? 700 : 600,
+              color: activeTab === key ? 'var(--mf-brand)' : 'var(--mf-text-muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              borderBottom: activeTab === key ? '2.5px solid var(--mf-accent)' : '2.5px solid transparent',
+              marginBottom: -1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            {label}
+            {activeTab === key && (
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--mf-accent)' }} />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* 検索結果 */}
+      {searchQuery.trim() ? (
+        <div style={{ paddingBottom: 16 }}>
+          {/* フェイス結果 */}
+          <div style={{ padding: '12px 20px 6px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+              {t('facesSection', { n: matchingFaces.length })}
+            </span>
+          </div>
+          {matchingFaces.length === 0 ? (
+            <p style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', padding: '4px 20px' }}>{t('noMatch')}</p>
+          ) : (
+            <div style={{ padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+              {matchingFaces.map((face) => {
+                const seedCount = subscribedActivities.filter((a) => a.faceId === face.id).length;
+                const lastAct = subscribedActivities.find((a) => a.faceId === face.id);
+                const color = getFaceColor(face.id);
+                return (
+                  <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ height: 200, borderRadius: 14, overflow: 'hidden', background: 'var(--mf-surface)', border: '0.5px solid var(--mf-line)', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ height: 130, flexShrink: 0, background: face.imageUrl ? undefined : color, backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                      <div style={{ padding: '11px 13px 12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>
+                            {getFaceTitle(face)}
+                          </div>
+                          <span style={{ flexShrink: 0 }}>
+                            <b style={{ color: 'var(--mf-text)', fontWeight: 700, fontSize: 17 }}>{seedCount}</b>
+                            <span style={{ fontSize: 10, color: 'var(--mf-text-muted)', marginLeft: 2 }}>{t('seedCount')}</span>
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
+                          {lastAct?.createdAt.slice(0, 10).replace(/-/g, '/') ?? '—'}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {/* シード結果 */}
+          <div style={{ padding: '16px 20px 6px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+              {t('seedsSection', { n: matchingSeeds.length })}
+            </span>
+          </div>
+          {matchingSeeds.length === 0 ? (
+            <p style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', padding: '4px 20px' }}>{t('noMatch')}</p>
+          ) : (
+            <div style={{ padding: '0 20px' }}>
+              {matchingSeeds.map((act) => {
+                const face = faceMap.get(act.faceId);
+                if (!face) return null;
+                return <SeedRow key={act.id} activity={act} face={face} />;
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {!searchQuery.trim() && activeTab === 'timeline' && (
+        <>
+          {/* フィルターボタン */}
+          {subscribedFaces.length > 0 && (
+            <div style={{ padding: '10px 18px 8px', borderBottom: '0.5px solid var(--mf-line)', position: 'relative' }}>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowFaceFilter((p) => !p); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '6px 12px', borderRadius: 999,
+                  background: selectedFaceId ? 'var(--mf-brand)' : 'var(--mf-surface)',
+                  border: `1px solid ${selectedFaceId ? 'var(--mf-brand)' : 'var(--mf-line)'}`,
+                  cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+                  color: selectedFaceId ? '#fff' : 'var(--mf-text-sub)',
+                }}
+              >
+                <svg width={13} height={13} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 3h12M3 7h8M5 11h4" />
+                </svg>
+                {selectedFaceId
+                  ? getFaceTitle(faceMap.get(selectedFaceId)!)
+                  : t('filterByFace')}
+                {selectedFaceId && (
+                  <span
+                    onClick={(e) => { e.stopPropagation(); setSelectedFaceId(null); }}
+                    style={{ display: 'flex', alignItems: 'center', marginLeft: 2, opacity: 0.8 }}
+                  >
+                    <svg width={12} height={12} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+                      <path d="M2 2l8 8M10 2L2 10" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+
+              {showFaceFilter && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    position: 'absolute', top: 'calc(100% - 4px)', left: 18, zIndex: 30,
+                    background: 'var(--mf-surface)', borderRadius: 12,
+                    border: '0.5px solid var(--mf-line)',
+                    boxShadow: '0 8px 24px rgba(30,42,74,0.12)', overflow: 'hidden', minWidth: 200,
+                  }}
+                >
+                  {subscribedFaces.map((face) => {
+                    const isSelected = selectedFaceId === face.id;
+                    return (
+                      <button
+                        key={face.id}
+                        type="button"
+                        onClick={() => { setSelectedFaceId(isSelected ? null : face.id); setShowFaceFilter(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '9px 14px', background: isSelected ? 'var(--mf-hover)' : 'transparent',
+                          border: 'none', cursor: 'pointer', textAlign: 'left',
+                        }}
+                      >
+                        <FaceBadge face={face} size={28} radius={8} />
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {getFaceTitle(face)}
+                        </span>
+                        {isSelected && (
+                          <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="var(--mf-accent)" strokeWidth={2} strokeLinecap="round" style={{ marginLeft: 'auto' }}>
+                            <path d="M2 7l4 4 6-7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* タイムライン */}
+          {grouped.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '80px 0', textAlign: 'center' }}>
+              <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFilteredActivities')}</p>
+            </div>
+          ) : (
+            grouped.map(({ dateKey, activities }) => (
+              <div key={dateKey}>
+                <DateBar label={dateKey} date={dateKey.replace(/-/g, '/')} />
+                <div style={{ padding: '0 18px' }}>
+                  {activities.map((act) => {
+                    const face = faceMap.get(act.faceId);
+                    if (!face) return null;
+                    return <SeedRow key={act.id} activity={act} face={face} />;
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </>
+      )}
+
+      {!searchQuery.trim() && activeTab === 'subscriptions' && (
+        <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {subscribedFaces.length === 0 ? (
+            <p style={{ fontSize: 13, color: 'var(--mf-text-muted)', textAlign: 'center', paddingTop: 40 }}>
+              {t('noSubscribedFaces')}
+            </p>
+          ) : (
+            subscribedFaces.map((face) => {
+              const seedCount = subscribedActivities.filter((a) => a.faceId === face.id).length;
+              return (
+                <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--mf-surface)', border: '0.5px solid var(--mf-line)' }}>
+                    <FaceBadge face={face} size={44} radius={12} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {getFaceTitle(face)}
+                      </div>
+                      {face.description && (
+                        <div style={{ fontSize: 11.5, color: 'var(--mf-text-sub)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {face.description}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--mf-brand)' }}>{seedCount}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>{t('seedCount')}</div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 };

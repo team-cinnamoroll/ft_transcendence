@@ -155,7 +155,18 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "searchLink": "Rechercher des facettes"
+    "searchLink": "Rechercher des facettes",
+    "timelineTab": "Fil d'actualité",
+    "subscriptionsTab": "Abonnements",
+    "filterPlaceholder": "Rechercher facettes & graines",
+    "filterByFace": "Filtrer par facette",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "noMatch": "Aucun résultat",
+    "seedCount": "Graines",
+    "noFilteredActivities": "Aucune graine trouvée",
+    "viewFace": "Voir la facette →",
+    "noSubscribedFaces": "Aucune facette abonnée"
   },
   "notificationList": {
     "noNotifications": "Aucune notification pour l'instant",
@@ -163,7 +174,17 @@
     "subscribedBadge": "📥 Abonnement",
     "linkedAction": "a lié votre publication",
     "subscribedAction": "s'est abonné à {faceName}",
-    "actionConnector": " "
+    "actionConnector": " ",
+    "filterAll": "Tout",
+    "filterSub": "Abonnement",
+    "filterLink": "Lien",
+    "typeLinkLabel": "Lien",
+    "typeUpdateLabel": "Mise à jour",
+    "today": "Aujourd'hui",
+    "earlier": "Auparavant",
+    "noNotificationsFiltered": "Aucune notification",
+    "linkedPreview": "Une graine liée",
+    "updatedPreview": "Nouvelle graine publiée sur {faceName}"
   },
   "searchBar": {
     "placeholder": "Rechercher par mot-clé..."

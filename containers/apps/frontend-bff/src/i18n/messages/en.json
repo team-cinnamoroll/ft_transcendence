@@ -155,7 +155,18 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
-    "searchLink": "Search for faces"
+    "searchLink": "Search for faces",
+    "timelineTab": "Timeline",
+    "subscriptionsTab": "Subscriptions",
+    "filterPlaceholder": "Search faces & seeds",
+    "filterByFace": "Filter by face",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "noMatch": "No results",
+    "seedCount": "Seeds",
+    "noFilteredActivities": "No seeds found",
+    "viewFace": "View face →",
+    "noSubscribedFaces": "No subscribed faces"
   },
   "notificationList": {
     "noNotifications": "No notifications yet",
@@ -163,7 +174,17 @@
     "subscribedBadge": "📥 Subscribe",
     "linkedAction": "linked your post",
     "subscribedAction": "subscribed to {faceName}",
-    "actionConnector": " "
+    "actionConnector": " ",
+    "filterAll": "All",
+    "filterSub": "Subscribe",
+    "filterLink": "Link",
+    "typeLinkLabel": "Link",
+    "typeUpdateLabel": "Update",
+    "today": "Today",
+    "earlier": "Earlier",
+    "noNotificationsFiltered": "No notifications",
+    "linkedPreview": "A linked seed",
+    "updatedPreview": "New seed posted to {faceName}"
   },
   "searchBar": {
     "placeholder": "Search by keyword..."

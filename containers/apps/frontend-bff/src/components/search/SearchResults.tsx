@@ -4,6 +4,9 @@ import { type Activity } from '@/types/activity';
 import { type UserProfile } from '@/types/user-profile';
 import { type Face } from '@/types/face';
 import SeedRow from '@/components/ui/SeedRow';
+import FaceBadge from '@/components/ui/FaceBadge';
+import { getFaceTitle } from '@/lib/display';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export type SearchActivityResultItem = {
@@ -26,12 +29,22 @@ const SearchResults = ({
   subscribedFaceIds,
 }: SearchResultsProps) => {
   const t = useTranslations('searchResults');
+
   if (!query) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-3xl">🔍</p>
-        <p className="text-sm text-zinc-400">{t('emptyTitle')}</p>
-        <p className="text-xs text-zinc-600">{t('emptyHint')}</p>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 12,
+          padding: '80px 0',
+          textAlign: 'center',
+        }}
+      >
+        <p style={{ fontSize: 32 }}>🔍</p>
+        <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('emptyTitle')}</p>
+        <p style={{ fontSize: 11.5, color: 'var(--mf-text-faint)' }}>{t('emptyHint')}</p>
       </div>
     );
   }
@@ -40,76 +53,136 @@ const SearchResults = ({
 
   if (totalCount === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-3xl">😶</p>
-        <p className="text-sm text-zinc-400">{t('noResultsTitle', { query })}</p>
-        <p className="text-xs text-zinc-600">{t('noResultsHint')}</p>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 12,
+          padding: '80px 0',
+          textAlign: 'center',
+        }}
+      >
+        <p style={{ fontSize: 32 }}>😶</p>
+        <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>
+          {t('noResultsTitle', { query })}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* フェイス検索結果セクション */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* フェイス検索結果 */}
       {faceResults.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <section>
+          <h2
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: 'var(--mf-text-muted)',
+              letterSpacing: 0.5,
+              textTransform: 'uppercase',
+              marginBottom: 10,
+            }}
+          >
             {t('facesSection')}
-            <span className="ml-2 text-violet-400">{faceResults.length}</span>
+            <span style={{ marginLeft: 6, color: 'var(--mf-accent)' }}>{faceResults.length}</span>
           </h2>
-          <ul className="flex flex-col gap-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {faceResults.map((face) => {
               const isSubscribed = subscribedFaceIds.includes(face.id);
               return (
-                <li
-                  key={face.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl bg-zinc-800/60 px-4 py-3 transition hover:bg-zinc-800"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    {face.emoji && <span className="text-2xl">{face.emoji}</span>}
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-zinc-100">{face.name}</p>
+                <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '12px 14px',
+                      borderRadius: 14,
+                      background: 'var(--mf-surface)',
+                      border: '0.5px solid var(--mf-line)',
+                    }}
+                  >
+                    <FaceBadge face={face} size={44} radius={12} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: 'var(--mf-brand)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          margin: 0,
+                        }}
+                      >
+                        {getFaceTitle(face)}
+                      </p>
                       {face.description && (
-                        <p className="truncate text-xs text-zinc-400">{face.description}</p>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: 'var(--mf-text-sub)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            margin: 0,
+                            marginTop: 2,
+                          }}
+                        >
+                          {face.description}
+                        </p>
                       )}
                     </div>
+                    <button
+                      style={{
+                        flexShrink: 0,
+                        padding: '5px 12px',
+                        borderRadius: 999,
+                        fontSize: 11.5,
+                        fontWeight: 600,
+                        background: isSubscribed ? 'transparent' : 'var(--mf-accent)',
+                        color: isSubscribed ? 'var(--mf-text-sub)' : '#fff',
+                        border: isSubscribed ? '1px solid var(--mf-line)' : 'none',
+                        cursor: 'default',
+                      }}
+                      disabled
+                      aria-label={isSubscribed ? t('unsubscribeAriaLabel', { name: face.name }) : t('subscribeAriaLabel', { name: face.name })}
+                    >
+                      {isSubscribed ? t('subscribed') : t('subscribe')}
+                    </button>
                   </div>
-                  <button
-                    className={
-                      isSubscribed
-                        ? 'shrink-0 rounded-full border border-violet-500 px-3 py-1 text-xs font-medium text-violet-400'
-                        : 'shrink-0 rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-500'
-                    }
-                    disabled
-                    aria-label={
-                      isSubscribed
-                        ? t('unsubscribeAriaLabel', { name: face.name })
-                        : t('subscribeAriaLabel', { name: face.name })
-                    }
-                  >
-                    {isSubscribed ? t('subscribed') : t('subscribe')}
-                  </button>
-                </li>
+                </Link>
               );
             })}
-          </ul>
+          </div>
         </section>
       )}
 
-      {/* アクティビティ検索結果セクション */}
+      {/* アクティビティ検索結果 */}
       {activityResults.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <section>
+          <h2
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: 'var(--mf-text-muted)',
+              letterSpacing: 0.5,
+              textTransform: 'uppercase',
+              marginBottom: 10,
+            }}
+          >
             {t('activitiesSection')}
-            <span className="ml-2 text-violet-400">{activityResults.length}</span>
+            <span style={{ marginLeft: 6, color: 'var(--mf-accent)' }}>{activityResults.length}</span>
           </h2>
-          <div style={{ padding: '0 4px' }}>
+          <div>
             {activityResults.map(({ activity, face }, index) => (
               <SeedRow
                 key={activity.id}
                 activity={activity}
                 face={face}
-
                 noBorder={index === activityResults.length - 1}
               />
             ))}

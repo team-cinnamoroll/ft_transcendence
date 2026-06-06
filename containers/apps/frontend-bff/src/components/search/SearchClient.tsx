@@ -39,24 +39,15 @@ const SearchClient = ({
     const lowerQuery = trimmedQuery.toLowerCase();
     const scopedActivities = allActivities.filter((activity) => {
       if (scope === 'mine') return activity.userId === currentUserId;
-      if (scope === 'subscribed') {
-        return subscribedFaceIds.includes(activity.faceId);
-      }
+      if (scope === 'subscribed') return subscribedFaceIds.includes(activity.faceId);
       return true;
     });
 
     return scopedActivities.flatMap((activity) => {
-      if (!activity.body.toLowerCase().includes(lowerQuery)) {
-        return [];
-      }
-
+      if (!activity.body.toLowerCase().includes(lowerQuery)) return [];
       const user = userMap.get(activity.userId);
       const face = faceMap.get(activity.faceId);
-
-      if (!user || !face) {
-        return [];
-      }
-
+      if (!user || !face) return [];
       return [{ activity, user, face }];
     });
   }, [allActivities, currentUserId, faceMap, query, scope, subscribedFaceIds, userMap]);
@@ -64,9 +55,7 @@ const SearchClient = ({
   const faceResults = useMemo(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return [];
-
     const lowerQuery = trimmedQuery.toLowerCase();
-
     return allFaces.filter(
       (face) =>
         face.name.toLowerCase().includes(lowerQuery) ||
@@ -75,16 +64,28 @@ const SearchClient = ({
   }, [allFaces, query]);
 
   return (
-    <div className="flex flex-col">
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <h1 className="mb-3 text-lg font-bold text-zinc-100">{t('title')}</h1>
-        <div className="flex flex-col gap-2">
-          <SearchBar value={query} onChange={setQuery} />
-          <SearchScopeSelector scope={scope} onScopeChange={setScope} />
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          background: 'var(--mf-bg-light)',
+          borderBottom: '0.5px solid var(--mf-line)',
+          padding: '14px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}
+      >
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
+          {t('title')}
+        </h1>
+        <SearchBar value={query} onChange={setQuery} />
+        <SearchScopeSelector scope={scope} onScopeChange={setScope} />
       </header>
 
-      <main className="px-4 py-4">
+      <main style={{ padding: '16px 20px' }}>
         <SearchResults
           query={query.trim()}
           activityResults={activityResults}
