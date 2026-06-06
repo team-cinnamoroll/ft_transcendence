@@ -5,8 +5,8 @@
   },
   "nav": {
     "home": "ホーム",
-    "faces": "フェイス",
-    "subscriptions": "サブスク",
+    "faces": "振り返り",
+    "subscriptions": "収集",
     "notifications": "通知",
     "search": "検索",
     "faceDetail": "フェイス詳細"

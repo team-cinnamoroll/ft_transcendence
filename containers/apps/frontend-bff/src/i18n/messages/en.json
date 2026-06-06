@@ -5,8 +5,8 @@
   },
   "nav": {
     "home": "Home",
-    "faces": "Faces",
-    "subscriptions": "Subscriptions",
+    "faces": "Reflection",
+    "subscriptions": "Collection",
     "notifications": "Notifications",
     "search": "Search",
     "faceDetail": "Face Detail"
