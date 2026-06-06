@@ -7,7 +7,7 @@ import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getFaceTitle } from '@/lib/display';
-import Avatar from './Avatar';
+import FaceBadge from './FaceBadge';
 import Badge from './Badge';
 import FaceChip from './FaceChip';
 import { useRelativeTime } from '@/lib/use-relative-time';
@@ -137,7 +137,7 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
         {/* ユーザー・フェイス行 */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-          <Avatar src={user.avatarUrl} alt={user.name} size="md" />
+          {face && <FaceBadge face={face} size={40} radius={11} />}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--mf-text)' }}>
               <span>{user.name}</span>
