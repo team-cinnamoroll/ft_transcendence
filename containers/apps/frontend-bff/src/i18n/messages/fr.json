@@ -97,7 +97,20 @@
     "title": "Facettes",
     "createNew": "Nouveau",
     "noFaces": "Aucune facette pour l'instant",
-    "private": "Privé"
+    "private": "Privé",
+    "searchPlaceholder": "Rechercher vos facettes et graines",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "noMatch": "Aucun résultat",
+    "noFilteredFaces": "Aucune facette trouvée pour \"{query}\"",
+    "sortLastAt": "Dernière publication",
+    "sortTotal": "Plus de graines",
+    "sortName": "Nom",
+    "gridView": "Vue grille",
+    "listView": "Vue liste",
+    "seedCount": "Graines",
+    "createFirstFace": "Créer votre première facette",
+    "createNewCard": "Nouvelle facette"
   },
   "faceActivityFeed": {
     "noActivities": "Aucune activité pour l'instant",
@@ -106,7 +119,10 @@
   "faceHeader": {
     "newest": "Plus récents",
     "oldest": "Plus anciens",
-    "images": "Avec images"
+    "images": "Avec images",
+    "seeds": "Graines",
+    "monthly": "Ce mois",
+    "subscribers": "Abonnés"
   },
   "activityFeed": {
     "noActivities": "Aucune activité pour l'instant"

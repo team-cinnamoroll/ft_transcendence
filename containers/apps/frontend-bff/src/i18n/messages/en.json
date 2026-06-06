@@ -97,7 +97,20 @@
     "title": "Faces",
     "createNew": "New",
     "noFaces": "No faces yet",
-    "private": "Private"
+    "private": "Private",
+    "searchPlaceholder": "Search your faces & seeds",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "noMatch": "No results",
+    "noFilteredFaces": "No faces found for \"{query}\"",
+    "sortLastAt": "Last post",
+    "sortTotal": "Most seeds",
+    "sortName": "Name",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "seedCount": "Seeds",
+    "createFirstFace": "Create your first face",
+    "createNewCard": "New face"
   },
   "faceActivityFeed": {
     "noActivities": "No activities yet",
@@ -106,7 +119,10 @@
   "faceHeader": {
     "newest": "Newest",
     "oldest": "Oldest",
-    "images": "With images"
+    "images": "With images",
+    "seeds": "Seeds",
+    "monthly": "This month",
+    "subscribers": "Subscribers"
   },
   "activityFeed": {
     "noActivities": "No activities yet"

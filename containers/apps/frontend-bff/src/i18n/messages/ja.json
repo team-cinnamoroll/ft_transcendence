@@ -97,7 +97,20 @@
     "title": "フェイス",
     "createNew": "新規作成",
     "noFaces": "フェイスがありません",
-    "private": "非公開"
+    "private": "非公開",
+    "searchPlaceholder": "自分のフェイス・シードを検索",
+    "facesSection": "フェイス ({n})",
+    "seedsSection": "シード ({n})",
+    "noMatch": "該当なし",
+    "noFilteredFaces": "「{query}」に一致するフェイスが見つかりません",
+    "sortLastAt": "最終投稿日順",
+    "sortTotal": "シード数順",
+    "sortName": "名前順",
+    "gridView": "グリッド表示",
+    "listView": "リスト表示",
+    "seedCount": "シード",
+    "createFirstFace": "最初のフェイスを作る",
+    "createNewCard": "新しいフェイスを作る"
   },
   "faceActivityFeed": {
     "noActivities": "アクティビティがありません",
@@ -106,7 +119,10 @@
   "faceHeader": {
     "newest": "新しい順",
     "oldest": "古い順",
-    "images": "画像あり"
+    "images": "画像あり",
+    "seeds": "シード",
+    "monthly": "今月",
+    "subscribers": "サブスク"
   },
   "activityFeed": {
     "noActivities": "アクティビティがありません"
