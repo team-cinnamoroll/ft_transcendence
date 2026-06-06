@@ -327,7 +327,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
             grouped.map(({ dateKey, activities }) => (
               <div key={dateKey}>
                 <DateBar label={dateKey} date={dateKey.replace(/-/g, '/')} />
-                <div style={{ padding: '0 18px' }}>
+                <div style={{ padding: '0 28px' }}>
                   {activities.map((act) => {
                     const face = faceMap.get(act.faceId);
                     if (!face) return null;
