@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { Face } from '@/types/face';
 import { createFaceAction } from '@/server/actions/faces';
 import { useTranslations } from 'next-intl';
@@ -48,11 +46,30 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
 
   if (!isOpen) return null;
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    borderRadius: 12,
+    border: '0.5px solid var(--mf-line)',
+    background: 'var(--mf-surface)',
+    padding: '10px 14px',
+    fontSize: 14,
+    color: 'var(--mf-ink)',
+    fontFamily: 'var(--mf-font-sans)',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
   return (
     <>
       {/* オーバーレイ */}
       <div
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          background: 'rgba(20,24,36,0.50)',
+          backdropFilter: 'blur(4px)',
+        }}
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -62,27 +79,54 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
         role="dialog"
         aria-modal="true"
         aria-label={t('ariaLabel')}
-        className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-zinc-900 shadow-xl"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 50,
+          width: 'calc(100% - 2rem)',
+          maxWidth: 400,
+          borderRadius: 18,
+          background: 'var(--mf-bg-light)',
+          border: '0.5px solid var(--mf-line)',
+          boxShadow: '0 20px 60px rgba(30,42,74,0.18)',
+        }}
       >
         {/* ヘッダー */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h2 className="text-base font-bold text-zinc-100">{t('title')}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px 12px' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
+            {t('title')}
+          </h2>
           <button
             type="button"
             onClick={handleClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
             aria-label={t('close')}
+            style={{
+              width: 30,
+              height: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--mf-text-muted)',
+            }}
           >
-            <X size={18} />
+            <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+              <path d="M2 2l12 12M14 2L2 14" />
+            </svg>
           </button>
         </div>
 
-        <div className="flex flex-col gap-4 px-4 pb-6 pt-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 18px 20px' }}>
           {/* 名前（必須） */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="face-name" className="text-xs font-medium text-zinc-400">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <label htmlFor="face-name" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('name')}
-              <span className="ml-1 text-violet-400">{t('required')}</span>
+              <span style={{ marginLeft: 4, color: 'var(--mf-accent)' }}>{t('required')}</span>
             </label>
             <input
               id="face-name"
@@ -90,19 +134,15 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('nameExample')}
-              className={cn(
-                'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
-                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
-                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
-              )}
+              style={inputStyle}
             />
           </div>
 
           {/* 絵文字（任意） */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="face-emoji" className="text-xs font-medium text-zinc-400">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <label htmlFor="face-emoji" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('emoji')}
-              <span className="ml-1 text-zinc-600">{t('optional')}</span>
+              <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
             <input
               id="face-emoji"
@@ -110,19 +150,15 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
               placeholder={t('emojiExample')}
-              className={cn(
-                'w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
-                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
-                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
-              )}
+              style={inputStyle}
             />
           </div>
 
           {/* 説明文（任意） */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="face-description" className="text-xs font-medium text-zinc-400">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <label htmlFor="face-description" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('description')}
-              <span className="ml-1 text-zinc-600">{t('optional')}</span>
+              <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
             <textarea
               id="face-description"
@@ -130,35 +166,55 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('descriptionPlaceholder')}
               rows={3}
-              className={cn(
-                'w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5',
-                'text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors',
-                'focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50'
-              )}
+              style={{ ...inputStyle, resize: 'none' }}
             />
           </div>
 
           {/* 公開/非公開トグル */}
-          <div className="flex items-center justify-between rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-zinc-100">{t('privateLabel')}</span>
-              <span className="text-xs text-zinc-500">{t('privateDescription')}</span>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: 12,
+              border: '0.5px solid var(--mf-line)',
+              background: 'var(--mf-surface)',
+              padding: '12px 14px',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--mf-text)' }}>{t('privateLabel')}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>{t('privateDescription')}</span>
             </div>
             <button
               type="button"
               role="switch"
               aria-checked={isPrivate}
               onClick={() => setIsPrivate((prev) => !prev)}
-              className={cn(
-                'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200',
-                isPrivate ? 'bg-violet-600' : 'bg-zinc-600'
-              )}
+              style={{
+                position: 'relative',
+                width: 44,
+                height: 24,
+                flexShrink: 0,
+                borderRadius: 999,
+                background: isPrivate ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
             >
               <span
-                className={cn(
-                  'absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200',
-                  isPrivate ? 'translate-x-5' : 'translate-x-0'
-                )}
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: isPrivate ? 22 : 2,
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                  transition: 'left 0.2s',
+                }}
               />
             </button>
           </div>
@@ -168,12 +224,19 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             type="button"
             onClick={handleSubmit}
             disabled={!isValid || isPending}
-            className={cn(
-              'w-full rounded-xl py-2.5 text-sm font-semibold transition-colors',
-              isValid && !isPending
-                ? 'bg-violet-600 text-white hover:bg-violet-500 active:bg-violet-700'
-                : 'cursor-not-allowed bg-zinc-700 text-zinc-500'
-            )}
+            style={{
+              width: '100%',
+              padding: '12px 0',
+              borderRadius: 12,
+              fontSize: 14,
+              fontWeight: 700,
+              border: 'none',
+              cursor: isValid && !isPending ? 'pointer' : 'not-allowed',
+              background: isValid && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
+              color: isValid && !isPending ? '#fff' : 'var(--mf-text-faint)',
+              boxShadow: isValid && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              transition: 'background 0.15s',
+            }}
           >
             {isPending ? t('submitting') : t('submit')}
           </button>

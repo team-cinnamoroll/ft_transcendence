@@ -3,8 +3,6 @@ import { listActivitiesByFaceIds } from '@/server/usecases/activities';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import { listAllUsers } from '@/server/usecases/users';
-import { getTranslations } from 'next-intl/server';
-
 export default async function SubscriptionsPage() {
   const subscribedFaceIds = await getSubscribedFaceIds();
   const [subscribedActivities, faces, users] = await Promise.all([
@@ -12,29 +10,15 @@ export default async function SubscriptionsPage() {
     listAllFaces(),
     listAllUsers(),
   ]);
-  const t = await getTranslations('subscriptions');
 
   return (
-    <div className="flex flex-col">
-      {/* スティッキーヘッダー */}
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold text-zinc-100">{t('title')}</h1>
-          <span className="text-xs text-zinc-500">
-            {t('subscribedCount', { count: subscribedFaceIds.length })}
-          </span>
-        </div>
-      </header>
-
-      <main className="px-4 py-4">
-        <SubscriptionFeed
-          subscribedFaceIds={subscribedFaceIds}
-          subscribedActivities={subscribedActivities}
-          faces={faces}
-          users={users}
-        />
-      </main>
-
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <SubscriptionFeed
+        subscribedFaceIds={subscribedFaceIds}
+        subscribedActivities={subscribedActivities}
+        faces={faces}
+        users={users}
+      />
     </div>
   );
 }

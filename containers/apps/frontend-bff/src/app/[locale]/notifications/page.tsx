@@ -17,16 +17,31 @@ export default async function NotificationsPage() {
   const t = await getTranslations('notifications');
 
   return (
-    <div className="flex flex-col">
-      {/* スティッキーヘッダー */}
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold text-zinc-100">{t('title')}</h1>
-          {count > 0 && <span className="text-xs text-zinc-500">{t('count', { count })}</span>}
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          borderBottom: '0.5px solid var(--mf-line)',
+          background: 'var(--mf-bg-light)',
+          padding: '14px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
+          {t('title')}
+        </h1>
+        {count > 0 && (
+          <span style={{ fontSize: 12, color: 'var(--mf-text-muted)' }}>
+            {t('count', { count })}
+          </span>
+        )}
       </header>
 
-      <main className="px-4 py-4">
+      <main>
         <NotificationList
           notifications={notifications}
           users={users}

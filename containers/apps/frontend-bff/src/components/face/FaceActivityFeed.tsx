@@ -26,7 +26,7 @@ const FaceActivityFeed = ({ face, activities, sortOrder = 'newest' }: FaceActivi
 
   if (sorted.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-zinc-500">
+      <p style={{ padding: '64px 0', textAlign: 'center', fontSize: 13, color: 'var(--mf-text-muted)' }}>
         {sortOrder === 'images' ? t('noImageActivities') : t('noActivities')}
       </p>
     );

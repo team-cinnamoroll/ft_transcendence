@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X } from 'lucide-react';
 import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
@@ -11,7 +10,6 @@ import { getFaceTitle } from '@/lib/display';
 import Avatar from './Avatar';
 import Badge from './Badge';
 import FaceChip from './FaceChip';
-import { cn } from '@/lib/utils';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { useTranslations } from 'next-intl';
 
@@ -24,6 +22,41 @@ type ActivityDetailApiResponse = {
   activity: Activity | null;
   user: UserProfile | null;
   face: Face | null;
+};
+
+const CloseButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <button
+    type="button"
+    aria-label={label}
+    onClick={onClick}
+    style={{
+      width: 30,
+      height: 30,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '50%',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      color: 'var(--mf-text-muted)',
+    }}
+  >
+    <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+      <path d="M2 2l10 10M12 2L2 12" />
+    </svg>
+  </button>
+);
+
+const headerStyle: React.CSSProperties = {
+  position: 'sticky',
+  top: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottom: '0.5px solid var(--mf-line)',
+  background: 'var(--mf-bg-light)',
+  padding: '12px 16px',
 };
 
 const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
@@ -44,47 +77,29 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
       headers: { Accept: 'application/json' },
     })
       .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch activity detail: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Failed to fetch activity detail: ${res.status}`);
         return (await res.json()) as ActivityDetailApiResponse;
       })
-      .then((json) => {
-        if (!isCurrent) return;
-        setData(json);
-      })
+      .then((json) => { if (isCurrent) setData(json); })
       .catch((err: unknown) => {
         if (!isCurrent) return;
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setData(null);
       })
-      .finally(() => {
-        if (!isCurrent) return;
-        setIsLoading(false);
-      });
+      .finally(() => { if (isCurrent) setIsLoading(false); });
 
-    return () => {
-      isCurrent = false;
-      controller.abort();
-    };
+    return () => { isCurrent = false; controller.abort(); };
   }, [activityId]);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
-          <button
-            type="button"
-            aria-label={t('close')}
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-          >
-            <X size={16} />
-          </button>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={headerStyle}>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--mf-text-muted)', margin: 0 }}>{t('title')}</h2>
+          <CloseButton label={t('close')} onClick={onClose} />
         </div>
-        <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">{t('loading')}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12 }}>
+          <p style={{ fontSize: 13, color: 'var(--mf-text-faint)' }}>{t('loading')}</p>
         </div>
       </div>
     );
@@ -96,20 +111,13 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
 
   if (!activity || !user) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-          <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
-          <button
-            type="button"
-            aria-label={t('close')}
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-          >
-            <X size={16} />
-          </button>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={headerStyle}>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--mf-text-muted)', margin: 0 }}>{t('title')}</h2>
+          <CloseButton label={t('close')} onClick={onClose} />
         </div>
-        <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
-          <p className="text-sm text-zinc-600">{t('notFound')}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12 }}>
+          <p style={{ fontSize: 13, color: 'var(--mf-text-faint)' }}>{t('notFound')}</p>
         </div>
       </div>
     );
@@ -120,52 +128,48 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
   const formattedTime = relativeTime(activity.createdAt);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* ヘッダー */}
-      <div className="sticky top-0 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
-        <h2 className="text-sm font-semibold text-zinc-400">{t('title')}</h2>
-        <button
-          type="button"
-          aria-label={t('close')}
-          onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-        >
-          <X size={16} />
-        </button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={headerStyle}>
+        <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--mf-text-muted)', margin: 0 }}>{t('title')}</h2>
+        <CloseButton label={t('close')} onClick={onClose} />
       </div>
 
-      {/* コンテンツ */}
-      <div className="px-4 py-4 flex flex-col gap-4 overflow-y-auto">
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
         {/* ユーザー・フェイス行 */}
-        <div className="flex items-start gap-3">
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           <Avatar src={user.avatarUrl} alt={user.name} size="md" />
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-zinc-100">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--mf-text)' }}>
               <span>{user.name}</span>
               {user.badge && <Badge emoji={user.badge} />}
             </div>
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <FaceChip title={faceTitle} faceId={activity.faceId} />
-              <time dateTime={activity.createdAt} className="text-xs text-zinc-500">
+              <time dateTime={activity.createdAt} style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>
                 {formattedTime}
               </time>
             </div>
           </div>
         </div>
 
-        {/* 本文（全文展開・折りたたみなし） */}
-        <p className="text-sm leading-relaxed text-zinc-200 whitespace-pre-wrap">{activity.body}</p>
+        {/* 本文 */}
+        <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--mf-ink)', whiteSpace: 'pre-wrap', margin: 0 }}>
+          {activity.body}
+        </p>
 
         {/* 画像グリッド */}
         {activity.imageUrls && activity.imageUrls.length > 0 && (
           <div
-            className={cn(
-              'grid gap-1.5 overflow-hidden rounded-xl',
-              activity.imageUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-            )}
+            style={{
+              display: 'grid',
+              gap: 6,
+              overflow: 'hidden',
+              borderRadius: 12,
+              gridTemplateColumns: activity.imageUrls.length === 1 ? '1fr' : '1fr 1fr',
+            }}
           >
             {activity.imageUrls.map((url, i) => (
-              <div key={i} className="relative aspect-video w-full overflow-hidden rounded-lg">
+              <div key={i} style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8 }}>
                 <Image
                   src={url}
                   alt={t('imageAlt', { n: i + 1 })}
@@ -181,7 +185,7 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
         {/* フェイスへのリンク */}
         <Link
           href={`/faces/${activity.faceId}`}
-          className="mt-2 self-start text-xs text-violet-400 hover:text-violet-300 transition-colors"
+          style={{ fontSize: 12, color: 'var(--mf-accent)', textDecoration: 'none', alignSelf: 'flex-start', marginTop: 8 }}
         >
           {t('viewFace')}
         </Link>
