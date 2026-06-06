@@ -51,6 +51,7 @@ export default async function RootLayout({
               <SideNav
                 faces={myFaces}
                 user={currentUser}
+                activities={myActivities}
                 faceCount={myFaces.length}
                 activityCount={myActivities.length}
               />

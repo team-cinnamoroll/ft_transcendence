@@ -10,6 +10,7 @@ import FaceNavItem from '@/components/ui/FaceNavItem';
 import AccountMenu from '@/components/ui/AccountMenu';
 import CreateFaceModal from '@/components/face/CreateFaceModal';
 import PostModal from '@/components/ui/PostModal';
+import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 
@@ -62,11 +63,12 @@ const NAV_ITEMS: NavItem[] = [
 type Props = {
   faces: Face[];
   user: UserProfile;
+  activities: Activity[];
   faceCount: number;
   activityCount: number;
 };
 
-const SideNav = ({ faces, user, faceCount, activityCount }: Props) => {
+const SideNav = ({ faces, user, activities, faceCount, activityCount }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
@@ -192,6 +194,7 @@ const SideNav = ({ faces, user, faceCount, activityCount }: Props) => {
                 key={face.id}
                 face={face}
                 activeFaceId={activeFaceId}
+                seedCount={activities.filter((a) => a.faceId === face.id).length}
                 onClick={handleFaceNavItemClick}
               />
             ))}
