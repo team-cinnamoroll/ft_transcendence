@@ -684,6 +684,14 @@ const face4_3Activities: Activity[] = [
 
 // ─── user-1 の 2025 年分の履歴アクティビティ（カレンダー映え用）───────────
 const face1_historicalActivities: Activity[] = [
+  // 2025年3月
+  {
+    id: 'act-h-0',
+    faceId: 'face-1-4',
+    userId: 'user-1',
+    body: '年度末。今年度を振り返ってみると、思ったよりいろんなことがあった。来年度は少しだけ丁寧に暮らしていきたい。',
+    createdAt: '2025-03-31T22:30:00+09:00',
+  },
   // 2025年4月
   {
     id: 'act-h-1',
