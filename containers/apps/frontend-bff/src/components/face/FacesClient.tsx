@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Face } from '@/types/face';
 import type { Activity } from '@/types/activity';
-import { getFaceTitle, getFaceColor, createLookupMap } from '@/lib/display';
+import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
 import CreateFaceModal from './CreateFaceModal';
 import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
@@ -387,8 +387,10 @@ const FacesClient = ({ initialFaces, activities }: Props) => {
                         backgroundSize: 'cover', backgroundPosition: 'center',
                         display: face.imageUrl ? 'block' : 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        {!face.imageUrl && face.emoji && (
-                          <span style={{ fontSize: 20 }}>{face.emoji}</span>
+                        {!face.imageUrl && (
+                          <span style={{ fontFamily: 'var(--mf-font-serif)', fontSize: 18, fontWeight: 600, color: '#fff' }}>
+                            {getFaceKanji(getFaceTitle(face))}
+                          </span>
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
