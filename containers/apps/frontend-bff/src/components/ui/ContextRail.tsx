@@ -12,6 +12,8 @@ import FaceBadge from '@/components/ui/FaceBadge';
 import FaceChip from '@/components/ui/FaceChip';
 import RailCard from '@/components/ui/RailCard';
 
+const REFERENCE_DATE = new Date('2026-03-31');
+
 // ── WritingRail ────────────────────────────────────────────────
 
 type WritingRailProps = {
@@ -21,7 +23,7 @@ type WritingRailProps = {
 
 const WritingRail = ({ activities, faces }: WritingRailProps) => {
   const t = useTranslations('contextRail');
-  const today = new Date();
+  const today = REFERENCE_DATE;
   const mmdd = today.toISOString().slice(5, 10);
 
   const faceById = new Map(faces.map((f) => [f.id, f]));
@@ -84,7 +86,7 @@ type ReflectionRailProps = {
 
 const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
   const t = useTranslations('contextRail');
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = REFERENCE_DATE.toISOString().slice(0, 7);
 
   const monthlyCountMap = new Map<string, number>();
   for (const act of activities) {
@@ -194,7 +196,7 @@ const CollectionRail = ({
   const formatRelative = useRelativeTime();
   const userMap = new Map(users.map((u) => [u.id, u]));
 
-  const UNREAD_CUTOFF = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const UNREAD_CUTOFF = new Date(REFERENCE_DATE.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
