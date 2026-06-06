@@ -18,30 +18,20 @@ export default async function NotificationsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          borderBottom: '0.5px solid var(--mf-line)',
-          background: 'var(--mf-bg-light)',
-          padding: '14px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h1 style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
-          {t('title')}
-        </h1>
-        {count > 0 && (
-          <span style={{ fontSize: 12, color: 'var(--mf-text-muted)' }}>
-            {t('count', { count })}
-          </span>
-        )}
-      </header>
-
       <main>
+        {count > 0 && (
+          <p
+            style={{
+              fontSize: 11.5,
+              color: 'var(--mf-text-muted)',
+              padding: '20px 18px 0',
+              marginBottom: 14,
+              fontWeight: 600,
+            }}
+          >
+            {t('count', { count })}
+          </p>
+        )}
         <NotificationList
           notifications={notifications}
           users={users}

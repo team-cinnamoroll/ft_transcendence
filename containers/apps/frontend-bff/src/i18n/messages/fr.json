@@ -217,7 +217,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count}"
+    "count": "{count} notifications"
   },
   "search": {
     "title": "Recherche",

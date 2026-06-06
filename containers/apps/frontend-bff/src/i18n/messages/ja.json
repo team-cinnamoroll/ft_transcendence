@@ -217,7 +217,7 @@
   },
   "notifications": {
     "title": "通知",
-    "count": "{count} 件"
+    "count": "{count} 件の通知"
   },
   "search": {
     "title": "検索",
