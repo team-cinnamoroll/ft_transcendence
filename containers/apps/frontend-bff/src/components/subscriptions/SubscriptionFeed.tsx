@@ -13,6 +13,101 @@ import { createLookupMap, getFaceTitle, getFaceColor } from '@/lib/display';
 
 type Tab = 'timeline' | 'subscriptions';
 
+const RECOMMENDED_FACES = [
+  { color: '#5B8DB8', kanji: '読', name: '読書',    handle: 'h_maru',     subs: 412, desc: '読みながら考えたこと' },
+  { color: '#7B6B9E', kanji: '映', name: '映画断片', handle: 'sayaka_t',   subs: 287, desc: '観終わってからしばらく' },
+  { color: '#A89050', kanji: '珈', name: '朝の珈琲', handle: 'kettle_co',  subs: 198, desc: '一杯目のメモ' },
+  { color: '#B06B7A', kanji: '夜', name: '夜更けに', handle: 'yorunoyoru', subs: 156, desc: '23時以降のひとりごと' },
+];
+
+const EmptyState = () => (
+  <div>
+    {/* Quiet Feed バナー */}
+    <div
+      style={{
+        margin: '20px 18px 0',
+        padding: '24px 22px',
+        borderRadius: 16,
+        background: 'var(--mf-brand)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute', top: -50, right: -50,
+          width: 140, height: 140, borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 35%, rgba(248,246,241,0.18) 0%, rgba(248,246,241,0.04) 60%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-accent)' }} />
+        <div style={{ fontSize: 10.5, color: 'var(--mf-accent)', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 700 }}>
+          Quiet Feed
+        </div>
+      </div>
+      <div style={{ fontSize: 17, lineHeight: 1.55, fontWeight: 700, color: '#F8F6F1', letterSpacing: 0.2, position: 'relative' }}>
+        まだ、誰のフェイスも<br />サブスクライブしていない。
+      </div>
+      <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.7, color: 'rgba(248,246,241,0.7)', position: 'relative' }}>
+        気になるフェイスを1つだけ、まず選んでみる。<br />
+        通知の重みを大切にする設計です。
+      </div>
+    </div>
+
+    {/* おすすめのフェイス */}
+    <div style={{ marginTop: 20 }}>
+      <div style={{ padding: '0 18px', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--mf-brand)', letterSpacing: 0.2 }}>おすすめのフェイス</div>
+        <div style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>· あなたに合いそうな</div>
+      </div>
+      {RECOMMENDED_FACES.map((r, i) => (
+        <div
+          key={r.handle}
+          style={{
+            padding: '12px 18px',
+            borderBottom: i < RECOMMENDED_FACES.length - 1 ? '0.5px solid var(--mf-line-soft)' : 'none',
+            display: 'flex', gap: 12, alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              width: 42, height: 42, borderRadius: 11,
+              background: r.color, color: '#fff',
+              fontFamily: 'var(--mf-font-serif)', fontSize: 20, fontWeight: 500,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+          >
+            {r.kanji}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>{r.name}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>@{r.handle}</div>
+            </div>
+            <div style={{ marginTop: 2, fontSize: 11.5, color: 'var(--mf-text-sub)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {r.desc} · {r.subs} サブスク
+            </div>
+          </div>
+          <button
+            type="button"
+            style={{
+              padding: '7px 14px', borderRadius: 999,
+              background: i === 0 ? 'var(--mf-brand)' : 'transparent',
+              border: i === 0 ? 'none' : '1px solid var(--mf-brand)',
+              color: i === 0 ? '#F8F6F1' : 'var(--mf-brand)',
+              fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            }}
+          >
+            サブスク
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 type Props = {
   subscribedFaceIds: string[];
   subscribedActivities: Activity[];
@@ -319,7 +414,9 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
           )}
 
           {/* タイムライン */}
-          {grouped.length === 0 ? (
+          {subscribedFaces.length === 0 ? (
+            <EmptyState />
+          ) : grouped.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '80px 0', textAlign: 'center' }}>
               <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFilteredActivities')}</p>
             </div>
@@ -343,9 +440,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
       {!searchQuery.trim() && activeTab === 'subscriptions' && (
         <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {subscribedFaces.length === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--mf-text-muted)', textAlign: 'center', paddingTop: 40 }}>
-              {t('noSubscribedFaces')}
-            </p>
+            <EmptyState />
           ) : (
             subscribedFaces.map((face) => {
               const seedCount = subscribedActivities.filter((a) => a.faceId === face.id).length;
