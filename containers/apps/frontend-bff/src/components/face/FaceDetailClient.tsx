@@ -29,16 +29,18 @@ const FaceDetailClient = ({ face, isOwner, activities, users, isSubscribed = fal
 
   return (
     <>
-      <FaceHeader
-        face={face}
-        isOwner={isOwner}
-        onSortChange={setSortOrder}
-        totalSeeds={totalSeeds}
-        monthlySeeds={monthlySeeds}
-        subscriberCount={SUBSCRIBER_COUNT_MOCK}
-        isSubscribed={isSubscribed}
-      />
-      <section style={{ padding: '0 16px' }}>
+      <div style={{ borderBottom: '0.5px solid var(--mf-line)' }}>
+        <FaceHeader
+          face={face}
+          isOwner={isOwner}
+          onSortChange={setSortOrder}
+          totalSeeds={totalSeeds}
+          monthlySeeds={monthlySeeds}
+          subscriberCount={SUBSCRIBER_COUNT_MOCK}
+          isSubscribed={isSubscribed}
+        />
+      </div>
+      <section>
         <FaceActivityFeed
           face={face}
           activities={activities}
