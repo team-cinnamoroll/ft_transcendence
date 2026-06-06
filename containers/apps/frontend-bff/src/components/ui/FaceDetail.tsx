@@ -5,6 +5,7 @@ import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
+import { useDetailPanel } from '@/lib/detail-panel-context';
 import FaceHeader from '@/components/face/FaceHeader';
 import SeedRow from './SeedRow';
 import { useTranslations } from 'next-intl';
@@ -58,6 +59,7 @@ const CloseButton = ({ label, onClick }: { label: string; onClick: () => void })
 
 const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
   const t = useTranslations('faceDetail');
+  const { openActivity } = useDetailPanel();
 
   const [data, setData] = useState<FaceDetailApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,6 +151,7 @@ const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
                 key={activity.id}
                 activity={activity}
                 face={face}
+                onClick={() => openActivity(activity.id)}
                 noBorder={i === activities.length - 1}
               />
             );
