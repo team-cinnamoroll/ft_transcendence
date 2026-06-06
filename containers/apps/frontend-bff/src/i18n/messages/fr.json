@@ -111,9 +111,19 @@
   "activityFeed": {
     "noActivities": "Aucune activité pour l'instant"
   },
+  "homeClient": {
+    "write": "Écrire",
+    "onThisDay": "Il y a un an",
+    "yearsAgo": "il y a {n} an(s)",
+    "reply": "Que répondriez-vous à votre passé ?",
+    "recentSeeds": "Graines récentes",
+    "viewAll": "Tout voir",
+    "compose": "Qu'allez-vous écrire aujourd'hui ?",
+    "post": "Publier"
+  },
   "homeProfile": {
     "faces": "Facettes",
-    "activities": "Activités"
+    "activities": "Graines"
   },
   "faceFilterBar": {
     "all": "Tout"

@@ -23,11 +23,22 @@ const ActivityFeed = ({ faces, activities, selectedFaceId }: ActivityFeedProps) 
   const faceCache = createLookupMap(faces, (face) => face.id);
 
   if (displayActivities.length === 0) {
-    return <p className="text-center text-sm text-zinc-500 py-16">{t('noActivities')}</p>;
+    return (
+      <p
+        style={{
+          textAlign: 'center',
+          fontSize: 13,
+          color: 'var(--mf-text-muted)',
+          padding: '64px 0',
+        }}
+      >
+        {t('noActivities')}
+      </p>
+    );
   }
 
   return (
-    <div style={{ padding: '0 16px' }}>
+    <div>
       {displayActivities.map((activity, index) => {
         const face = faceCache.get(activity.faceId);
         if (!face) return null;

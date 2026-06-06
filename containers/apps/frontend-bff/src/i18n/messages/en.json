@@ -111,9 +111,19 @@
   "activityFeed": {
     "noActivities": "No activities yet"
   },
+  "homeClient": {
+    "write": "Write",
+    "onThisDay": "On this day",
+    "yearsAgo": "{n} year(s) ago",
+    "reply": "What would you say to your past self?",
+    "recentSeeds": "Recent seeds",
+    "viewAll": "View all",
+    "compose": "What will you write today?",
+    "post": "Post"
+  },
   "homeProfile": {
     "faces": "Faces",
-    "activities": "Activities"
+    "activities": "Seeds"
   },
   "faceFilterBar": {
     "all": "All"
