@@ -33,7 +33,7 @@ const FaceActivityFeed = ({ face, activities, sortOrder = 'newest' }: FaceActivi
   }
 
   return (
-    <div style={{ padding: '0 16px' }}>
+    <div style={{ padding: '0 28px' }}>
       {sorted.map((activity, index) => (
         <SeedRow
           key={activity.id}
