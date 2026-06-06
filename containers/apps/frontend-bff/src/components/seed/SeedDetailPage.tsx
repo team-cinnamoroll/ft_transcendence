@@ -55,6 +55,9 @@ const LinkedSeedRow = ({ seedLink, incoming = false }: LinkedSeedRowProps) => {
           <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mf-brand)' }}>
             {getFaceTitle(face)}
           </span>
+          {seedLink.author?.handle && (
+            <span style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>@{seedLink.author.handle}</span>
+          )}
           <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
             {formatRelative(seed.createdAt)}
           </span>
@@ -93,6 +96,7 @@ type Props = {
 const SeedDetailPage = ({
   seed,
   face,
+  author,
   isOwner,
   outgoingLinks,
   incomingLinks,
@@ -117,6 +121,9 @@ const SeedDetailPage = ({
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>
               {getFaceTitle(face)}
             </span>
+            {author?.handle && (
+              <span style={{ fontSize: 12, color: 'var(--mf-text-muted)' }}>@{author.handle}</span>
+            )}
           </div>
           <div
             style={{
