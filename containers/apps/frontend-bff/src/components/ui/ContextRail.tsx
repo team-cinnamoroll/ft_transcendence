@@ -181,6 +181,14 @@ const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
 
 // ── CollectionRail ─────────────────────────────────────────────
 
+const RECOMMENDED_FACES_MOCK = [
+  { name: '読書', handle: 'h_maru', subs: 412 },
+  { name: '映画断片', handle: 'sayaka_t', subs: 287 },
+  { name: '朝の珈琲', handle: 'kettle_co', subs: 198 },
+];
+
+const RECOMMENDED_COLORS = ['#5B8DB8', '#7B6B9E', '#A89050'];
+
 type CollectionRailProps = {
   subscribedFaces: Face[];
   latestActivityByFaceId: Record<string, Activity>;
@@ -284,6 +292,59 @@ const CollectionRail = ({
           </p>
         </RailCard>
       )}
+
+      {/* 人気のフェイス */}
+      <RailCard title={t('popularFaces')}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {RECOMMENDED_FACES_MOCK.map((rec, i) => (
+            <div key={rec.handle} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 9,
+                  background: RECOMMENDED_COLORS[i % RECOMMENDED_COLORS.length],
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  fontFamily: 'var(--mf-font-serif)',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#fff',
+                }}
+              >
+                {rec.name.slice(0, 1)}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {rec.name}
+                </div>
+                <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
+                  @{rec.handle} · {rec.subs} {t('subscribersUnit')}
+                </div>
+              </div>
+              <button
+                type="button"
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 999,
+                  background: 'transparent',
+                  border: '1px solid var(--mf-brand)',
+                  color: 'var(--mf-brand)',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {t('subscribeButton')}
+              </button>
+            </div>
+          ))}
+        </div>
+      </RailCard>
     </div>
   );
 };

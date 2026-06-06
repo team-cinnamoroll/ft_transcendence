@@ -286,6 +286,9 @@
     "noActivitiesThisMonth": "No records this month",
     "subscribedFaces": "Subscribed",
     "noSubscriptions": "You haven't subscribed to any faces yet.",
-    "findFaces": "Find Faces →"
+    "findFaces": "Find Faces →",
+    "popularFaces": "Popular Faces",
+    "subscribersUnit": "subscribers",
+    "subscribeButton": "Subscribe"
   }
 }

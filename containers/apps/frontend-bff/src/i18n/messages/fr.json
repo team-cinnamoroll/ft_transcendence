@@ -286,6 +286,9 @@
     "noActivitiesThisMonth": "Aucune activité ce mois-ci",
     "subscribedFaces": "Abonnements",
     "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
-    "findFaces": "Chercher des facettes →"
+    "findFaces": "Chercher des facettes →",
+    "popularFaces": "Facettes populaires",
+    "subscribersUnit": "abonnés",
+    "subscribeButton": "S'abonner"
   }
 }

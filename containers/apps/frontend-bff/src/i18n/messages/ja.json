@@ -286,6 +286,9 @@
     "noActivitiesThisMonth": "今月はまだ記録がありません",
     "subscribedFaces": "サブスク中",
     "noSubscriptions": "サブスクしているフェイスがありません。",
-    "findFaces": "フェイスを探す →"
+    "findFaces": "フェイスを探す →",
+    "popularFaces": "人気のフェイス",
+    "subscribersUnit": "サブスク",
+    "subscribeButton": "サブスク"
   }
 }
