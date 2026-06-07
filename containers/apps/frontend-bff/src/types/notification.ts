@@ -3,7 +3,7 @@ export type Notification =
       id: string;
       type: 'link';
       fromUserId: string;
-      activityId: string;
+      seedId: string;
       createdAt: string;
     }
   | {

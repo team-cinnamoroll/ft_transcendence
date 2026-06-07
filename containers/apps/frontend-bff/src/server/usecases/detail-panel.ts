@@ -3,47 +3,45 @@ import 'server-only';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { findActivityById, listActivitiesByFaceId } from './activities';
+import { findSeedById, listSeedsByFaceId } from './seeds';
 import { findFaceById } from './faces';
 import { getCurrentUser, findUserById, listAllUsers } from './users';
 
 export type FaceDetailPanelData = {
   currentUser: UserProfile;
   face: Face | null;
-  activities: Seed[];
+  seeds: Seed[];
   users: UserProfile[];
 };
 
 export async function getFaceDetailPanelData(faceId: string): Promise<FaceDetailPanelData> {
   const currentUser = await getCurrentUser();
 
-  const [face, activities, users] = await Promise.all([
+  const [face, seeds, users] = await Promise.all([
     findFaceById(faceId),
-    listActivitiesByFaceId(faceId),
+    listSeedsByFaceId(faceId),
     listAllUsers(),
   ]);
 
-  return { currentUser, face, activities, users };
+  return { currentUser, face, seeds, users };
 }
 
-export type ActivityDetailPanelData = {
-  activity: Seed | null;
+export type SeedDetailPanelData = {
+  seed: Seed | null;
   user: UserProfile | null;
   face: Face | null;
 };
 
-export async function getActivityDetailPanelData(
-  activityId: string
-): Promise<ActivityDetailPanelData> {
-  const activity = await findActivityById(activityId);
-  if (!activity) {
-    return { activity: null, user: null, face: null };
+export async function getSeedDetailPanelData(seedId: string): Promise<SeedDetailPanelData> {
+  const seed = await findSeedById(seedId);
+  if (!seed) {
+    return { seed: null, user: null, face: null };
   }
 
   const [user, face] = await Promise.all([
-    findUserById(activity.userId),
-    findFaceById(activity.faceId),
+    findUserById(seed.userId),
+    findFaceById(seed.faceId),
   ]);
 
-  return { activity, user, face };
+  return { seed, user, face };
 }

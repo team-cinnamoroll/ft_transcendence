@@ -1,20 +1,28 @@
 import 'server-only';
 
 import type { Seed } from '@/types/seed';
-import { seeds as activities } from '@/mocks/seeds';
+import { seeds } from '@/mocks/seeds';
 import { createSingletonProvider } from '@/repositories/provider';
+
+const sortByCreatedAtDesc = (list: Seed[]): Seed[] =>
+  [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
 export type SeedRepositorySpec = {
   findById: (seedId: string) => Promise<Seed | null>;
   listAll: () => Promise<Seed[]>;
   listByFaceId: (faceId: string) => Promise<Seed[]>;
+  listByUserId: (userId: string) => Promise<Seed[]>;
+  listByFaceIds: (faceIds: string[]) => Promise<Seed[]>;
 };
 
 export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
   return {
-    findById: async (seedId) => activities.find((a) => a.id === seedId) ?? null,
-    listAll: async () => activities,
-    listByFaceId: async (faceId) => activities.filter((a) => a.faceId === faceId),
+    findById: async (seedId) => seeds.find((s) => s.id === seedId) ?? null,
+    listAll: async () => sortByCreatedAtDesc(seeds),
+    listByFaceId: async (faceId) => sortByCreatedAtDesc(seeds.filter((s) => s.faceId === faceId)),
+    listByUserId: async (userId) => sortByCreatedAtDesc(seeds.filter((s) => s.userId === userId)),
+    listByFaceIds: async (faceIds) =>
+      sortByCreatedAtDesc(seeds.filter((s) => faceIds.includes(s.faceId))),
   };
 }
 

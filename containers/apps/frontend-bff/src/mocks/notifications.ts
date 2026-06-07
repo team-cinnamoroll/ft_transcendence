@@ -20,7 +20,7 @@ export const notifications: Notification[] = [
     id: 'notif-2',
     type: 'link',
     fromUserId: 'user-2',
-    activityId: 'act-1-1-7',
+    seedId: 'act-1-1-7',
     createdAt: '2026-03-28T18:45:00+09:00',
   },
   {
@@ -34,7 +34,7 @@ export const notifications: Notification[] = [
     id: 'notif-4',
     type: 'link',
     fromUserId: 'user-3',
-    activityId: 'act-1-1-6',
+    seedId: 'act-1-1-6',
     createdAt: '2026-03-20T21:30:00+09:00',
   },
   {
@@ -48,7 +48,7 @@ export const notifications: Notification[] = [
     id: 'notif-6',
     type: 'link',
     fromUserId: 'user-4',
-    activityId: 'act-1-1-5',
+    seedId: 'act-1-1-5',
     createdAt: '2026-03-10T08:05:00+09:00',
   },
 ];

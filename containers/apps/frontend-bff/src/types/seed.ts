@@ -4,6 +4,6 @@ export type Seed = {
   userId: string;
   body: string;
   imageUrls?: string[];
-  linkedActivityIds?: string[];
+  linkedSeedIds?: string[];
   createdAt: string; // ISO 8601
 };

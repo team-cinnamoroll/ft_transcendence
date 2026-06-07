@@ -22,6 +22,22 @@ export type SeedDetailData = {
   users: UserProfile[];
 };
 
+export async function listSeedsByUserId(userId: string): Promise<Seed[]> {
+  return getSeedRepository().listByUserId(userId);
+}
+
+export async function listSeedsByFaceId(faceId: string): Promise<Seed[]> {
+  return getSeedRepository().listByFaceId(faceId);
+}
+
+export async function listAllSeeds(): Promise<Seed[]> {
+  return getSeedRepository().listAll();
+}
+
+export async function listSeedsByFaceIds(faceIds: string[]): Promise<Seed[]> {
+  return getSeedRepository().listByFaceIds(faceIds);
+}
+
 export async function findSeedById(seedId: string): Promise<Seed | null> {
   return getSeedRepository().findById(seedId);
 }
@@ -42,10 +58,9 @@ export async function getSeedDetailData(seedId: string): Promise<SeedDetailData 
 
   const isOwner = seed.userId === currentUser.id;
 
-  // 発信リンク: このシードが参照している他のシード
   const outgoingLinks: SeedLink[] = (
     await Promise.all(
-      (seed.linkedActivityIds ?? []).map(async (id) => {
+      (seed.linkedSeedIds ?? []).map(async (id) => {
         const linked = await getSeedRepository().findById(id);
         if (!linked) return null;
         const linkedFace = await findFaceById(linked.faceId);
@@ -54,14 +69,13 @@ export async function getSeedDetailData(seedId: string): Promise<SeedDetailData 
     )
   ).filter((x): x is SeedLink => x !== null);
 
-  // 被リンク: このシードを参照している他のシード
   const incomingLinks: SeedLink[] = (
     await Promise.all(
       allSeeds
-        .filter((a) => a.id !== seed.id && (a.linkedActivityIds ?? []).includes(seed.id))
-        .map(async (a) => {
-          const linkedFace = await findFaceById(a.faceId);
-          return linkedFace ? { seed: a, face: linkedFace } : null;
+        .filter((s) => s.id !== seed.id && (s.linkedSeedIds ?? []).includes(seed.id))
+        .map(async (s) => {
+          const linkedFace = await findFaceById(s.faceId);
+          return linkedFace ? { seed: s, face: linkedFace } : null;
         })
     )
   ).filter((x): x is SeedLink => x !== null);

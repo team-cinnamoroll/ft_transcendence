@@ -5,7 +5,7 @@ import type { DetailPanelState } from '@/types/detail-panel';
 
 type DetailPanelContextValue = {
   state: DetailPanelState;
-  openActivity: (activityId: string) => void;
+  openSeed: (seedId: string) => void;
   openFace: (faceId: string) => void;
   close: () => void;
 };
@@ -15,8 +15,8 @@ const DetailPanelContext = createContext<DetailPanelContextValue | null>(null);
 export const DetailPanelProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<DetailPanelState>({ type: 'none' });
 
-  const openActivity = (activityId: string) => {
-    setState({ type: 'seed', seedId: activityId });
+  const openSeed = (seedId: string) => {
+    setState({ type: 'seed', seedId });
   };
 
   const openFace = (faceId: string) => {
@@ -28,7 +28,7 @@ export const DetailPanelProvider = ({ children }: { children: React.ReactNode })
   };
 
   return (
-    <DetailPanelContext.Provider value={{ state, openActivity, openFace, close }}>
+    <DetailPanelContext.Provider value={{ state, openSeed, openFace, close }}>
       {children}
     </DetailPanelContext.Provider>
   );
