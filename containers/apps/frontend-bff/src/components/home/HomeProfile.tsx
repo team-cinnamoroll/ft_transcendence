@@ -3,7 +3,7 @@ import type { Activity } from '@/types/activity';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import ActivityTileCalendar from './ActivityTileCalendar';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   user: UserProfile;
@@ -11,8 +11,8 @@ type Props = {
   activities: Activity[];
 };
 
-const HomeProfile = async ({ user, faces, activities }: Props) => {
-  const t = await getTranslations('homeProfile');
+const HomeProfile = ({ user, faces, activities }: Props) => {
+  const t = useTranslations('homeProfile');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '20px 28px 12px' }}>
