@@ -1,6 +1,6 @@
 'use client';
 
-import { type Activity } from '@/types/activity';
+import { type Seed } from '@/types/seed';
 import { type UserProfile } from '@/types/user-profile';
 import { type Face } from '@/types/face';
 import SeedRow from '@/components/ui/SeedRow';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export type SearchActivityResultItem = {
-  activity: Activity;
+  activity: Seed;
   user: UserProfile;
   face: Face;
 };

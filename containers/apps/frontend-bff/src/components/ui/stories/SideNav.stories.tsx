@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SideNav from '../SideNav';
 import { faces } from '@/mocks/faces';
 import { currentUser } from '@/mocks/users';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 
 const meta: Meta<typeof SideNav> = {
   title: 'UI/SideNav',

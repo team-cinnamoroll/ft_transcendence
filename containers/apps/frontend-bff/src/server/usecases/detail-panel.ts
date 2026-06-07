@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { findActivityById, listActivitiesByFaceId } from './activities';
@@ -10,7 +10,7 @@ import { getCurrentUser, findUserById, listAllUsers } from './users';
 export type FaceDetailPanelData = {
   currentUser: UserProfile;
   face: Face | null;
-  activities: Activity[];
+  activities: Seed[];
   users: UserProfile[];
 };
 
@@ -27,7 +27,7 @@ export async function getFaceDetailPanelData(faceId: string): Promise<FaceDetail
 }
 
 export type ActivityDetailPanelData = {
-  activity: Activity | null;
+  activity: Seed | null;
   user: UserProfile | null;
   face: Face | null;
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
@@ -18,7 +18,7 @@ type FaceDetailProps = {
 type FaceDetailApiResponse = {
   currentUser: UserProfile;
   face: Face | null;
-  activities: Activity[];
+  activities: Seed[];
   users: UserProfile[];
 };
 

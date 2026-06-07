@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
 import { type UserProfile } from '@/types/user-profile';
@@ -158,7 +158,7 @@ type Props = {
   notifications: Notification[];
   users: UserProfile[];
   faces: Face[];
-  activities: Activity[];
+  activities: Seed[];
 };
 
 const NotificationList = ({ notifications, faces, activities }: Props) => {

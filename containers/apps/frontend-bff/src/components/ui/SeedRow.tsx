@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import { getFaceTitle } from '@/lib/display';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import FaceBadge from '@/components/ui/FaceBadge';
 
 type SeedRowProps = {
-  activity: Activity;
+  activity: Seed;
   face: Face;
   handle?: string;
   onClick?: () => void;

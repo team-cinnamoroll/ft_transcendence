@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
@@ -11,7 +11,7 @@ import SearchScopeSelector, { type SearchScope } from '@/components/search/Searc
 import SearchResults, { type SearchActivityResultItem } from '@/components/search/SearchResults';
 
 type SearchClientProps = {
-  allActivities: Activity[];
+  allActivities: Seed[];
   allFaces: Face[];
   allUsers: UserProfile[];
   currentUserId: string;

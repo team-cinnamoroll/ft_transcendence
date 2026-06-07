@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
@@ -15,8 +15,8 @@ import { getFaceTitle } from '@/lib/display';
 type Props = {
   currentUser: UserProfile;
   faces: Face[];
-  activities: Activity[];
-  onThisDay?: Activity;
+  activities: Seed[];
+  onThisDay?: Seed;
   onThisDayFace?: Face;
   yearsAgo?: number;
   dateLabel?: string;

@@ -16,7 +16,7 @@ export const DetailPanelProvider = ({ children }: { children: React.ReactNode })
   const [state, setState] = useState<DetailPanelState>({ type: 'none' });
 
   const openActivity = (activityId: string) => {
-    setState({ type: 'activity', activityId });
+    setState({ type: 'seed', seedId: activityId });
   };
 
   const openFace = (faceId: string) => {

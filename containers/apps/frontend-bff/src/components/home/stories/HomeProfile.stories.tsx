@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import HomeProfile from '../HomeProfile';
 import { currentUser } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 
 const meta: Meta<typeof HomeProfile> = {
   title: 'Home/HomeProfile',

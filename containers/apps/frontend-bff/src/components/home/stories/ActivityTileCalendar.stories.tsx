@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ActivityTileCalendar from '../ActivityTileCalendar';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 
 const meta: Meta<typeof ActivityTileCalendar> = {
   title: 'Home/ActivityTileCalendar',

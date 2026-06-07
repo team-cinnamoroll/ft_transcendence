@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getCurrentUser, listAllUsers } from './users';
@@ -11,9 +11,9 @@ import { getSubscribedFaceIds } from './subscriptions';
 export type LayoutData = {
   currentUser: UserProfile;
   myFaces: Face[];
-  myActivities: Activity[];
+  myActivities: Seed[];
   subscribedFaces: Face[];
-  latestActivityByFaceId: Record<string, Activity>;
+  latestActivityByFaceId: Record<string, Seed>;
   allUsers: UserProfile[];
 };
 
@@ -38,8 +38,8 @@ export async function getLayoutData(): Promise<LayoutData> {
       return faceActivities.length > 0 ? ([face.id, faceActivities[0]] as const) : null;
     })
   );
-  const latestActivityByFaceId: Record<string, Activity> = Object.fromEntries(
-    latestActivityEntries.filter((e): e is [string, Activity] => e !== null)
+  const latestActivityByFaceId: Record<string, Seed> = Object.fromEntries(
+    latestActivityEntries.filter((e): e is [string, Seed] => e !== null)
   );
 
   return {

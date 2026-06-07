@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { Face } from '@/types/face';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import FaceHeader, { type SortOrder } from './FaceHeader';
 import FaceActivityFeed from './FaceActivityFeed';
@@ -13,7 +13,7 @@ const SUBSCRIBER_COUNT_MOCK = 12;
 type Props = {
   face: Face;
   isOwner: boolean;
-  activities: Activity[];
+  activities: Seed[];
   users: UserProfile[];
   isSubscribed?: boolean;
 };

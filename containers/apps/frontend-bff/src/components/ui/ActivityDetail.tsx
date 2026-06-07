@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getFaceTitle } from '@/lib/display';
@@ -19,7 +19,7 @@ type ActivityDetailProps = {
 };
 
 type ActivityDetailApiResponse = {
-  activity: Activity | null;
+  activity: Seed | null;
   user: UserProfile | null;
   face: Face | null;
 };

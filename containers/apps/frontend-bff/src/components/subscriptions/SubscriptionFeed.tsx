@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
@@ -110,7 +110,7 @@ const EmptyState = () => (
 
 type Props = {
   subscribedFaceIds: string[];
-  subscribedActivities: Activity[];
+  subscribedActivities: Seed[];
   faces: Face[];
   users: UserProfile[];
 };
@@ -164,7 +164,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
 
   // タイムラインを日付でグループ化
   const grouped = useMemo(() => {
-    const groups: { dateKey: string; activities: Activity[] }[] = [];
+    const groups: { dateKey: string; activities: Seed[] }[] = [];
     let lastKey = '';
     for (const act of filteredActivities) {
       const dateKey = act.createdAt.slice(0, 10);

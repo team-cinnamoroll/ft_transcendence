@@ -1,7 +1,7 @@
 import 'server-only';
 
 import type { Seed } from '@/types/seed';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 import { createSingletonProvider } from '@/repositories/provider';
 
 export type SeedRepositorySpec = {

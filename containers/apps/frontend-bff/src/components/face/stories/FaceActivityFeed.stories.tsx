@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import FaceActivityFeed from '../FaceActivityFeed';
 import { faces } from '@/mocks/faces';
 import { users } from '@/mocks/users';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 
 const meta: Meta<typeof FaceActivityFeed> = {
   title: 'Face/FaceActivityFeed',

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Face } from '@/types/face';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
 import CreateFaceModal from './CreateFaceModal';
 import SeedRow from '@/components/ui/SeedRow';
@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 
 type Props = {
   initialFaces: Face[];
-  activities: Activity[];
+  activities: Seed[];
 };
 
 type SortType = 'lastAt' | 'total' | 'name';

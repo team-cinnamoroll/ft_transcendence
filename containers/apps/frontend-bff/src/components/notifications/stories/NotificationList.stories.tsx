@@ -3,7 +3,7 @@ import NotificationList from '../NotificationList';
 import { notifications } from '@/mocks/notifications';
 import { users } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 
 const meta: Meta<typeof NotificationList> = {
   title: 'Notifications/NotificationList',

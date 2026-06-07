@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
@@ -17,7 +17,7 @@ const REFERENCE_DATE = new Date('2026-03-31');
 // ── WritingRail ────────────────────────────────────────────────
 
 type WritingRailProps = {
-  activities: Activity[];
+  activities: Seed[];
   faces: Face[];
 };
 
@@ -81,7 +81,7 @@ const WritingRail = ({ activities, faces }: WritingRailProps) => {
 
 type ReflectionRailProps = {
   faces: Face[];
-  activities: Activity[];
+  activities: Seed[];
 };
 
 const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
@@ -191,7 +191,7 @@ const RECOMMENDED_COLORS = ['#5B8DB8', '#7B6B9E', '#A89050'];
 
 type CollectionRailProps = {
   subscribedFaces: Face[];
-  latestActivityByFaceId: Record<string, Activity>;
+  latestActivityByFaceId: Record<string, Seed>;
   users: UserProfile[];
 };
 
@@ -354,9 +354,9 @@ const CollectionRail = ({
 export type ContextRailProps = {
   user: UserProfile;
   faces: Face[];
-  activities: Activity[];
+  activities: Seed[];
   subscribedFaces: Face[];
-  latestActivityByFaceId: Record<string, Activity>;
+  latestActivityByFaceId: Record<string, Seed>;
   users: UserProfile[];
 };
 

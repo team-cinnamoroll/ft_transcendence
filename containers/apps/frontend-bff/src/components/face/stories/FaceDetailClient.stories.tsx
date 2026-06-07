@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FaceDetailClient from '../FaceDetailClient';
 import { faces } from '@/mocks/faces';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 import { users } from '@/mocks/users';
 
 const face = faces.find((f) => f.id === 'face-1-1')!;

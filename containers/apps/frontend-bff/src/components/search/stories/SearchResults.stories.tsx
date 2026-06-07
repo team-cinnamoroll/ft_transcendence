@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SearchResults from '../SearchResults';
 import { users } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
-import { activities } from '@/mocks/activities';
+import { seeds as activities } from '@/mocks/seeds';
 import { subscribedFaceIds } from '@/mocks/subscriptions';
 import type { SearchActivityResultItem } from '../SearchResults';
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { type Face } from '@/types/face';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
@@ -10,7 +10,7 @@ import type { SortOrder } from './FaceHeader';
 
 type FaceActivityFeedProps = {
   face: Face;
-  activities: Activity[];
+  activities: Seed[];
   users?: UserProfile[];
   sortOrder?: SortOrder;
 };

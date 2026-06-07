@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ContextRail from '../ContextRail';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 
@@ -17,7 +17,7 @@ const mockFaces: Face[] = [
 ];
 
 const now = new Date();
-const mockActivities: Activity[] = [
+const mockActivities: Seed[] = [
   {
     id: 'act-1',
     faceId: 'face-1',
@@ -42,7 +42,7 @@ const mockSubscribedFace: Face = {
   isPrivate: false,
 };
 
-const mockLatestActivityByFaceId: Record<string, Activity> = {
+const mockLatestSeedByFaceId: Record<string, Seed> = {
   'face-sub-1': {
     id: 'act-sub-1',
     faceId: 'face-sub-1',
@@ -95,7 +95,7 @@ export const WithSubscriptions: Story = {
     faces: mockFaces,
     activities: mockActivities,
     subscribedFaces: [mockSubscribedFace],
-    latestActivityByFaceId: mockLatestActivityByFaceId,
+    latestActivityByFaceId: mockLatestSeedByFaceId,
     users: mockUsers,
   },
 };

@@ -10,7 +10,7 @@ import FaceNavItem from '@/components/ui/FaceNavItem';
 import AccountMenu from '@/components/ui/AccountMenu';
 import CreateFaceModal from '@/components/face/CreateFaceModal';
 import PostModal from '@/components/ui/PostModal';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 
@@ -63,7 +63,7 @@ const NAV_ITEMS: NavItem[] = [
 type Props = {
   faces: Face[];
   user: UserProfile;
-  activities: Activity[];
+  activities: Seed[];
   faceCount: number;
   activityCount: number;
 };

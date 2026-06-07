@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import ActivityTileCalendar from './ActivityTileCalendar';
@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 type Props = {
   user: UserProfile;
   faces: Face[];
-  activities: Activity[];
+  activities: Seed[];
 };
 
 const HomeProfile = ({ user, faces, activities }: Props) => {

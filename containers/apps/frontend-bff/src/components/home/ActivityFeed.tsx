@@ -1,6 +1,6 @@
 'use client';
 
-import type { Activity } from '@/types/activity';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 type ActivityFeedProps = {
   currentUser?: UserProfile;
   faces: Face[];
-  activities: Activity[];
+  activities: Seed[];
   selectedFaceId?: string | null;
 };
 

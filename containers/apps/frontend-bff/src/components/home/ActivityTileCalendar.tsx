@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { type Activity } from '@/types/activity';
+import { type Seed } from '@/types/seed';
 import { useTranslations } from 'next-intl';
 
-type ActivityTileCalendarProps = {
-  activities: Activity[];
+type SeedTileCalendarProps = {
+  activities: Seed[];
 };
 
 const REFERENCE_DATE = new Date('2026-04-01');
@@ -38,7 +38,7 @@ type WeekData = {
 
 const LEGEND_COUNTS = [0, 1, 2, 4, 6];
 
-const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
+const SeedTileCalendar = ({ activities }: SeedTileCalendarProps) => {
   const [selectedWeekIdx, setSelectedWeekIdx] = useState<number | null>(null);
   const t = useTranslations('activityTileCalendar');
 
@@ -84,7 +84,7 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
     return labels;
   }, [weeks]);
 
-  const selectedWeekActivities = useMemo<Activity[]>(() => {
+  const selectedWeekActivities = useMemo<Seed[]>(() => {
     if (selectedWeekIdx === null) return [];
     const week = weeks[selectedWeekIdx];
     const startKey = toDateKey(week.startDate);
@@ -275,4 +275,4 @@ const ActivityTileCalendar = ({ activities }: ActivityTileCalendarProps) => {
   );
 };
 
-export default ActivityTileCalendar;
+export default SeedTileCalendar;
