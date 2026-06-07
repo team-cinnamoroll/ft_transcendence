@@ -22,7 +22,7 @@ export const Open: Story = {
   args: {
     user: mockUser,
     faceCount: 5,
-    activityCount: 42,
+    seedCount: 42,
     isOpen: true,
     onClose: () => {},
   },
@@ -32,7 +32,7 @@ export const Closed: Story = {
   args: {
     user: mockUser,
     faceCount: 5,
-    activityCount: 42,
+    seedCount: 42,
     isOpen: false,
     onClose: () => {},
   },

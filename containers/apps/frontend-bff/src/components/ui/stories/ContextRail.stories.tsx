@@ -17,7 +17,7 @@ const mockFaces: Face[] = [
 ];
 
 const now = new Date();
-const mockActivities: Seed[] = [
+const mockSeeds: Seed[] = [
   {
     id: 'act-1',
     faceId: 'face-1',
@@ -82,9 +82,9 @@ export const WritingRail: Story = {
   args: {
     user: mockUser,
     faces: mockFaces,
-    activities: mockActivities,
+    seeds: mockSeeds,
     subscribedFaces: [],
-    latestActivityByFaceId: {},
+    latestSeedByFaceId: {},
     users: mockUsers,
   },
 };
@@ -93,9 +93,9 @@ export const WithSubscriptions: Story = {
   args: {
     user: mockUser,
     faces: mockFaces,
-    activities: mockActivities,
+    seeds: mockSeeds,
     subscribedFaces: [mockSubscribedFace],
-    latestActivityByFaceId: mockLatestSeedByFaceId,
+    latestSeedByFaceId: mockLatestSeedByFaceId,
     users: mockUsers,
   },
 };

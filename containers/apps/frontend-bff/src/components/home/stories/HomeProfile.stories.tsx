@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import HomeProfile from '../HomeProfile';
 import { currentUser } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
-import { seeds as activities } from '@/mocks/seeds';
+import { seeds } from '@/mocks/seeds';
 
 const meta: Meta<typeof HomeProfile> = {
   title: 'Home/HomeProfile',
@@ -14,12 +14,12 @@ export default meta;
 type Story = StoryObj<typeof HomeProfile>;
 
 const myFaces = faces.filter((f) => f.userId === 'user-1');
-const myActivities = activities.filter((a) => a.userId === 'user-1');
+const mySeeds = seeds.filter((s) => s.userId === 'user-1');
 
 export const Default: Story = {
-  args: { user: currentUser, faces: myFaces, activities: myActivities },
+  args: { user: currentUser, faces: myFaces, seeds: mySeeds },
 };
 
-export const NoActivities: Story = {
-  args: { user: currentUser, faces: myFaces, activities: [] },
+export const NoSeeds: Story = {
+  args: { user: currentUser, faces: myFaces, seeds: [] },
 };

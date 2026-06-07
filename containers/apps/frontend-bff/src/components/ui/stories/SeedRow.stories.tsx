@@ -9,7 +9,7 @@ const mockFace = {
   isPrivate: false,
 };
 
-const mockActivity = {
+const mockSeed = {
   id: 'act-1',
   faceId: 'face-1',
   userId: 'user-1',
@@ -17,7 +17,7 @@ const mockActivity = {
   createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
 };
 
-const mockActivityLong = {
+const mockSeedLong = {
   id: 'act-2',
   faceId: 'face-1',
   userId: 'user-1',
@@ -25,10 +25,10 @@ const mockActivityLong = {
   createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
 };
 
-const mockActivityWithLinks = {
-  ...mockActivity,
+const mockSeedWithLinks = {
+  ...mockSeed,
   id: 'act-3',
-  linkedActivityIds: ['act-ref-1', 'act-ref-2'],
+  linkedSeedIds: ['act-ref-1', 'act-ref-2'],
 };
 
 const meta: Meta<typeof SeedRow> = {
@@ -48,17 +48,17 @@ export default meta;
 type Story = StoryObj<typeof SeedRow>;
 
 export const Default: Story = {
-  args: { activity: mockActivity, face: mockFace },
+  args: { seed: mockSeed, face: mockFace },
 };
 
 export const LongBody: Story = {
-  args: { activity: mockActivityLong, face: mockFace },
+  args: { seed: mockSeedLong, face: mockFace },
 };
 
 export const WithLinks: Story = {
-  args: { activity: mockActivityWithLinks, face: mockFace, showActions: true },
+  args: { seed: mockSeedWithLinks, face: mockFace, showActions: true },
 };
 
 export const WithHandle: Story = {
-  args: { activity: mockActivity, face: mockFace, handle: 'yamada_t' },
+  args: { seed: mockSeed, face: mockFace, handle: 'yamada_t' },
 };

@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import SeedDetailPage from '../SeedDetailPage';
 import { faces } from '@/mocks/faces';
-import { seeds as activities } from '@/mocks/seeds';
+import { seeds } from '@/mocks/seeds';
 import { users } from '@/mocks/users';
 
 const face = faces.find((f) => f.id === 'face-1-1')!;
-const seed = activities.find((a) => a.faceId === 'face-1-1')!;
-const linkedSeed = activities.find((a) => a.faceId !== 'face-1-1')!;
+const seed = seeds.find((s) => s.faceId === 'face-1-1')!;
+const linkedSeed = seeds.find((s) => s.faceId !== 'face-1-1')!;
 const linkedFace = faces.find((f) => f.id === linkedSeed?.faceId) ?? faces[1];
 
 const meta: Meta<typeof SeedDetailPage> = {

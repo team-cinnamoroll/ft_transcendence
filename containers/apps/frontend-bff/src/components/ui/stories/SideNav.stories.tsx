@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SideNav from '../SideNav';
 import { faces } from '@/mocks/faces';
 import { currentUser } from '@/mocks/users';
-import { seeds as activities } from '@/mocks/seeds';
+import { seeds } from '@/mocks/seeds';
 
 const meta: Meta<typeof SideNav> = {
   title: 'UI/SideNav',
@@ -15,7 +15,7 @@ const meta: Meta<typeof SideNav> = {
   args: {
     user: currentUser,
     faceCount: faces.filter((f) => f.userId === 'user-1').length,
-    activityCount: activities.filter((a) => a.userId === 'user-1').length,
+    seedCount: seeds.filter((s) => s.userId === 'user-1').length,
   },
 };
 

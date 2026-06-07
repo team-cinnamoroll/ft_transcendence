@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FaceDetailClient from '../FaceDetailClient';
 import { faces } from '@/mocks/faces';
-import { seeds as activities } from '@/mocks/seeds';
+import { seeds } from '@/mocks/seeds';
 import { users } from '@/mocks/users';
 
 const face = faces.find((f) => f.id === 'face-1-1')!;
-const faceActivities = activities.filter((a) => a.faceId === face.id);
+const faceSeeds = seeds.filter((s) => s.faceId === face.id);
 
 const meta: Meta<typeof FaceDetailClient> = {
   title: 'Face/FaceDetailClient',
@@ -21,7 +21,7 @@ export const AsOwner: Story = {
   args: {
     face,
     isOwner: true,
-    activities: faceActivities,
+    seeds: faceSeeds,
     users,
   },
 };
@@ -30,7 +30,7 @@ export const AsVisitor: Story = {
   args: {
     face,
     isOwner: false,
-    activities: faceActivities,
+    seeds: faceSeeds,
     users,
   },
 };

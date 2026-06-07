@@ -1,20 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ActivityTileCalendar from '../ActivityTileCalendar';
-import { seeds as activities } from '@/mocks/seeds';
+import SeedTileCalendar from '../SeedTileCalendar';
+import { seeds } from '@/mocks/seeds';
 
-const meta: Meta<typeof ActivityTileCalendar> = {
-  title: 'Home/ActivityTileCalendar',
-  component: ActivityTileCalendar,
+const meta: Meta<typeof SeedTileCalendar> = {
+  title: 'Home/SeedTileCalendar',
+  component: SeedTileCalendar,
   tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj<typeof ActivityTileCalendar>;
+type Story = StoryObj<typeof SeedTileCalendar>;
 
 export const Default: Story = {
-  args: { activities },
+  args: { seeds },
 };
 
 export const Empty: Story = {
-  args: { activities: [] },
+  args: { seeds: [] },
 };

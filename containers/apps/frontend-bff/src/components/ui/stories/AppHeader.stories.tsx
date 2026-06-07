@@ -25,7 +25,7 @@ export const Default: Story = {
   args: {
     user: mockUser,
     faceCount: 5,
-    activityCount: 42,
+    seedCount: 42,
     unreadCount: 0,
   },
 };
@@ -34,7 +34,7 @@ export const WithUnread: Story = {
   args: {
     user: mockUser,
     faceCount: 5,
-    activityCount: 42,
+    seedCount: 42,
     unreadCount: 3,
   },
 };
