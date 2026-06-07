@@ -32,7 +32,7 @@ tracen 側には以下の制約（アーキテクチャ要求）があるため�
 | ---------------------- | -------- | ---------------------------------------------------- |
 | `AppHeader.tsx`        | ui/      | ヘッダー（tracen の `TopBar.tsx` を置き換え候補）    |
 | `ContextRail.tsx`      | ui/      | 右サイドバー（コンテキスト情報表示）                 |
-| `ActivityCard.tsx`     | ui/      | アクティビティカード（フィード用独立コンポーネント） |
+| `SeedCard.tsx`         | ui/      | アクティビティカード（フィード用独立コンポーネント） |
 | `FaceBadge.tsx`        | ui/      | フェイスバッジ                                       |
 | `SeedRow.tsx`          | ui/      | シード行コンポーネント                               |
 | `DateBar.tsx`          | ui/      | 日付バー                                             |
@@ -46,10 +46,10 @@ tracen 側には以下の制約（アーキテクチャ要求）があるため�
 ### MultiFace で更新された既存コンポーネント（tracen にも存在する）
 
 - `SideNav.tsx`, `BottomNav.tsx`, `DetailPanel.tsx`, `PostModal.tsx`
-- `FaceDetail.tsx`, `ActivityDetail.tsx`, `FaceChip.tsx`, `FaceNavItem.tsx`
+- `FaceDetail.tsx`, `SeedDetail.tsx`, `FaceChip.tsx`, `FaceNavItem.tsx`
 - `Avatar.tsx`, `Badge.tsx`
-- home/: `HomeClient.tsx`, `HomeProfile.tsx`, `ActivityFeed.tsx`, `FaceFilterBar.tsx`, `ActivityTileCalendar.tsx`
-- face/: `FacesClient.tsx`, `FaceHeader.tsx`, `FaceActivityFeed.tsx`, `CreateFaceModal.tsx`
+- home/: `HomeClient.tsx`, `HomeProfile.tsx`, `SeedFeed.tsx`, `FaceFilterBar.tsx`, `SeedTileCalendar.tsx`
+- face/: `FacesClient.tsx`, `FaceHeader.tsx`, `FaceSeedFeed.tsx`, `CreateFaceModal.tsx`
 - search/: `SearchClient.tsx`, `SearchBar.tsx`, `SearchResults.tsx`, `SearchScopeSelector.tsx`
 - subscriptions/: `SubscriptionFeed.tsx`
 - notifications/: `NotificationList.tsx`
@@ -66,11 +66,11 @@ MultiFace で「Midnight Ink」デザインシステムが導入された。CSS 
 
 ### 新規ユーティリティ・型
 
-| MultiFace                            | tracen 対応                                                                 |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| `lib/display.ts` の `getFaceColor()` | tracen の `lib/display.ts` に追記                                           |
+| MultiFace                            | tracen 対応                                                                       |
+| ------------------------------------ | --------------------------------------------------------------------------------- |
+| `lib/display.ts` の `getFaceColor()` | tracen の `lib/display.ts` に追記                                                 |
 | `types/user.ts`（`User` 型）         | **`@tracen/contracts` の `UserProfile` を正として使用**（下記「型管理方針」参照） |
-| `lib/format-relative-time.ts`        | 差分があれば更新                                                            |
+| `lib/format-relative-time.ts`        | 差分があれば更新                                                                  |
 
 ### 型管理方針（重要）
 
@@ -79,14 +79,14 @@ tracen では「バックエンドと共有すべき型は `@tracen/contracts/` 
 
 **移植時のルール:**
 
-| MultiFace の型 | tracen での配置 | 理由 |
-|---|---|---|
-| `User` | **使わない**。`@tracen/contracts` の `UserProfile` を参照する | contracts への移行済み型。重複定義しない |
-| `Face` | `src/types/face.ts`（既存） | バックエンド共有未定。types に置く |
-| `Activity` | `src/types/activity.ts`（既存） | 同上 |
-| `Notification` | `src/types/notification.ts`（既存） | 同上 |
-| `DetailPanelState` | `src/types/detail-panel.ts`（既存） | フロントエンド固有。types に置く |
-| `Seed`（新規） | `src/types/seed.ts`（新規追加） | バックエンド共有未定。types に置く |
+| MultiFace の型     | tracen での配置                                               | 理由                                     |
+| ------------------ | ------------------------------------------------------------- | ---------------------------------------- |
+| `User`             | **使わない**。`@tracen/contracts` の `UserProfile` を参照する | contracts への移行済み型。重複定義しない |
+| `Face`             | `src/types/face.ts`（既存）                                   | バックエンド共有未定。types に置く       |
+| `Seed`             | `src/types/seed.ts`（既存）                                   | 同上                                     |
+| `Notification`     | `src/types/notification.ts`（既存）                           | 同上                                     |
+| `DetailPanelState` | `src/types/detail-panel.ts`（既存）                           | フロントエンド固有。types に置く         |
+| `Seed`（新規）     | `src/types/seed.ts`（新規追加）                               | バックエンド共有未定。types に置く       |
 
 > **契約:** 将来バックエンドとの型共有が必要になった型は contracts に移動する。  
 > ただし今回の移植では `UserProfile` 以外を contracts に追加しない。
@@ -162,10 +162,10 @@ MultiFace の `types/user.ts`（`User` 型）は tracen に持ち込まない。
 
 ```ts
 // NG: MultiFace の User 型をそのまま持ち込む
-import type { User } from "@/types/user";
+import type { User } from '@/types/user';
 
 // OK: contracts の UserProfile を使う
-import type { UserProfile } from "@tracen/contracts";
+import type { UserProfile } from '@tracen/contracts';
 ```
 
 新規追加が必要な型（`Seed` 等）は `src/types/` に追加する。contracts には追加しない。
@@ -192,7 +192,7 @@ import type { UserProfile } from "@tracen/contracts";
 4. FaceBadge.tsx          — フェイスバッジ（getFaceColor 依存）
 5. MobileComposeBar.tsx   — モバイル作成バー（PostModal 依存）
 6. AccountMenu.tsx        — アカウントメニュー（Avatar 依存）
-7. ActivityCard.tsx       — アクティビティカード（FaceChip 等依存）
+7. SeedCard.tsx       — アクティビティカード（FaceChip 等依存）
 8. SeedRow.tsx            — シード行（型定義要確認）
 9. AppHeader.tsx          — ヘッダー（Wordmark, AccountMenu 依存）
 10. ContextRail.tsx       — 右サイドバー（RailCard 等依存）
@@ -222,15 +222,15 @@ MultiFace で変更された既存コンポーネントを差分比較し、trac
   - SideNav.tsx, BottomNav.tsx, DetailPanel.tsx
 
 中 (各ページのメインコンポーネント):
-  - home/: HomeClient, HomeProfile, ActivityFeed, FaceFilterBar, ActivityTileCalendar
-  - face/: FacesClient, FaceHeader, FaceActivityFeed, CreateFaceModal, FaceDetailClient
+  - home/: HomeClient, HomeProfile, SeedFeed, FaceFilterBar, SeedTileCalendar
+  - face/: FacesClient, FaceHeader, FaceSeedFeed, CreateFaceModal, FaceDetailClient
   - search/: SearchClient, SearchBar, SearchResults, SearchScopeSelector
   - subscriptions/: SubscriptionFeed
   - notifications/: NotificationList
 
 低 (汎用 UI 部品):
   - Avatar, Badge, FaceChip, FaceNavItem
-  - PostModal, FaceDetail, ActivityDetail
+  - PostModal, FaceDetail, SeedDetail
 ```
 
 ---
@@ -286,7 +286,7 @@ src/i18n/messages/fr.json  — フランス語（翻訳）
   "appHeader": { ... },
   "contextRail": { ... },
   "accountMenu": { ... },
-  "activityCard": { ... },
+  "seedCard": { ... },
   "seeds": { ... },
   "seedDetail": { ... }
 }
