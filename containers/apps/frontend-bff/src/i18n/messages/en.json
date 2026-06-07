@@ -73,19 +73,19 @@
     "close": "Close",
     "loading": "Loading…",
     "notFound": "Face not found",
-    "activitiesHeading": "Activities in this face",
-    "noActivities": "No activities yet"
+    "seedsHeading": "Seeds in this face",
+    "noSeeds": "No seeds yet"
   },
-  "activityDetail": {
-    "title": "Activity Detail",
+  "seedDetailPanel": {
+    "title": "Seed Detail",
     "close": "Close",
     "loading": "Loading…",
-    "notFound": "Activity not found",
+    "notFound": "Seed not found",
     "unknownFace": "Unknown face",
     "imageAlt": "Image {n}",
     "viewFace": "→ View this face"
   },
-  "activityCard": {
+  "seedCard": {
     "showMore": "Show more",
     "collapse": "Collapse",
     "imageAlt": "Image {n}"
@@ -112,9 +112,9 @@
     "createFirstFace": "Create your first face",
     "createNewCard": "New face"
   },
-  "faceActivityFeed": {
-    "noActivities": "No activities yet",
-    "noImageActivities": "No activities with images"
+  "faceSeedFeed": {
+    "noSeeds": "No seeds yet",
+    "noImageSeeds": "No seeds with images"
   },
   "faceHeader": {
     "newest": "Newest",
@@ -124,8 +124,8 @@
     "monthly": "This month",
     "subscribers": "Subscribers"
   },
-  "activityFeed": {
-    "noActivities": "No activities yet"
+  "seedFeed": {
+    "noSeeds": "No seeds yet"
   },
   "homeClient": {
     "write": "Write",
@@ -139,19 +139,19 @@
   },
   "homeProfile": {
     "faces": "Faces",
-    "activities": "Seeds"
+    "seeds": "Seeds"
   },
   "faceFilterBar": {
     "all": "All"
   },
-  "activityTileCalendar": {
+  "seedTileCalendar": {
     "title": "Review",
     "weekAriaLabel": "Week of {date}",
     "dayCount": "{count}",
     "few": "Less",
     "many": "More",
     "weekRecord": "record",
-    "noRecord": "No activity this week"
+    "noRecord": "No seeds this week"
   },
   "subscriptionFeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
@@ -164,7 +164,7 @@
     "seedsSection": "Seeds ({n})",
     "noMatch": "No results",
     "seedCount": "Seeds",
-    "noFilteredActivities": "No seeds found",
+    "noFilteredSeeds": "No seeds found",
     "viewFace": "View face →",
     "noSubscribedFaces": "No subscribed faces"
   },
@@ -196,11 +196,11 @@
   },
   "searchResults": {
     "emptyTitle": "Enter a keyword to search",
-    "emptyHint": "Search face names and activity content by scope",
+    "emptyHint": "Search face names and seed content by scope",
     "noResultsTitle": "No results for \"{query}\"",
     "noResultsHint": "Try a different keyword or scope",
     "facesSection": "Faces",
-    "activitiesSection": "Activities",
+    "seedsSection": "Seeds",
     "subscribe": "Subscribe",
     "subscribed": "Subscribed",
     "subscribeAriaLabel": "Subscribe to {name}",
@@ -247,7 +247,7 @@
     "otherSettingsSub": "Notifications · Theme · Data",
     "help": "Help",
     "facesUnit": "Faces",
-    "activitiesUnit": "Seeds",
+    "seedsUnit": "Seeds",
     "logout": "Log out"
   },
   "appHeader": {
@@ -281,9 +281,9 @@
     "onThisDayPrompt": "What would you say today?",
     "aboutFaces": "About Faces",
     "aboutFacesDesc": "A Face is one facet of who you are. Write with the face that fits what you want to express, and reflect on it later.",
-    "activitiesThisMonth": "Activity",
+    "seedsThisMonth": "Seeds",
     "thisMonth": "This month",
-    "noActivitiesThisMonth": "No records this month",
+    "noSeedsThisMonth": "No seeds this month",
     "subscribedFaces": "Subscribed",
     "noSubscriptions": "You haven't subscribed to any faces yet.",
     "findFaces": "Find Faces →",

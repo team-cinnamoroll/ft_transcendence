@@ -73,19 +73,19 @@
     "close": "Fermer",
     "loading": "Chargement…",
     "notFound": "Facette introuvable",
-    "activitiesHeading": "Activités de cette facette",
-    "noActivities": "Aucune activité pour l'instant"
+    "seedsHeading": "Graines de cette facette",
+    "noSeeds": "Aucune graine pour l'instant"
   },
-  "activityDetail": {
-    "title": "Détail de l'activité",
+  "seedDetailPanel": {
+    "title": "Détail de la graine",
     "close": "Fermer",
     "loading": "Chargement…",
-    "notFound": "Activité introuvable",
+    "notFound": "Graine introuvable",
     "unknownFace": "Facette inconnue",
     "imageAlt": "Image {n}",
     "viewFace": "→ Voir cette facette"
   },
-  "activityCard": {
+  "seedCard": {
     "showMore": "Voir plus",
     "collapse": "Réduire",
     "imageAlt": "Image {n}"
@@ -112,9 +112,9 @@
     "createFirstFace": "Créer votre première facette",
     "createNewCard": "Nouvelle facette"
   },
-  "faceActivityFeed": {
-    "noActivities": "Aucune activité pour l'instant",
-    "noImageActivities": "Aucune activité avec images"
+  "faceSeedFeed": {
+    "noSeeds": "Aucune graine pour l'instant",
+    "noImageSeeds": "Aucune graine avec images"
   },
   "faceHeader": {
     "newest": "Plus récents",
@@ -124,8 +124,8 @@
     "monthly": "Ce mois",
     "subscribers": "Abonnés"
   },
-  "activityFeed": {
-    "noActivities": "Aucune activité pour l'instant"
+  "seedFeed": {
+    "noSeeds": "Aucune graine pour l'instant"
   },
   "homeClient": {
     "write": "Écrire",
@@ -139,19 +139,19 @@
   },
   "homeProfile": {
     "faces": "Facettes",
-    "activities": "Graines"
+    "seeds": "Graines"
   },
   "faceFilterBar": {
     "all": "Tout"
   },
-  "activityTileCalendar": {
+  "seedTileCalendar": {
     "title": "Bilan",
     "weekAriaLabel": "Semaine du {date}",
     "dayCount": "{count}",
     "few": "Peu",
     "many": "Beaucoup",
     "weekRecord": "enregistrement(s)",
-    "noRecord": "Aucune activité cette semaine"
+    "noRecord": "Aucune graine cette semaine"
   },
   "subscriptionFeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
@@ -164,7 +164,7 @@
     "seedsSection": "Graines ({n})",
     "noMatch": "Aucun résultat",
     "seedCount": "Graines",
-    "noFilteredActivities": "Aucune graine trouvée",
+    "noFilteredSeeds": "Aucune graine trouvée",
     "viewFace": "Voir la facette →",
     "noSubscribedFaces": "Aucune facette abonnée"
   },
@@ -200,7 +200,7 @@
     "noResultsTitle": "Aucun résultat pour « {query} »",
     "noResultsHint": "Essayez un autre mot-clé ou une autre portée",
     "facesSection": "Facettes",
-    "activitiesSection": "Activités",
+    "seedsSection": "Graines",
     "subscribe": "S'abonner",
     "subscribed": "Abonné",
     "subscribeAriaLabel": "S'abonner à {name}",
@@ -247,7 +247,7 @@
     "otherSettingsSub": "Notifications · Thème · Données",
     "help": "Aide",
     "facesUnit": "Facettes",
-    "activitiesUnit": "Seeds",
+    "seedsUnit": "Seeds",
     "logout": "Se déconnecter"
   },
   "appHeader": {
@@ -281,9 +281,9 @@
     "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
     "aboutFaces": "À propos des facettes",
     "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",
-    "activitiesThisMonth": "Activité",
+    "seedsThisMonth": "Graines",
     "thisMonth": "Ce mois-ci",
-    "noActivitiesThisMonth": "Aucune activité ce mois-ci",
+    "noSeedsThisMonth": "Aucune graine ce mois-ci",
     "subscribedFaces": "Abonnements",
     "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
     "findFaces": "Chercher des facettes →",
