@@ -1,12 +1,12 @@
 import SubscriptionFeed from '@/components/subscriptions/SubscriptionFeed';
-import { listActivitiesByFaceIds } from '@/server/usecases/activities';
+import { listSeedsByFaceIds } from '@/server/usecases/seeds';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import { listAllUsers } from '@/server/usecases/users';
 export default async function SubscriptionsPage() {
   const subscribedFaceIds = await getSubscribedFaceIds();
-  const [subscribedActivities, faces, users] = await Promise.all([
-    listActivitiesByFaceIds(subscribedFaceIds),
+  const [subscribedSeeds, faces, users] = await Promise.all([
+    listSeedsByFaceIds(subscribedFaceIds),
     listAllFaces(),
     listAllUsers(),
   ]);
@@ -15,7 +15,7 @@ export default async function SubscriptionsPage() {
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <SubscriptionFeed
         subscribedFaceIds={subscribedFaceIds}
-        subscribedActivities={subscribedActivities}
+        subscribedSeeds={subscribedSeeds}
         faces={faces}
         users={users}
       />

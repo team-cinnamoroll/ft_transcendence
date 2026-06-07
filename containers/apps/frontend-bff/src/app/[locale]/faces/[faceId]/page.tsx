@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import FaceDetailClient from '@/components/face/FaceDetailClient';
-import { listActivitiesByFaceId } from '@/server/usecases/activities';
+import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
@@ -22,9 +22,9 @@ const FaceDetailPage = async ({ params }: Props) => {
 
   const face = maybeFace as Face;
 
-  const [currentUser, activities, users, subscribedFaceIds, t] = await Promise.all([
+  const [currentUser, seeds, users, subscribedFaceIds, t] = await Promise.all([
     getCurrentUser(),
-    listActivitiesByFaceId(faceId),
+    listSeedsByFaceId(faceId),
     listAllUsers(),
     getSubscribedFaceIds(),
     getTranslations('faceDetailPage'),
@@ -86,7 +86,7 @@ const FaceDetailPage = async ({ params }: Props) => {
         <FaceDetailClient
           face={face}
           isOwner={isOwner}
-          activities={activities}
+          seeds={seeds}
           users={users}
           isSubscribed={isSubscribed}
         />

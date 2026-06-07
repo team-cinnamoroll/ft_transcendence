@@ -39,7 +39,7 @@ export default async function RootLayout({
   }
 
   const [layoutData, messages] = await Promise.all([getLayoutData(), getMessages()]);
-  const { currentUser, myFaces, myActivities, subscribedFaces, latestActivityByFaceId, allUsers } =
+  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
     layoutData;
 
   return (
@@ -51,15 +51,15 @@ export default async function RootLayout({
               <SideNav
                 faces={myFaces}
                 user={currentUser}
-                activities={myActivities}
+                seeds={mySeeds}
                 faceCount={myFaces.length}
-                activityCount={myActivities.length}
+                seedCount={mySeeds.length}
               />
               <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <AppHeader
                   user={currentUser}
                   faceCount={myFaces.length}
-                  activityCount={myActivities.length}
+                  seedCount={mySeeds.length}
                 />
                 <div className="flex flex-1 min-h-0 overflow-hidden">
                   <main
@@ -71,9 +71,9 @@ export default async function RootLayout({
                   <ContextRail
                     user={currentUser}
                     faces={myFaces}
-                    activities={myActivities}
+                    seeds={mySeeds}
                     subscribedFaces={subscribedFaces}
-                    latestActivityByFaceId={latestActivityByFaceId}
+                    latestSeedByFaceId={latestSeedByFaceId}
                     users={allUsers}
                   />
                 </div>

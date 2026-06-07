@@ -1,19 +1,19 @@
 import HomeProfile from '@/components/home/HomeProfile';
 import HomeClient from '@/components/home/HomeClient';
-import { listActivitiesByUserId } from '@/server/usecases/activities';
+import { listSeedsByUserId } from '@/server/usecases/seeds';
 import { getViewerContext } from '@/server/usecases/viewer';
 
 const REFERENCE_DATE = new Date('2026-03-31');
 
 export default async function Home() {
   const { currentUser, myFaces } = await getViewerContext();
-  const activities = await listActivitiesByUserId(currentUser.id);
+  const seeds = await listSeedsByUserId(currentUser.id);
 
-  // On This Day: 同じ月日の過去アクティビティを探す
+  // On This Day: 同じ月日の過去シードを探す
   const today = REFERENCE_DATE;
   const mmdd = today.toISOString().slice(5, 10);
-  const onThisDay = activities.find((a) => {
-    const d = a.createdAt.slice(0, 10);
+  const onThisDay = seeds.find((s) => {
+    const d = s.createdAt.slice(0, 10);
     return d.slice(5) === mmdd && !d.startsWith('2026');
   });
   const onThisDayFace = onThisDay ? myFaces.find((f) => f.id === onThisDay.faceId) : undefined;
@@ -27,13 +27,13 @@ export default async function Home() {
     <div className="flex flex-col">
       <main>
         {/* 上部: プロフィールエリア（Server Component） */}
-        <HomeProfile user={currentUser} faces={myFaces} activities={activities} />
+        <HomeProfile user={currentUser} faces={myFaces} seeds={seeds} />
 
-        {/* 中部〜下部: フェイスフィルタ + アクティビティフィード（Client Component） */}
+        {/* 中部〜下部: フェイスフィルタ + シードフィード（Client Component） */}
         <HomeClient
           currentUser={currentUser}
           faces={myFaces}
-          activities={activities}
+          seeds={seeds}
           onThisDay={onThisDay}
           onThisDayFace={onThisDayFace}
           yearsAgo={yearsAgo}

@@ -158,15 +158,15 @@ type Props = {
   notifications: Notification[];
   users: UserProfile[];
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
 };
 
-const NotificationList = ({ notifications, faces, activities }: Props) => {
+const NotificationList = ({ notifications, faces, seeds }: Props) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const t = useTranslations('notificationList');
 
   const faceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
-  const activityMap = useMemo(() => createLookupMap(activities, (activity) => activity.id), [activities]);
+  const seedMap = useMemo(() => createLookupMap(seeds, (seed) => seed.id), [seeds]);
 
   const FILTER_LABELS: { key: FilterType; label: string }[] = [
     { key: 'all', label: t('filterAll') },
@@ -239,8 +239,8 @@ const NotificationList = ({ notifications, faces, activities }: Props) => {
             />
             {items.map((notification) => {
               if (notification.type === 'link') {
-                const activity = activityMap.get(notification.activityId);
-                const linkedFace = activity ? faceMap.get(activity.faceId) : undefined;
+                const seed = seedMap.get(notification.seedId);
+                const linkedFace = seed ? faceMap.get(seed.faceId) : undefined;
                 return (
                   <NotifItem
                     key={notification.id}
@@ -248,7 +248,7 @@ const NotificationList = ({ notifications, faces, activities }: Props) => {
                     faceName={linkedFace ? getFaceTitle(linkedFace) : undefined}
                     faceId={linkedFace?.id}
                     faceImageUrl={linkedFace?.imageUrl}
-                    preview={activity?.body ?? t('linkedPreview')}
+                    preview={seed?.body ?? t('linkedPreview')}
                     typeLinkLabel={t('typeLinkLabel')}
                     typeUpdateLabel={t('typeUpdateLabel')}
                   />

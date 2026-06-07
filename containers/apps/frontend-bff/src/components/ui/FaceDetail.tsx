@@ -18,7 +18,7 @@ type FaceDetailProps = {
 type FaceDetailApiResponse = {
   currentUser: UserProfile;
   face: Face | null;
-  activities: Seed[];
+  seeds: Seed[];
   users: UserProfile[];
 };
 
@@ -59,7 +59,7 @@ const CloseButton = ({ label, onClick }: { label: string; onClick: () => void })
 
 const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
   const t = useTranslations('faceDetail');
-  const { openActivity } = useDetailPanel();
+  const { openSeed } = useDetailPanel();
 
   const [data, setData] = useState<FaceDetailApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +105,7 @@ const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
 
   const face = data?.face ?? null;
   const currentUser = data?.currentUser ?? null;
-  const activities = data?.activities ?? [];
+  const seeds = data?.seeds ?? [];
   const users = data?.users ?? [];
   const userMap = createLookupMap(users, (user) => user.id);
 
@@ -138,21 +138,21 @@ const FaceDetail = ({ faceId, onClose }: FaceDetailProps) => {
 
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <p style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--mf-text-muted)' }}>
-          {t('activitiesHeading')}
+          {t('seedsHeading')}
         </p>
-        {activities.length === 0 ? (
-          <p style={{ fontSize: 13, color: 'var(--mf-text-faint)' }}>{t('noActivities')}</p>
+        {seeds.length === 0 ? (
+          <p style={{ fontSize: 13, color: 'var(--mf-text-faint)' }}>{t('noSeeds')}</p>
         ) : (
-          activities.map((activity, i) => {
-            const activityUser = userMap.get(activity.userId);
-            if (!activityUser) return null;
+          seeds.map((seed, i) => {
+            const seedUser = userMap.get(seed.userId);
+            if (!seedUser) return null;
             return (
               <SeedRow
-                key={activity.id}
-                activity={activity}
+                key={seed.id}
+                seed={seed}
                 face={face}
-                onClick={() => openActivity(activity.id)}
-                noBorder={i === activities.length - 1}
+                onClick={() => openSeed(seed.id)}
+                noBorder={i === seeds.length - 1}
               />
             );
           })

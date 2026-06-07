@@ -6,7 +6,7 @@ import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceFilterBar from './FaceFilterBar';
-import ActivityFeed from './ActivityFeed';
+import SeedFeed from './SeedFeed';
 import FaceChip from '@/components/ui/FaceChip';
 import FaceBadge from '@/components/ui/FaceBadge';
 import PostModal from '@/components/ui/PostModal';
@@ -15,7 +15,7 @@ import { getFaceTitle } from '@/lib/display';
 type Props = {
   currentUser: UserProfile;
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
   onThisDay?: Seed;
   onThisDayFace?: Face;
   yearsAgo?: number;
@@ -25,7 +25,7 @@ type Props = {
 const HomeClient = ({
   currentUser: _currentUser,
   faces,
-  activities,
+  seeds,
   onThisDay,
   onThisDayFace,
   yearsAgo,
@@ -164,7 +164,7 @@ const HomeClient = ({
       <FaceFilterBar faces={faces} selectedFaceId={selectedFaceId} onSelect={setSelectedFaceId} />
 
       <div style={{ padding: '0 28px' }}>
-        <ActivityFeed faces={faces} activities={activities} selectedFaceId={selectedFaceId} />
+        <SeedFeed faces={faces} seeds={seeds} selectedFaceId={selectedFaceId} />
       </div>
 
       <PostModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

@@ -2,16 +2,16 @@ import Image from 'next/image';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import ActivityTileCalendar from './ActivityTileCalendar';
+import SeedTileCalendar from './SeedTileCalendar';
 import { useTranslations } from 'next-intl';
 
 type Props = {
   user: UserProfile;
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
 };
 
-const HomeProfile = ({ user, faces, activities }: Props) => {
+const HomeProfile = ({ user, faces, seeds }: Props) => {
   const t = useTranslations('homeProfile');
 
   return (
@@ -47,15 +47,15 @@ const HomeProfile = ({ user, faces, activities }: Props) => {
             </span>
             <span style={{ width: 1, height: 12, background: 'var(--mf-line)', display: 'inline-block' }} />
             <span>
-              <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{activities.length}</b>{' '}
-              {t('activities')}
+              <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{seeds.length}</b>{' '}
+              {t('seeds')}
             </span>
           </div>
         </div>
       </div>
 
       {/* タイルカレンダー */}
-      <ActivityTileCalendar activities={activities} />
+      <SeedTileCalendar seeds={seeds} />
     </div>
   );
 };

@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 
 type Props = {
   initialFaces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
 };
 
 type SortType = 'lastAt' | 'total' | 'name';
@@ -19,7 +19,7 @@ type ViewType = 'grid' | 'list';
 
 const REFERENCE_MONTH = '2026-04';
 
-const FacesClient = ({ initialFaces, activities }: Props) => {
+const FacesClient = ({ initialFaces, seeds }: Props) => {
   const [faces, setFaces] = useState<Face[]>(initialFaces);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,17 +35,17 @@ const FacesClient = ({ initialFaces, activities }: Props) => {
   const faceStats = useMemo(() => {
     const stats = new Map<string, { total: number; monthly: number; lastDate: string | null }>();
     for (const face of faces) {
-      const faceActivities = activities.filter((a) => a.faceId === face.id);
-      const monthly = faceActivities.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length;
-      const sorted = [...faceActivities].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      const faceSeeds = seeds.filter((a) => a.faceId === face.id);
+      const monthly = faceSeeds.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length;
+      const sorted = [...faceSeeds].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       stats.set(face.id, {
-        total: faceActivities.length,
+        total: faceSeeds.length,
         monthly,
         lastDate: sorted[0]?.createdAt.slice(0, 10) ?? null,
       });
     }
     return stats;
-  }, [faces, activities]);
+  }, [faces, seeds]);
 
   const SORT_LABELS: Record<SortType, string> = {
     lastAt: t('sortLastAt'),
@@ -83,8 +83,8 @@ const FacesClient = ({ initialFaces, activities }: Props) => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
     const faceIds = new Set(faces.map((f) => f.id));
-    return activities.filter((a) => faceIds.has(a.faceId) && a.body.toLowerCase().includes(q));
-  }, [searchQuery, faces, activities]);
+    return seeds.filter((a) => faceIds.has(a.faceId) && a.body.toLowerCase().includes(q));
+  }, [searchQuery, faces, seeds]);
 
   return (
     <main style={{ display: 'flex', flexDirection: 'column', paddingBottom: 24 }}>
@@ -207,7 +207,7 @@ const FacesClient = ({ initialFaces, activities }: Props) => {
                 return (
                   <SeedRow
                     key={act.id}
-                    activity={act}
+                    seed={act}
                     face={face}
                   />
                 );

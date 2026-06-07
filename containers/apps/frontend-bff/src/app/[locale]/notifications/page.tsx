@@ -1,16 +1,16 @@
 import NotificationList from '@/components/notifications/NotificationList';
-import { listAllActivities } from '@/server/usecases/activities';
+import { listAllSeeds } from '@/server/usecases/seeds';
 import { listAllFaces } from '@/server/usecases/faces';
 import { listNotifications } from '@/server/usecases/notifications';
 import { listAllUsers } from '@/server/usecases/users';
 import { getTranslations } from 'next-intl/server';
 
 export default async function NotificationsPage() {
-  const [notifications, users, faces, activities] = await Promise.all([
+  const [notifications, users, faces, seeds] = await Promise.all([
     listNotifications(),
     listAllUsers(),
     listAllFaces(),
-    listAllActivities(),
+    listAllSeeds(),
   ]);
 
   const count = notifications.length;
@@ -36,7 +36,7 @@ export default async function NotificationsPage() {
           notifications={notifications}
           users={users}
           faces={faces}
-          activities={activities}
+          seeds={seeds}
         />
       </main>
     </div>

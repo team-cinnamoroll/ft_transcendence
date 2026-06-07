@@ -17,18 +17,18 @@ const REFERENCE_DATE = new Date('2026-03-31');
 // ── WritingRail ────────────────────────────────────────────────
 
 type WritingRailProps = {
-  activities: Seed[];
+  seeds: Seed[];
   faces: Face[];
 };
 
-const WritingRail = ({ activities, faces }: WritingRailProps) => {
+const WritingRail = ({ seeds, faces }: WritingRailProps) => {
   const t = useTranslations('contextRail');
   const today = REFERENCE_DATE;
   const mmdd = today.toISOString().slice(5, 10);
 
   const faceById = new Map(faces.map((f) => [f.id, f]));
 
-  const onThisDay = activities.find((a) => {
+  const onThisDay = seeds.find((a) => {
     const d = a.createdAt.slice(0, 10);
     return d.slice(5) === mmdd && d.slice(0, 4) !== String(today.getFullYear());
   });
@@ -81,15 +81,15 @@ const WritingRail = ({ activities, faces }: WritingRailProps) => {
 
 type ReflectionRailProps = {
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
 };
 
-const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
+const ReflectionRail = ({ faces, seeds }: ReflectionRailProps) => {
   const t = useTranslations('contextRail');
   const thisMonth = REFERENCE_DATE.toISOString().slice(0, 7);
 
   const monthlyCountMap = new Map<string, number>();
-  for (const act of activities) {
+  for (const act of seeds) {
     if (act.createdAt.startsWith(thisMonth)) {
       monthlyCountMap.set(act.faceId, (monthlyCountMap.get(act.faceId) ?? 0) + 1);
     }
@@ -118,10 +118,10 @@ const ReflectionRail = ({ faces, activities }: ReflectionRailProps) => {
         </p>
       </RailCard>
 
-      <RailCard title={t('activitiesThisMonth')} action={t('thisMonth')}>
+      <RailCard title={t('seedsThisMonth')} action={t('thisMonth')}>
         {facesWithCount.length === 0 ? (
           <p style={{ fontSize: 12, color: 'var(--mf-text-muted)', margin: 0 }}>
-            {t('noActivitiesThisMonth')}
+            {t('noSeedsThisMonth')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -191,13 +191,13 @@ const RECOMMENDED_COLORS = ['#5B8DB8', '#7B6B9E', '#A89050'];
 
 type CollectionRailProps = {
   subscribedFaces: Face[];
-  latestActivityByFaceId: Record<string, Seed>;
+  latestSeedByFaceId: Record<string, Seed>;
   users: UserProfile[];
 };
 
 const CollectionRail = ({
   subscribedFaces,
-  latestActivityByFaceId,
+  latestSeedByFaceId,
   users,
 }: CollectionRailProps) => {
   const t = useTranslations('contextRail');
@@ -212,7 +212,7 @@ const CollectionRail = ({
         <RailCard title={t('subscribedFaces')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {subscribedFaces.map((face) => {
-              const lastAct = latestActivityByFaceId[face.id];
+              const lastAct = latestSeedByFaceId[face.id];
               const owner = userMap.get(face.userId);
               const hasUnread = lastAct && lastAct.createdAt >= UNREAD_CUTOFF;
               return (
@@ -354,35 +354,35 @@ const CollectionRail = ({
 export type ContextRailProps = {
   user: UserProfile;
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
   subscribedFaces: Face[];
-  latestActivityByFaceId: Record<string, Seed>;
+  latestSeedByFaceId: Record<string, Seed>;
   users: UserProfile[];
 };
 
 const ContextRail = ({
   faces,
-  activities,
+  seeds,
   subscribedFaces,
-  latestActivityByFaceId,
+  latestSeedByFaceId,
   users,
 }: ContextRailProps) => {
   const pathname = usePathname();
 
   const renderContent = () => {
     if (pathname === '/faces' || pathname.startsWith('/faces/')) {
-      return <ReflectionRail faces={faces} activities={activities} />;
+      return <ReflectionRail faces={faces} seeds={seeds} />;
     }
     if (pathname === '/subscriptions') {
       return (
         <CollectionRail
           subscribedFaces={subscribedFaces}
-          latestActivityByFaceId={latestActivityByFaceId}
+          latestSeedByFaceId={latestSeedByFaceId}
           users={users}
         />
       );
     }
-    return <WritingRail activities={activities} faces={faces} />;
+    return <WritingRail seeds={seeds} faces={faces} />;
   };
 
   return (

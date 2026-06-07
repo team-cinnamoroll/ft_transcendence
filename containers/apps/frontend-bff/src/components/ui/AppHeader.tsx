@@ -11,11 +11,11 @@ import AccountMenu from '@/components/ui/AccountMenu';
 type Props = {
   user: UserProfile;
   faceCount?: number;
-  activityCount?: number;
+  seedCount?: number;
   unreadCount?: number;
 };
 
-const AppHeader = ({ user, faceCount = 0, activityCount = 0, unreadCount = 0 }: Props) => {
+const AppHeader = ({ user, faceCount = 0, seedCount = 0, unreadCount = 0 }: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('appHeader');
   const tNav = useTranslations('nav');
@@ -104,7 +104,7 @@ const AppHeader = ({ user, faceCount = 0, activityCount = 0, unreadCount = 0 }: 
       <AccountMenu
         user={user}
         faceCount={faceCount}
-        activityCount={activityCount}
+        seedCount={seedCount}
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
       />

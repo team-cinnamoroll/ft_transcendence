@@ -63,12 +63,12 @@ const NAV_ITEMS: NavItem[] = [
 type Props = {
   faces: Face[];
   user: UserProfile;
-  activities: Seed[];
+  seeds: Seed[];
   faceCount: number;
-  activityCount: number;
+  seedCount: number;
 };
 
-const SideNav = ({ faces, user, activities, faceCount, activityCount }: Props) => {
+const SideNav = ({ faces, user, seeds, faceCount, seedCount }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
@@ -194,7 +194,7 @@ const SideNav = ({ faces, user, activities, faceCount, activityCount }: Props) =
                 key={face.id}
                 face={face}
                 activeFaceId={activeFaceId}
-                seedCount={activities.filter((a) => a.faceId === face.id).length}
+                seedCount={seeds.filter((s) => s.faceId === face.id).length}
                 onClick={handleFaceNavItemClick}
               />
             ))}
@@ -279,7 +279,7 @@ const SideNav = ({ faces, user, activities, faceCount, activityCount }: Props) =
       <AccountMenu
         user={user}
         faceCount={faceCount}
-        activityCount={activityCount}
+        seedCount={seedCount}
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
         anchorRef={userButtonRef}

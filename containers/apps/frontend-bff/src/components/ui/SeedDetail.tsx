@@ -13,13 +13,13 @@ import FaceChip from './FaceChip';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { useTranslations } from 'next-intl';
 
-type ActivityDetailProps = {
-  activityId: string;
+type SeedDetailProps = {
+  seedId: string;
   onClose: () => void;
 };
 
-type ActivityDetailApiResponse = {
-  activity: Seed | null;
+type SeedDetailApiResponse = {
+  seed: Seed | null;
   user: UserProfile | null;
   face: Face | null;
 };
@@ -59,11 +59,11 @@ const headerStyle: React.CSSProperties = {
   padding: '12px 16px',
 };
 
-const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
-  const t = useTranslations('activityDetail');
+const SeedDetail = ({ seedId, onClose }: SeedDetailProps) => {
+  const t = useTranslations('seedDetailPanel');
   const relativeTime = useRelativeTime();
 
-  const [data, setData] = useState<ActivityDetailApiResponse | null>(null);
+  const [data, setData] = useState<SeedDetailApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -72,13 +72,13 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
     setIsLoading(true);
     setData(null);
 
-    void fetch(`/api/detail/activity/${encodeURIComponent(activityId)}`, {
+    void fetch(`/api/detail/seed/${encodeURIComponent(seedId)}`, {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`Failed to fetch activity detail: ${res.status}`);
-        return (await res.json()) as ActivityDetailApiResponse;
+        if (!res.ok) throw new Error(`Failed to fetch seed detail: ${res.status}`);
+        return (await res.json()) as SeedDetailApiResponse;
       })
       .then((json) => { if (isCurrent) setData(json); })
       .catch((err: unknown) => {
@@ -89,7 +89,7 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
       .finally(() => { if (isCurrent) setIsLoading(false); });
 
     return () => { isCurrent = false; controller.abort(); };
-  }, [activityId]);
+  }, [seedId]);
 
   if (isLoading) {
     return (
@@ -105,11 +105,11 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
     );
   }
 
-  const activity = data?.activity ?? null;
+  const seed = data?.seed ?? null;
   const face = data?.face ?? null;
   const user = data?.user ?? null;
 
-  if (!activity || !user) {
+  if (!seed || !user) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={headerStyle}>
@@ -124,8 +124,8 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
   }
 
   const resolvedFaceTitle = face ? getFaceTitle(face) : '';
-  const faceTitle = resolvedFaceTitle || activity.faceId || t('unknownFace');
-  const formattedTime = relativeTime(activity.createdAt);
+  const faceTitle = resolvedFaceTitle || seed.faceId || t('unknownFace');
+  const formattedTime = relativeTime(seed.createdAt);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -135,7 +135,6 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
       </div>
 
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
-        {/* ユーザー・フェイス行 */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           {face && <FaceBadge face={face} size={40} radius={11} />}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -144,31 +143,29 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
               {user.badge && <Badge emoji={user.badge} />}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FaceChip title={faceTitle} faceId={activity.faceId} />
-              <time dateTime={activity.createdAt} style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>
+              <FaceChip title={faceTitle} faceId={seed.faceId} />
+              <time dateTime={seed.createdAt} style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>
                 {formattedTime}
               </time>
             </div>
           </div>
         </div>
 
-        {/* 本文 */}
         <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--mf-ink)', whiteSpace: 'pre-wrap', margin: 0 }}>
-          {activity.body}
+          {seed.body}
         </p>
 
-        {/* 画像グリッド */}
-        {activity.imageUrls && activity.imageUrls.length > 0 && (
+        {seed.imageUrls && seed.imageUrls.length > 0 && (
           <div
             style={{
               display: 'grid',
               gap: 6,
               overflow: 'hidden',
               borderRadius: 12,
-              gridTemplateColumns: activity.imageUrls.length === 1 ? '1fr' : '1fr 1fr',
+              gridTemplateColumns: seed.imageUrls.length === 1 ? '1fr' : '1fr 1fr',
             }}
           >
-            {activity.imageUrls.map((url, i) => (
+            {seed.imageUrls.map((url, i) => (
               <div key={i} style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', borderRadius: 8 }}>
                 <Image
                   src={url}
@@ -182,9 +179,8 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
           </div>
         )}
 
-        {/* フェイスへのリンク */}
         <Link
-          href={`/faces/${activity.faceId}`}
+          href={`/faces/${seed.faceId}`}
           style={{ fontSize: 12, color: 'var(--mf-accent)', textDecoration: 'none', alignSelf: 'flex-start', marginTop: 8 }}
         >
           {t('viewFace')}
@@ -194,4 +190,4 @@ const ActivityDetail = ({ activityId, onClose }: ActivityDetailProps) => {
   );
 };
 
-export default ActivityDetail;
+export default SeedDetail;

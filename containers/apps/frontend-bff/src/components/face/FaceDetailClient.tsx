@@ -5,7 +5,7 @@ import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import FaceHeader, { type SortOrder } from './FaceHeader';
-import FaceActivityFeed from './FaceActivityFeed';
+import FaceSeedFeed from './FaceSeedFeed';
 
 const REFERENCE_MONTH = '2026-04';
 const SUBSCRIBER_COUNT_MOCK = 12;
@@ -13,18 +13,18 @@ const SUBSCRIBER_COUNT_MOCK = 12;
 type Props = {
   face: Face;
   isOwner: boolean;
-  activities: Seed[];
+  seeds: Seed[];
   users: UserProfile[];
   isSubscribed?: boolean;
 };
 
-const FaceDetailClient = ({ face, isOwner, activities, users, isSubscribed = false }: Props) => {
+const FaceDetailClient = ({ face, isOwner, seeds, users, isSubscribed = false }: Props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
 
-  const totalSeeds = activities.length;
+  const totalSeeds = seeds.length;
   const monthlySeeds = useMemo(
-    () => activities.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length,
-    [activities]
+    () => seeds.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length,
+    [seeds]
   );
 
   return (
@@ -41,9 +41,9 @@ const FaceDetailClient = ({ face, isOwner, activities, users, isSubscribed = fal
         />
       </div>
       <section>
-        <FaceActivityFeed
+        <FaceSeedFeed
           face={face}
-          activities={activities}
+          seeds={seeds}
           users={users}
           sortOrder={sortOrder}
         />

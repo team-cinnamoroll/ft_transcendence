@@ -9,22 +9,22 @@ import { getFaceTitle } from '@/lib/display';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-export type SearchActivityResultItem = {
-  activity: Seed;
+export type SearchSeedResultItem = {
+  seed: Seed;
   user: UserProfile;
   face: Face;
 };
 
 type SearchResultsProps = {
   query: string;
-  activityResults: SearchActivityResultItem[];
+  seedResults: SearchSeedResultItem[];
   faceResults: Face[];
   subscribedFaceIds: string[];
 };
 
 const SearchResults = ({
   query,
-  activityResults,
+  seedResults,
   faceResults,
   subscribedFaceIds,
 }: SearchResultsProps) => {
@@ -49,7 +49,7 @@ const SearchResults = ({
     );
   }
 
-  const totalCount = faceResults.length + activityResults.length;
+  const totalCount = faceResults.length + seedResults.length;
 
   if (totalCount === 0) {
     return (
@@ -161,8 +161,8 @@ const SearchResults = ({
         </section>
       )}
 
-      {/* アクティビティ検索結果 */}
-      {activityResults.length > 0 && (
+      {/* シード検索結果 */}
+      {seedResults.length > 0 && (
         <section>
           <h2
             style={{
@@ -174,16 +174,16 @@ const SearchResults = ({
               marginBottom: 10,
             }}
           >
-            {t('activitiesSection')}
-            <span style={{ marginLeft: 6, color: 'var(--mf-accent)' }}>{activityResults.length}</span>
+            {t('seedsSection')}
+            <span style={{ marginLeft: 6, color: 'var(--mf-accent)' }}>{seedResults.length}</span>
           </h2>
           <div>
-            {activityResults.map(({ activity, face }, index) => (
+            {seedResults.map(({ seed, face }, index) => (
               <SeedRow
-                key={activity.id}
-                activity={activity}
+                key={seed.id}
+                seed={seed}
                 face={face}
-                noBorder={index === activityResults.length - 1}
+                noBorder={index === seedResults.length - 1}
               />
             ))}
           </div>

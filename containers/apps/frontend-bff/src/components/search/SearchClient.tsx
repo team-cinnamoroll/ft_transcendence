@@ -8,10 +8,10 @@ import type { UserProfile } from '@/types/user-profile';
 import { createLookupMap } from '@/lib/display';
 import SearchBar from '@/components/search/SearchBar';
 import SearchScopeSelector, { type SearchScope } from '@/components/search/SearchScopeSelector';
-import SearchResults, { type SearchActivityResultItem } from '@/components/search/SearchResults';
+import SearchResults, { type SearchSeedResultItem } from '@/components/search/SearchResults';
 
 type SearchClientProps = {
-  allActivities: Seed[];
+  allSeeds: Seed[];
   allFaces: Face[];
   allUsers: UserProfile[];
   currentUserId: string;
@@ -19,7 +19,7 @@ type SearchClientProps = {
 };
 
 const SearchClient = ({
-  allActivities,
+  allSeeds,
   allFaces,
   allUsers,
   currentUserId,
@@ -32,25 +32,25 @@ const SearchClient = ({
   const faceMap = useMemo(() => createLookupMap(allFaces, (face) => face.id), [allFaces]);
   const userMap = useMemo(() => createLookupMap(allUsers, (user) => user.id), [allUsers]);
 
-  const activityResults = useMemo<SearchActivityResultItem[]>(() => {
+  const seedResults = useMemo<SearchSeedResultItem[]>(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return [];
 
     const lowerQuery = trimmedQuery.toLowerCase();
-    const scopedActivities = allActivities.filter((activity) => {
-      if (scope === 'mine') return activity.userId === currentUserId;
-      if (scope === 'subscribed') return subscribedFaceIds.includes(activity.faceId);
+    const scopedSeeds = allSeeds.filter((seed) => {
+      if (scope === 'mine') return seed.userId === currentUserId;
+      if (scope === 'subscribed') return subscribedFaceIds.includes(seed.faceId);
       return true;
     });
 
-    return scopedActivities.flatMap((activity) => {
-      if (!activity.body.toLowerCase().includes(lowerQuery)) return [];
-      const user = userMap.get(activity.userId);
-      const face = faceMap.get(activity.faceId);
+    return scopedSeeds.flatMap((seed) => {
+      if (!seed.body.toLowerCase().includes(lowerQuery)) return [];
+      const user = userMap.get(seed.userId);
+      const face = faceMap.get(seed.faceId);
       if (!user || !face) return [];
-      return [{ activity, user, face }];
+      return [{ seed, user, face }];
     });
-  }, [allActivities, currentUserId, faceMap, query, scope, subscribedFaceIds, userMap]);
+  }, [allSeeds, currentUserId, faceMap, query, scope, subscribedFaceIds, userMap]);
 
   const faceResults = useMemo(() => {
     const trimmedQuery = query.trim();
@@ -88,7 +88,7 @@ const SearchClient = ({
       <main style={{ padding: '16px 20px' }}>
         <SearchResults
           query={query.trim()}
-          activityResults={activityResults}
+          seedResults={seedResults}
           faceResults={faceResults}
           subscribedFaceIds={subscribedFaceIds}
         />

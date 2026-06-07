@@ -10,7 +10,7 @@ import { useRelativeTime } from '@/lib/use-relative-time';
 import FaceBadge from '@/components/ui/FaceBadge';
 
 type SeedRowProps = {
-  activity: Seed;
+  seed: Seed;
   face: Face;
   handle?: string;
   onClick?: () => void;
@@ -22,7 +22,7 @@ type SeedRowProps = {
 const COLLAPSE_THRESHOLD = 200;
 
 const SeedRow = ({
-  activity,
+  seed,
   face,
   handle,
   onClick,
@@ -34,11 +34,11 @@ const SeedRow = ({
   const t = useTranslations('seedRow');
   const formatRelative = useRelativeTime();
 
-  const isLong = activity.body.length > COLLAPSE_THRESHOLD;
+  const isLong = seed.body.length > COLLAPSE_THRESHOLD;
   const displayBody =
-    isLong && !expanded ? activity.body.slice(0, COLLAPSE_THRESHOLD) + '…' : activity.body;
+    isLong && !expanded ? seed.body.slice(0, COLLAPSE_THRESHOLD) + '…' : seed.body;
 
-  const linkedCount = activity.linkedActivityIds?.length ?? 0;
+  const linkedCount = seed.linkedSeedIds?.length ?? 0;
 
   return (
     <div
@@ -115,7 +115,7 @@ const SeedRow = ({
           )}
           <span style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', flexShrink: 0 }}>·</span>
           <span style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
-            {formatRelative(activity.createdAt)}
+            {formatRelative(seed.createdAt)}
           </span>
           <button
             type="button"
@@ -178,12 +178,12 @@ const SeedRow = ({
           </button>
         )}
 
-        {activity.imageUrls && activity.imageUrls.length > 0 && (
+        {seed.imageUrls && seed.imageUrls.length > 0 && (
           <div
             style={{
               marginTop: 10,
               display: 'grid',
-              gridTemplateColumns: `repeat(${Math.min(activity.imageUrls.length, 2)}, 1fr)`,
+              gridTemplateColumns: `repeat(${Math.min(seed.imageUrls.length, 2)}, 1fr)`,
               gap: 3,
               borderRadius: 14,
               overflow: 'hidden',
@@ -191,12 +191,12 @@ const SeedRow = ({
               maxWidth: '50%',
             }}
           >
-            {activity.imageUrls.slice(0, 4).map((url, i) => (
+            {seed.imageUrls.slice(0, 4).map((url, i) => (
               <div
                 key={i}
                 style={{
                   position: 'relative',
-                  aspectRatio: activity.imageUrls!.length === 1 ? '16/10' : '1/1',
+                  aspectRatio: seed.imageUrls!.length === 1 ? '16/10' : '1/1',
                 }}
               >
                 <Image

@@ -7,22 +7,22 @@ import { createLookupMap } from '@/lib/display';
 import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 
-type ActivityFeedProps = {
+type SeedFeedProps = {
   currentUser?: UserProfile;
   faces: Face[];
-  activities: Seed[];
+  seeds: Seed[];
   selectedFaceId?: string | null;
 };
 
-const ActivityFeed = ({ faces, activities, selectedFaceId }: ActivityFeedProps) => {
-  const t = useTranslations('activityFeed');
-  const displayActivities = selectedFaceId
-    ? activities.filter((a) => a.faceId === selectedFaceId)
-    : activities;
+const SeedFeed = ({ faces, seeds, selectedFaceId }: SeedFeedProps) => {
+  const t = useTranslations('seedFeed');
+  const displaySeeds = selectedFaceId
+    ? seeds.filter((s) => s.faceId === selectedFaceId)
+    : seeds;
 
   const faceCache = createLookupMap(faces, (face) => face.id);
 
-  if (displayActivities.length === 0) {
+  if (displaySeeds.length === 0) {
     return (
       <p
         style={{
@@ -32,22 +32,22 @@ const ActivityFeed = ({ faces, activities, selectedFaceId }: ActivityFeedProps) 
           padding: '64px 0',
         }}
       >
-        {t('noActivities')}
+        {t('noSeeds')}
       </p>
     );
   }
 
   return (
     <div>
-      {displayActivities.map((activity, index) => {
-        const face = faceCache.get(activity.faceId);
+      {displaySeeds.map((seed, index) => {
+        const face = faceCache.get(seed.faceId);
         if (!face) return null;
         return (
           <SeedRow
-            key={activity.id}
-            activity={activity}
+            key={seed.id}
+            seed={seed}
             face={face}
-            noBorder={index === displayActivities.length - 1}
+            noBorder={index === displaySeeds.length - 1}
           />
         );
       })}
@@ -55,4 +55,4 @@ const ActivityFeed = ({ faces, activities, selectedFaceId }: ActivityFeedProps) 
   );
 };
 
-export default ActivityFeed;
+export default SeedFeed;

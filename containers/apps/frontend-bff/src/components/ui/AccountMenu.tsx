@@ -7,13 +7,13 @@ import type { UserProfile } from '@/types/user-profile';
 type Props = {
   user: UserProfile;
   faceCount: number;
-  activityCount: number;
+  seedCount: number;
   isOpen: boolean;
   onClose: () => void;
   anchorRef?: React.RefObject<HTMLElement | null>;
 };
 
-const AccountMenu = ({ user, faceCount, activityCount, isOpen, onClose }: Props) => {
+const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('accountMenu');
 
@@ -184,8 +184,8 @@ const AccountMenu = ({ user, faceCount, activityCount, isOpen, onClose }: Props)
                 {t('facesUnit')}
               </span>
               <span>
-                <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{activityCount}</b>{' '}
-                {t('activitiesUnit')}
+                <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{seedCount}</b>{' '}
+                {t('seedsUnit')}
               </span>
             </div>
           </div>

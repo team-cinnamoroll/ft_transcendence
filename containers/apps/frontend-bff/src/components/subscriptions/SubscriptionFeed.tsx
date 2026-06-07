@@ -110,12 +110,12 @@ const EmptyState = () => (
 
 type Props = {
   subscribedFaceIds: string[];
-  subscribedActivities: Seed[];
+  subscribedSeeds: Seed[];
   faces: Face[];
   users: UserProfile[];
 };
 
-const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, users: _users }: Props) => {
+const SubscriptionFeed = ({ subscribedFaceIds, subscribedSeeds, faces, users: _users }: Props) => {
   const [activeTab, setActiveTab] = useState<Tab>('timeline');
   const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
   const [showFaceFilter, setShowFaceFilter] = useState(false);
@@ -129,10 +129,10 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
 
   const faceMap = useMemo(() => createLookupMap(subscribedFaces, (face) => face.id), [subscribedFaces]);
 
-  const filteredActivities = useMemo(() => {
+  const filteredSeeds = useMemo(() => {
     let result = selectedFaceId
-      ? subscribedActivities.filter((a) => a.faceId === selectedFaceId)
-      : subscribedActivities;
+      ? subscribedSeeds.filter((a) => a.faceId === selectedFaceId)
+      : subscribedSeeds;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter((a) => {
@@ -144,7 +144,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
       });
     }
     return result;
-  }, [subscribedActivities, selectedFaceId, searchQuery, faceMap]);
+  }, [subscribedSeeds, selectedFaceId, searchQuery, faceMap]);
 
   const matchingFaces = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -159,24 +159,24 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
   const matchingSeeds = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
-    return subscribedActivities.filter((a) => a.body.toLowerCase().includes(q));
-  }, [searchQuery, subscribedActivities]);
+    return subscribedSeeds.filter((a) => a.body.toLowerCase().includes(q));
+  }, [searchQuery, subscribedSeeds]);
 
   // タイムラインを日付でグループ化
   const grouped = useMemo(() => {
-    const groups: { dateKey: string; activities: Seed[] }[] = [];
+    const groups: { dateKey: string; seeds: Seed[] }[] = [];
     let lastKey = '';
-    for (const act of filteredActivities) {
+    for (const act of filteredSeeds) {
       const dateKey = act.createdAt.slice(0, 10);
       if (dateKey !== lastKey) {
-        groups.push({ dateKey, activities: [act] });
+        groups.push({ dateKey, seeds: [act] });
         lastKey = dateKey;
       } else {
-        groups[groups.length - 1].activities.push(act);
+        groups[groups.length - 1].seeds.push(act);
       }
     }
     return groups;
-  }, [filteredActivities]);
+  }, [filteredSeeds]);
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'timeline', label: t('timelineTab') },
@@ -283,8 +283,8 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
           ) : (
             <div style={{ padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
               {matchingFaces.map((face) => {
-                const seedCount = subscribedActivities.filter((a) => a.faceId === face.id).length;
-                const lastAct = subscribedActivities.find((a) => a.faceId === face.id);
+                const seedCount = subscribedSeeds.filter((a) => a.faceId === face.id).length;
+                const lastAct = subscribedSeeds.find((a) => a.faceId === face.id);
                 const color = getFaceColor(face.id);
                 return (
                   <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
@@ -324,7 +324,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
               {matchingSeeds.map((act) => {
                 const face = faceMap.get(act.faceId);
                 if (!face) return null;
-                return <SeedRow key={act.id} activity={act} face={face} />;
+                return <SeedRow key={act.id} seed={act} face={face} />;
               })}
             </div>
           )}
@@ -378,7 +378,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
                 >
                   {subscribedFaces.map((face) => {
                     const isSelected = selectedFaceId === face.id;
-                    const hasUnread = subscribedActivities.some((a) => a.faceId === face.id);
+                    const hasUnread = subscribedSeeds.some((a) => a.faceId === face.id);
                     return (
                       <button
                         key={face.id}
@@ -418,17 +418,17 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
             <EmptyState />
           ) : grouped.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '80px 0', textAlign: 'center' }}>
-              <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFilteredActivities')}</p>
+              <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFilteredSeeds')}</p>
             </div>
           ) : (
-            grouped.map(({ dateKey, activities }) => (
+            grouped.map(({ dateKey, seeds }) => (
               <div key={dateKey}>
                 <DateBar label={dateKey} date={dateKey.replace(/-/g, '/')} />
                 <div style={{ padding: '0 28px' }}>
-                  {activities.map((act) => {
+                  {seeds.map((act) => {
                     const face = faceMap.get(act.faceId);
                     if (!face) return null;
-                    return <SeedRow key={act.id} activity={act} face={face} />;
+                    return <SeedRow key={act.id} seed={act} face={face} />;
                   })}
                 </div>
               </div>
@@ -443,7 +443,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedActivities, faces, user
             <EmptyState />
           ) : (
             subscribedFaces.map((face) => {
-              const seedCount = subscribedActivities.filter((a) => a.faceId === face.id).length;
+              const seedCount = subscribedSeeds.filter((a) => a.faceId === face.id).length;
               return (
                 <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--mf-surface)', border: '0.5px solid var(--mf-line)' }}>
