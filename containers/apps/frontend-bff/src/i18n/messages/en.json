@@ -5,15 +5,16 @@
   },
   "nav": {
     "home": "Home",
-    "faces": "Faces",
-    "subscriptions": "Subscriptions",
+    "faces": "Reflection",
+    "subscriptions": "Collection",
     "notifications": "Notifications",
     "search": "Search",
     "faceDetail": "Face Detail"
   },
   "sideNav": {
-    "facesSection": "Faces",
-    "createFace": "New Face"
+    "facesSection": "My Faces",
+    "createFace": "New Face",
+    "newSeed": "Write a new seed"
   },
   "topBar": {
     "post": "Post"
@@ -21,13 +22,22 @@
   "postModal": {
     "title": "Post",
     "ariaLabel": "Post",
+    "cancel": "Cancel",
     "close": "Close",
     "faceLabel": "Face",
+    "selectFace": "Select face",
+    "writeToThisFace": "Write to this face",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Private",
     "loading": "Loading…",
     "noFaces": "No faces available",
     "contentLabel": "Content",
     "textareaPlaceholder": "Jot something down…",
     "addPhoto": "Add photo",
+    "addPhotoAriaLabel": "Attach image",
+    "addLink": "Add link",
+    "charCount": "{n} chars",
+    "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
     "submit": "Post",
@@ -63,19 +73,19 @@
     "close": "Close",
     "loading": "Loading…",
     "notFound": "Face not found",
-    "activitiesHeading": "Activities in this face",
-    "noActivities": "No activities yet"
+    "seedsHeading": "Seeds in this face",
+    "noSeeds": "No seeds yet"
   },
-  "activityDetail": {
-    "title": "Activity Detail",
+  "seedDetailPanel": {
+    "title": "Seed Detail",
     "close": "Close",
     "loading": "Loading…",
-    "notFound": "Activity not found",
+    "notFound": "Seed not found",
     "unknownFace": "Unknown face",
     "imageAlt": "Image {n}",
     "viewFace": "→ View this face"
   },
-  "activityCard": {
+  "seedCard": {
     "showMore": "Show more",
     "collapse": "Collapse",
     "imageAlt": "Image {n}"
@@ -87,33 +97,76 @@
     "title": "Faces",
     "createNew": "New",
     "noFaces": "No faces yet",
-    "private": "Private"
+    "private": "Private",
+    "searchPlaceholder": "Search your faces & seeds",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "noMatch": "No results",
+    "noFilteredFaces": "No faces found for \"{query}\"",
+    "sortLastAt": "Last post",
+    "sortTotal": "Most seeds",
+    "sortName": "Name",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "seedCount": "Seeds",
+    "createFirstFace": "Create your first face",
+    "createNewCard": "New face"
   },
-  "faceActivityFeed": {
-    "noActivities": "No activities yet"
+  "faceSeedFeed": {
+    "noSeeds": "No seeds yet",
+    "noImageSeeds": "No seeds with images"
   },
-  "activityFeed": {
-    "noActivities": "No activities yet"
+  "faceHeader": {
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "images": "With images",
+    "seeds": "Seeds",
+    "monthly": "This month",
+    "subscribers": "Subscribers"
+  },
+  "seedFeed": {
+    "noSeeds": "No seeds yet"
+  },
+  "homeClient": {
+    "write": "Write",
+    "onThisDay": "On this day",
+    "yearsAgo": "{n} year(s) ago",
+    "reply": "What would you say to your past self?",
+    "recentSeeds": "Recent seeds",
+    "viewAll": "View all",
+    "compose": "What will you write today?",
+    "post": "Post"
   },
   "homeProfile": {
     "faces": "Faces",
-    "activities": "Activities"
+    "seeds": "Seeds"
   },
   "faceFilterBar": {
     "all": "All"
   },
-  "activityTileCalendar": {
+  "seedTileCalendar": {
     "title": "Review",
     "weekAriaLabel": "Week of {date}",
     "dayCount": "{count}",
     "few": "Less",
     "many": "More",
     "weekRecord": "record",
-    "noRecord": "No activity this week"
+    "noRecord": "No seeds this week"
   },
   "subscriptionFeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
-    "searchLink": "Search for faces"
+    "searchLink": "Search for faces",
+    "timelineTab": "Timeline",
+    "subscriptionsTab": "Subscriptions",
+    "filterPlaceholder": "Search faces & seeds",
+    "filterByFace": "Filter by face",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "noMatch": "No results",
+    "seedCount": "Seeds",
+    "noFilteredSeeds": "No seeds found",
+    "viewFace": "View face →",
+    "noSubscribedFaces": "No subscribed faces"
   },
   "notificationList": {
     "noNotifications": "No notifications yet",
@@ -121,7 +174,17 @@
     "subscribedBadge": "📥 Subscribe",
     "linkedAction": "linked your post",
     "subscribedAction": "subscribed to {faceName}",
-    "actionConnector": " "
+    "actionConnector": " ",
+    "filterAll": "All",
+    "filterSub": "Subscribe",
+    "filterLink": "Link",
+    "typeLinkLabel": "Link",
+    "typeUpdateLabel": "Update",
+    "today": "Today",
+    "earlier": "Earlier",
+    "noNotificationsFiltered": "No notifications",
+    "linkedPreview": "A linked seed",
+    "updatedPreview": "New seed posted to {faceName}"
   },
   "searchBar": {
     "placeholder": "Search by keyword..."
@@ -133,11 +196,11 @@
   },
   "searchResults": {
     "emptyTitle": "Enter a keyword to search",
-    "emptyHint": "Search face names and activity content by scope",
+    "emptyHint": "Search face names and seed content by scope",
     "noResultsTitle": "No results for \"{query}\"",
     "noResultsHint": "Try a different keyword or scope",
     "facesSection": "Faces",
-    "activitiesSection": "Activities",
+    "seedsSection": "Seeds",
     "subscribe": "Subscribe",
     "subscribed": "Subscribed",
     "subscribeAriaLabel": "Subscribe to {name}",
@@ -154,7 +217,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count}"
+    "count": "{count} notifications"
   },
   "search": {
     "title": "Search",
@@ -172,5 +235,60 @@
     "minutesAgo": "{n}m ago",
     "hoursAgo": "{n}h ago",
     "daysAgo": "{n}d ago"
+  },
+  "mobileComposeBar": {
+    "placeholder": "What are you writing?",
+    "post": "Post"
+  },
+  "accountMenu": {
+    "settings": "Account Settings",
+    "settingsSub": "Profile · Password",
+    "otherSettings": "Other Settings",
+    "otherSettingsSub": "Notifications · Theme · Data",
+    "help": "Help",
+    "facesUnit": "Faces",
+    "seedsUnit": "Seeds",
+    "logout": "Log out"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "Account menu"
+  },
+  "seedRow": {
+    "readMore": "Read more",
+    "collapse": "Collapse",
+    "imageAlt": "Image {n}",
+    "moreOptions": "More options",
+    "edit": "Edit",
+    "linksCount": "{count} links"
+  },
+  "seedDetail": {
+    "title": "Seed",
+    "backAriaLabel": "Go back",
+    "moreOptions": "More options",
+    "public": "Public",
+    "private": "Private",
+    "linkToThisSeed": "Link to this seed",
+    "edit": "Edit",
+    "outgoingLinks": "Links from this seed",
+    "incomingLinks": "Links to this seed",
+    "linksUnit": "",
+    "showMore": "Show {count} more →",
+    "imageAlt": "Image {n}"
+  },
+  "contextRail": {
+    "onThisDay": "On This Day",
+    "yearsAgo": "{n} year(s) ago",
+    "onThisDayPrompt": "What would you say today?",
+    "aboutFaces": "About Faces",
+    "aboutFacesDesc": "A Face is one facet of who you are. Write with the face that fits what you want to express, and reflect on it later.",
+    "seedsThisMonth": "Seeds",
+    "thisMonth": "This month",
+    "noSeedsThisMonth": "No seeds this month",
+    "subscribedFaces": "Subscribed",
+    "noSubscriptions": "You haven't subscribed to any faces yet.",
+    "findFaces": "Find Faces →",
+    "popularFaces": "Popular Faces",
+    "subscribersUnit": "subscribers",
+    "subscribeButton": "Subscribe"
   }
 }

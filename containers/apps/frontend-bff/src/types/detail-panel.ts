@@ -1,4 +1,4 @@
 export type DetailPanelState =
   | { type: 'none' }
-  | { type: 'activity'; activityId: string }
+  | { type: 'seed'; seedId: string }
   | { type: 'face'; faceId: string };

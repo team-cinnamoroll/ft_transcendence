@@ -1,13 +1,13 @@
 import SearchClient from '@/components/search/SearchClient';
-import { listAllActivities } from '@/server/usecases/activities';
+import { listAllSeeds } from '@/server/usecases/seeds';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
 
 export default async function SearchPage() {
-  const [currentUser, allActivities, allFaces, allUsers, subscribedFaceIds] = await Promise.all([
+  const [currentUser, allSeeds, allFaces, allUsers, subscribedFaceIds] = await Promise.all([
     getCurrentUser(),
-    listAllActivities(),
+    listAllSeeds(),
     listAllFaces(),
     listAllUsers(),
     getSubscribedFaceIds(),
@@ -15,7 +15,7 @@ export default async function SearchPage() {
 
   return (
     <SearchClient
-      allActivities={allActivities}
+      allSeeds={allSeeds}
       allFaces={allFaces}
       allUsers={allUsers}
       currentUserId={currentUser.id}

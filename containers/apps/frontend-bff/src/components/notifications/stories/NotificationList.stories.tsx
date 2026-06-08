@@ -3,7 +3,7 @@ import NotificationList from '../NotificationList';
 import { notifications } from '@/mocks/notifications';
 import { users } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
-import { activities } from '@/mocks/activities';
+import { seeds } from '@/mocks/seeds';
 
 const meta: Meta<typeof NotificationList> = {
   title: 'Notifications/NotificationList',
@@ -15,9 +15,9 @@ export default meta;
 type Story = StoryObj<typeof NotificationList>;
 
 export const Default: Story = {
-  args: { notifications, users, faces, activities },
+  args: { notifications, users, faces, seeds },
 };
 
 export const Empty: Story = {
-  args: { notifications: [], users, faces, activities },
+  args: { notifications: [], users, faces, seeds },
 };

@@ -1,31 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800&family=Shippori+Mincho+B1:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap');
 @import 'tailwindcss';
 
 :root {
+  /* ── 既存 (tracen) ────────────────────── */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* ── Midnight Ink — brand palette ────── */
+  --mf-brand: #1e2a4a;
+  --mf-brand-soft: #2a3960;
+  --mf-bg-light: #f8f6f1;
+  --mf-bg-paper: #f2efe7;
+  --mf-bg-dark: #141824;
+  --mf-accent: #d4922a;
+  --mf-accent-soft: #e8b461;
+  --mf-text: #1a1a2e;
+  --mf-text-sub: rgba(26, 26, 46, 0.6);
+  --mf-text-muted: rgba(26, 26, 46, 0.42);
+  --mf-text-faint: rgba(26, 26, 46, 0.22);
+  --mf-ink: rgba(26, 26, 46, 0.92);
+  --mf-line: rgba(30, 42, 74, 0.1);
+  --mf-line-soft: rgba(30, 42, 74, 0.06);
+  --mf-surface: #ffffff;
+  --mf-surface-card: #fcfaf5;
+  --mf-surface-tint: #eeeae0;
+  --mf-hover: rgba(30, 42, 74, 0.04);
+
+  /* ── Typography ─────────────────────── */
+  --mf-font-sans: 'Noto Sans JP', 'Hiragino Sans', -apple-system, 'Helvetica Neue', system-ui,
+    sans-serif;
+  --mf-font-serif: 'Shippori Mincho B1', 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+  --mf-font-serif-en: 'Cormorant Garamond', 'Shippori Mincho B1', serif;
+
+  /* ── Face colors (6色) ──────────────── */
+  --mf-face-water: #5b8db8;
+  --mf-face-moss: #5b9b72;
+  --mf-face-wisteria: #7b6b9e;
+  --mf-face-persimmon: #c47a50;
+  --mf-face-rose: #b06b7a;
+  --mf-face-grass: #a89050;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ededed;
-  }
+  --color-background: var(--mf-bg-light);
+  --color-foreground: var(--mf-text);
+  --font-sans: var(--mf-font-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--mf-bg-light);
+  color: var(--mf-text);
+  font-family: var(--mf-font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* スクロールバーを細く・控えめに */
+/* カスタムスクロールバー（Midnight Ink） */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -35,17 +64,32 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a; /* zinc-800 */
+  background: var(--mf-line);
   border-radius: 9999px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46; /* zinc-700 */
+  background: var(--mf-text-faint);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #27272a transparent;
+  scrollbar-color: var(--mf-line) transparent;
+}
+
+/* スクロールバー非表示ユーティリティ */
+.mf-scroll::-webkit-scrollbar {
+  display: none;
+}
+.mf-scroll {
+  scrollbar-width: none;
+}
+
+/* カーソル点滅アニメーション */
+@keyframes mf-blink {
+  50% {
+    opacity: 0;
+  }
 }

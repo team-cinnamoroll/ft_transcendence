@@ -5,15 +5,16 @@
   },
   "nav": {
     "home": "Accueil",
-    "faces": "Facettes",
-    "subscriptions": "Abonnements",
+    "faces": "Réflexion",
+    "subscriptions": "Collection",
     "notifications": "Notifications",
     "search": "Recherche",
     "faceDetail": "Détail de la facette"
   },
   "sideNav": {
-    "facesSection": "Facettes",
-    "createFace": "Nouvelle facette"
+    "facesSection": "Mes facettes",
+    "createFace": "Nouvelle facette",
+    "newSeed": "Écrire une nouvelle graine"
   },
   "topBar": {
     "post": "Publier"
@@ -21,13 +22,22 @@
   "postModal": {
     "title": "Nouvelle publication",
     "ariaLabel": "Publier",
+    "cancel": "Annuler",
     "close": "Fermer",
     "faceLabel": "Facette",
+    "selectFace": "Sélectionner une facette",
+    "writeToThisFace": "Écrire dans cette facette",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Privé",
     "loading": "Chargement…",
     "noFaces": "Aucune facette disponible",
     "contentLabel": "Contenu",
     "textareaPlaceholder": "Notez quelque chose…",
     "addPhoto": "Ajouter une photo",
+    "addPhotoAriaLabel": "Joindre une image",
+    "addLink": "Ajouter un lien",
+    "charCount": "{n} car.",
+    "draftSaved": "Brouillon sauvegardé",
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
     "submit": "Publier",
@@ -63,19 +73,19 @@
     "close": "Fermer",
     "loading": "Chargement…",
     "notFound": "Facette introuvable",
-    "activitiesHeading": "Activités de cette facette",
-    "noActivities": "Aucune activité pour l'instant"
+    "seedsHeading": "Graines de cette facette",
+    "noSeeds": "Aucune graine pour l'instant"
   },
-  "activityDetail": {
-    "title": "Détail de l'activité",
+  "seedDetailPanel": {
+    "title": "Détail de la graine",
     "close": "Fermer",
     "loading": "Chargement…",
-    "notFound": "Activité introuvable",
+    "notFound": "Graine introuvable",
     "unknownFace": "Facette inconnue",
     "imageAlt": "Image {n}",
     "viewFace": "→ Voir cette facette"
   },
-  "activityCard": {
+  "seedCard": {
     "showMore": "Voir plus",
     "collapse": "Réduire",
     "imageAlt": "Image {n}"
@@ -87,33 +97,76 @@
     "title": "Facettes",
     "createNew": "Nouveau",
     "noFaces": "Aucune facette pour l'instant",
-    "private": "Privé"
+    "private": "Privé",
+    "searchPlaceholder": "Rechercher vos facettes et graines",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "noMatch": "Aucun résultat",
+    "noFilteredFaces": "Aucune facette trouvée pour \"{query}\"",
+    "sortLastAt": "Dernière publication",
+    "sortTotal": "Plus de graines",
+    "sortName": "Nom",
+    "gridView": "Vue grille",
+    "listView": "Vue liste",
+    "seedCount": "Graines",
+    "createFirstFace": "Créer votre première facette",
+    "createNewCard": "Nouvelle facette"
   },
-  "faceActivityFeed": {
-    "noActivities": "Aucune activité pour l'instant"
+  "faceSeedFeed": {
+    "noSeeds": "Aucune graine pour l'instant",
+    "noImageSeeds": "Aucune graine avec images"
   },
-  "activityFeed": {
-    "noActivities": "Aucune activité pour l'instant"
+  "faceHeader": {
+    "newest": "Plus récents",
+    "oldest": "Plus anciens",
+    "images": "Avec images",
+    "seeds": "Graines",
+    "monthly": "Ce mois",
+    "subscribers": "Abonnés"
+  },
+  "seedFeed": {
+    "noSeeds": "Aucune graine pour l'instant"
+  },
+  "homeClient": {
+    "write": "Écrire",
+    "onThisDay": "Il y a un an",
+    "yearsAgo": "il y a {n} an(s)",
+    "reply": "Que répondriez-vous à votre passé ?",
+    "recentSeeds": "Graines récentes",
+    "viewAll": "Tout voir",
+    "compose": "Qu'allez-vous écrire aujourd'hui ?",
+    "post": "Publier"
   },
   "homeProfile": {
     "faces": "Facettes",
-    "activities": "Activités"
+    "seeds": "Graines"
   },
   "faceFilterBar": {
     "all": "Tout"
   },
-  "activityTileCalendar": {
+  "seedTileCalendar": {
     "title": "Bilan",
     "weekAriaLabel": "Semaine du {date}",
     "dayCount": "{count}",
     "few": "Peu",
     "many": "Beaucoup",
     "weekRecord": "enregistrement(s)",
-    "noRecord": "Aucune activité cette semaine"
+    "noRecord": "Aucune graine cette semaine"
   },
   "subscriptionFeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "searchLink": "Rechercher des facettes"
+    "searchLink": "Rechercher des facettes",
+    "timelineTab": "Fil d'actualité",
+    "subscriptionsTab": "Abonnements",
+    "filterPlaceholder": "Rechercher facettes & graines",
+    "filterByFace": "Filtrer par facette",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "noMatch": "Aucun résultat",
+    "seedCount": "Graines",
+    "noFilteredSeeds": "Aucune graine trouvée",
+    "viewFace": "Voir la facette →",
+    "noSubscribedFaces": "Aucune facette abonnée"
   },
   "notificationList": {
     "noNotifications": "Aucune notification pour l'instant",
@@ -121,7 +174,17 @@
     "subscribedBadge": "📥 Abonnement",
     "linkedAction": "a lié votre publication",
     "subscribedAction": "s'est abonné à {faceName}",
-    "actionConnector": " "
+    "actionConnector": " ",
+    "filterAll": "Tout",
+    "filterSub": "Abonnement",
+    "filterLink": "Lien",
+    "typeLinkLabel": "Lien",
+    "typeUpdateLabel": "Mise à jour",
+    "today": "Aujourd'hui",
+    "earlier": "Auparavant",
+    "noNotificationsFiltered": "Aucune notification",
+    "linkedPreview": "Une graine liée",
+    "updatedPreview": "Nouvelle graine publiée sur {faceName}"
   },
   "searchBar": {
     "placeholder": "Rechercher par mot-clé..."
@@ -137,7 +200,7 @@
     "noResultsTitle": "Aucun résultat pour « {query} »",
     "noResultsHint": "Essayez un autre mot-clé ou une autre portée",
     "facesSection": "Facettes",
-    "activitiesSection": "Activités",
+    "seedsSection": "Graines",
     "subscribe": "S'abonner",
     "subscribed": "Abonné",
     "subscribeAriaLabel": "S'abonner à {name}",
@@ -154,7 +217,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count}"
+    "count": "{count} notifications"
   },
   "search": {
     "title": "Recherche",
@@ -172,5 +235,60 @@
     "minutesAgo": "il y a {n} min",
     "hoursAgo": "il y a {n} h",
     "daysAgo": "il y a {n} j"
+  },
+  "mobileComposeBar": {
+    "placeholder": "Qu'est-ce que vous écrivez ?",
+    "post": "Publier"
+  },
+  "accountMenu": {
+    "settings": "Paramètres du compte",
+    "settingsSub": "Profil · Mot de passe",
+    "otherSettings": "Autres paramètres",
+    "otherSettingsSub": "Notifications · Thème · Données",
+    "help": "Aide",
+    "facesUnit": "Facettes",
+    "seedsUnit": "Seeds",
+    "logout": "Se déconnecter"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "Menu du compte"
+  },
+  "seedRow": {
+    "readMore": "Lire la suite",
+    "collapse": "Réduire",
+    "imageAlt": "Image {n}",
+    "moreOptions": "Plus d'options",
+    "edit": "Modifier",
+    "linksCount": "{count} lien(s)"
+  },
+  "seedDetail": {
+    "title": "Seed",
+    "backAriaLabel": "Retour",
+    "moreOptions": "Plus d'options",
+    "public": "Public",
+    "private": "Privé",
+    "linkToThisSeed": "Lier à ce seed",
+    "edit": "Modifier",
+    "outgoingLinks": "Liens depuis ce seed",
+    "incomingLinks": "Liens vers ce seed",
+    "linksUnit": "",
+    "showMore": "Voir {count} de plus →",
+    "imageAlt": "Image {n}"
+  },
+  "contextRail": {
+    "onThisDay": "Ce jour il y a un an",
+    "yearsAgo": "Il y a {n} an(s)",
+    "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
+    "aboutFaces": "À propos des facettes",
+    "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",
+    "seedsThisMonth": "Graines",
+    "thisMonth": "Ce mois-ci",
+    "noSeedsThisMonth": "Aucune graine ce mois-ci",
+    "subscribedFaces": "Abonnements",
+    "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
+    "findFaces": "Chercher des facettes →",
+    "popularFaces": "Facettes populaires",
+    "subscribersUnit": "abonnés",
+    "subscribeButton": "S'abonner"
   }
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { type Face } from '@/types/face';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import FaceBadge from '@/components/ui/FaceBadge';
 
 type FaceFilterBarProps = {
   faces: Face[];
@@ -10,46 +10,60 @@ type FaceFilterBarProps = {
   onSelect: (faceId: string | null) => void;
 };
 
-/**
- * フェイスアイコン一覧（横スクロール）。
- * タップで該当フェイスのアクティビティに絞り込む Client Component。
- * 「すべて」ボタンでフィルタを解除できる。
- */
 const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) => {
   const t = useTranslations('faceFilterBar');
-  const handleSelectAll = () => {
-    onSelect(null);
-  };
 
   const handleSelectFace = (faceId: string) => {
-    // 同じフェイスを再タップしたらフィルタ解除
     onSelect(selectedFaceId === faceId ? null : faceId);
   };
 
   return (
-    <div className="overflow-x-auto border-b border-zinc-800 px-4 py-3">
-      <div className="flex items-center gap-2 w-max">
+    <div
+      className="overflow-x-auto mf-scroll"
+      style={{ borderBottom: '0.5px solid var(--mf-line)', padding: '12px 16px' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: 'max-content' }}>
         {/* すべてボタン */}
         <button
           type="button"
-          onClick={handleSelectAll}
-          className={cn('flex flex-col items-center gap-1 shrink-0', 'focus:outline-none')}
+          onClick={() => onSelect(null)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+          }}
         >
           <span
-            className={cn(
-              'flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all',
-              selectedFaceId === null
-                ? 'bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950'
-                : 'bg-zinc-800 hover:bg-zinc-700'
-            )}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: selectedFaceId === null ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+              transition: 'background 0.15s',
+            }}
           >
             🌐
           </span>
           <span
-            className={cn(
-              'text-[10px] leading-none max-w-11 truncate',
-              selectedFaceId === null ? 'text-violet-400' : 'text-zinc-500'
-            )}
+            style={{
+              fontSize: 10,
+              lineHeight: 1,
+              maxWidth: 44,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              color: selectedFaceId === null ? 'var(--mf-brand)' : 'var(--mf-text-muted)',
+              fontWeight: selectedFaceId === null ? 700 : 500,
+            }}
           >
             {t('all')}
           </span>
@@ -58,30 +72,42 @@ const FaceFilterBar = ({ faces, selectedFaceId, onSelect }: FaceFilterBarProps) 
         {/* 各フェイスボタン */}
         {faces.map((face) => {
           const isActive = selectedFaceId === face.id;
-          const icon = face.emoji ?? face.name.slice(0, 1);
-
           return (
             <button
               key={face.id}
               type="button"
               onClick={() => handleSelectFace(face.id)}
-              className={cn('flex flex-col items-center gap-1 shrink-0', 'focus:outline-none')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 4,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+              }}
             >
-              <span
-                className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all',
-                  isActive
-                    ? 'bg-violet-600 ring-2 ring-violet-400 ring-offset-2 ring-offset-zinc-950'
-                    : 'bg-zinc-800 hover:bg-zinc-700'
-                )}
+              <div
+                style={{
+                  borderRadius: 11,
+                  boxShadow: isActive ? '0 0 0 2.5px var(--mf-accent)' : 'none',
+                  transition: 'box-shadow 0.15s',
+                }}
               >
-                {icon}
-              </span>
+                <FaceBadge face={face} size={40} radius={11} />
+              </div>
               <span
-                className={cn(
-                  'text-[10px] leading-none max-w-11 truncate',
-                  isActive ? 'text-violet-400' : 'text-zinc-500'
-                )}
+                style={{
+                  fontSize: 10,
+                  lineHeight: 1,
+                  maxWidth: 44,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: isActive ? 'var(--mf-brand)' : 'var(--mf-text-muted)',
+                  fontWeight: isActive ? 700 : 500,
+                }}
               >
                 {face.name}
               </span>

@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import FaceHeader from '@/components/face/FaceHeader';
-import FaceActivityFeed from '@/components/face/FaceActivityFeed';
-import FAB from '@/components/ui/FAB';
-import { listActivitiesByFaceId } from '@/server/usecases/activities';
+import FaceDetailClient from '@/components/face/FaceDetailClient';
+import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
+import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import { getTranslations } from 'next-intl/server';
+import type { Face } from '@/types/face';
 
 type Props = {
   params: Promise<{ faceId: string }>;
@@ -14,62 +14,83 @@ type Props = {
 
 const FaceDetailPage = async ({ params }: Props) => {
   const { faceId } = await params;
-  const face = await findFaceById(faceId);
+  const maybeFace = await findFaceById(faceId);
 
-  if (!face) {
+  if (!maybeFace) {
     notFound();
   }
 
-  const [currentUser, activities, users] = await Promise.all([
+  const face = maybeFace as Face;
+
+  const [currentUser, seeds, users, subscribedFaceIds, t] = await Promise.all([
     getCurrentUser(),
-    listActivitiesByFaceId(faceId),
+    listSeedsByFaceId(faceId),
     listAllUsers(),
+    getSubscribedFaceIds(),
+    getTranslations('faceDetailPage'),
   ]);
-  const t = await getTranslations('faceDetailPage');
+
+  const isOwner = face.userId === currentUser.id;
+  const isSubscribed = subscribedFaceIds.includes(face.id);
 
   return (
-    <div className="flex flex-col">
-      {/* スティッキーヘッダー */}
-      <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-sm">
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          borderBottom: '0.5px solid var(--mf-line)',
+          background: 'var(--mf-bg-light)',
+          padding: '12px 16px',
+        }}
+      >
         <Link
           href="/faces"
-          className="flex items-center justify-center rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
           aria-label={t('backAriaLabel')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 30,
+            height: 30,
+            borderRadius: '50%',
+            color: 'var(--mf-text-muted)',
+            textDecoration: 'none',
+            flexShrink: 0,
+          }}
         >
-          {/* 左矢印アイコン */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </Link>
-        <h2 className="truncate text-base font-bold text-zinc-100">
+        <h2
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: 'var(--mf-brand)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            margin: 0,
+          }}
+        >
           {face.emoji ? `${face.emoji} ${face.name}` : face.name}
         </h2>
       </header>
 
       <main>
-        {/* フェイスヘッダー（絵文字・名前・説明・サブスクボタン） */}
-        <div className="border-b border-zinc-800">
-          <FaceHeader face={face} isOwner={face.userId === currentUser.id} />
-        </div>
-
-        {/* アクティビティ一覧 */}
-        <section className="px-4 py-4">
-          <FaceActivityFeed face={face} activities={activities} users={users} />
-        </section>
+        <FaceDetailClient
+          face={face}
+          isOwner={isOwner}
+          seeds={seeds}
+          users={users}
+          isSubscribed={isSubscribed}
+        />
       </main>
-
-      {/* 自分のフェイスのみ投稿FABを表示 */}
-      {face.userId === currentUser.id && <FAB defaultFaceId={face.id} className="md:hidden" />}
     </div>
   );
 };

@@ -37,10 +37,10 @@
 
 フロントエンド（Next.js）の仕事は大きく2つです：
 
-| 役割 | 説明 |
-|---|---|
-| **UI の描画** | React コンポーネントでユーザーに見える画面を作る |
-| **BFF（Backend For Frontend）** | 画面に必要な形にデータを集約/整形して UI に渡す |
+| 役割                            | 説明                                             |
+| ------------------------------- | ------------------------------------------------ |
+| **UI の描画**                   | React コンポーネントでユーザーに見える画面を作る |
+| **BFF（Backend For Frontend）** | 画面に必要な形にデータを集約/整形して UI に渡す  |
 
 > **BFF とは?**
 > UI が使いやすい形にデータを整形する「フロントエンドの専用サーバー」機能です。
@@ -113,7 +113,7 @@ src/
 │       ├── viewer/route.ts
 │       └── detail/
 │           ├── face/[faceId]/route.ts
-│           └── activity/[activityId]/route.ts
+│           └── seed/[seedId]/route.ts
 │
 ├── components/                   # UI コンポーネント
 │   ├── ui/
@@ -130,7 +130,7 @@ src/
 ├── repositories/                 # ★ server-only: Spec/Impl/Provider
 │   ├── provider.ts               # Provider 共通ヘルパー
 │   ├── face-repository.ts
-│   ├── activity-repository.ts
+│   ├── seed-repository.ts
 │   ├── user-repository.ts
 │   ├── subscription-repository.ts
 │   └── notification-repository.ts
@@ -176,9 +176,9 @@ src/
 たとえば「通知を送る Worker」を追加する場合も、同じルールで作れます。
 
 ```ts
-import "server-only";
+import 'server-only';
 
-import { createSingletonProvider } from "@/repositories/provider";
+import { createSingletonProvider } from '@/repositories/provider';
 
 export type NotificationWorkerSpec = {
   send: (message: string) => Promise<void>;
@@ -195,8 +195,9 @@ export function createNotificationMockWorkerImpl(): NotificationWorkerSpec {
 export const notificationMockWorkerImpl: NotificationWorkerSpec =
   createNotificationMockWorkerImpl();
 
-export const getNotificationWorker =
-  createSingletonProvider<NotificationWorkerSpec>(() => notificationMockWorkerImpl);
+export const getNotificationWorker = createSingletonProvider<NotificationWorkerSpec>(
+  () => notificationMockWorkerImpl
+);
 ```
 
 > 補足: `createSingletonProvider` は現在 `src/repositories/provider.ts` に置いています。
@@ -214,13 +215,13 @@ Repository は「データ取得の窓口」です。
 例: `src/repositories/face-repository.ts` の抜粋イメージ
 
 ```ts
-import "server-only";
+import 'server-only';
 
-import type { Face } from "@/types/face";
-import { faces } from "@/mocks/faces";
-import { createSingletonProvider } from "@/repositories/provider";
+import type { Face } from '@/types/face';
+import { faces } from '@/mocks/faces';
+import { createSingletonProvider } from '@/repositories/provider';
 
-export type CreateFaceInput = Omit<Face, "id" | "userId">;
+export type CreateFaceInput = Omit<Face, 'id' | 'userId'>;
 
 // 契約（Spec）: 必ず Promise を返す
 export type FaceRepositorySpec = {
@@ -269,10 +270,10 @@ Usecase は、UI が欲しい形にデータを **集約・整形** する層で
 例: viewer context（`src/server/usecases/viewer.ts` のイメージ）
 
 ```ts
-import "server-only";
+import 'server-only';
 
-import { getCurrentUser } from "./users";
-import { listFacesByUserId } from "./faces";
+import { getCurrentUser } from './users';
+import { listFacesByUserId } from './faces';
 
 export async function getViewerContext() {
   const currentUser = await getCurrentUser();
@@ -292,8 +293,8 @@ export async function getViewerContext() {
 例: `src/app/layout.tsx`
 
 ```tsx
-import SideNav from "@/components/ui/SideNav";
-import { getViewerContext } from "@/server/usecases/viewer";
+import SideNav from '@/components/ui/SideNav';
+import { getViewerContext } from '@/server/usecases/viewer';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { myFaces } = await getViewerContext();
@@ -316,36 +317,40 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 例: `src/components/face/CreateFaceModal.tsx`（Client） → `src/server/actions/faces.ts`（Server）
 
 ```tsx
-"use client";
+'use client';
 
-import { useTransition } from "react";
-import { createFaceAction } from "@/server/actions/faces";
+import { useTransition } from 'react';
+import { createFaceAction } from '@/server/actions/faces';
 
 export function CreateFaceModal() {
   const [isPending, startTransition] = useTransition();
 
   const onSubmit = () => {
     startTransition(async () => {
-      await createFaceAction({ name: "読書", isPrivate: false });
+      await createFaceAction({ name: '読書', isPrivate: false });
     });
   };
 
-  return <button onClick={onSubmit} disabled={isPending}>作成</button>;
+  return (
+    <button onClick={onSubmit} disabled={isPending}>
+      作成
+    </button>
+  );
 }
 ```
 
 `src/server/actions/faces.ts`（イメージ）
 
 ```ts
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { createFaceForCurrentUser } from "@/server/usecases/faces";
+import { revalidatePath } from 'next/cache';
+import { createFaceForCurrentUser } from '@/server/usecases/faces';
 
 export async function createFaceAction(input) {
   const face = await createFaceForCurrentUser(input);
-  revalidatePath("/");
-  revalidatePath("/faces");
+  revalidatePath('/');
+  revalidatePath('/faces');
   return face;
 }
 ```
@@ -360,10 +365,10 @@ Client Component は server-only を import できないため、必要に応じ
 例: DetailPanel のデータ取得（`src/app/api/detail/.../route.ts`）
 
 ```ts
-import { NextResponse } from "next/server";
-import { getFaceDetailPanelData } from "@/server/usecases/detail-panel";
+import { NextResponse } from 'next/server';
+import { getFaceDetailPanelData } from '@/server/usecases/detail-panel';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ faceId: string }> }) {
   const { faceId } = await params;
@@ -375,9 +380,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ faceId:
 Client 側（イメージ）
 
 ```tsx
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function FaceDetail({ faceId }: { faceId: string }) {
   const [data, setData] = useState(null);
@@ -388,7 +393,7 @@ export function FaceDetail({ faceId }: { faceId: string }) {
       .then(setData);
   }, [faceId]);
 
-  return <div>{data ? "loaded" : "loading"}</div>;
+  return <div>{data ? 'loaded' : 'loading'}</div>;
 }
 ```
 
@@ -398,12 +403,12 @@ export function FaceDetail({ faceId }: { faceId: string }) {
 
 どちらも「サーバーで動く処理」ですが、**呼び出し方と用途**が違います。
 
-| 観点 | Server Actions | Route Handler（/api） |
-|---|---|---|
-| 呼び出し方 | Client から **関数呼び出し**（Next.js が裏でリクエスト化） | Client/外部 から **HTTP リクエスト**（`fetch('/api/...')`） |
-| 主な用途 | **更新系**（作成/更新/削除） + `revalidatePath` などと相性が良い | **取得系**（Client で後から読むデータ）/ 外部連携も可能 |
-| 返り値 | 直列化できる値（オブジェクト等） | `Response`（JSON を返すのが一般的） |
-| URL の有無 | URL を意識しない（関数として扱える） | URL が存在する（`/api/...` が入口） |
+| 観点       | Server Actions                                                   | Route Handler（/api）                                       |
+| ---------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| 呼び出し方 | Client から **関数呼び出し**（Next.js が裏でリクエスト化）       | Client/外部 から **HTTP リクエスト**（`fetch('/api/...')`） |
+| 主な用途   | **更新系**（作成/更新/削除） + `revalidatePath` などと相性が良い | **取得系**（Client で後から読むデータ）/ 外部連携も可能     |
+| 返り値     | 直列化できる値（オブジェクト等）                                 | `Response`（JSON を返すのが一般的）                         |
+| URL の有無 | URL を意識しない（関数として扱える）                             | URL が存在する（`/api/...` が入口）                         |
 
 ### 使い分けの目安（迷ったらこれ）
 

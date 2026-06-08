@@ -41,10 +41,11 @@ const preview: Preview = {
       defaultViewport: 'mobile',
     },
     backgrounds: {
-      default: 'dark',
+      default: 'app',
       values: [
-        { name: 'dark', value: '#000000' },
-        { name: 'light', value: '#ffffff' },
+        { name: 'app',   value: '#f8f6f1' },
+        { name: 'white', value: '#ffffff' },
+        { name: 'dark',  value: '#141824' },
       ],
     },
     controls: {

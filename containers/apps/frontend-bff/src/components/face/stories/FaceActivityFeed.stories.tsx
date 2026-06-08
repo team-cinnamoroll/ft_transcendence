@@ -1,33 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import FaceActivityFeed from '../FaceActivityFeed';
+import FaceSeedFeed from '../FaceSeedFeed';
 import { faces } from '@/mocks/faces';
 import { users } from '@/mocks/users';
-import { activities } from '@/mocks/activities';
+import { seeds } from '@/mocks/seeds';
 
-const meta: Meta<typeof FaceActivityFeed> = {
-  title: 'Face/FaceActivityFeed',
-  component: FaceActivityFeed,
+const meta: Meta<typeof FaceSeedFeed> = {
+  title: 'Face/FaceSeedFeed',
+  component: FaceSeedFeed,
   tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj<typeof FaceActivityFeed>;
+type Story = StoryObj<typeof FaceSeedFeed>;
 
 const face = faces.find((f) => f.id === 'face-1-1')!;
-const faceActivities = activities.filter((a) => a.faceId === face.id);
+const faceSeeds = seeds.filter((s) => s.faceId === face.id);
 
 export const Default: Story = {
-  args: { face, activities: faceActivities, users },
+  args: { face, seeds: faceSeeds, users },
 };
 
 export const Empty: Story = {
-  args: { face, activities: [], users },
+  args: { face, seeds: [], users },
 };
 
 export const OtherFace: Story = {
   args: {
     face: faces.find((f) => f.id === 'face-1-2') ?? face,
-    activities: activities.filter((a) => a.faceId === 'face-1-2'),
+    seeds: seeds.filter((s) => s.faceId === 'face-1-2'),
     users,
   },
 };

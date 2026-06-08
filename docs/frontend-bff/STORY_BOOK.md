@@ -45,7 +45,7 @@ containers/apps/frontend-bff/
 │       └── server-only.ts    ← 'server-only' をスタブ化
 └── src/components/
     ├── ui/
-    │   ├── ActivityCard.tsx
+    │   ├── SeedCard.tsx
     │   ├── Avatar.tsx
     │   ├── Badge.tsx
     │   ├── BottomNav.tsx
@@ -56,7 +56,7 @@ containers/apps/frontend-bff/
     │   ├── SideNav.tsx
     │   ├── TopBar.tsx
     │   └── stories/
-    │       ├── ActivityCard.stories.tsx
+    │       ├── SeedCard.stories.tsx
     │       ├── Avatar.stories.tsx
     │       ├── Badge.stories.tsx
     │       ├── BottomNav.stories.tsx
@@ -69,12 +69,12 @@ containers/apps/frontend-bff/
     ├── face/
     │   └── stories/
     │       ├── CreateFaceModal.stories.tsx
-    │       ├── FaceActivityFeed.stories.tsx
+    │       ├── FaceSeedFeed.stories.tsx
     │       └── FaceHeader.stories.tsx
     ├── home/
     │   └── stories/
-    │       ├── ActivityFeed.stories.tsx
-    │       ├── ActivityTileCalendar.stories.tsx
+    │       ├── SeedFeed.stories.tsx
+    │       ├── SeedTileCalendar.stories.tsx
     │       ├── FaceFilterBar.stories.tsx
     │       └── HomeProfile.stories.tsx
     ├── notifications/
@@ -124,9 +124,9 @@ src/components/
 │   └── stories/
 │       └── FaceHeader.stories.tsx
 ├── home/
-│   ├── ActivityFeed.tsx
+│   ├── SeedFeed.tsx
 │   └── stories/
-│       └── ActivityFeed.stories.tsx
+│       └── SeedFeed.stories.tsx
 ```
 
 インポートは親ディレクトリへの相対パス（`'../ComponentName'`）を使う。

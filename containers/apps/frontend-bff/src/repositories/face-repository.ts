@@ -1,13 +1,14 @@
 import 'server-only';
 
+import { type CreateFaceRequest } from '@tracen/contracts';
 import { type Face } from '@/types/face';
 import { faces } from '@/mocks/faces';
 import { createSingletonProvider } from '@/repositories/provider';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
 
-/** フェイス作成時の入力型（id・userId は自動付与のため不要） */
-export type CreateFaceInput = Omit<Face, 'id' | 'userId'>;
+/** フェイス作成時の入力型 */
+export type CreateFaceInput = CreateFaceRequest;
 
 /** FaceRepository が提供するメソッドの契約（Spec） */
 export type FaceRepositorySpec = {

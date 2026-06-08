@@ -23,3 +23,11 @@ export const useSearchParams = () => {
 export const useParams = () => {
   return {};
 };
+
+export const redirect = (_url: string): never => {
+  throw new Error('redirect() called in Storybook');
+};
+
+export const permanentRedirect = (_url: string): never => {
+  throw new Error('permanentRedirect() called in Storybook');
+};

@@ -1,9 +1,11 @@
 import FacesClient from '@/components/face/FacesClient';
 import { getViewerContext } from '@/server/usecases/viewer';
+import { listSeedsByUserId } from '@/server/usecases/seeds';
 
 const FacesPage = async () => {
-  const { myFaces } = await getViewerContext();
-  return <FacesClient initialFaces={myFaces} />;
+  const { currentUser, myFaces } = await getViewerContext();
+  const seeds = await listSeedsByUserId(currentUser.id);
+  return <FacesClient initialFaces={myFaces} seeds={seeds} />;
 };
 
 export default FacesPage;

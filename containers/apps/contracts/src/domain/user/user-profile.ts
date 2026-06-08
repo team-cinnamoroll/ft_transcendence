@@ -10,9 +10,8 @@ export const UserProfileResponseSchema = z
   .object({
     id: UserIdSchema,
     name: z.string().min(1),
-    avatarUrl: z.string().url(),
+    avatarUrl: z.url(),
     badge: z
-      .string()
       .emoji({ message: '絵文字のみを入力してください' }) // Zodの標準機能で絵文字か判定
       .refine(
         (val) => {

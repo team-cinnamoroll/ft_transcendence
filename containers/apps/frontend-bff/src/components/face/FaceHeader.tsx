@@ -3,27 +3,52 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { type Face } from '@/types/face';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import FaceBadge from '@/components/ui/FaceBadge';
+import { getFaceTitle, getFaceColor } from '@/lib/display';
+
+export type SortOrder = 'newest' | 'oldest' | 'images';
 
 type FaceHeaderProps = {
   face: Face;
   isOwner?: boolean;
+  onSortChange?: (sort: SortOrder) => void;
+  totalSeeds?: number;
+  monthlySeeds?: number;
+  subscriberCount?: number;
+  isSubscribed?: boolean;
 };
 
-const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
-  const [subscribed, setSubscribed] = useState(false);
+const FaceHeader = ({
+  face,
+  isOwner = false,
+  onSortChange,
+  totalSeeds = 0,
+  monthlySeeds = 0,
+  subscriberCount = 0,
+  isSubscribed: initialSubscribed = false,
+}: FaceHeaderProps) => {
+  const [subscribed, setSubscribed] = useState(initialSubscribed);
+  const [sort, setSort] = useState<SortOrder>('newest');
   const t = useTranslations('face');
+  const tHeader = useTranslations('faceHeader');
 
-  const handleSubscribe = () => {
-    setSubscribed((prev) => !prev);
+  const handleSort = (s: SortOrder) => {
+    setSort(s);
+    onSortChange?.(s);
   };
 
+  const SORT_OPTIONS: { key: SortOrder; label: string }[] = [
+    { key: 'newest', label: tHeader('newest') },
+    { key: 'oldest', label: tHeader('oldest') },
+    { key: 'images', label: tHeader('images') },
+  ];
+
   return (
-    <div className="flex flex-col">
+    <div>
       {face.imageUrl ? (
-        /* カバー画像あり: 画像 + グラデーションオーバーレイ */
-        <div className="relative aspect-video w-full overflow-hidden">
+        /* カバー画像あり */
+        <div style={{ position: 'relative', aspectRatio: '16/9', width: '100%' }}>
           <Image
             src={face.imageUrl}
             alt={face.name}
@@ -32,81 +57,222 @@ const FaceHeader = ({ face, isOwner = false }: FaceHeaderProps) => {
             sizes="100vw"
             priority
           />
-          {/* グラデーションオーバーレイ */}
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
-          {/* コンテンツ（画像上に重ねる） */}
-          <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 py-6 text-center">
-            {face.emoji && (
-              <span className="text-5xl leading-none" aria-hidden="true">
-                {face.emoji}
-              </span>
-            )}
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white">{face.name}</h1>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(20,24,36,0.80) 0%, rgba(20,24,36,0.35) 50%, transparent 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 10,
+              textAlign: 'center',
+            }}
+          >
+            <FaceBadge face={face} size={56} radius={15} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: 0 }}>
+                {getFaceTitle(face)}
+              </h1>
               {face.isPrivate && (
-                <span className="rounded-full bg-black/40 px-2 py-0.5 text-xs text-white/80">
+                <span
+                  style={{
+                    padding: '2px 8px',
+                    borderRadius: 999,
+                    background: 'rgba(0,0,0,0.4)',
+                    fontSize: 11,
+                    color: 'rgba(255,255,255,0.8)',
+                  }}
+                >
                   {t('private')}
                 </span>
               )}
             </div>
             {face.description && (
-              <p className="max-w-xs text-sm text-white/80">{face.description}</p>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', maxWidth: 320, margin: 0 }}>
+                {face.description}
+              </p>
             )}
             {!isOwner && (
               <button
                 type="button"
-                onClick={handleSubscribe}
-                className={cn(
-                  'mt-1 rounded-full px-6 py-2 text-sm font-semibold transition-colors',
-                  subscribed
-                    ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
-                    : 'bg-violet-600 text-white hover:bg-violet-500'
-                )}
+                onClick={() => setSubscribed((prev) => !prev)}
+                style={{
+                  marginTop: 4,
+                  padding: '8px 24px',
+                  borderRadius: 999,
+                  background: subscribed ? 'rgba(255,255,255,0.15)' : 'var(--mf-accent)',
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                {subscribed ? '✓ サブスク中' : 'サブスクする'}
+                {subscribed ? t('subscribed') : t('subscribe')}
               </button>
             )}
           </div>
         </div>
       ) : (
-        /* カバー画像なし: 従来どおり */
-        <div className="flex flex-col gap-4 px-4 py-6">
-          <div className="flex flex-col items-center gap-2 text-center">
-            {face.emoji && (
-              <span className="text-5xl leading-none" aria-hidden="true">
-                {face.emoji}
+        /* カバー画像なし — face color グラデーションヒーロー */
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 12,
+            padding: '28px 24px 20px',
+            textAlign: 'center',
+            background: `linear-gradient(180deg, ${getFaceColor(face.id)}1A 0%, transparent 100%)`,
+          }}
+        >
+          <FaceBadge face={face} size={56} radius={15} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h1
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: 'var(--mf-brand)',
+                margin: 0,
+              }}
+            >
+              {getFaceTitle(face)}
+            </h1>
+            {face.isPrivate && (
+              <span
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: 999,
+                  background: 'var(--mf-surface-tint)',
+                  fontSize: 11,
+                  color: 'var(--mf-text-muted)',
+                }}
+              >
+                {t('private')}
               </span>
             )}
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-zinc-100">{face.name}</h1>
-              {face.isPrivate && (
-                <span className="rounded-full bg-zinc-700 px-2 py-0.5 text-xs text-zinc-400">
-                  {t('private')}
-                </span>
-              )}
-            </div>
-            {face.description && (
-              <p className="max-w-xs text-sm text-zinc-400">{face.description}</p>
-            )}
           </div>
+          {face.description && (
+            <p
+              style={{
+                fontSize: 13,
+                lineHeight: 1.7,
+                color: 'var(--mf-text-sub)',
+                maxWidth: 320,
+                margin: 0,
+              }}
+            >
+              {face.description}
+            </p>
+          )}
           {!isOwner && (
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={handleSubscribe}
-                className={cn(
-                  'rounded-full px-6 py-2 text-sm font-semibold transition-colors',
-                  subscribed
-                    ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
-                    : 'bg-violet-600 text-white hover:bg-violet-500'
-                )}
-              >
-                {subscribed ? t('subscribed') : t('subscribe')}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setSubscribed((prev) => !prev)}
+              style={{
+                padding: '8px 24px',
+                borderRadius: 999,
+                background: subscribed ? 'var(--mf-surface-tint)' : 'var(--mf-accent)',
+                color: subscribed ? 'var(--mf-text-sub)' : '#fff',
+                fontSize: 13,
+                fontWeight: 700,
+                border: subscribed ? '1px solid var(--mf-line)' : 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {subscribed ? t('subscribed') : t('subscribe')}
+            </button>
           )}
         </div>
       )}
+
+      {/* 統計行 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 24,
+          padding: '12px 24px',
+          borderBottom: '0.5px solid var(--mf-line)',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)' }}>
+            {totalSeeds}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
+            {tHeader('seeds')}
+          </div>
+        </div>
+        <div style={{ width: 0.5, height: 28, background: 'var(--mf-line)' }} />
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)' }}>
+            {monthlySeeds}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
+            {tHeader('monthly')}
+          </div>
+        </div>
+        {!isOwner && (
+          <>
+            <div style={{ width: 0.5, height: 28, background: 'var(--mf-line)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)' }}>
+                {subscriberCount}
+              </div>
+              <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
+                {tHeader('subscribers')}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ソートピル */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '10px 16px',
+          borderBottom: '0.5px solid var(--mf-line)',
+          overflowX: 'auto',
+        }}
+        className="mf-scroll"
+      >
+        {SORT_OPTIONS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handleSort(key)}
+            style={{
+              padding: '5px 14px',
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: sort === key ? 700 : 400,
+              background: sort === key ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+              color: sort === key ? '#fff' : 'var(--mf-text-sub)',
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

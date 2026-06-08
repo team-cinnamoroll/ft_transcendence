@@ -1,42 +1,49 @@
+import { getFaceColor } from '@/lib/display';
 import { cn } from '@/lib/utils';
 
 type FaceChipProps = {
   title: string;
   faceId: string;
+  size?: 'sm' | 'md';
   className?: string;
 };
 
-/**
- * フェイス ID の末尾数字をインデックスとしてカラーパレットから色を決定する。
- * 固定の色パレットを使うのでフェイスごとに一貫した色が付く。
- */
-const COLOR_PALETTE = [
-  'bg-violet-900/60 text-violet-300',
-  'bg-sky-900/60 text-sky-300',
-  'bg-emerald-900/60 text-emerald-300',
-  'bg-amber-900/60 text-amber-300',
-  'bg-rose-900/60 text-rose-300',
-  'bg-pink-900/60 text-pink-300',
-  'bg-teal-900/60 text-teal-300',
-  'bg-orange-900/60 text-orange-300',
-];
+const FaceChip = ({
+  title,
+  faceId,
+  size = 'sm',
+  className,
+}: FaceChipProps) => {
+  const color = getFaceColor(faceId);
+  const dotSize = size === 'sm' ? 5 : 6;
+  const fontSize = size === 'sm' ? 11 : 12;
+  const padding = size === 'sm' ? '2px 8px 2px 7px' : '3px 10px 3px 9px';
 
-const getColorClass = (faceId: string): string => {
-  // id 末尾の数字全部を合算して index を決める
-  const digits = faceId.replace(/\D/g, '');
-  const sum = digits.split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
-  return COLOR_PALETTE[sum % COLOR_PALETTE.length];
-};
-
-const FaceChip = ({ title, faceId, className }: FaceChipProps) => {
   return (
     <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        getColorClass(faceId),
-        className
-      )}
+      className={cn('inline-flex items-center whitespace-nowrap', className)}
+      style={{
+        gap: 5,
+        padding,
+        background: `${color}20`,
+        borderRadius: 999,
+        fontFamily: 'var(--mf-font-sans)',
+        fontSize,
+        fontWeight: 600,
+        color,
+        letterSpacing: 0.1,
+      }}
     >
+      <span
+        style={{
+          width: dotSize,
+          height: dotSize,
+          borderRadius: '50%',
+          background: color,
+          flexShrink: 0,
+          display: 'inline-block',
+        }}
+      />
       {title}
     </span>
   );

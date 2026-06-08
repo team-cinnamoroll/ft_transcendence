@@ -1,21 +1,16 @@
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
 import '../globals.css';
 import BottomNav from '@/components/ui/BottomNav';
 import SideNav from '@/components/ui/SideNav';
-import TopBar from '@/components/ui/TopBar';
-import DetailPanel from '@/components/ui/DetailPanel';
+import AppHeader from '@/components/ui/AppHeader';
+import ContextRail from '@/components/ui/ContextRail';
+import MobileComposeBar from '@/components/ui/MobileComposeBar';
 import { DetailPanelProvider } from '@/lib/detail-panel-context';
-import { getViewerContext } from '@/server/usecases/viewer';
+import { getLayoutData } from '@/server/usecases/layout';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
 
 export async function generateMetadata({
   params,
@@ -43,30 +38,49 @@ export default async function RootLayout({
     notFound();
   }
 
-  const [{ myFaces }, messages] = await Promise.all([getViewerContext(), getMessages()]);
+  const [layoutData, messages] = await Promise.all([getLayoutData(), getMessages()]);
+  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
+    layoutData;
 
   return (
-    <html
-      lang={locale}
-      className={`${geistSans.variable} h-full antialiased dark scroll-smooth`}
-      data-scroll-behavior="smooth"
-    >
-      <body className="min-h-full bg-zinc-950 text-zinc-100">
+    <html lang={locale} className="h-full scroll-smooth" style={{ background: 'var(--mf-bg-light)' }}>
+      <body className="min-h-full" style={{ background: 'var(--mf-bg-light)', color: 'var(--mf-text)' }}>
         <NextIntlClientProvider messages={messages}>
           <DetailPanelProvider>
-            <div className="flex h-screen w-full overflow-hidden">
-              <SideNav faces={myFaces} />
+            <div className="flex h-screen w-full overflow-hidden" style={{ background: 'var(--mf-bg-light)' }}>
+              <SideNav
+                faces={myFaces}
+                user={currentUser}
+                seeds={mySeeds}
+                faceCount={myFaces.length}
+                seedCount={mySeeds.length}
+              />
               <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-                <TopBar />
+                <AppHeader
+                  user={currentUser}
+                  faceCount={myFaces.length}
+                  seedCount={mySeeds.length}
+                />
                 <div className="flex flex-1 min-h-0 overflow-hidden">
-                  <main className="flex-1 min-w-0 overflow-y-auto border-r border-zinc-800 pb-16 md:pb-0">
+                  <main
+                    className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0"
+                    style={{ borderRight: '0.5px solid var(--mf-line)' }}
+                  >
                     {children}
                   </main>
-                  <DetailPanel />
+                  <ContextRail
+                    user={currentUser}
+                    faces={myFaces}
+                    seeds={mySeeds}
+                    subscribedFaces={subscribedFaces}
+                    latestSeedByFaceId={latestSeedByFaceId}
+                    users={allUsers}
+                  />
                 </div>
               </div>
             </div>
             <BottomNav className="md:hidden" />
+            <MobileComposeBar defaultFace={myFaces[0]} />
           </DetailPanelProvider>
         </NextIntlClientProvider>
       </body>

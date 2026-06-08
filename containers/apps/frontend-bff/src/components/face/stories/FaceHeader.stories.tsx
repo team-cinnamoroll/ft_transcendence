@@ -20,7 +20,7 @@ export const Default: Story = {
 };
 
 export const AsOwner: Story = {
-  args: { face, isOwner: true },
+  args: { face, isOwner: true, onSortChange: (_s) => {} },
 };
 
 export const WithImage: Story = {

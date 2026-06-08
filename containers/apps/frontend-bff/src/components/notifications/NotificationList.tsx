@@ -1,155 +1,278 @@
 'use client';
 
-import Avatar from '@/components/ui/Avatar';
-import type { Activity } from '@/types/activity';
+import { useState, useMemo } from 'react';
+import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
 import { type UserProfile } from '@/types/user-profile';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
-import { cn } from '@/lib/utils';
-import { useDetailPanel } from '@/lib/detail-panel-context';
 import { useTranslations } from 'next-intl';
+import FaceBadge from '@/components/ui/FaceBadge';
+import DateBar from '@/components/ui/DateBar';
 
-// ─── 通知アイテム ──────────────────────────────────────────────
+type FilterType = 'all' | 'sub' | 'link';
 
-type NotificationItemProps = {
+const UNREAD_CUTOFF = '2026-03-25';
+
+type NotifItemProps = {
   notification: Notification;
-  fromUser: UserProfile;
-  detail: string;
-  /** リンク通知の場合のアクティビティ本文スニペット（任意） */
-  activitySnippet?: string;
-  /** リンク通知の場合の紐づくアクティビティID */
-  activityId?: string;
+  faceName?: string;
+  faceId?: string;
+  faceImageUrl?: string | null;
+  preview: string;
+  typeLinkLabel: string;
+  typeUpdateLabel: string;
 };
 
-const NotificationItem = ({
+const NotifItem = ({
   notification,
-  fromUser,
-  detail,
-  activitySnippet,
-  activityId,
-}: NotificationItemProps) => {
-  const { openActivity, state } = useDetailPanel();
-  const t = useTranslations('notificationList');
+  faceName,
+  faceId,
+  faceImageUrl,
+  preview,
+  typeLinkLabel,
+  typeUpdateLabel,
+}: NotifItemProps) => {
   const relativeTime = useRelativeTime();
+  const isUnread = notification.createdAt >= UNREAD_CUTOFF;
   const isLink = notification.type === 'link';
 
-  const isSelected =
-    state.type === 'activity' && activityId !== undefined && state.activityId === activityId;
+  const typeMeta = isLink
+    ? { label: typeLinkLabel, bg: 'rgba(30,42,74,0.10)', color: 'var(--mf-brand)' }
+    : { label: typeUpdateLabel, bg: 'rgba(212,146,42,0.10)', color: 'var(--mf-accent)' };
 
-  const handleClick = () => {
-    if (activityId) openActivity(activityId);
-  };
+  const mockFace = faceId
+    ? { id: faceId, name: faceName ?? '', userId: '', isPrivate: false, imageUrl: faceImageUrl ?? undefined }
+    : null;
 
   return (
-    <li
-      onClick={handleClick}
-      className={cn(
-        'flex gap-3 rounded-2xl bg-zinc-800/60 p-4 transition',
-        activityId && 'md:cursor-pointer hover:bg-zinc-800',
-        isSelected && 'ring-1 ring-violet-500/40 bg-zinc-800'
-      )}
+    <div
+      style={{
+        padding: '12px 18px',
+        background: isUnread ? 'rgba(212,146,42,0.05)' : 'transparent',
+        borderBottom: '0.5px solid var(--mf-line-soft)',
+        display: 'flex',
+        gap: 12,
+        alignItems: 'flex-start',
+        position: 'relative',
+      }}
     >
-      {/* アバター */}
-      <div className="shrink-0">
-        <Avatar src={fromUser.avatarUrl} alt={fromUser.name} size="md" />
-      </div>
+      {isUnread && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 6,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            background: 'var(--mf-accent)',
+          }}
+        />
+      )}
+
+      {/* フェイスバッジ */}
+      {mockFace ? (
+        <div style={{ flexShrink: 0 }}>
+          <FaceBadge face={mockFace} size={38} radius={11} />
+        </div>
+      ) : (
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 11,
+            background: 'var(--mf-surface-tint)',
+            border: '1px dashed var(--mf-line)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <svg width={14} height={14} viewBox="0 0 20 20" fill="none" stroke="var(--mf-text-muted)" strokeWidth={1.6} strokeLinecap="round">
+            <path d="M5 5l10 10M15 5L5 15" />
+          </svg>
+        </div>
+      )}
 
       {/* 本文 */}
-      <div className="flex flex-1 flex-col gap-1.5 overflow-hidden">
-        {/* アクション行 */}
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm text-zinc-200 leading-snug">
-            <span className="font-semibold text-zinc-100">{fromUser.name}</span>
-            {t('actionConnector')}
-            <span className="text-violet-400">{detail}</span>
-          </p>
-          <span className="shrink-0 text-xs text-zinc-500" suppressHydrationWarning>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            marginBottom: 4,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 7px',
+              borderRadius: 4,
+              background: typeMeta.bg,
+              color: typeMeta.color,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 0.4,
+              flexShrink: 0,
+            }}
+          >
+            {typeMeta.label}
+          </div>
+          {faceName && (
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {faceName}
+            </span>
+          )}
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
             {relativeTime(notification.createdAt)}
           </span>
         </div>
 
-        {/* リンク通知: アクティビティ本文スニペット */}
-        {isLink && activitySnippet && (
-          <blockquote className="rounded-lg border-l-2 border-violet-500/60 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400 line-clamp-2">
-            {activitySnippet}
-          </blockquote>
-        )}
-
-        {/* 通知種別バッジ */}
-        <span className="self-start rounded-full bg-zinc-700/60 px-2 py-0.5 text-xs text-zinc-400">
-          {isLink ? t('linkedBadge') : t('subscribedBadge')}
-        </span>
+        <div
+          style={{
+            fontSize: 12.5,
+            lineHeight: 1.6,
+            color: 'var(--mf-ink)',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}
+        >
+          {preview}
+        </div>
       </div>
-    </li>
+    </div>
   );
 };
 
-// ─── NotificationList ──────────────────────────────────────────
-
-/**
- * 通知一覧コンポーネント（Client Component）。
- * notificationRepository から全通知を取得し、時系列降順で表示する。
- * リンク通知のアイテムをクリックすると DetailPanel に紐づくアクティビティを表示する。
- */
 type Props = {
   notifications: Notification[];
   users: UserProfile[];
   faces: Face[];
-  activities: Activity[];
+  seeds: Seed[];
 };
 
-const NotificationList = ({ notifications, users, faces, activities }: Props) => {
-  const userMap = createLookupMap(users, (user) => user.id);
-  const faceMap = createLookupMap(faces, (face) => face.id);
-  const activityMap = createLookupMap(activities, (activity) => activity.id);
+const NotificationList = ({ notifications, faces, seeds }: Props) => {
+  const [filter, setFilter] = useState<FilterType>('all');
   const t = useTranslations('notificationList');
 
-  if (notifications.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-4xl">🔔</p>
-        <p className="text-sm text-zinc-400">{t('noNotifications')}</p>
-      </div>
-    );
-  }
+  const faceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
+  const seedMap = useMemo(() => createLookupMap(seeds, (seed) => seed.id), [seeds]);
+
+  const FILTER_LABELS: { key: FilterType; label: string }[] = [
+    { key: 'all', label: t('filterAll') },
+    { key: 'sub', label: t('filterSub') },
+    { key: 'link', label: t('filterLink') },
+  ];
+
+  const filtered = useMemo(
+    () =>
+      notifications.filter((n) => {
+        if (filter === 'sub') return n.type === 'subscribe';
+        if (filter === 'link') return n.type === 'link';
+        return true;
+      }),
+    [notifications, filter]
+  );
+
+  // 日付でグループ化
+  const grouped = useMemo(() => {
+    const groups: { dateKey: string; items: Notification[] }[] = [];
+    let lastKey = '';
+    for (const n of filtered) {
+      const dateKey = n.createdAt.slice(0, 10);
+      if (dateKey !== lastKey) {
+        groups.push({ dateKey, items: [n] });
+        lastKey = dateKey;
+      } else {
+        groups[groups.length - 1].items.push(n);
+      }
+    }
+    return groups;
+  }, [filtered]);
 
   return (
-    <ul className="flex flex-col gap-3">
-      {notifications.map((notification) => {
-        const fromUser = userMap.get(notification.fromUserId);
-        if (!fromUser) return null;
+    <div>
+      {/* フィルターピル */}
+      <div style={{ padding: '14px 18px 10px', display: 'flex', gap: 6, borderBottom: '0.5px solid var(--mf-line-soft)' }}>
+        {FILTER_LABELS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilter(key)}
+            style={{
+              padding: '5px 11px',
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: filter === key ? 'var(--mf-brand)' : 'transparent',
+              color: filter === key ? '#fff' : 'var(--mf-text-sub)',
+              border: filter === key ? 'none' : '1px solid var(--mf-line)',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-        if (notification.type === 'link') {
-          const activity = activityMap.get(notification.activityId);
-          const detail = t('linkedAction');
-          return (
-            <NotificationItem
-              key={notification.id}
-              notification={notification}
-              fromUser={fromUser}
-              detail={detail}
-              activitySnippet={activity?.body}
-              activityId={notification.activityId}
+      {filtered.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '80px 0', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noNotificationsFiltered')}</p>
+        </div>
+      ) : (
+        grouped.map(({ dateKey, items }) => (
+          <div key={dateKey}>
+            <DateBar
+              label={dateKey >= '2026-03-30' ? t('today') : t('earlier')}
+              date={dateKey.replace(/-/g, '/')}
             />
-          );
-        }
+            {items.map((notification) => {
+              if (notification.type === 'link') {
+                const seed = seedMap.get(notification.seedId);
+                const linkedFace = seed ? faceMap.get(seed.faceId) : undefined;
+                return (
+                  <NotifItem
+                    key={notification.id}
+                    notification={notification}
+                    faceName={linkedFace ? getFaceTitle(linkedFace) : undefined}
+                    faceId={linkedFace?.id}
+                    faceImageUrl={linkedFace?.imageUrl}
+                    preview={seed?.body ?? t('linkedPreview')}
+                    typeLinkLabel={t('typeLinkLabel')}
+                    typeUpdateLabel={t('typeUpdateLabel')}
+                  />
+                );
+              }
 
-        // subscribe
-        const face = faceMap.get(notification.faceId);
-        const faceName = face ? getFaceTitle(face) : notification.faceId;
-        const detail = t('subscribedAction', { faceName });
-        return (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            fromUser={fromUser}
-            detail={detail}
-          />
-        );
-      })}
-    </ul>
+              const face = faceMap.get(notification.faceId);
+              return (
+                <NotifItem
+                  key={notification.id}
+                  notification={notification}
+                  faceName={face ? getFaceTitle(face) : undefined}
+                  faceId={face?.id}
+                  faceImageUrl={face?.imageUrl}
+                  preview={face ? t('updatedPreview', { faceName: getFaceTitle(face) }) : t('noNotifications')}
+                  typeLinkLabel={t('typeLinkLabel')}
+                  typeUpdateLabel={t('typeUpdateLabel')}
+                />
+              );
+            })}
+          </div>
+        ))
+      )}
+    </div>
   );
 };
 

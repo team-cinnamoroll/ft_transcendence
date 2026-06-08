@@ -5,15 +5,16 @@
   },
   "nav": {
     "home": "ホーム",
-    "faces": "フェイス",
-    "subscriptions": "サブスク",
+    "faces": "振り返り",
+    "subscriptions": "収集",
     "notifications": "通知",
     "search": "検索",
     "faceDetail": "フェイス詳細"
   },
   "sideNav": {
-    "facesSection": "フェイス",
-    "createFace": "新規フェイス作成"
+    "facesSection": "マイフェイス",
+    "createFace": "新規フェイス作成",
+    "newSeed": "新しいシードを書く"
   },
   "topBar": {
     "post": "投稿する"
@@ -21,16 +22,25 @@
   "postModal": {
     "title": "投稿する",
     "ariaLabel": "投稿",
+    "cancel": "キャンセル",
     "close": "閉じる",
     "faceLabel": "フェイス",
+    "selectFace": "フェイスを選択",
+    "writeToThisFace": "このフェイスに書く",
+    "visibilityPublic": "公開",
+    "visibilityPrivate": "非公開",
     "loading": "読み込み中…",
     "noFaces": "フェイスがありません",
     "contentLabel": "内容",
     "textareaPlaceholder": "気軽に書き留めてみましょう…",
     "addPhoto": "写真を追加",
+    "addPhotoAriaLabel": "画像を添付",
+    "addLink": "リンクを追加",
+    "charCount": "{n} 文字",
+    "draftSaved": "下書き保存済",
     "attachedImageAlt": "添付画像{n}",
     "removeImageAriaLabel": "画像{n}を削除",
-    "submit": "投稿する",
+    "submit": "投稿",
     "submitting": "投稿中..."
   },
   "createFaceModal": {
@@ -63,19 +73,19 @@
     "close": "閉じる",
     "loading": "読み込み中…",
     "notFound": "フェイスが見つかりませんでした",
-    "activitiesHeading": "このフェイスのアクティビティ",
-    "noActivities": "まだアクティビティがありません"
+    "seedsHeading": "このフェイスのシード",
+    "noSeeds": "まだシードがありません"
   },
-  "activityDetail": {
-    "title": "アクティビティ詳細",
+  "seedDetailPanel": {
+    "title": "シード詳細",
     "close": "閉じる",
     "loading": "読み込み中…",
-    "notFound": "アクティビティが見つかりませんでした",
+    "notFound": "シードが見つかりませんでした",
     "unknownFace": "不明なフェイス",
     "imageAlt": "画像 {n}",
     "viewFace": "→ このフェイスを見る"
   },
-  "activityCard": {
+  "seedCard": {
     "showMore": "もっと見る",
     "collapse": "折りたたむ",
     "imageAlt": "画像 {n}"
@@ -87,22 +97,54 @@
     "title": "フェイス",
     "createNew": "新規作成",
     "noFaces": "フェイスがありません",
-    "private": "非公開"
+    "private": "非公開",
+    "searchPlaceholder": "自分のフェイス・シードを検索",
+    "facesSection": "フェイス ({n})",
+    "seedsSection": "シード ({n})",
+    "noMatch": "該当なし",
+    "noFilteredFaces": "「{query}」に一致するフェイスが見つかりません",
+    "sortLastAt": "最終投稿日順",
+    "sortTotal": "シード数順",
+    "sortName": "名前順",
+    "gridView": "グリッド表示",
+    "listView": "リスト表示",
+    "seedCount": "シード",
+    "createFirstFace": "最初のフェイスを作る",
+    "createNewCard": "新しいフェイスを作る"
   },
-  "faceActivityFeed": {
-    "noActivities": "アクティビティがありません"
+  "faceSeedFeed": {
+    "noSeeds": "シードがありません",
+    "noImageSeeds": "画像付きのシードがありません"
   },
-  "activityFeed": {
-    "noActivities": "アクティビティがありません"
+  "faceHeader": {
+    "newest": "新しい順",
+    "oldest": "古い順",
+    "images": "画像あり",
+    "seeds": "シード",
+    "monthly": "今月",
+    "subscribers": "サブスク"
+  },
+  "seedFeed": {
+    "noSeeds": "シードがありません"
+  },
+  "homeClient": {
+    "write": "書く",
+    "onThisDay": "一年前の今日",
+    "yearsAgo": "{n}年前",
+    "reply": "今のあなたは、何と返しますか",
+    "recentSeeds": "最近のシード",
+    "viewAll": "すべて見る",
+    "compose": "今、何を書く？",
+    "post": "投稿"
   },
   "homeProfile": {
     "faces": "フェイス",
-    "activities": "アクティビティ"
+    "seeds": "シード"
   },
   "faceFilterBar": {
     "all": "すべて"
   },
-  "activityTileCalendar": {
+  "seedTileCalendar": {
     "title": "振り返り",
     "weekAriaLabel": "{date} の週",
     "dayCount": "{count}件",
@@ -113,7 +155,18 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "まだサブスクしているフェイスがありません",
-    "searchLink": "検索してフェイスを探す"
+    "searchLink": "検索してフェイスを探す",
+    "timelineTab": "タイムライン",
+    "subscriptionsTab": "サブスク一覧",
+    "filterPlaceholder": "他人のフェイス・シードを検索",
+    "filterByFace": "フェイスで絞り込み",
+    "facesSection": "フェイス ({n})",
+    "seedsSection": "シード ({n})",
+    "noMatch": "該当なし",
+    "seedCount": "シード",
+    "noFilteredSeeds": "該当するシードがありません",
+    "viewFace": "フェイスを見る →",
+    "noSubscribedFaces": "サブスクしているフェイスがありません"
   },
   "notificationList": {
     "noNotifications": "まだ通知はありません",
@@ -121,7 +174,17 @@
     "subscribedBadge": "📥 サブスク",
     "linkedAction": "あなたの投稿をリンクしました",
     "subscribedAction": "{faceName} をサブスクライブしました",
-    "actionConnector": " さんが "
+    "actionConnector": " さんが ",
+    "filterAll": "すべて",
+    "filterSub": "サブスク",
+    "filterLink": "リンク",
+    "typeLinkLabel": "リンク",
+    "typeUpdateLabel": "更新",
+    "today": "今日",
+    "earlier": "以前",
+    "noNotificationsFiltered": "通知はありません",
+    "linkedPreview": "リンクされたシードです",
+    "updatedPreview": "{faceName} に新しいシードが投稿されました"
   },
   "searchBar": {
     "placeholder": "キーワードで検索..."
@@ -137,7 +200,7 @@
     "noResultsTitle": "「{query}」に一致する結果が見つかりませんでした",
     "noResultsHint": "別のキーワードやスコープで試してみてください",
     "facesSection": "フェイス",
-    "activitiesSection": "アクティビティ",
+    "seedsSection": "シード",
     "subscribe": "サブスクする",
     "subscribed": "サブスク中",
     "subscribeAriaLabel": "{name}をサブスクする",
@@ -154,7 +217,7 @@
   },
   "notifications": {
     "title": "通知",
-    "count": "{count} 件"
+    "count": "{count} 件の通知"
   },
   "search": {
     "title": "検索",
@@ -172,5 +235,60 @@
     "minutesAgo": "{n}分前",
     "hoursAgo": "{n}時間前",
     "daysAgo": "{n}日前"
+  },
+  "mobileComposeBar": {
+    "placeholder": "今、何を書く？",
+    "post": "投稿"
+  },
+  "accountMenu": {
+    "settings": "アカウント設定",
+    "settingsSub": "プロフィール · パスワード",
+    "otherSettings": "その他詳細設定",
+    "otherSettingsSub": "通知 · テーマ · データ",
+    "help": "ヘルプ",
+    "facesUnit": "フェイス",
+    "seedsUnit": "シード",
+    "logout": "ログアウト"
+  },
+  "appHeader": {
+    "accountMenuAriaLabel": "アカウントメニュー"
+  },
+  "seedRow": {
+    "readMore": "続きを読む",
+    "collapse": "折りたたむ",
+    "imageAlt": "画像 {n}",
+    "moreOptions": "その他",
+    "edit": "編集",
+    "linksCount": "{count} 件のリンク"
+  },
+  "seedDetail": {
+    "title": "シード",
+    "backAriaLabel": "前のページに戻る",
+    "moreOptions": "その他",
+    "public": "公開",
+    "private": "非公開",
+    "linkToThisSeed": "このシードにリンク",
+    "edit": "編集",
+    "outgoingLinks": "このシードのリンク",
+    "incomingLinks": "このシードへのリンク",
+    "linksUnit": "件",
+    "showMore": "さらに {count} 件を見る →",
+    "imageAlt": "画像 {n}"
+  },
+  "contextRail": {
+    "onThisDay": "一年前の今日",
+    "yearsAgo": "{n}年前",
+    "onThisDayPrompt": "今のあなたは、何と返しますか",
+    "aboutFaces": "フェイスについて",
+    "aboutFacesDesc": "フェイスは「あなたの多面性」のひとつ。投稿したい内容にあったフェイスで書き、後から自分のために振り返ることができます。",
+    "seedsThisMonth": "シード",
+    "thisMonth": "今月",
+    "noSeedsThisMonth": "今月はまだ記録がありません",
+    "subscribedFaces": "サブスク中",
+    "noSubscriptions": "サブスクしているフェイスがありません。",
+    "findFaces": "フェイスを探す →",
+    "popularFaces": "人気のフェイス",
+    "subscribersUnit": "サブスク",
+    "subscribeButton": "サブスク"
   }
 }
