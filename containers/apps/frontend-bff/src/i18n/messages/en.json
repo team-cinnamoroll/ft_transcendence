@@ -166,7 +166,13 @@
     "seedCount": "Seeds",
     "noFilteredSeeds": "No seeds found",
     "viewFace": "View face →",
-    "noSubscribedFaces": "No subscribed faces"
+    "noSubscribedFaces": "No subscribed faces",
+    "emptyHeadline": "You haven't subscribed to<br></br>anyone's face yet.",
+    "emptyBody": "Start by picking just one face that interests you.<br></br>This is designed to keep notifications meaningful.",
+    "recommendedTitle": "Recommended faces",
+    "recommendedSubtitle": "· Picked for you",
+    "subscriberCount": "{n} subscribers",
+    "subscribeAction": "Subscribe"
   },
   "notificationList": {
     "noNotifications": "No notifications yet",
