@@ -2,15 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import { type Seed } from '@/types/seed';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 
 type SeedTileCalendarProps = {
   seeds: Seed[];
 };
 
 const REFERENCE_DATE = new Date('2026-04-01');
-
-const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'] as const;
 
 const getColorStyle = (count: number): string => {
   if (count === 0) return 'var(--mf-surface-tint)';
@@ -40,6 +38,7 @@ const LEGEND_COUNTS = [0, 1, 2, 4, 6];
 const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
   const [selectedWeekIdx, setSelectedWeekIdx] = useState<number | null>(null);
   const t = useTranslations('seedTileCalendar');
+  const format = useFormatter();
 
   const weeks = useMemo<WeekData[]>(() => {
     const today = new Date(REFERENCE_DATE);
@@ -76,12 +75,17 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
     weeks.forEach((week, idx) => {
       const month = week.startDate.getMonth();
       if (month !== lastMonth) {
-        labels[idx] = `${month + 1}月`;
+        labels[idx] = format.dateTime(week.startDate, { month: 'short' });
         lastMonth = month;
       }
     });
     return labels;
-  }, [weeks]);
+  }, [weeks, format]);
+
+  const weekdayLabels = useMemo(() => {
+    if (weeks.length === 0) return [];
+    return weeks[0].days.map((d) => format.dateTime(d.date, { weekday: 'short' }));
+  }, [weeks, format]);
 
   const selectedWeekSeeds = useMemo<Seed[]>(() => {
     if (selectedWeekIdx === null) return [];
@@ -138,10 +142,16 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
 
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
           <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0, gap: 2 }}>
-            {DAY_LABELS.map((label, i) => (
+            {weekdayLabels.map((label, i) => (
               <div
                 key={i}
-                style={{ width: 18, height: 11, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
+                style={{
+                  width: 18,
+                  height: 11,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                }}
               >
                 {(i === 1 || i === 3 || i === 5) && (
                   <span style={{ fontSize: 9, lineHeight: 1, color: 'var(--mf-text-muted)' }}>
@@ -194,15 +204,27 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 8 }}>
-          <span style={{ fontSize: 9, color: 'var(--mf-text-muted)', marginRight: 2 }}>{t('few')}</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 3,
+            marginTop: 8,
+          }}
+        >
+          <span style={{ fontSize: 9, color: 'var(--mf-text-muted)', marginRight: 2 }}>
+            {t('few')}
+          </span>
           {LEGEND_COUNTS.map((count, i) => (
             <div
               key={i}
               style={{ width: 11, height: 11, borderRadius: 2, background: getColorStyle(count) }}
             />
           ))}
-          <span style={{ fontSize: 9, color: 'var(--mf-text-muted)', marginLeft: 2 }}>{t('many')}</span>
+          <span style={{ fontSize: 9, color: 'var(--mf-text-muted)', marginLeft: 2 }}>
+            {t('many')}
+          </span>
         </div>
       </div>
 
@@ -229,7 +251,16 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
               {t('noRecord')}
             </p>
           ) : (
-            <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'none', padding: 0, margin: 0 }}>
+            <ul
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+              }}
+            >
               {selectedWeekSeeds.map((seed) => (
                 <li
                   key={seed.id}
