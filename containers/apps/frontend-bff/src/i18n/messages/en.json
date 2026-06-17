@@ -171,7 +171,7 @@
     "emptyBody": "Start by picking just one face that interests you.<br></br>This is designed to keep notifications meaningful.",
     "recommendedTitle": "Recommended faces",
     "recommendedSubtitle": "· Picked for you",
-    "subscriberCount": "{n} subscribers",
+    "subscriberCount": "{n, plural, one {# subscriber} other {# subscribers}}",
     "subscribeAction": "Subscribe"
   },
   "notificationList": {

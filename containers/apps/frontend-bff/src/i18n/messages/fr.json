@@ -171,7 +171,7 @@
     "emptyBody": "Commencez par choisir un seul visage qui vous intéresse.<br></br>Conçu pour préserver le sens des notifications.",
     "recommendedTitle": "Visages recommandés",
     "recommendedSubtitle": "· Choisis pour vous",
-    "subscriberCount": "{n} abonnés",
+    "subscriberCount": "{n, plural, one {# abonné} other {# abonnés}}",
     "subscribeAction": "S'abonner"
   },
   "notificationList": {
