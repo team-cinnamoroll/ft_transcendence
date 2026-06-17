@@ -166,7 +166,13 @@
     "seedCount": "Graines",
     "noFilteredSeeds": "Aucune graine trouvée",
     "viewFace": "Voir la facette →",
-    "noSubscribedFaces": "Aucune facette abonnée"
+    "noSubscribedFaces": "Aucune facette abonnée",
+    "emptyHeadline": "Vous n'êtes encore abonné<br></br>à aucun visage.",
+    "emptyBody": "Commencez par choisir un seul visage qui vous intéresse.<br></br>Conçu pour préserver le sens des notifications.",
+    "recommendedTitle": "Visages recommandés",
+    "recommendedSubtitle": "· Choisis pour vous",
+    "subscriberCount": "{n, plural, one {# abonné} other {# abonnés}}",
+    "subscribeAction": "S'abonner"
   },
   "notificationList": {
     "noNotifications": "Aucune notification pour l'instant",
