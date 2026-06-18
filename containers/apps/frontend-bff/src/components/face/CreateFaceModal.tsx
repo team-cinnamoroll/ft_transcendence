@@ -5,6 +5,8 @@ import type { Face } from '@/types/face';
 import { createFaceAction } from '@/server/actions/faces';
 import { useTranslations } from 'next-intl';
 
+type FieldErrors = Record<string, string[]>;
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +19,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
   const t = useTranslations('createFaceModal');
 
   const isValid = name.trim().length > 0;
@@ -25,13 +28,18 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
     if (!isValid || isPending) return;
 
     startTransition(async () => {
-      const newFace: Face = await createFaceAction({
+      const result = await createFaceAction({
         name: name.trim(),
         emoji: emoji.trim() || undefined,
         description: description.trim() || undefined,
         isPrivate,
       });
-      onCreate(newFace);
+      if (!result.success) {
+        setFieldErrors(result.errors);
+        return;
+      }
+      setFieldErrors(null);
+      onCreate(result.data);
       handleClose();
     });
   };
@@ -41,6 +49,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
     setEmoji('');
     setDescription('');
     setIsPrivate(false);
+    setFieldErrors(null);
     onClose();
   };
 
@@ -136,6 +145,11 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               placeholder={t('nameExample')}
               style={inputStyle}
             />
+            {fieldErrors?.name?.map((msg) => (
+              <span key={msg} style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}>
+                {msg}
+              </span>
+            ))}
           </div>
 
           {/* 絵文字（任意） */}
