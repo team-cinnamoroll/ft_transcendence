@@ -36,7 +36,7 @@
     "addPhoto": "Ajouter une photo",
     "addPhotoAriaLabel": "Joindre une image",
     "addLink": "Ajouter un lien",
-    "charCount": "{n} car.",
+    "charCount": "{n, plural, one {# car.} other {# car.}}",
     "draftSaved": "Brouillon sauvegardé",
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
@@ -130,7 +130,7 @@
   "homeClient": {
     "write": "Écrire",
     "onThisDay": "Il y a un an",
-    "yearsAgo": "il y a {n} an(s)",
+    "yearsAgo": "{n, plural, one {il y a # an} other {il y a # ans}}",
     "reply": "Que répondriez-vous à votre passé ?",
     "recentSeeds": "Graines récentes",
     "viewAll": "Tout voir",
@@ -223,7 +223,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count} notifications"
+    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Recherche",
@@ -231,7 +231,7 @@
   },
   "subscriptions": {
     "title": "Abonnements",
-    "subscribedCount": "{count} facette(s) suivie(s)"
+    "subscribedCount": "{count, plural, one {# facette suivie} other {# facettes suivies}}"
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour à la liste des facettes"
@@ -265,7 +265,7 @@
     "imageAlt": "Image {n}",
     "moreOptions": "Plus d'options",
     "edit": "Modifier",
-    "linksCount": "{count} lien(s)"
+    "linksCount": "{count, plural, one {# lien} other {# liens}}"
   },
   "seedDetail": {
     "title": "Seed",
@@ -283,7 +283,7 @@
   },
   "contextRail": {
     "onThisDay": "Ce jour il y a un an",
-    "yearsAgo": "Il y a {n} an(s)",
+    "yearsAgo": "{n, plural, one {il y a # an} other {il y a # ans}}",
     "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
     "aboutFaces": "À propos des facettes",
     "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",

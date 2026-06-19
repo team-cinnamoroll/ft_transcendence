@@ -36,7 +36,7 @@
     "addPhoto": "Add photo",
     "addPhotoAriaLabel": "Attach image",
     "addLink": "Add link",
-    "charCount": "{n} chars",
+    "charCount": "{n, plural, one {# char} other {# chars}}",
     "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
@@ -130,7 +130,7 @@
   "homeClient": {
     "write": "Write",
     "onThisDay": "On this day",
-    "yearsAgo": "{n} year(s) ago",
+    "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "reply": "What would you say to your past self?",
     "recentSeeds": "Recent seeds",
     "viewAll": "View all",
@@ -223,7 +223,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count} notifications"
+    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Search",
@@ -231,7 +231,7 @@
   },
   "subscriptions": {
     "title": "Subscriptions",
-    "subscribedCount": "{count} faces subscribed"
+    "subscribedCount": "{count, plural, one {# face subscribed} other {# faces subscribed}}"
   },
   "faceDetailPage": {
     "backAriaLabel": "Back to faces list"
@@ -265,7 +265,7 @@
     "imageAlt": "Image {n}",
     "moreOptions": "More options",
     "edit": "Edit",
-    "linksCount": "{count} links"
+    "linksCount": "{count, plural, one {# link} other {# links}}"
   },
   "seedDetail": {
     "title": "Seed",
@@ -283,7 +283,7 @@
   },
   "contextRail": {
     "onThisDay": "On This Day",
-    "yearsAgo": "{n} year(s) ago",
+    "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "onThisDayPrompt": "What would you say today?",
     "aboutFaces": "About Faces",
     "aboutFacesDesc": "A Face is one facet of who you are. Write with the face that fits what you want to express, and reflect on it later.",
