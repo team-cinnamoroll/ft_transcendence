@@ -60,6 +60,23 @@
     "submit": "Créer",
     "submitting": "Création…"
   },
+  "editFaceModal": {
+    "title": "Modifier la facette",
+    "ariaLabel": "Modifier la facette",
+    "close": "Fermer",
+    "name": "Nom",
+    "required": "*",
+    "nameExample": "ex : Lecture",
+    "emoji": "Emoji",
+    "optional": "(facultatif)",
+    "emojiExample": "ex : 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez cette facette",
+    "privateLabel": "Privé",
+    "privateDescription": "Seul vous pouvez voir cette facette",
+    "submit": "Enregistrer",
+    "submitting": "Enregistrement…"
+  },
   "face": {
     "private": "Privé",
     "subscribe": "S'abonner",
@@ -110,7 +127,14 @@
     "listView": "Vue liste",
     "seedCount": "Graines",
     "createFirstFace": "Créer votre première facette",
-    "createNewCard": "Nouvelle facette"
+    "createNewCard": "Nouvelle facette",
+    "editFace": "Modifier",
+    "deleteFace": "Supprimer",
+    "deleteConfirmTitle": "Confirmer la suppression",
+    "deleteConfirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
+    "deleteCancel": "Annuler",
+    "deleteConfirmButton": "Supprimer",
+    "deleting": "Suppression…"
   },
   "faceSeedFeed": {
     "noSeeds": "Aucune graine pour l'instant",

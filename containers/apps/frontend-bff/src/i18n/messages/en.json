@@ -60,6 +60,23 @@
     "submit": "Create",
     "submitting": "Creating..."
   },
+  "editFaceModal": {
+    "title": "Edit Face",
+    "ariaLabel": "Edit Face",
+    "close": "Close",
+    "name": "Name",
+    "required": "*",
+    "nameExample": "e.g. Reading",
+    "emoji": "Emoji",
+    "optional": "(optional)",
+    "emojiExample": "e.g. 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe this face",
+    "privateLabel": "Private",
+    "privateDescription": "Only you can view this face",
+    "submit": "Save",
+    "submitting": "Saving..."
+  },
   "face": {
     "private": "Private",
     "subscribe": "Subscribe",
@@ -110,7 +127,14 @@
     "listView": "List view",
     "seedCount": "Seeds",
     "createFirstFace": "Create your first face",
-    "createNewCard": "New face"
+    "createNewCard": "New face",
+    "editFace": "Edit",
+    "deleteFace": "Delete",
+    "deleteConfirmTitle": "Confirm delete",
+    "deleteConfirmMessage": "Delete \"{name}\"? This action cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirmButton": "Delete",
+    "deleting": "Deleting..."
   },
   "faceSeedFeed": {
     "noSeeds": "No seeds yet",

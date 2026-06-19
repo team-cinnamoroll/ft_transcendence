@@ -10,8 +10,8 @@
 | ---------- | -------------------------------------------- | ----------------------------------------- | -------------------------- | ----------------------------------- |
 | **Create** | ✅ `create()`                                | ✅ `createFaceForCurrentUser()`           | ✅ `createFaceAction()`    | ✅ `CreateFaceModal`                |
 | **Read**   | ✅ `listByUserId()` `findById()` `listAll()` | ✅ `listFacesByUserId()` `findFaceById()` | ✅ `/api/detail/face/[id]` | ✅ `FacesClient` `FaceDetailClient` |
-| **Update** | ❌                                           | ❌                                        | ❌                         | ❌                                  |
-| **Delete** | ❌                                           | ❌                                        | ❌                         | ❌                                  |
+| **Update** | ✅ `update()` (#215)                         | ✅ `updateFaceForCurrentUser()` (#215)    | ✅ `updateFaceAction()` (#215) | ✅ `EditFaceModal` (#215)       |
+| **Delete** | ✅ `delete()` (#215)                         | ✅ `deleteFaceForCurrentUser()` (#215)    | ✅ `deleteFaceAction()` (#215) | ✅ `FacesClient` (#215)         |
 
 ---
 

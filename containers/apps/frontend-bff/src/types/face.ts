@@ -1,1 +1,1 @@
-export type { FaceResponse as Face, CreateFaceRequest } from '@tracen/contracts';
+export type { FaceResponse as Face, CreateFaceRequest, UpdateFaceRequest } from '@tracen/contracts';

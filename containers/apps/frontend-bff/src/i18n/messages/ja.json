@@ -60,6 +60,23 @@
     "submit": "作成する",
     "submitting": "作成中..."
   },
+  "editFaceModal": {
+    "title": "フェイスを編集",
+    "ariaLabel": "フェイスを編集",
+    "close": "閉じる",
+    "name": "名前",
+    "required": "*",
+    "nameExample": "例：読書",
+    "emoji": "絵文字",
+    "optional": "（任意）",
+    "emojiExample": "例：📚",
+    "description": "説明文",
+    "descriptionPlaceholder": "このフェイスについて説明してください",
+    "privateLabel": "非公開",
+    "privateDescription": "オンにすると自分だけが閲覧できます",
+    "submit": "保存する",
+    "submitting": "保存中..."
+  },
   "face": {
     "private": "非公開",
     "subscribe": "サブスクする",
@@ -110,7 +127,14 @@
     "listView": "リスト表示",
     "seedCount": "シード",
     "createFirstFace": "最初のフェイスを作る",
-    "createNewCard": "新しいフェイスを作る"
+    "createNewCard": "新しいフェイスを作る",
+    "editFace": "編集",
+    "deleteFace": "削除",
+    "deleteConfirmTitle": "削除の確認",
+    "deleteConfirmMessage": "「{name}」を削除しますか？この操作は元に戻せません。",
+    "deleteCancel": "キャンセル",
+    "deleteConfirmButton": "削除する",
+    "deleting": "削除中..."
   },
   "faceSeedFeed": {
     "noSeeds": "シードがありません",
