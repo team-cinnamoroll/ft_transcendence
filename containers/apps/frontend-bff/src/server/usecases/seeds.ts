@@ -3,7 +3,7 @@ import 'server-only';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { getSeedRepository } from '@/repositories/seed-repository';
+import { type CreateSeedInput, getSeedRepository } from '@/repositories/seed-repository';
 import { findFaceById } from './faces';
 import { getCurrentUser, findUserById, listAllUsers } from './users';
 
@@ -40,6 +40,11 @@ export async function listSeedsByFaceIds(faceIds: string[]): Promise<Seed[]> {
 
 export async function findSeedById(seedId: string): Promise<Seed | null> {
   return getSeedRepository().findById(seedId);
+}
+
+export async function createSeedForCurrentUser(input: CreateSeedInput): Promise<Seed> {
+  const currentUser = await getCurrentUser();
+  return getSeedRepository().create(currentUser.id, input);
 }
 
 export async function getSeedDetailData(seedId: string): Promise<SeedDetailData | null> {

@@ -19,7 +19,7 @@
 
 | CRUD       | Repository                                      | Usecase                                      | Server Action / API        | UI                                       |
 | ---------- | ----------------------------------------------- | -------------------------------------------- | -------------------------- | ---------------------------------------- |
-| **Create** | ❌                                              | ❌                                           | ❌                         | ⚠️ `PostModal`（UI のみ、Action 未接続） |
+| **Create** | ✅ `create()` (#214)                            | ✅ `createSeedForCurrentUser()` (#214)       | ✅ `createSeedAction()` (#214) | ✅ `PostModal` (#214)               |
 | **Read**   | ✅ `findById()` `listAll()` `listByFaceId()` 他 | ✅ `findSeedById()` `listSeedsByFaceId()` 他 | ✅ `/api/detail/seed/[id]` | ✅ `SeedFeed` `SeedDetailPage`           |
 | **Update** | ❌                                              | ❌                                           | ❌                         | ❌                                       |
 | **Delete** | ❌                                              | ❌                                           | ❌                         | ❌                                       |

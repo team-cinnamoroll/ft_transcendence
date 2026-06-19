@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import type { Face } from '@/types/face';
+import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
+import { createSeedAction } from '@/server/actions/seeds';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -16,10 +18,13 @@ type AttachedImage = {
   objectUrl: string;
 };
 
+type FieldErrors = Record<string, string[]>;
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   defaultFaceId?: string;
+  onCreate?: (seed: Seed) => void;
 };
 
 type ViewerApiResponse = {
@@ -29,10 +34,12 @@ type ViewerApiResponse = {
 
 const EMPTY_FACES: Face[] = [];
 
-const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
+const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const t = useTranslations('postModal');
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
   const imagesRef = useRef<AttachedImage[]>([]);
 
   useEffect(() => {
@@ -100,6 +107,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       setText('');
       setSelectedFaceId(initialSelectedFaceId);
       setShowFacePicker(false);
+      setFieldErrors(null);
     } else {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
@@ -110,6 +118,20 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       imagesRef.current.forEach((img) => URL.revokeObjectURL(img.objectUrl));
     };
   }, []);
+
+  const handleSubmit = () => {
+    if (!canPost || !selectedFaceId) return;
+    setFieldErrors(null);
+    startTransition(async () => {
+      const result = await createSeedAction({ faceId: selectedFaceId, body: text });
+      if (!result.success) {
+        setFieldErrors(result.errors);
+        return;
+      }
+      onCreate?.(result.data);
+      onClose();
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -223,23 +245,24 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           {/* 投稿ボタン */}
           <button
             type="button"
-            disabled={!canPost}
+            disabled={!canPost || isPending}
+            onClick={handleSubmit}
             style={{
               padding: '8px 18px',
               borderRadius: 999,
-              background: canPost ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
-              color: canPost ? '#fff' : 'var(--mf-text-faint)',
+              background: canPost && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
+              color: canPost && !isPending ? '#fff' : 'var(--mf-text-faint)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: 0.3,
               border: 'none',
-              cursor: canPost ? 'pointer' : 'not-allowed',
+              cursor: canPost && !isPending ? 'pointer' : 'not-allowed',
               whiteSpace: 'nowrap',
-              boxShadow: canPost ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              boxShadow: canPost && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
               transition: 'background 0.15s, box-shadow 0.15s',
             }}
           >
-            {t('submit')}
+            {isPending ? t('submitting') : t('submit')}
           </button>
         </div>
       </div>
@@ -343,6 +366,18 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
             caretColor: 'var(--mf-accent)',
           }}
         />
+
+        {/* バリデーションエラー */}
+        {fieldErrors?.body && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {fieldErrors.body[0]}
+          </p>
+        )}
+        {fieldErrors?.faceId && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {fieldErrors.faceId[0]}
+          </p>
+        )}
 
         {/* 画像プレビュー */}
         {images.length > 0 && (
