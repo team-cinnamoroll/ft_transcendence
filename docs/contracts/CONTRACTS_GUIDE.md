@@ -240,3 +240,73 @@ export type UserViewModel = UserResponse & {
   - `src/domain/auth/index.ts` / `src/domain/user/index.ts` は各契約ファイルを export
   - `src/shared/index.ts` は shared 内の定義を export
 - これにより、利用側は原則として `@tracen/contracts` から必要な型・スキーマを import できます。
+
+---
+
+## 11. frontend-bff における `@tracen/contracts` の利用ルール
+
+`frontend-bff` 内では、`@tracen/contracts` の参照方法を以下のルールで統一します。
+
+### 11.1. 型定義は `src/types/` 経由で import する
+
+`@tracen/contracts` の型（`type` キーワードで参照するもの）は、`frontend-bff/src/types/` を通じて re-export し、アプリケーションコードは `@/types/*` から import します。
+
+```
+@tracen/contracts  →  src/types/*  →  アプリケーションコード
+```
+
+### 11.2. re-export 時の命名規則
+
+`src/types/` で re-export する際は、以下のルールで型名を変換します。
+
+| 種類 | contracts での名前 | src/types/ での名前 | 規則 |
+|---|---|---|---|
+| レスポンス型 | `FaceResponse` | `Face` | `Response` サフィックスを除去 |
+| レスポンス型 | `UserResponse` | `User` | `Response` サフィックスを除去 |
+| レスポンス型 | `AuthSignUpResponse` | `AuthSignUp` | `Response` サフィックスを除去 |
+| リクエスト型 | `CreateFaceRequest` | `CreateFaceRequest` | そのまま（変更しない） |
+| リクエスト型 | `SignUpRequest` | `SignUpRequest` | そのまま（変更しない） |
+
+**理由:**
+- `Response` はサーバー・API 側の概念。フロントエンドから見れば単にドメインオブジェクトなので除去する
+- `Request` はサーバーへ送るデータであることを示す有効な情報のため、そのまま残す
+- contracts の命名規則（`XxxResponse` / `XxxRequest`）が異なるため衝突は発生しない
+
+**`src/types/` のファイル構成例:**
+
+```ts
+// src/types/face.ts
+export type { FaceResponse as Face, CreateFaceRequest } from '@tracen/contracts';
+
+// src/types/auth.ts
+export type {
+  SignUpRequest,
+  SignInRequest,
+  AuthSignUpResponse as AuthSignUp,
+  AuthSignInResponse as AuthSignIn,
+  AuthRefreshResponse as AuthRefresh,
+} from '@tracen/contracts';
+
+// src/types/user.ts
+export type { UserResponse as User } from '@tracen/contracts';
+
+// src/types/user-profile.ts
+export type { UserProfileResponse as UserProfile } from '@tracen/contracts';
+```
+
+### 11.3. Zod スキーマは `@tracen/contracts` から直接 import する
+
+Zod スキーマ（`*Schema` という変数名のランタイム値）は `src/types/` ではなく `@tracen/contracts` から直接 import します。型ではなく実行時の値であるため、`src/types/` に置くとセマンティクスがずれるためです。
+
+```ts
+// ✅ スキーマ: @tracen/contracts から直接
+import { CreateFaceRequestSchema } from '@tracen/contracts';
+
+// ✅ 型: src/types/ 経由（Response は除去、Request はそのまま）
+import type { Face, CreateFaceRequest } from '@/types/face';
+```
+
+### 11.4. この運用をする理由
+
+- `@tracen/contracts` の命名規則（`FaceResponse`, `SignUpRequest` など）をアプリケーション内に直接漏らさない
+- contracts の型名が変わった場合の変更箇所を `src/types/` に集約し、影響範囲を最小化する
