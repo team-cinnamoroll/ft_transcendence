@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type CreateFaceRequest } from '@tracen/contracts';
+import { type CreateFaceRequest } from '@/types/face';
 import { type Face } from '@/types/face';
 import { faces } from '@/mocks/faces';
 import { createSingletonProvider } from '@/repositories/provider';

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { SignUpRequest, SignInRequest } from '@tracen/contracts';
+import type { SignUpRequest, SignInRequest } from '@/types/auth';
 
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
