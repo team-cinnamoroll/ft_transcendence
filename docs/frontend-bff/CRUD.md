@@ -6,7 +6,7 @@
 
 ## Face
 
-| CRUD       | Repository                                   | Usecase                                   | Server Action / API        | UI                                  |
+| CRUD       | Repository                                   | Usecase                                   | Server Action / API / Server Component 直呼び        | UI                                  |
 | ---------- | -------------------------------------------- | ----------------------------------------- | -------------------------- | ----------------------------------- |
 | **Create** | ✅ `create()`                                | ✅ `createFaceForCurrentUser()`           | ✅ `createFaceAction()`    | ✅ `CreateFaceModal`                |
 | **Read**   | ✅ `listByUserId()` `findById()` `listAll()` | ✅ `listFacesByUserId()` `findFaceById()` | ✅ `/api/detail/face/[id]` | ✅ `FacesClient` `FaceDetailClient` |
@@ -17,7 +17,7 @@
 
 ## Seed
 
-| CRUD       | Repository                                      | Usecase                                      | Server Action / API        | UI                                       |
+| CRUD       | Repository                                      | Usecase                                      | Server Action / API / Server Component 直呼び        | UI                                       |
 | ---------- | ----------------------------------------------- | -------------------------------------------- | -------------------------- | ---------------------------------------- |
 | **Create** | ✅ `create()` (#214)                            | ✅ `createSeedForCurrentUser()` (#214)       | ✅ `createSeedAction()` (#214) | ✅ `PostModal` (#214)               |
 | **Read**   | ✅ `findById()` `listAll()` `listByFaceId()` 他 | ✅ `findSeedById()` `listSeedsByFaceId()` 他 | ✅ `/api/detail/seed/[id]` | ✅ `SeedFeed` `SeedDetailPage`           |
@@ -28,10 +28,10 @@
 
 ## Notification
 
-| CRUD       | Repository     | Usecase                  | Server Action / API           | UI                    |
+| CRUD       | Repository     | Usecase                  | Server Action / API / Server Component 直呼び           | UI                    |
 | ---------- | -------------- | ------------------------ | ----------------------------- | --------------------- |
 | **Create** | —              | —                        | —                             | —                     |
-| **Read**   | ✅ `listAll()` | ✅ `listNotifications()` | ❌（Server Component 直呼び） | ✅ `NotificationList` |
+| **Read**   | ✅ `listAll()` | ✅ `listNotifications()` | ✅（Server Component 直呼び） | ✅ `NotificationList` |
 | **Update** | —              | —                        | —                             | —                     |
 | **Delete** | —              | —                        | —                             | —                     |
 
@@ -42,7 +42,7 @@
 
 ## User / UserProfile
 
-| CRUD       | Repository                         | Usecase                                | Server Action / API | UI                             |
+| CRUD       | Repository                         | Usecase                                | Server Action / API / Server Component 直呼び | UI                             |
 | ---------- | ---------------------------------- | -------------------------------------- | ------------------- | ------------------------------ |
 | **Create** | ❌                                 | ❌                                     | ❌                  | ❌                             |
 | **Read**   | ✅ `getCurrentUser()` `findById()` | ✅ `getCurrentUser()` `findUserById()` | ✅ `/api/viewer`    | ✅ `HomeProfile` `AccountMenu` |
@@ -53,10 +53,10 @@
 
 ## Subscription
 
-| CRUD       | Repository                  | Usecase                     | Server Action / API           | UI                    |
+| CRUD       | Repository                  | Usecase                     | Server Action / API / Server Component 直呼び           | UI                    |
 | ---------- | --------------------------- | --------------------------- | ----------------------------- | --------------------- |
 | **Create** | ✅ `subscribe()` (#217)     | ✅ `subscribeFace()` (#217)   | ✅ `subscribeAction()` (#217)   | ✅ `FaceHeader` `SearchResults` (#217) |
-| **Read**   | ✅ `getSubscribedFaceIds()` | ✅ `getSubscribedFaceIds()`   | ❌（Server Component 直呼び）   | ✅ `SubscriptionFeed`                  |
+| **Read**   | ✅ `getSubscribedFaceIds()` | ✅ `getSubscribedFaceIds()`   | ✅（Server Component 直呼び）   | ✅ `SubscriptionFeed`                  |
 | **Delete** | ✅ `unsubscribe()` (#217)   | ✅ `unsubscribeFace()` (#217) | ✅ `unsubscribeAction()` (#217) | ✅ `FaceHeader` `SearchResults` (#217) |
 
 - ※サブスクリプションはUpdateが存在しないため、CRUDのうちCreate/Read/Deleteのみを表にしています。
