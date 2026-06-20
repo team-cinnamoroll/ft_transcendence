@@ -11,3 +11,11 @@ export const CreateSeedRequestSchema = z
   })
   .strict();
 export type CreateSeedRequest = z.infer<typeof CreateSeedRequestSchema>;
+
+export const UpdateSeedRequestSchema = z
+  .object({
+    body: z.string().min(1),
+    imageUrls: z.array(z.url()).optional(),
+  })
+  .strict();
+export type UpdateSeedRequest = z.infer<typeof UpdateSeedRequestSchema>;

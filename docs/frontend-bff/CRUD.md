@@ -21,8 +21,8 @@
 | ---------- | ----------------------------------------------- | -------------------------------------------- | -------------------------- | ---------------------------------------- |
 | **Create** | ✅ `create()` (#214)                            | ✅ `createSeedForCurrentUser()` (#214)       | ✅ `createSeedAction()` (#214) | ✅ `PostModal` (#214)               |
 | **Read**   | ✅ `findById()` `listAll()` `listByFaceId()` 他 | ✅ `findSeedById()` `listSeedsByFaceId()` 他 | ✅ `/api/detail/seed/[id]` | ✅ `SeedFeed` `SeedDetailPage`           |
-| **Update** | ❌                                              | ❌                                           | ❌                         | ❌                                       |
-| **Delete** | ❌                                              | ❌                                           | ❌                         | ❌                                       |
+| **Update** | ✅ `update()` (#216)                            | ✅ `updateSeedForCurrentUser()` (#216)       | ✅ `updateSeedAction()` (#216) | ✅ `EditSeedModal` (#216)           |
+| **Delete** | ✅ `delete()` (#216)                            | ✅ `deleteSeedForCurrentUser()` (#216)       | ✅ `deleteSeedAction()` (#216) | ✅ `HomeClient` (#216)              |
 
 ---
 

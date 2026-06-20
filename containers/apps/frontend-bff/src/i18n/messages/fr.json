@@ -277,6 +277,25 @@
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"
   },
+  "editSeedModal": {
+    "title": "Modifier la graine",
+    "ariaLabel": "Modifier la graine",
+    "close": "Fermer",
+    "body": "Contenu",
+    "required": "*",
+    "bodyPlaceholder": "Écrivez quelque chose…",
+    "submit": "Enregistrer",
+    "submitting": "Enregistrement…"
+  },
+  "seedActions": {
+    "editSeed": "Modifier",
+    "deleteSeed": "Supprimer",
+    "deleteConfirmTitle": "Confirmer la suppression",
+    "deleteConfirmMessage": "Supprimer cette graine ? Cette action est irréversible.",
+    "deleteCancel": "Annuler",
+    "deleteConfirmButton": "Supprimer",
+    "deleting": "Suppression…"
+  },
   "seedRow": {
     "readMore": "Lire la suite",
     "collapse": "Réduire",

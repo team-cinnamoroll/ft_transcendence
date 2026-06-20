@@ -277,6 +277,25 @@
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
   },
+  "editSeedModal": {
+    "title": "Edit Seed",
+    "ariaLabel": "Edit Seed",
+    "close": "Close",
+    "body": "Content",
+    "required": "*",
+    "bodyPlaceholder": "Write something…",
+    "submit": "Save",
+    "submitting": "Saving…"
+  },
+  "seedActions": {
+    "editSeed": "Edit",
+    "deleteSeed": "Delete",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Delete this seed? This action cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirmButton": "Delete",
+    "deleting": "Deleting…"
+  },
   "seedRow": {
     "readMore": "Read more",
     "collapse": "Collapse",
