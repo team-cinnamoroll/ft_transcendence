@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { SignUpRequest, SignInRequest } from '@tracen/contracts';
+import type { AuthSignUpRequest, AuthSignInRequest } from '@tracen/contracts';
 
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
@@ -9,8 +9,8 @@ export type BackendHealthRepositorySpec = {
   backendHealth: () => Promise<Response>;
   backendHealthRedis: () => Promise<Response>;
   getJWKS: () => Promise<Response>;
-  signUpUser: (input: SignUpRequest) => Promise<Response>;
-  signInUser: (input: SignInRequest) => Promise<Response>;
+  signUpUser: (input: AuthSignUpRequest) => Promise<Response>;
+  signInUser: (input: AuthSignInRequest) => Promise<Response>;
   getUserById: (id: string, token: string) => Promise<Response>;
   deleteUserById: (id: string, token: string) => Promise<Response>;
   refreshToken: (refreshToken: string) => Promise<Response>;

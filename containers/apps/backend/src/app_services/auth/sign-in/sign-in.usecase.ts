@@ -1,5 +1,5 @@
 import {
-  type SignInRequest,
+  type AuthSignInRequest,
   type AuthSignInResponse,
   AuthSignInResponseSchema,
   UserResponseSchema,
@@ -12,7 +12,7 @@ import { ZodError } from 'zod';
 export async function signIn(
   repo: UserRepositorySpec,
   worker: AuthPassWorkerSpec,
-  request: SignInRequest
+  request: AuthSignInRequest
 ): Promise<AuthSignInResponse> {
   try {
     const user = await getUserEntityByEmail(repo, request.email);

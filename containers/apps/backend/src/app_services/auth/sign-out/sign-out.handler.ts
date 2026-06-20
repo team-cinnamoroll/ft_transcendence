@@ -3,13 +3,13 @@ import { zValidator } from '@hono/zod-validator';
 
 import { type ProtectedEnv } from '../../../shared/types/hono';
 import { type AuthHandlerEnv, injectAuthDeps } from '../auth.di';
-import { SignOutRequestSchema, AuthSignOutResponseSchema } from '@tracen/contracts';
+import { AuthSignOutRequestSchema, AuthSignOutResponseSchema } from '@tracen/contracts';
 import { signOutWithValidation } from '../sign-out/sign-out.usecase';
 
 export function authSignOutRouter() {
   return new Hono<ProtectedEnv & AuthHandlerEnv>()
     .use('*', injectAuthDeps())
-    .post('/', zValidator('json', SignOutRequestSchema), async (c) => {
+    .post('/', zValidator('json', AuthSignOutRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
 
