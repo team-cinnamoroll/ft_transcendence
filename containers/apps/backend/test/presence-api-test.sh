@@ -29,15 +29,18 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
-# 状態の保存（個別実行のためにIDとTokenを保持）
+# 状態の保存（個別実行のためにIDとToken、リフレッシュトークンを保持）
 save_state() {
     cat <<EOF > "$STATE_FILE"
 U1_ID="$U1_ID"
 U1_TOKEN="$U1_TOKEN"
+U1_REFRESH="$U1_REFRESH"
 U2_ID="$U2_ID"
 U2_TOKEN="$U2_TOKEN"
+U2_REFRESH="$U2_REFRESH"
 U3_ID="$U3_ID"
 U3_TOKEN="$U3_TOKEN"
+U3_REFRESH="$U3_REFRESH"
 EOF
 }
 
@@ -77,6 +80,7 @@ setup() {
 
         # トークンとIDを変数に格納
         declare U${i}_TOKEN=$(echo "$RES" | jq -r '.accessToken')
+        declare U${i}_REFRESH=$(echo "$RES" | jq -r '.refreshToken')
         declare U${i}_ID=$(echo "$RES" | jq -r '.user.id')
 
         eval current_id=\$U${i}_ID
@@ -146,11 +150,32 @@ run_tests() {
     echo ""
 }
 
-# 3. 後処理 (ユーザー削除)
+# 3. 後処理 (ログアウト ＆ ユーザー削除)
 cleanup() {
     load_state
-    echo "=== 【後処理】全ユーザーアカウントの削除 ==="
+    echo "=== 【後処理】全ユーザーのログアウト ＆ アカウント削除 ==="
 
+    # --- 1. ユーザーのログアウト ---
+    echo "ログアウト処理を実行中..."
+    for i in 1 2 3; do
+        eval token=\$U${i}_TOKEN
+        eval refresh=\$U${i}_REFRESH
+
+        RES_LOGOUT=$(curl -s -X POST "$BASE_URL/auth/sign-out" \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            -d "{\"refreshToken\":\"$refresh\"}")
+
+        SUCCESS_LOGOUT=$(echo "$RES_LOGOUT" | jq -r '.success')
+        if [ "$SUCCESS_LOGOUT" = "true" ]; then
+            echo "  -> User $i logged out successfully."
+        else
+            echo "  -> Failed to log out User $i. Response: $RES_LOGOUT"
+        fi
+    done
+
+    # --- 2. ユーザーの削除 ---
+    echo "アカウント削除処理を実行中..."
     for i in 1 2 3; do
         eval id=\$U${i}_ID
         eval token=\$U${i}_TOKEN
@@ -194,7 +219,7 @@ case "$1" in
         echo "使用方法: $0 {setup|test|cleanup|all}"
         echo "  setup   : 準備（アカウント作成とトークン取得）"
         echo "  test    : テスト実行（ハートビートとオフライン状態の確認）"
-        echo "  cleanup : 後処理（アカウントの削除）"
+        echo "  cleanup : 後処理（ログアウトとアカウントの削除）"
         echo "  all     : setup -> test -> cleanup を一括で実行"
         exit 1
         ;;
