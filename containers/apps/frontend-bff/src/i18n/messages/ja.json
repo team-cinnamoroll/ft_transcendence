@@ -166,7 +166,13 @@
     "seedCount": "シード",
     "noFilteredSeeds": "該当するシードがありません",
     "viewFace": "フェイスを見る →",
-    "noSubscribedFaces": "サブスクしているフェイスがありません"
+    "noSubscribedFaces": "サブスクしているフェイスがありません",
+    "emptyHeadline": "まだ、誰のフェイスも<br></br>サブスクライブしていない。",
+    "emptyBody": "気になるフェイスを1つだけ、まず選んでみる。<br></br>通知の重みを大切にする設計です。",
+    "recommendedTitle": "おすすめのフェイス",
+    "recommendedSubtitle": "· あなたに合いそうな",
+    "subscriberCount": "{n} サブスク",
+    "subscribeAction": "サブスク"
   },
   "notificationList": {
     "noNotifications": "まだ通知はありません",
