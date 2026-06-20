@@ -2,13 +2,14 @@ import SubscriptionFeed from '@/components/subscriptions/SubscriptionFeed';
 import { listSeedsByFaceIds } from '@/server/usecases/seeds';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
-import { listAllUsers } from '@/server/usecases/users';
+import { listAllUsers, getCurrentUser } from '@/server/usecases/users';
 export default async function SubscriptionsPage() {
   const subscribedFaceIds = await getSubscribedFaceIds();
-  const [subscribedSeeds, faces, users] = await Promise.all([
+  const [subscribedSeeds, faces, users, currentUser] = await Promise.all([
     listSeedsByFaceIds(subscribedFaceIds),
     listAllFaces(),
     listAllUsers(),
+    getCurrentUser(),
   ]);
 
   return (
@@ -18,6 +19,7 @@ export default async function SubscriptionsPage() {
         subscribedSeeds={subscribedSeeds}
         faces={faces}
         users={users}
+        currentUserId={currentUser.id}
       />
     </div>
   );

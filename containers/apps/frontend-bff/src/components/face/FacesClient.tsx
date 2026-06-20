@@ -8,24 +8,32 @@ import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib
 import CreateFaceModal from './CreateFaceModal';
 import EditFaceModal from './EditFaceModal';
 import SeedRow from '@/components/ui/SeedRow';
+import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteFaceAction } from '@/server/actions/faces';
+import { deleteSeedAction } from '@/server/actions/seeds';
 import { useTranslations } from 'next-intl';
 
 type Props = {
   initialFaces: Face[];
   seeds: Seed[];
+  currentUserId?: string;
 };
 
 type SortType = 'lastAt' | 'total' | 'name';
 type ViewType = 'grid' | 'list';
 type ActionMenu = { face: Face; top: number; right: number };
+type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 const REFERENCE_MONTH = '2026-04';
 
-const FacesClient = ({ initialFaces, seeds }: Props) => {
+const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props) => {
   const [faces, setFaces] = useState<Face[]>(initialFaces);
+  const [seeds, setSeeds] = useState(initialSeeds);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionMenu, setActionMenu] = useState<ActionMenu | null>(null);
+  const [seedActionMenu, setSeedActionMenu] = useState<SeedActionMenu | null>(null);
+  const [editingSeed, setEditingSeed] = useState<Seed | null>(null);
+  const [deletingSeed, setDeletingSeed] = useState<Seed | null>(null);
 
   const openActionMenu = (e: React.MouseEvent<HTMLButtonElement>, face: Face) => {
     e.preventDefault();
@@ -36,14 +44,25 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
     const top = spaceBelow >= menuHeight + 4 ? rect.bottom + 4 : rect.top - menuHeight - 4;
     setActionMenu({ face, top, right: window.innerWidth - rect.right });
   };
+
+  const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const menuHeight = 110;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top = spaceBelow >= menuHeight + 4 ? rect.bottom + 4 : rect.top - menuHeight - 4;
+    setSeedActionMenu({ seed, top, right: window.innerWidth - rect.right });
+  };
+
   const [editingFace, setEditingFace] = useState<Face | null>(null);
   const [deletingFace, setDeletingFace] = useState<Face | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isDeletingSeed, startSeedDeleteTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortType, setSortType] = useState<SortType>('lastAt');
   const [viewType, setViewType] = useState<ViewType>('grid');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const t = useTranslations('facesClient');
+  const tSeed = useTranslations('seedActions');
 
   const handleCreate = (newFace: Face) => {
     setFaces((prev) => [newFace, ...prev]);
@@ -60,6 +79,20 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
       await deleteFaceAction(faceId);
       setFaces((prev) => prev.filter((f) => f.id !== faceId));
       setDeletingFace(null);
+    });
+  };
+
+  const handleSeedUpdate = (updatedSeed: Seed) => {
+    setSeeds((prev) => prev.map((s) => (s.id === updatedSeed.id ? updatedSeed : s)));
+  };
+
+  const handleConfirmSeedDelete = () => {
+    if (!deletingSeed || isDeletingSeed) return;
+    const seedId = deletingSeed.id;
+    startSeedDeleteTransition(async () => {
+      await deleteSeedAction(seedId);
+      setSeeds((prev) => prev.filter((s) => s.id !== seedId));
+      setDeletingSeed(null);
     });
   };
 
@@ -393,7 +426,7 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
               {matchingSeeds.map((act) => {
                 const face = faceMap.get(act.faceId);
                 if (!face) return null;
-                return <SeedRow key={act.id} seed={act} face={face} />;
+                return <SeedRow key={act.id} seed={act} face={face} currentUserId={currentUserId} onMoreOptions={openSeedActionMenu} />;
               })}
             </div>
           )}
@@ -1139,6 +1172,63 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                 }}
               >
                 {isDeleting ? t('deleting') : t('deleteConfirmButton')}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+      {/* シードアクションドロップダウン */}
+      {seedActionMenu && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+            onClick={() => setSeedActionMenu(null)}
+            aria-hidden="true"
+          />
+          <div
+            role="menu"
+            style={{ position: 'fixed', top: seedActionMenu.top, right: seedActionMenu.right, zIndex: 50, minWidth: 180, borderRadius: 12, background: 'var(--mf-bg-light)', border: '0.5px solid var(--mf-line)', boxShadow: '0 8px 32px rgba(30,42,74,0.18)', overflow: 'hidden' }}
+          >
+            <div style={{ padding: '10px 16px 8px', borderBottom: '0.5px solid var(--mf-line)' }}>
+              <p style={{ fontSize: 12, color: 'var(--mf-text-muted)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                {seedActionMenu.seed.body.slice(0, 30)}{seedActionMenu.seed.body.length > 30 ? '…' : ''}
+              </p>
+            </div>
+            <button type="button" role="menuitem" onClick={() => { setEditingSeed(seedActionMenu.seed); setSeedActionMenu(null); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', borderBottom: '0.5px solid var(--mf-line)', cursor: 'pointer', color: 'var(--mf-text)', textAlign: 'left' }}>
+              <svg width={15} height={15} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" /></svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{tSeed('editSeed')}</span>
+            </button>
+            <button type="button" role="menuitem" onClick={() => { setDeletingSeed(seedActionMenu.seed); setSeedActionMenu(null); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mf-danger, #e53e3e)', textAlign: 'left' }}>
+              <svg width={15} height={15} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M2 3.5h10M5.5 3.5V2h3v1.5M3.5 3.5l.7 8h5.6l.7-8" /></svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{tSeed('deleteSeed')}</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* シード編集モーダル */}
+      {editingSeed && (
+        <EditSeedModal
+          isOpen={true}
+          seed={editingSeed}
+          onClose={() => setEditingSeed(null)}
+          onUpdate={(updated) => { handleSeedUpdate(updated); setEditingSeed(null); }}
+        />
+      )}
+
+      {/* シード削除確認ダイアログ */}
+      {deletingSeed && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(20,24,36,0.50)', backdropFilter: 'blur(4px)' }} onClick={() => { if (!isDeletingSeed) setDeletingSeed(null); }} aria-hidden="true" />
+          <div role="dialog" aria-modal="true" style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', zIndex: 50, width: 'calc(100% - 2rem)', maxWidth: 320, borderRadius: 18, background: 'var(--mf-bg-light)', border: '0.5px solid var(--mf-line)', boxShadow: '0 20px 60px rgba(30,42,74,0.18)', padding: '24px 20px 20px' }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--mf-brand)', margin: '0 0 8px' }}>{tSeed('deleteConfirmTitle')}</h2>
+            <p style={{ fontSize: 13, color: 'var(--mf-text-sub)', margin: '0 0 20px', lineHeight: 1.6 }}>{tSeed('deleteConfirmMessage')}</p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" onClick={() => setDeletingSeed(null)} disabled={isDeletingSeed} style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13.5, fontWeight: 600, border: '0.5px solid var(--mf-line)', background: 'none', color: 'var(--mf-text)', cursor: 'pointer' }}>
+                {tSeed('deleteCancel')}
+              </button>
+              <button type="button" onClick={handleConfirmSeedDelete} disabled={isDeletingSeed} style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13.5, fontWeight: 600, border: 'none', background: 'var(--mf-danger, #e53e3e)', color: '#fff', cursor: isDeletingSeed ? 'not-allowed' : 'pointer', opacity: isDeletingSeed ? 0.7 : 1 }}>
+                {isDeletingSeed ? tSeed('deleting') : tSeed('deleteConfirmButton')}
               </button>
             </div>
           </div>
