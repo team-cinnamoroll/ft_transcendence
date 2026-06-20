@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { type Seed } from '@/types/seed';
 import { type UserProfile } from '@/types/user-profile';
 import { type Face } from '@/types/face';
@@ -8,6 +9,7 @@ import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle } from '@/lib/display';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { subscribeAction, unsubscribeAction } from '@/server/actions/subscriptions';
 
 export type SearchSeedResultItem = {
   seed: Seed;
@@ -26,9 +28,26 @@ const SearchResults = ({
   query,
   seedResults,
   faceResults,
-  subscribedFaceIds,
+  subscribedFaceIds: initialSubscribedFaceIds,
 }: SearchResultsProps) => {
+  const [subscribedFaceIds, setSubscribedFaceIds] = useState(initialSubscribedFaceIds);
+  const [togglingFaceId, startToggleTransition] = useTransition();
   const t = useTranslations('searchResults');
+
+  const handleSubscribeToggle = (face: Face) => {
+    const isSubscribed = subscribedFaceIds.includes(face.id);
+    const next = isSubscribed
+      ? subscribedFaceIds.filter((id) => id !== face.id)
+      : [...subscribedFaceIds, face.id];
+    setSubscribedFaceIds(next);
+    startToggleTransition(async () => {
+      if (isSubscribed) {
+        await unsubscribeAction(face.id);
+      } else {
+        await subscribeAction(face.id);
+      }
+    });
+  };
 
   if (!query) {
     return (
@@ -137,6 +156,9 @@ const SearchResults = ({
                       )}
                     </div>
                     <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); handleSubscribeToggle(face); }}
+                      disabled={togglingFaceId}
                       style={{
                         flexShrink: 0,
                         padding: '5px 12px',
@@ -146,9 +168,9 @@ const SearchResults = ({
                         background: isSubscribed ? 'transparent' : 'var(--mf-accent)',
                         color: isSubscribed ? 'var(--mf-text-sub)' : '#fff',
                         border: isSubscribed ? '1px solid var(--mf-line)' : 'none',
-                        cursor: 'default',
+                        cursor: togglingFaceId ? 'not-allowed' : 'pointer',
+                        opacity: togglingFaceId ? 0.7 : 1,
                       }}
-                      disabled
                       aria-label={isSubscribed ? t('unsubscribeAriaLabel', { name: face.name }) : t('subscribeAriaLabel', { name: face.name })}
                     >
                       {isSubscribed ? t('subscribed') : t('subscribe')}

@@ -30,10 +30,13 @@
 
 | CRUD       | Repository     | Usecase                  | Server Action / API           | UI                    |
 | ---------- | -------------- | ------------------------ | ----------------------------- | --------------------- |
-| **Create** | ❌             | ❌                       | ❌                            | ❌                    |
+| **Create** | —              | —                        | —                             | —                     |
 | **Read**   | ✅ `listAll()` | ✅ `listNotifications()` | ❌（Server Component 直呼び） | ✅ `NotificationList` |
-| **Update** | ❌             | ❌                       | ❌                            | ❌                    |
-| **Delete** | ❌             | ❌                       | ❌                            | ❌                    |
+| **Update** | —              | —                        | —                             | —                     |
+| **Delete** | —              | —                        | —                             | —                     |
+
+- Create: フォロー・投稿などのイベントをトリガーにバックエンドが生成するため、フロントエンドからの実装は不要
+- Update（既読管理）/ Delete（通知削除）: 現時点では仕様未確定のため対象外。機能追加時に別途 Issue 化する
 
 ---
 
@@ -52,9 +55,9 @@
 
 | CRUD       | Repository                  | Usecase                     | Server Action / API           | UI                    |
 | ---------- | --------------------------- | --------------------------- | ----------------------------- | --------------------- |
-| **Create** | ❌                          | ❌                          | ❌                            | ❌                    |
-| **Read**   | ✅ `getSubscribedFaceIds()` | ✅ `getSubscribedFaceIds()` | ❌（Server Component 直呼び） | ✅ `SubscriptionFeed` |
-| **Delete** | ❌                          | ❌                          | ❌                            | ❌                    |
+| **Create** | ✅ `subscribe()` (#217)     | ✅ `subscribeFace()` (#217)   | ✅ `subscribeAction()` (#217)   | ✅ `FaceHeader` `SearchResults` (#217) |
+| **Read**   | ✅ `getSubscribedFaceIds()` | ✅ `getSubscribedFaceIds()`   | ❌（Server Component 直呼び）   | ✅ `SubscriptionFeed`                  |
+| **Delete** | ✅ `unsubscribe()` (#217)   | ✅ `unsubscribeFace()` (#217) | ✅ `unsubscribeAction()` (#217) | ✅ `FaceHeader` `SearchResults` (#217) |
 
 - ※サブスクリプションはUpdateが存在しないため、CRUDのうちCreate/Read/Deleteのみを表にしています。
 
