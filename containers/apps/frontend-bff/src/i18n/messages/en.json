@@ -179,13 +179,26 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
-    "searchLink": "Search for faces",
     "timelineTab": "Timeline",
     "subscriptionsTab": "Subscriptions",
-    "filterPlaceholder": "Search faces & seeds",
+    "filterPlaceholder": "Find a new face / seed",
     "filterByFace": "Filter by face",
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
+    "feedTitle": "Recent subscription seed",
+    "exploringAll": "Exploring all",
+    "explorePromptTitle": "Enter a keyword",
+    "explorePromptHint": "Search all faces and seeds — subscribed or not",
+    "searchTabSubscribed": "Subscribed",
+    "searchTabOther": "Others",
+    "searchSubscribedFacesSection": "Subscribed Faces ({n})",
+    "searchOtherFacesSection": "Other Faces ({n})",
+    "searchSubscribedSeedsSection": "Subscribed Seeds ({n})",
+    "searchOtherSeedsSection": "Other Seeds ({n})",
+    "subscribe": "Subscribe",
+    "subscribed": "✓ Subscribed",
+    "subscribeAriaLabel": "Subscribe to {name}",
+    "unsubscribeAriaLabel": "Unsubscribe from {name}",
     "noMatch": "No results",
     "seedCount": "Seeds",
     "noFilteredSeeds": "No seeds found",
@@ -209,29 +222,6 @@
     "noNotificationsFiltered": "No notifications",
     "linkedPreview": "A linked seed",
     "updatedPreview": "New seed posted to {faceName}"
-  },
-  "searchBar": {
-    "placeholder": "Search by keyword..."
-  },
-  "searchScopeSelector": {
-    "all": "All",
-    "mine": "Mine",
-    "subscribed": "Subscribed"
-  },
-  "searchResults": {
-    "emptyTitle": "Enter a keyword to search",
-    "emptyHint": "Search face names and seed content by scope",
-    "noResultsTitle": "No results for \"{query}\"",
-    "noResultsHint": "Try a different keyword or scope",
-    "facesSection": "Faces",
-    "seedsSection": "Seeds",
-    "subscribe": "Subscribe",
-    "subscribed": "Subscribed",
-    "subscribeAriaLabel": "Subscribe to {name}",
-    "unsubscribeAriaLabel": "Unsubscribe from {name}"
-  },
-  "searchClient": {
-    "title": "Search"
   },
   "home": {
     "title": "Home"

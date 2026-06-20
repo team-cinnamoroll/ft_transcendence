@@ -179,13 +179,26 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "searchLink": "Rechercher des facettes",
     "timelineTab": "Fil d'actualité",
     "subscriptionsTab": "Abonnements",
-    "filterPlaceholder": "Rechercher facettes & graines",
+    "filterPlaceholder": "Trouver de nouveaux visages / graines",
     "filterByFace": "Filtrer par facette",
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
+    "feedTitle": "Semences d'abonnement récentes",
+    "exploringAll": "Exploration globale",
+    "explorePromptTitle": "Entrez un mot-clé",
+    "explorePromptHint": "Recherchez toutes les facettes et graines, abonnées ou non",
+    "searchTabSubscribed": "Abonnés",
+    "searchTabOther": "Autres",
+    "searchSubscribedFacesSection": "Facettes abonnées ({n})",
+    "searchOtherFacesSection": "Autres facettes ({n})",
+    "searchSubscribedSeedsSection": "Graines abonnées ({n})",
+    "searchOtherSeedsSection": "Autres graines ({n})",
+    "subscribe": "S'abonner",
+    "subscribed": "✓ Abonné",
+    "subscribeAriaLabel": "S'abonner à {name}",
+    "unsubscribeAriaLabel": "Se désabonner de {name}",
     "noMatch": "Aucun résultat",
     "seedCount": "Graines",
     "noFilteredSeeds": "Aucune graine trouvée",
@@ -209,29 +222,6 @@
     "noNotificationsFiltered": "Aucune notification",
     "linkedPreview": "Une graine liée",
     "updatedPreview": "Nouvelle graine publiée sur {faceName}"
-  },
-  "searchBar": {
-    "placeholder": "Rechercher par mot-clé..."
-  },
-  "searchScopeSelector": {
-    "all": "Tout",
-    "mine": "Le mien",
-    "subscribed": "Abonnements"
-  },
-  "searchResults": {
-    "emptyTitle": "Saisissez un mot-clé pour rechercher",
-    "emptyHint": "Recherche dans les noms de facettes et le contenu des activités selon la portée",
-    "noResultsTitle": "Aucun résultat pour « {query} »",
-    "noResultsHint": "Essayez un autre mot-clé ou une autre portée",
-    "facesSection": "Facettes",
-    "seedsSection": "Graines",
-    "subscribe": "S'abonner",
-    "subscribed": "Abonné",
-    "subscribeAriaLabel": "S'abonner à {name}",
-    "unsubscribeAriaLabel": "Se désabonner de {name}"
-  },
-  "searchClient": {
-    "title": "Recherche"
   },
   "home": {
     "title": "Accueil"

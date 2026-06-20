@@ -280,7 +280,7 @@ const CollectionRail = ({
             {t('noSubscriptions')}
             <br />
             <Link
-              href="/search"
+              href="/subscriptions"
               style={{
                 color: 'var(--mf-accent)',
                 textDecoration: 'none',

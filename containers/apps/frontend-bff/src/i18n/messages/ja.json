@@ -179,13 +179,26 @@
   },
   "subscriptionFeed": {
     "noSubscriptions": "まだサブスクしているフェイスがありません",
-    "searchLink": "検索してフェイスを探す",
     "timelineTab": "タイムライン",
     "subscriptionsTab": "サブスク一覧",
-    "filterPlaceholder": "他人のフェイス・シードを検索",
+    "filterPlaceholder": "新しいフェイス・シードを見つける",
     "filterByFace": "フェイスで絞り込み",
     "facesSection": "フェイス ({n})",
     "seedsSection": "シード ({n})",
+    "feedTitle": "最新のサブスクシード",
+    "exploringAll": "全体を探索中",
+    "explorePromptTitle": "キーワードを入力してください",
+    "explorePromptHint": "サブスク中・サブスク外のフェイス・シードを一括検索できます",
+    "searchTabSubscribed": "サブスク中",
+    "searchTabOther": "その他",
+    "searchSubscribedFacesSection": "サブスク中のフェイス ({n})",
+    "searchOtherFacesSection": "その他のフェイス ({n})",
+    "searchSubscribedSeedsSection": "サブスク中のシード ({n})",
+    "searchOtherSeedsSection": "その他のシード ({n})",
+    "subscribe": "サブスクする",
+    "subscribed": "✓ サブスク中",
+    "subscribeAriaLabel": "{name}をサブスクする",
+    "unsubscribeAriaLabel": "{name}のサブスクを解除",
     "noMatch": "該当なし",
     "seedCount": "シード",
     "noFilteredSeeds": "該当するシードがありません",
@@ -209,29 +222,6 @@
     "noNotificationsFiltered": "通知はありません",
     "linkedPreview": "リンクされたシードです",
     "updatedPreview": "{faceName} に新しいシードが投稿されました"
-  },
-  "searchBar": {
-    "placeholder": "キーワードで検索..."
-  },
-  "searchScopeSelector": {
-    "all": "全体",
-    "mine": "自分",
-    "subscribed": "サブスクフェイス"
-  },
-  "searchResults": {
-    "emptyTitle": "キーワードを入力して検索してください",
-    "emptyHint": "フェイス名・アクティビティ本文をスコープに応じて絞り込みます",
-    "noResultsTitle": "「{query}」に一致する結果が見つかりませんでした",
-    "noResultsHint": "別のキーワードやスコープで試してみてください",
-    "facesSection": "フェイス",
-    "seedsSection": "シード",
-    "subscribe": "サブスクする",
-    "subscribed": "サブスク中",
-    "subscribeAriaLabel": "{name}をサブスクする",
-    "unsubscribeAriaLabel": "{name}のサブスクを解除"
-  },
-  "searchClient": {
-    "title": "検索"
   },
   "home": {
     "title": "ホーム"
