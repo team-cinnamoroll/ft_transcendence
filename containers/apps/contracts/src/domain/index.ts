@@ -3,3 +3,4 @@ export * from './face';
 export * from './notification';
 export * from './seed';
 export * from './user';
+export * from './presence';
