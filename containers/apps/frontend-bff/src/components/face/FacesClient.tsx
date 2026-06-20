@@ -8,6 +8,7 @@ import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib
 import CreateFaceModal from './CreateFaceModal';
 import EditFaceModal from './EditFaceModal';
 import SeedRow from '@/components/ui/SeedRow';
+import Pagination from '@/components/ui/Pagination';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteFaceAction } from '@/server/actions/faces';
 import { deleteSeedAction } from '@/server/actions/seeds';
@@ -58,6 +59,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isDeletingSeed, startSeedDeleteTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
+  const [seedsPage, setSeedsPage] = useState(1);
   const [sortType, setSortType] = useState<SortType>('lastAt');
   const [viewType, setViewType] = useState<ViewType>('grid');
   const [showSortMenu, setShowSortMenu] = useState(false);
@@ -148,6 +150,13 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
     return seeds.filter((a) => faceIds.has(a.faceId) && a.body.toLowerCase().includes(q));
   }, [searchQuery, faces, seeds]);
 
+  const SEEDS_PAGE_SIZE = 10;
+  const seedsTotalPages = Math.ceil(matchingSeeds.length / SEEDS_PAGE_SIZE);
+  const pagedMatchingSeeds = matchingSeeds.slice(
+    (seedsPage - 1) * SEEDS_PAGE_SIZE,
+    seedsPage * SEEDS_PAGE_SIZE,
+  );
+
   return (
     <main style={{ display: 'flex', flexDirection: 'column', paddingBottom: 24 }}>
       {/* 検索バー */}
@@ -179,7 +188,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setSeedsPage(1); }}
             placeholder={t('searchPlaceholder')}
             style={{
               flex: 1,
@@ -422,13 +431,20 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
               {t('noMatch')}
             </p>
           ) : (
-            <div style={{ padding: '0 20px' }}>
-              {matchingSeeds.map((act) => {
-                const face = faceMap.get(act.faceId);
-                if (!face) return null;
-                return <SeedRow key={act.id} seed={act} face={face} currentUserId={currentUserId} onMoreOptions={openSeedActionMenu} />;
-              })}
-            </div>
+            <>
+              <div style={{ padding: '0 20px' }}>
+                {pagedMatchingSeeds.map((act) => {
+                  const face = faceMap.get(act.faceId);
+                  if (!face) return null;
+                  return <SeedRow key={act.id} seed={act} face={face} currentUserId={currentUserId} onMoreOptions={openSeedActionMenu} />;
+                })}
+              </div>
+              <Pagination
+                currentPage={seedsPage}
+                totalPages={seedsTotalPages}
+                onPageChange={setSeedsPage}
+              />
+            </>
           )}
         </div>
       )}

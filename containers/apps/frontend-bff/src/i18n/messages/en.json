@@ -177,7 +177,7 @@
     "weekRecord": "record",
     "noRecord": "No seeds this week"
   },
-  "subscriptionFeed": {
+  "subscriptionSeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
     "timelineTab": "Timeline",
     "subscriptionsTab": "Subscriptions",
@@ -185,7 +185,7 @@
     "filterByFace": "Filter by face",
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
-    "feedTitle": "Recent subscription seed",
+    "sectionTitle": "Recent subscription seed",
     "exploringAll": "Exploring all",
     "explorePromptTitle": "Enter a keyword",
     "explorePromptHint": "Search all faces and seeds — subscribed or not",
@@ -307,6 +307,12 @@
     "linksUnit": "",
     "showMore": "Show {count} more →",
     "imageAlt": "Image {n}"
+  },
+  "pagination": {
+    "ariaLabel": "Pagination",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {n}"
   },
   "contextRail": {
     "onThisDay": "On This Day",

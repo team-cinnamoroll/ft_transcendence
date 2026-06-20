@@ -7,6 +7,7 @@ import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import SeedRow from '@/components/ui/SeedRow';
+import Pagination from '@/components/ui/Pagination';
 import FaceBadge from '@/components/ui/FaceBadge';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
@@ -22,7 +23,7 @@ type SearchFaceRowProps = {
 };
 
 const SearchFaceRow = ({ face, isSubscribed, onToggle }: SearchFaceRowProps) => {
-  const t = useTranslations('subscriptionFeed');
+  const t = useTranslations('subscriptionSeed');
   return (
     <Link href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
       <div
@@ -301,7 +302,7 @@ type Props = {
   currentUserId?: string;
 };
 
-const SubscriptionFeed = ({
+const SubscriptionSeed = ({
   subscribedFaceIds: initialSubscribedFaceIds,
   subscribedSeeds,
   allSeeds,
@@ -314,6 +315,8 @@ const SubscriptionFeed = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchTab, setSearchTab] = useState<'subscribed' | 'other'>('subscribed');
+  const [seedPage, setSeedPage] = useState(1);
+  const [searchSeedsPage, setSearchSeedsPage] = useState(1);
   const [seeds, setSeeds] = useState<Seed[]>(subscribedSeeds);
   const [localSubscribedFaceIds, setLocalSubscribedFaceIds] =
     useState<string[]>(initialSubscribedFaceIds);
@@ -322,7 +325,7 @@ const SubscriptionFeed = ({
   const [deletingSeed, setDeletingSeed] = useState<Seed | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
   const [, startSubscribeTransition] = useTransition();
-  const t = useTranslations('subscriptionFeed');
+  const t = useTranslations('subscriptionSeed');
   const tSeed = useTranslations('seedActions');
 
   const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
@@ -422,6 +425,26 @@ const SubscriptionFeed = ({
     );
   }, [searchQuery, allSeeds, subscribedIdSet]);
 
+  const PAGE_SIZE = 10;
+
+  const seedTotalPages = Math.ceil(filteredSeeds.length / PAGE_SIZE);
+  const pagedFilteredSeeds = filteredSeeds.slice(
+    (seedPage - 1) * PAGE_SIZE,
+    seedPage * PAGE_SIZE,
+  );
+
+  const subscribedSeedsTotalPages = Math.ceil(subscribedMatchingSeeds.length / PAGE_SIZE);
+  const pagedSubscribedSeeds = subscribedMatchingSeeds.slice(
+    (searchSeedsPage - 1) * PAGE_SIZE,
+    searchSeedsPage * PAGE_SIZE,
+  );
+
+  const otherSeedsTotalPages = Math.ceil(otherMatchingSeeds.length / PAGE_SIZE);
+  const pagedOtherSeeds = otherMatchingSeeds.slice(
+    (searchSeedsPage - 1) * PAGE_SIZE,
+    searchSeedsPage * PAGE_SIZE,
+  );
+
   return (
     <div onClick={() => setShowFaceFilter(false)}>
       {/* 検索バー */}
@@ -456,7 +479,7 @@ const SubscriptionFeed = ({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setSearchSeedsPage(1); }}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
             placeholder={t('filterPlaceholder')}
@@ -574,7 +597,7 @@ const SubscriptionFeed = ({
                 <button
                   key={tab}
                   type="button"
-                  onClick={() => setSearchTab(tab)}
+                  onClick={() => { setSearchTab(tab); setSearchSeedsPage(1); }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -638,7 +661,7 @@ const SubscriptionFeed = ({
                     </span>
                   </div>
                   <div style={{ padding: '0 20px' }}>
-                    {subscribedMatchingSeeds.map((seed) => {
+                    {pagedSubscribedSeeds.map((seed) => {
                       const face = allFaceMap.get(seed.faceId);
                       if (!face) return null;
                       return (
@@ -652,6 +675,11 @@ const SubscriptionFeed = ({
                       );
                     })}
                   </div>
+                  <Pagination
+                    currentPage={searchSeedsPage}
+                    totalPages={subscribedSeedsTotalPages}
+                    onPageChange={setSearchSeedsPage}
+                  />
                 </>
               )}
 
@@ -694,12 +722,17 @@ const SubscriptionFeed = ({
                     </span>
                   </div>
                   <div style={{ padding: '0 20px' }}>
-                    {otherMatchingSeeds.map((seed) => {
+                    {pagedOtherSeeds.map((seed) => {
                       const face = allFaceMap.get(seed.faceId);
                       if (!face) return null;
                       return <SeedRow key={seed.id} seed={seed} face={face} />;
                     })}
                   </div>
+                  <Pagination
+                    currentPage={searchSeedsPage}
+                    totalPages={otherSeedsTotalPages}
+                    onPageChange={setSearchSeedsPage}
+                  />
                 </>
               )}
 
@@ -731,7 +764,7 @@ const SubscriptionFeed = ({
               }}
             >
               <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
-                {t('feedTitle')}
+                {t('sectionTitle')}
               </p>
               <div style={{ position: 'relative' }}>
                 <button
@@ -772,6 +805,7 @@ const SubscriptionFeed = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedFaceId(null);
+                        setSeedPage(1);
                       }}
                       style={{ display: 'flex', alignItems: 'center', marginLeft: 2, opacity: 0.8 }}
                     >
@@ -816,6 +850,7 @@ const SubscriptionFeed = ({
                           onClick={() => {
                             setSelectedFaceId(isSelected ? null : face.id);
                             setShowFaceFilter(false);
+                            setSeedPage(1);
                           }}
                           style={{
                             width: '100%',
@@ -894,21 +929,28 @@ const SubscriptionFeed = ({
               <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFilteredSeeds')}</p>
             </div>
           ) : (
-            <div style={{ padding: '0 28px' }}>
-              {filteredSeeds.map((act) => {
-                const face = faceMap.get(act.faceId);
-                if (!face) return null;
-                return (
-                  <SeedRow
-                    key={act.id}
-                    seed={act}
-                    face={face}
-                    currentUserId={currentUserId}
-                    onMoreOptions={openSeedActionMenu}
-                  />
-                );
-              })}
-            </div>
+            <>
+              <div style={{ padding: '0 28px' }}>
+                {pagedFilteredSeeds.map((act) => {
+                  const face = faceMap.get(act.faceId);
+                  if (!face) return null;
+                  return (
+                    <SeedRow
+                      key={act.id}
+                      seed={act}
+                      face={face}
+                      currentUserId={currentUserId}
+                      onMoreOptions={openSeedActionMenu}
+                    />
+                  );
+                })}
+              </div>
+              <Pagination
+                currentPage={seedPage}
+                totalPages={seedTotalPages}
+                onPageChange={setSeedPage}
+              />
+            </>
           )}
         </>
       )}
@@ -1133,4 +1175,4 @@ const SubscriptionFeed = ({
   );
 };
 
-export default SubscriptionFeed;
+export default SubscriptionSeed;

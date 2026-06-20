@@ -1,4 +1,4 @@
-import SubscriptionFeed from '@/components/subscriptions/SubscriptionFeed';
+import SubscriptionSeed from '@/components/subscriptions/SubscriptionSeed';
 import { listSeedsByFaceIds, listAllSeeds } from '@/server/usecases/seeds';
 import { listAllFaces } from '@/server/usecases/faces';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
@@ -15,7 +15,7 @@ export default async function SubscriptionsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <SubscriptionFeed
+      <SubscriptionSeed
         subscribedFaceIds={subscribedFaceIds}
         subscribedSeeds={subscribedSeeds}
         allSeeds={allSeeds}

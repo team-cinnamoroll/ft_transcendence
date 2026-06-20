@@ -177,7 +177,7 @@
     "weekRecord": "enregistrement(s)",
     "noRecord": "Aucune graine cette semaine"
   },
-  "subscriptionFeed": {
+  "subscriptionSeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
     "timelineTab": "Fil d'actualité",
     "subscriptionsTab": "Abonnements",
@@ -185,7 +185,7 @@
     "filterByFace": "Filtrer par facette",
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
-    "feedTitle": "Semences d'abonnement récentes",
+    "sectionTitle": "Semences d'abonnement récentes",
     "exploringAll": "Exploration globale",
     "explorePromptTitle": "Entrez un mot-clé",
     "explorePromptHint": "Recherchez toutes les facettes et graines, abonnées ou non",
@@ -307,6 +307,12 @@
     "linksUnit": "",
     "showMore": "Voir {count} de plus →",
     "imageAlt": "Image {n}"
+  },
+  "pagination": {
+    "ariaLabel": "Pagination",
+    "prev": "Page précédente",
+    "next": "Page suivante",
+    "page": "Page {n}"
   },
   "contextRail": {
     "onThisDay": "Ce jour il y a un an",
