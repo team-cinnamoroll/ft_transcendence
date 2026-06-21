@@ -14,7 +14,7 @@ export async function acceptRefreshRequest(
     return null; // トークンが見つからない場合はnullを返す
   }
   if (existingTokenData.status !== 'active') {
-    await repo.deleteAllTokensByFamilyId(existingTokenData.familyId); // トークンが無効（revokedなど）の場合は同一familyIdのトークンを全て削除
+    await repo.deleteAllTokensOfFamily(existingTokenData.familyId); // トークンが無効（revokedなど）の場合は同一familyIdのトークンを全て削除
     return null; // トークンが無効（revokedなど）の場合もnullを返す
   }
   return refreshTokenDataSchema.parse(existingTokenData);
@@ -26,7 +26,7 @@ export async function logoutByRefreshToken(
 ): Promise<void> {
   const existingTokenData = await repo.findToken(refreshToken);
   if (existingTokenData && existingTokenData.familyId) {
-    await repo.deleteAllTokensByFamilyId(existingTokenData.familyId);
+    await repo.deleteAllTokensOfFamily(existingTokenData.familyId);
   } else {
     await repo.deleteToken(refreshToken);
   }

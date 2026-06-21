@@ -3,7 +3,7 @@ import 'server-only';
 import crypto from 'node:crypto';
 
 import {
-  SignUpRequestSchema,
+  AuthSignUpRequestSchema,
   type UserResponse,
   type AuthSignUpResponse,
   type AuthSignInResponse,
@@ -144,7 +144,7 @@ export async function runApiHealthCheck(
     const name = `healthcheck-${nonce.slice(0, 8)}`;
     const password = 'password1234567890';
 
-    const createUserInput = SignUpRequestSchema.parse({
+    const createUserInput = AuthSignUpRequestSchema.parse({
       email: email,
       name: name,
       password: password,

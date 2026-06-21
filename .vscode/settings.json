@@ -59,5 +59,17 @@
     "**/dist": true,
     "**/build": true,
     ".eslintcache": true
+  },
+  "redisXplorer.config": {
+    "profiles": [
+      {
+        "name": "tracen",
+        "host": "redis",
+        "accessKey": "tracen_secret",
+        "filter": "*",
+        "port": "6379"
+      }
+    ],
+    "scanLimit": 200
   }
 }

@@ -42,7 +42,7 @@
 
 クライアントからサーバーへ送るデータのスキーマです。
 
-- 例: `SignUpRequestSchema`
+- 例: `AuthSignUpRequestSchema`
 - 内容: 生パスワード、メールアドレス、ユーザー名など。
 
 ### 3.2. Response DTO（出力）
@@ -102,12 +102,12 @@ import { z } from 'zod';
 import { EmailSchema, UserPasswordSchema } from '../../shared';
 
 // 2. 作成リクエストの定義
-export const SignUpRequestSchema = z.object({
+export const AuthSignUpRequestSchema = z.object({
   email: EmailSchema,
   name: z.string().min(1),
   password: UserPasswordSchema, // 生パスワード
 });
-export type SignUpRequest = z.infer<typeof SignUpRequestSchema>;
+export type AuthSignUpRequest = z.infer<typeof AuthSignUpRequestSchema>;
 ```
 
 #### 【backend パッケージ】

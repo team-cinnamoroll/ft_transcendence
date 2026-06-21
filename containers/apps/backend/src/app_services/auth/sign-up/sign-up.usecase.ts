@@ -1,5 +1,5 @@
 import {
-  type SignUpRequest,
+  type AuthSignUpRequest,
   type AuthSignUpResponse,
   AuthSignUpResponseSchema,
   UserResponseSchema,
@@ -17,7 +17,7 @@ import { ZodError } from 'zod';
 export async function signUp(
   repo: UserRepositorySpec,
   worker: AuthPassWorkerSpec,
-  request: SignUpRequest
+  request: AuthSignUpRequest
 ): Promise<AuthSignUpResponse> {
   const password_hash = await worker.createHash(request.password);
   const newUser = createUserEntity({
