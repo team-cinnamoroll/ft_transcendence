@@ -294,7 +294,7 @@
     "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
     "findFaces": "Chercher des facettes →",
     "popularFaces": "Facettes populaires",
-    "subscribersUnit": "abonnés",
+    "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
     "subscribeButton": "S'abonner"
   }
 }

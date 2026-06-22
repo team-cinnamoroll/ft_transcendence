@@ -294,7 +294,7 @@
     "noSubscriptions": "You haven't subscribed to any faces yet.",
     "findFaces": "Find Faces →",
     "popularFaces": "Popular Faces",
-    "subscribersUnit": "subscribers",
+    "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
     "subscribeButton": "Subscribe"
   }
 }
