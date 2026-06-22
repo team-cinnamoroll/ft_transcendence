@@ -130,7 +130,7 @@
   "homeClient": {
     "write": "Écrire",
     "onThisDay": "Il y a un an",
-    "yearsAgo": "{n, plural, one {il y a # an} other {il y a # ans}}",
+    "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
     "reply": "Que répondriez-vous à votre passé ?",
     "recentSeeds": "Graines récentes",
     "viewAll": "Tout voir",
@@ -283,7 +283,7 @@
   },
   "contextRail": {
     "onThisDay": "Ce jour il y a un an",
-    "yearsAgo": "{n, plural, one {il y a # an} other {il y a # ans}}",
+    "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
     "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
     "aboutFaces": "À propos des facettes",
     "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",
