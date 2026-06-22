@@ -252,8 +252,8 @@
     "otherSettings": "Autres paramètres",
     "otherSettingsSub": "Notifications · Thème · Données",
     "help": "Aide",
-    "facesUnit": "Facettes",
-    "seedsUnit": "Seeds",
+    "facesUnit": "{count, plural, one {Facette} other {Facettes}}",
+    "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Se déconnecter"
   },
   "appHeader": {
