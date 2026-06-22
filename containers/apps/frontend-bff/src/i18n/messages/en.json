@@ -138,8 +138,8 @@
     "post": "Post"
   },
   "homeProfile": {
-    "faces": "Faces",
-    "seeds": "Seeds"
+    "faces": "{count, plural, one {Face} other {Faces}}",
+    "seeds": "{count, plural, one {Seed} other {Seeds}}"
   },
   "faceFilterBar": {
     "all": "All"

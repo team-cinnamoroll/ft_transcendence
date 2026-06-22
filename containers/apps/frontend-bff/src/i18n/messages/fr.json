@@ -138,8 +138,8 @@
     "post": "Publier"
   },
   "homeProfile": {
-    "faces": "Facettes",
-    "seeds": "Graines"
+    "faces": "{count, plural, one {Facette} other {Facettes}}",
+    "seeds": "{count, plural, one {Graine} other {Graines}}"
   },
   "faceFilterBar": {
     "all": "Tout"
