@@ -163,7 +163,7 @@
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
     "noMatch": "Aucun résultat",
-    "seedCount": "Graines",
+    "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "noFilteredSeeds": "Aucune graine trouvée",
     "viewFace": "Voir la facette →",
     "noSubscribedFaces": "Aucune facette abonnée",

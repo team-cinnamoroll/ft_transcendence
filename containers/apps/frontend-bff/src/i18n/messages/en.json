@@ -163,7 +163,7 @@
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
     "noMatch": "No results",
-    "seedCount": "Seeds",
+    "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "noFilteredSeeds": "No seeds found",
     "viewFace": "View face →",
     "noSubscribedFaces": "No subscribed faces",

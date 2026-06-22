@@ -496,7 +496,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedSeeds, faces, users: _u
                             <span
                               style={{ fontSize: 10, color: 'var(--mf-text-muted)', marginLeft: 2 }}
                             >
-                              {t('seedCount')}
+                              {t('seedCount', { count: seedCount })}
                             </span>
                           </span>
                         </div>
@@ -781,7 +781,7 @@ const SubscriptionFeed = ({ subscribedFaceIds, subscribedSeeds, faces, users: _u
                         {seedCount}
                       </div>
                       <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
-                        {t('seedCount')}
+                        {t('seedCount', { count: seedCount })}
                       </div>
                     </div>
                   </div>
