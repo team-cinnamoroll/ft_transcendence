@@ -2,14 +2,14 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
-import { SignInRequestSchema, AuthSignInResponseSchema } from '@tracen/contracts';
+import { AuthSignInRequestSchema, AuthSignInResponseSchema } from '@tracen/contracts';
 import { signIn } from './sign-in.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv>().post(
     '/',
-    zValidator('json', SignInRequestSchema),
+    zValidator('json', AuthSignInRequestSchema),
     async (c) => {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
