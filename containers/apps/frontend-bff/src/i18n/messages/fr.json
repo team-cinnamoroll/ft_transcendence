@@ -108,7 +108,7 @@
     "sortName": "Nom",
     "gridView": "Vue grille",
     "listView": "Vue liste",
-    "seedCount": "Graines",
+    "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "createFirstFace": "Créer votre première facette",
     "createNewCard": "Nouvelle facette"
   },
