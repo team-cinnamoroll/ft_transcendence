@@ -36,7 +36,7 @@
     "addPhoto": "Ajouter une photo",
     "addPhotoAriaLabel": "Joindre une image",
     "addLink": "Ajouter un lien",
-    "charCount": "{n} car.",
+    "charCount": "{n, plural, one {# car.} other {# car.}}",
     "draftSaved": "Brouillon sauvegardé",
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
@@ -108,7 +108,7 @@
     "sortName": "Nom",
     "gridView": "Vue grille",
     "listView": "Vue liste",
-    "seedCount": "Graines",
+    "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "createFirstFace": "Créer votre première facette",
     "createNewCard": "Nouvelle facette"
   },
@@ -130,7 +130,7 @@
   "homeClient": {
     "write": "Écrire",
     "onThisDay": "Il y a un an",
-    "yearsAgo": "il y a {n} an(s)",
+    "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
     "reply": "Que répondriez-vous à votre passé ?",
     "recentSeeds": "Graines récentes",
     "viewAll": "Tout voir",
@@ -138,8 +138,8 @@
     "post": "Publier"
   },
   "homeProfile": {
-    "faces": "Facettes",
-    "seeds": "Graines"
+    "faces": "{count, plural, one {Facette} other {Facettes}}",
+    "seeds": "{count, plural, one {Graine} other {Graines}}"
   },
   "faceFilterBar": {
     "all": "Tout"
@@ -163,7 +163,7 @@
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
     "noMatch": "Aucun résultat",
-    "seedCount": "Graines",
+    "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "noFilteredSeeds": "Aucune graine trouvée",
     "viewFace": "Voir la facette →",
     "noSubscribedFaces": "Aucune facette abonnée",
@@ -223,7 +223,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count} notifications"
+    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Recherche",
@@ -231,7 +231,7 @@
   },
   "subscriptions": {
     "title": "Abonnements",
-    "subscribedCount": "{count} facette(s) suivie(s)"
+    "subscribedCount": "{count, plural, one {# facette suivie} other {# facettes suivies}}"
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour à la liste des facettes"
@@ -252,8 +252,8 @@
     "otherSettings": "Autres paramètres",
     "otherSettingsSub": "Notifications · Thème · Données",
     "help": "Aide",
-    "facesUnit": "Facettes",
-    "seedsUnit": "Seeds",
+    "facesUnit": "{count, plural, one {Facette} other {Facettes}}",
+    "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Se déconnecter"
   },
   "appHeader": {
@@ -265,7 +265,7 @@
     "imageAlt": "Image {n}",
     "moreOptions": "Plus d'options",
     "edit": "Modifier",
-    "linksCount": "{count} lien(s)"
+    "linksCount": "{count, plural, one {# lien} other {# liens}}"
   },
   "seedDetail": {
     "title": "Seed",
@@ -283,7 +283,7 @@
   },
   "contextRail": {
     "onThisDay": "Ce jour il y a un an",
-    "yearsAgo": "Il y a {n} an(s)",
+    "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
     "onThisDayPrompt": "Que diriez-vous aujourd'hui ?",
     "aboutFaces": "À propos des facettes",
     "aboutFacesDesc": "Une Facette est l'une de vos facettes. Écrivez avec la facette adaptée et relisez-vous plus tard.",
@@ -294,7 +294,7 @@
     "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
     "findFaces": "Chercher des facettes →",
     "popularFaces": "Facettes populaires",
-    "subscribersUnit": "abonnés",
+    "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
     "subscribeButton": "S'abonner"
   }
 }

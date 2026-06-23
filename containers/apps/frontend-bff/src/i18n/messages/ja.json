@@ -108,7 +108,7 @@
     "sortName": "名前順",
     "gridView": "グリッド表示",
     "listView": "リスト表示",
-    "seedCount": "シード",
+    "seedCount": "{count, plural, other {シード}}",
     "createFirstFace": "最初のフェイスを作る",
     "createNewCard": "新しいフェイスを作る"
   },
@@ -138,8 +138,8 @@
     "post": "投稿"
   },
   "homeProfile": {
-    "faces": "フェイス",
-    "seeds": "シード"
+    "faces": "{count, plural, other {フェイス}}",
+    "seeds": "{count, plural, other {シード}}"
   },
   "faceFilterBar": {
     "all": "すべて"
@@ -163,7 +163,7 @@
     "facesSection": "フェイス ({n})",
     "seedsSection": "シード ({n})",
     "noMatch": "該当なし",
-    "seedCount": "シード",
+    "seedCount": "{count, plural, other {シード}}",
     "noFilteredSeeds": "該当するシードがありません",
     "viewFace": "フェイスを見る →",
     "noSubscribedFaces": "サブスクしているフェイスがありません",
@@ -252,8 +252,8 @@
     "otherSettings": "その他詳細設定",
     "otherSettingsSub": "通知 · テーマ · データ",
     "help": "ヘルプ",
-    "facesUnit": "フェイス",
-    "seedsUnit": "シード",
+    "facesUnit": "{count, plural, other {フェイス}}",
+    "seedsUnit": "{count, plural, other {シード}}",
     "logout": "ログアウト"
   },
   "appHeader": {
@@ -294,7 +294,7 @@
     "noSubscriptions": "サブスクしているフェイスがありません。",
     "findFaces": "フェイスを探す →",
     "popularFaces": "人気のフェイス",
-    "subscribersUnit": "サブスク",
+    "subscribersUnit": "{count, plural, other {サブスク}}",
     "subscribeButton": "サブスク"
   }
 }

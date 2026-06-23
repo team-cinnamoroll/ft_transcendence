@@ -36,7 +36,7 @@
     "addPhoto": "Add photo",
     "addPhotoAriaLabel": "Attach image",
     "addLink": "Add link",
-    "charCount": "{n} chars",
+    "charCount": "{n, plural, one {# char} other {# chars}}",
     "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
@@ -108,7 +108,7 @@
     "sortName": "Name",
     "gridView": "Grid view",
     "listView": "List view",
-    "seedCount": "Seeds",
+    "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "createFirstFace": "Create your first face",
     "createNewCard": "New face"
   },
@@ -130,7 +130,7 @@
   "homeClient": {
     "write": "Write",
     "onThisDay": "On this day",
-    "yearsAgo": "{n} year(s) ago",
+    "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "reply": "What would you say to your past self?",
     "recentSeeds": "Recent seeds",
     "viewAll": "View all",
@@ -138,8 +138,8 @@
     "post": "Post"
   },
   "homeProfile": {
-    "faces": "Faces",
-    "seeds": "Seeds"
+    "faces": "{count, plural, one {Face} other {Faces}}",
+    "seeds": "{count, plural, one {Seed} other {Seeds}}"
   },
   "faceFilterBar": {
     "all": "All"
@@ -163,7 +163,7 @@
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
     "noMatch": "No results",
-    "seedCount": "Seeds",
+    "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "noFilteredSeeds": "No seeds found",
     "viewFace": "View face →",
     "noSubscribedFaces": "No subscribed faces",
@@ -223,7 +223,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "count": "{count} notifications"
+    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Search",
@@ -231,7 +231,7 @@
   },
   "subscriptions": {
     "title": "Subscriptions",
-    "subscribedCount": "{count} faces subscribed"
+    "subscribedCount": "{count, plural, one {# face subscribed} other {# faces subscribed}}"
   },
   "faceDetailPage": {
     "backAriaLabel": "Back to faces list"
@@ -252,8 +252,8 @@
     "otherSettings": "Other Settings",
     "otherSettingsSub": "Notifications · Theme · Data",
     "help": "Help",
-    "facesUnit": "Faces",
-    "seedsUnit": "Seeds",
+    "facesUnit": "{count, plural, one {Face} other {Faces}}",
+    "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Log out"
   },
   "appHeader": {
@@ -265,7 +265,7 @@
     "imageAlt": "Image {n}",
     "moreOptions": "More options",
     "edit": "Edit",
-    "linksCount": "{count} links"
+    "linksCount": "{count, plural, one {# link} other {# links}}"
   },
   "seedDetail": {
     "title": "Seed",
@@ -283,7 +283,7 @@
   },
   "contextRail": {
     "onThisDay": "On This Day",
-    "yearsAgo": "{n} year(s) ago",
+    "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "onThisDayPrompt": "What would you say today?",
     "aboutFaces": "About Faces",
     "aboutFacesDesc": "A Face is one facet of who you are. Write with the face that fits what you want to express, and reflect on it later.",
@@ -294,7 +294,7 @@
     "noSubscriptions": "You haven't subscribed to any faces yet.",
     "findFaces": "Find Faces →",
     "popularFaces": "Popular Faces",
-    "subscribersUnit": "subscribers",
+    "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
     "subscribeButton": "Subscribe"
   }
 }
