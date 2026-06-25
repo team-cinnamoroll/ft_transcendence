@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
 
@@ -30,7 +31,7 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
 
   if (!isOpen) return null;
 
-  const menuItems = [
+  const menuItems: { icon: React.ReactNode; title: string; sub: string | null; href?: string }[] = [
     {
       icon: (
         <svg
@@ -49,6 +50,7 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
       ),
       title: t('settings'),
       sub: t('settingsSub'),
+      href: '/settings',
     },
     {
       icon: (
@@ -187,60 +189,74 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
         </div>
 
         <div style={{ padding: '6px 0 2px' }}>
-          {menuItems.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '10px 6px',
-                borderRadius: 8,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 9,
-                  background: 'var(--mf-surface-card)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                {item.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--mf-brand)' }}>
-                  {item.title}
+          {menuItems.map((item, i) => {
+            const itemStyle: React.CSSProperties = {
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '10px 6px',
+              borderRadius: 8,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'left',
+              textDecoration: 'none',
+            };
+            const itemContent = (
+              <>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 9,
+                    background: 'var(--mf-surface-card)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.icon}
                 </div>
-                {item.sub && (
-                  <div style={{ fontSize: 11, color: 'var(--mf-text-sub)', marginTop: 1 }}>
-                    {item.sub}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--mf-brand)' }}>
+                    {item.title}
                   </div>
-                )}
-              </div>
-              <svg
-                width={8}
-                height={8}
-                viewBox="0 0 8 8"
-                fill="none"
-                stroke="var(--mf-text-faint)"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-              >
-                <path d="M2 1l3 3-3 3" />
-              </svg>
-            </button>
-          ))}
+                  {item.sub && (
+                    <div style={{ fontSize: 11, color: 'var(--mf-text-sub)', marginTop: 1 }}>
+                      {item.sub}
+                    </div>
+                  )}
+                </div>
+                <svg
+                  width={8}
+                  height={8}
+                  viewBox="0 0 8 8"
+                  fill="none"
+                  stroke="var(--mf-text-faint)"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                >
+                  <path d="M2 1l3 3-3 3" />
+                </svg>
+              </>
+            );
+
+            if (item.href) {
+              return (
+                <Link key={i} href={item.href} onClick={onClose} style={itemStyle}>
+                  {itemContent}
+                </Link>
+              );
+            }
+
+            return (
+              <button key={i} type="button" style={itemStyle}>
+                {itemContent}
+              </button>
+            );
+          })}
         </div>
 
         <div
