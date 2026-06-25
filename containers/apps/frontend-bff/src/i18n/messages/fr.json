@@ -247,6 +247,23 @@
     "title": "Abonnements",
     "subscribedCount": "{count, plural, one {# facette suivie} other {# facettes suivies}}"
   },
+  "settings": {
+    "title": "Paramètres",
+    "facesUnit": "{count, plural, one {Facette} other {Facettes}}",
+    "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
+    "profile": {
+      "title": "Profil",
+      "description": "Modifiez votre nom, votre badge et votre avatar."
+    },
+    "data": {
+      "title": "Données et confidentialité",
+      "description": "Exportez vos données."
+    },
+    "account": {
+      "title": "Compte",
+      "description": "Supprimez votre compte."
+    }
+  },
   "faceDetailPage": {
     "backAriaLabel": "Retour à la liste des facettes"
   },
