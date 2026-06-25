@@ -233,6 +233,23 @@
     "title": "サブスク",
     "subscribedCount": "{count} フェイスをサブスク中"
   },
+  "settings": {
+    "title": "設定",
+    "facesUnit": "{count, plural, other {フェイス}}",
+    "seedsUnit": "{count, plural, other {シード}}",
+    "profile": {
+      "title": "プロフィール",
+      "description": "表示名・バッジ・アバターを変更します。"
+    },
+    "data": {
+      "title": "データとプライバシー",
+      "description": "あなたのデータをエクスポートします。"
+    },
+    "account": {
+      "title": "アカウント",
+      "description": "アカウントを削除します。"
+    }
+  },
   "faceDetailPage": {
     "backAriaLabel": "フェイス一覧に戻る"
   },

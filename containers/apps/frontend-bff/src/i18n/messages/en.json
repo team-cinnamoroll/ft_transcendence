@@ -233,6 +233,23 @@
     "title": "Subscriptions",
     "subscribedCount": "{count, plural, one {# face subscribed} other {# faces subscribed}}"
   },
+  "settings": {
+    "title": "Settings",
+    "facesUnit": "{count, plural, one {Face} other {Faces}}",
+    "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
+    "profile": {
+      "title": "Profile",
+      "description": "Edit your display name, badge, and avatar."
+    },
+    "data": {
+      "title": "Data & Privacy",
+      "description": "Export your data."
+    },
+    "account": {
+      "title": "Account",
+      "description": "Delete your account."
+    }
+  },
   "faceDetailPage": {
     "backAriaLabel": "Back to faces list"
   },
