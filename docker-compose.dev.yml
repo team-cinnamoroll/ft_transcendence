@@ -61,6 +61,7 @@ services:
     volumes:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
+      - file_storage_data:${FILE_STORAGE_BASE_DIR:-/app/uploads}
     working_dir: /workspace
     command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
     depends_on:
@@ -121,3 +122,4 @@ volumes:
   postgres_data:
   ci_docker_data:
   redis_data:
+  file_storage_data:
