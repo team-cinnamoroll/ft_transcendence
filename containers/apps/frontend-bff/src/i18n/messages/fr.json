@@ -239,7 +239,8 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "profile": {
       "title": "Profil",
-      "description": "Modifiez votre nom, votre badge et votre avatar."
+      "description": "Modifiez votre nom, votre badge et votre avatar.",
+      "edit": "Modifier"
     },
     "data": {
       "title": "Données et confidentialité",
@@ -249,6 +250,25 @@
       "title": "Compte",
       "description": "Supprimez votre compte."
     }
+  },
+  "profileEditModal": {
+    "title": "Modifier le profil",
+    "ariaLabel": "Modifier le profil",
+    "close": "Fermer",
+    "name": "Nom",
+    "required": "*",
+    "namePlaceholder": "Nom affiché",
+    "badge": "Badge",
+    "optional": "(facultatif)",
+    "badgePlaceholder": "🌟",
+    "badgeHint": "Un seul emoji",
+    "avatar": "URL de l'avatar",
+    "avatarPlaceholder": "https://example.com/avatar.png",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "errorName": "Veuillez saisir un nom",
+    "errorBadge": "Le badge doit être un seul emoji",
+    "errorAvatar": "Veuillez saisir une URL valide"
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour à la liste des facettes"
