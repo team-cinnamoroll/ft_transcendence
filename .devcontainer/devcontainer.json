@@ -41,7 +41,8 @@
         "wallabyjs.console-ninja",
 
         // DB
-        "dbcode.dbcode",
+        "ms-ossdata.vscode-pgsql",
+        "davidsekar.redis-xplorer",
 
         // Git / チーム開発
         "eamodio.gitlens",

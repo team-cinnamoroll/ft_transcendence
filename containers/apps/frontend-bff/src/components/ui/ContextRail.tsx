@@ -140,9 +140,7 @@ const ReflectionRail = ({ faces, seeds }: ReflectionRailProps) => {
                         marginBottom: 4,
                       }}
                     >
-                      <span
-                        style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text)' }}
-                      >
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text)' }}>
                         {getFaceTitle(face)}
                       </span>
                       <span
@@ -195,11 +193,7 @@ type CollectionRailProps = {
   users: UserProfile[];
 };
 
-const CollectionRail = ({
-  subscribedFaces,
-  latestSeedByFaceId,
-  users,
-}: CollectionRailProps) => {
+const CollectionRail = ({ subscribedFaces, latestSeedByFaceId, users }: CollectionRailProps) => {
   const t = useTranslations('contextRail');
   const formatRelative = useRelativeTime();
   const userMap = new Map(users.map((u) => [u.id, u]));
@@ -317,11 +311,20 @@ const CollectionRail = ({
                 {rec.name.slice(0, 1)}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    color: 'var(--mf-brand)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {rec.name}
                 </div>
                 <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
-                  @{rec.handle} · {rec.subs} {t('subscribersUnit')}
+                  @{rec.handle} · {rec.subs} {t('subscribersUnit', { count: rec.subs })}
                 </div>
               </div>
               <button

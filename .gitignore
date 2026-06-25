@@ -49,3 +49,7 @@ containers/infra/local-prod/certs/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# dev
+dev-sql/
+redis-xplorer.redis

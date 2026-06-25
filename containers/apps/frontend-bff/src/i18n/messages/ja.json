@@ -125,7 +125,7 @@
     "sortName": "名前順",
     "gridView": "グリッド表示",
     "listView": "リスト表示",
-    "seedCount": "シード",
+    "seedCount": "{count, plural, other {シード}}",
     "createFirstFace": "最初のフェイスを作る",
     "createNewCard": "新しいフェイスを作る",
     "editFace": "編集",
@@ -162,8 +162,8 @@
     "post": "投稿"
   },
   "homeProfile": {
-    "faces": "フェイス",
-    "seeds": "シード"
+    "faces": "{count, plural, other {フェイス}}",
+    "seeds": "{count, plural, other {シード}}"
   },
   "faceFilterBar": {
     "all": "すべて"
@@ -200,10 +200,16 @@
     "subscribeAriaLabel": "{name}をサブスクする",
     "unsubscribeAriaLabel": "{name}のサブスクを解除",
     "noMatch": "該当なし",
-    "seedCount": "シード",
+    "seedCount": "{count, plural, other {シード}}",
     "noFilteredSeeds": "該当するシードがありません",
     "viewFace": "フェイスを見る →",
-    "noSubscribedFaces": "サブスクしているフェイスがありません"
+    "noSubscribedFaces": "サブスクしているフェイスがありません",
+    "emptyHeadline": "まだ、誰のフェイスも<br></br>サブスクライブしていない。",
+    "emptyBody": "気になるフェイスを1つだけ、まず選んでみる。<br></br>通知の重みを大切にする設計です。",
+    "recommendedTitle": "おすすめのフェイス",
+    "recommendedSubtitle": "· あなたに合いそうな",
+    "subscriberCount": "{n} サブスク",
+    "subscribeAction": "サブスク"
   },
   "notificationList": {
     "noNotifications": "まだ通知はありません",
@@ -260,8 +266,8 @@
     "otherSettings": "その他詳細設定",
     "otherSettingsSub": "通知 · テーマ · データ",
     "help": "ヘルプ",
-    "facesUnit": "フェイス",
-    "seedsUnit": "シード",
+    "facesUnit": "{count, plural, other {フェイス}}",
+    "seedsUnit": "{count, plural, other {シード}}",
     "logout": "ログアウト"
   },
   "appHeader": {
@@ -327,7 +333,7 @@
     "noSubscriptions": "サブスクしているフェイスがありません。",
     "findFaces": "フェイスを探す →",
     "popularFaces": "人気のフェイス",
-    "subscribersUnit": "サブスク",
+    "subscribersUnit": "{count, plural, other {サブスク}}",
     "subscribeButton": "サブスク"
   }
 }

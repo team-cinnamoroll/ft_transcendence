@@ -1,6 +1,6 @@
 export type {
-  SignUpRequest,
-  SignInRequest,
+  AuthSignUpRequest,
+  AuthSignInRequest,
   AuthSignUpResponse as AuthSignUp,
   AuthSignInResponse as AuthSignIn,
   AuthRefreshResponse as AuthRefresh,

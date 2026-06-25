@@ -2,9 +2,13 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 
-import { SignUpRequestSchema } from '@tracen/contracts';
-import type { AuthSignUp, AuthSignIn, AuthRefresh } from '@/types/auth';
-import type { User } from '@/types/user';
+import {
+  AuthSignUpRequestSchema,
+  type UserResponse,
+  type AuthSignUpResponse,
+  type AuthSignInResponse,
+  type AuthRefreshResponse,
+} from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
 import { verifyToken } from '@/lib/backend-client';
@@ -140,7 +144,7 @@ export async function runApiHealthCheck(
     const name = `healthcheck-${nonce.slice(0, 8)}`;
     const password = 'password1234567890';
 
-    const createUserInput = SignUpRequestSchema.parse({
+    const createUserInput = AuthSignUpRequestSchema.parse({
       email: email,
       name: name,
       password: password,
@@ -164,7 +168,7 @@ export async function runApiHealthCheck(
       return await failWithResponse('create-user', createRes, 'user creation returned non-2xx');
     }
 
-    const created = (await createRes.json()) as AuthSignUp;
+    const created = (await createRes.json()) as AuthSignUpResponse;
     const createdUserId = created.user?.id;
     if (!createdUserId) {
       log('FAIL (create-user): response JSON missing id');
@@ -231,7 +235,7 @@ export async function runApiHealthCheck(
         'refresh token endpoint returned non-2xx'
       );
     }
-    const refreshJson = (await refreshRes.json()) as AuthRefresh;
+    const refreshJson = (await refreshRes.json()) as AuthRefreshResponse;
     log(`OK (refresh-token): refresh token response ${JSON.stringify(refreshJson)}`);
     const refreshedAccessToken = refreshJson.accessToken;
     if (!refreshedAccessToken) {
@@ -322,7 +326,7 @@ export async function runApiHealthCheck(
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
-    const user = (await getExistsRes.json()) as User;
+    const user = (await getExistsRes.json()) as UserResponse;
     if (user.id !== createdUserId) {
       log(
         `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${user.id})`
@@ -355,7 +359,7 @@ export async function runApiHealthCheck(
         'sign in with created user returned non-2xx'
       );
     }
-    const signInJson = (await signInRes.json()) as AuthSignIn;
+    const signInJson = (await signInRes.json()) as AuthSignInResponse;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
     const signInJwt = signInJson.accessToken;
     if (!signInJwt) {

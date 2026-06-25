@@ -115,8 +115,7 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
           background: 'var(--mf-bg-light)',
           borderRadius: 18,
           padding: '16px 14px 10px',
-          boxShadow:
-            '0 20px 60px rgba(20,24,36,0.32), 0 0 0 0.5px rgba(30,42,74,0.1)',
+          boxShadow: '0 20px 60px rgba(20,24,36,0.32), 0 0 0 0.5px rgba(30,42,74,0.1)',
         }}
       >
         <div
@@ -160,15 +159,11 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
             {user.name.slice(0, 1)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--mf-brand)' }}
-            >
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--mf-brand)' }}>
               {user.name}
             </div>
             {user.badge && (
-              <div style={{ fontSize: 11.5, color: 'var(--mf-text-sub)' }}>
-                {user.badge}
-              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--mf-text-sub)' }}>{user.badge}</div>
             )}
             <div
               style={{
@@ -181,11 +176,11 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
             >
               <span>
                 <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{faceCount}</b>{' '}
-                {t('facesUnit')}
+                {t('facesUnit', { count: faceCount })}
               </span>
               <span>
                 <b style={{ color: 'var(--mf-text)', fontWeight: 700 }}>{seedCount}</b>{' '}
-                {t('seedsUnit')}
+                {t('seedsUnit', { count: seedCount })}
               </span>
             </div>
           </div>
@@ -224,15 +219,11 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
                 {item.icon}
               </div>
               <div style={{ flex: 1 }}>
-                <div
-                  style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--mf-brand)' }}
-                >
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--mf-brand)' }}>
                   {item.title}
                 </div>
                 {item.sub && (
-                  <div
-                    style={{ fontSize: 11, color: 'var(--mf-text-sub)', marginTop: 1 }}
-                  >
+                  <div style={{ fontSize: 11, color: 'var(--mf-text-sub)', marginTop: 1 }}>
                     {item.sub}
                   </div>
                 )}

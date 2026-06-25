@@ -4,3 +4,5 @@ export const SuccessResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(), // success: falseのときのエラーメッセージ
 });
+
+export type SuccessResponse = z.infer<typeof SuccessResponseSchema>;

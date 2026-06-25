@@ -313,7 +313,7 @@ contracts/src/
 │   │   ├── user.ts          # UserResponseSchema / UserIdSchema など
 │   │   └── user.request.ts  # UserIdParamSchema など
 │   └── auth/
-│       ├── auth.sign-up.request.ts  # SignUpRequestSchema
+│       ├── auth.sign-up.request.ts  # AuthSignUpRequestSchema
 │       └── auth.sign-up.ts          # AuthSignUpResponseSchema
 └── shared/
   ├── primitives.ts
