@@ -3,9 +3,11 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
 import * as usersSchema from '../../../features/users/infra/db/schema';
+import * as fileStorageSchema from '../../../features/file-storage/infra/db/schema';
 
 export const appSchema = {
   ...usersSchema,
+  ...fileStorageSchema,
 };
 
 export type TracenDb = PostgresJsDatabase<typeof appSchema>;
