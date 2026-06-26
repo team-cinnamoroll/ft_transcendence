@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [
     devServer({
       entry: 'src/index.ts',
+      exclude: [/.*\.ts$/, /.*\.tsx$/, /^\/@.+$/, /^\/favicon\.ico$/, /^\/node_modules\/.*/],
     }),
   ],
   ssr: {
