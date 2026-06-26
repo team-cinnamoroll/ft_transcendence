@@ -1,8 +1,8 @@
 import type { MiddlewareHandler } from 'hono';
 
-import { ProtectedEnv } from '../../../shared/types/hono';
-import { UserRepositorySpec } from '../../../features/users/domain/users.repository';
-import { getUserRepository } from '../infra/users.repository.di';
+import { ProtectedEnv } from '../../shared/types/hono';
+import { UserRepositorySpec } from './domain/users.repository';
+import { getUserRepository } from './infra/users.repository.di';
 
 export type UsersHandlerEnv = ProtectedEnv & {
   Variables: { userRepo: UserRepositorySpec };
