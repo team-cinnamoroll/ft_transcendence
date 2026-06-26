@@ -13,3 +13,7 @@ export type Uuid = z.infer<typeof UuidSchema>;
 // ISO 8601形式の日時文字列のスキーマと型
 export const IsoDateTimeStringSchema = z.iso.datetime();
 export type IsoDateTimeString = z.infer<typeof IsoDateTimeStringSchema>;
+
+// ファイルパス
+export const FilePathSchema = z.string().min(1).max(255);
+export type FilePath = z.infer<typeof FilePathSchema>;
