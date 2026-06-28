@@ -313,5 +313,17 @@
     "popularFaces": "Popular Faces",
     "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
     "subscribeButton": "Subscribe"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalid": "Invalid input",
+    "tooShort": "Must be at least {min} characters",
+    "tooLong": "Must be at most {max} characters",
+    "email": { "invalid": "Enter a valid email address" },
+    "url": { "invalid": "Enter a valid URL" },
+    "password": {
+      "tooShort": "Password must be at least {min} characters",
+      "tooLong": "Password must be at most {max} characters"
+    }
   }
 }
