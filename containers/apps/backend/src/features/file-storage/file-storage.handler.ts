@@ -3,12 +3,12 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
-import { saveFile } from './domain/file-storage.usecase';
+import { saveFile } from './domain/file-storage.save-file.usecase';
 import { deleteFile, FileDeleteError } from './domain/file-storage.delete-file.usecase';
 import {
   downloadPrivateFile,
   FileDownloadError,
-} from './domain/file-storage.private-download-file.usecase';
+} from './domain/file-storage.download-private-file.usecase';
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
