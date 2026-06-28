@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { MimeTypeSchema, FileSizeSchema, type Visibility, type FilePath } from '@tracen/contracts';
+import {
+  MimeTypeSchema,
+  FileSizeSchema,
+  type Visibility,
+  type FilePath,
+  type FileMetadataId,
+} from '@tracen/contracts';
 import {
   type BucketNameType,
   type StorageKey,
@@ -38,6 +44,7 @@ export interface FileStoragesServiceRepositorySpec {
   resolveUrl(
     bucket: BucketNameType,
     storageKey: StorageKey,
+    fileId: FileMetadataId,
     visibility: Visibility
   ): Promise<FilePath>;
 }

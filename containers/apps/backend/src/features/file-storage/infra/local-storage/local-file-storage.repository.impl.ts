@@ -8,7 +8,7 @@ import {
 } from '../../domain/repositories/storage-service.repository';
 import { StorageDataInput } from '../../domain/file-storage.file-save.request';
 import { type BucketNameType, type StorageKey } from '../../domain/file-metadata.entity';
-import { type Visibility, type FilePath } from '@tracen/contracts';
+import { type Visibility, type FilePath, type FileMetadataId } from '@tracen/contracts';
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error;
@@ -54,7 +54,10 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
    * ファイルをローカルディスクからストリームとして読み出す
    * Honoの c.body(stream) にそのまま流せるように Web標準の ReadableStream で返す
    */
-  async get(bucket: string, storageKey: string): Promise<ReadableStream<Uint8Array> | null> {
+  async get(
+    bucket: BucketNameType,
+    storageKey: StorageKey
+  ): Promise<ReadableStream<Uint8Array> | null> {
     const fullPath = path.join(this.baseDir, bucket, storageKey);
 
     try {
@@ -78,7 +81,7 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
   /**
    * ファイルをローカルディスクから削除する
    */
-  async delete(bucket: string, storageKey: string): Promise<void> {
+  async delete(bucket: BucketNameType, storageKey: StorageKey): Promise<void> {
     const fullPath = path.join(this.baseDir, bucket, storageKey);
     try {
       await fs.unlink(fullPath);
@@ -99,6 +102,7 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
   async resolveUrl(
     bucket: BucketNameType,
     storageKey: StorageKey,
+    fileId: FileMetadataId,
     visibility: Visibility
   ): Promise<FilePath> {
     if (visibility === 'public') {
@@ -109,8 +113,8 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
     } else {
       // 【プライベートアクセス（認証必須）】
       // 直接ファイルを返さず、必ずHonoの認可ミドルウェアを通るAPIのパスを返す
-      // 例: /api/files/private/secure-doc/report.pdf
-      return `/api/v1/file-storage/private/${bucket}/${storageKey}`;
+      // 例: /api/v1/file-storage/download/file-123
+      return `/api/v1/file-storage/download/${fileId}`;
     }
   }
 }

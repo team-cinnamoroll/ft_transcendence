@@ -1,14 +1,21 @@
 import { Hono } from 'hono';
+import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/file-storage.usecase';
 import { deleteFile, FileDeleteError } from './domain/file-storage.delete-file.usecase';
 import {
+  downloadPrivateFile,
+  FileDownloadError,
+} from './domain/file-storage.private-download-file.usecase';
+import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
   FileDeleteRequestSchema as FileDeleteApiRequestSchema,
   FileDeleteResponseSchema,
+  FileMetadataIdSchema,
+  SuccessResponseSchema,
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/file-storage.file-save.request';
 import { FileDeleteRequestSchema } from './domain/file-storage.file-delete.request';
@@ -129,5 +136,74 @@ export function fileStorageRouter() {
           500
         );
       }
-    });
+    })
+    .get(
+      '/download/:fileId',
+      zValidator(
+        'param',
+        z.object({
+          fileId: FileMetadataIdSchema,
+        })
+      ),
+      async (c) => {
+        const fileStorageRepo = c.get('fileStorageRepo');
+        const fileMetadataRepo = c.get('fileMetadataRepo');
+        if (!fileStorageRepo || !fileMetadataRepo) {
+          return c.json(
+            SuccessResponseSchema.parse({
+              success: false,
+              message: 'File storage dependencies are not initialized',
+            }),
+            500
+          );
+        }
+
+        const jwtPayload = c.get('jwtPayload');
+        const clientId = jwtPayload.sub;
+        if (!clientId) {
+          return c.json(
+            SuccessResponseSchema.parse({
+              success: false,
+              message: 'JWT token is invalid: sub (userId) is missing',
+            }),
+            400
+          );
+        }
+
+        const { fileId } = c.req.valid('param');
+
+        try {
+          const { stream, metadata } = await downloadPrivateFile(
+            fileStorageRepo,
+            fileMetadataRepo,
+            fileId,
+            clientId
+          );
+          c.header('Content-Type', metadata.mimeType);
+          c.header('Content-Length', metadata.fileSize.toString());
+          // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
+          const encodedFileName = encodeURIComponent(metadata.fileName);
+          c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
+          return c.body(stream);
+        } catch (error) {
+          console.error('File download failed:', error);
+          if (error instanceof FileDownloadError) {
+            return c.json(
+              SuccessResponseSchema.parse({
+                success: false,
+                message: error.message,
+              }),
+              error.code
+            );
+          }
+          return c.json(
+            SuccessResponseSchema.parse({
+              success: false,
+              message: 'File download failed',
+            }),
+            500
+          );
+        }
+      }
+    );
 }

@@ -50,6 +50,7 @@ export async function saveFile(
   const filePath: FilePath = await storageRepo.resolveUrl(
     bucket,
     storageKey,
+    fileMetadataId,
     saveRequest.visibility
   );
 
