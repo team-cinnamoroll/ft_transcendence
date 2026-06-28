@@ -3,8 +3,15 @@ import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/file-storage.usecase';
-import { FileUploadRequestHeaderSchema, FileUploadResponseSchema } from '@tracen/contracts';
+import { deleteFile, FileDeleteError } from './domain/file-storage.delete-file.usecase';
+import {
+  FileUploadRequestHeaderSchema,
+  FileUploadResponseSchema,
+  FileDeleteRequestSchema as FileDeleteApiRequestSchema,
+  FileDeleteResponseSchema,
+} from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/file-storage.file-save.request';
+import { FileDeleteRequestSchema } from './domain/file-storage.file-delete.request';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -64,6 +71,60 @@ export function fileStorageRouter() {
           FileUploadResponseSchema.parse({
             success: false,
             message: 'File upload failed',
+          }),
+          500
+        );
+      }
+    })
+    .post('/delete', zValidator('json', FileDeleteApiRequestSchema), async (c) => {
+      const fileStorageRepo = c.get('fileStorageRepo');
+      const fileMetadataRepo = c.get('fileMetadataRepo');
+      if (!fileStorageRepo || !fileMetadataRepo) {
+        return c.json(
+          FileDeleteResponseSchema.parse({
+            success: false,
+            message: 'File storage dependencies are not initialized',
+          }),
+          500
+        );
+      }
+
+      const jwtPayload = c.get('jwtPayload');
+      const clientId = jwtPayload.sub;
+      if (!clientId) {
+        return c.json(
+          FileDeleteResponseSchema.parse({
+            success: false,
+            message: 'JWT token is invalid: sub (userId) is missing',
+          }),
+          400
+        );
+      }
+
+      const deleteRequestBody = c.req.valid('json');
+
+      try {
+        const deleteRequest = FileDeleteRequestSchema.parse({
+          fileId: deleteRequestBody.fileId,
+          clientId,
+        });
+        const result = await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
+        return c.json(result, 200);
+      } catch (error) {
+        console.error('File deletion failed:', error);
+        if (error instanceof FileDeleteError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            error.code
+          );
+        }
+        return c.json(
+          FileDeleteResponseSchema.parse({
+            success: false,
+            message: 'File deletion failed',
           }),
           500
         );

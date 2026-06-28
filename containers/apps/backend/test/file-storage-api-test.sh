@@ -60,6 +60,66 @@ load_state() {
     fi
 }
 
+resolve_download_target_url() {
+    local target_url="$FILE_PATH"
+
+    if [[ "$FILE_PATH" != http* ]]; then
+        target_url="${STATIC_BASE_URL}${FILE_PATH}"
+    fi
+
+    echo "$target_url"
+}
+
+run_download_assertion() {
+    local expected_status="$1"
+    local validate_checksum="$2"
+    local target_url
+    local http_status
+
+    if [ -z "$FILE_PATH" ] || [ "$FILE_PATH" = "null" ]; then
+        echo "Error: ダウンロード対象の filePath が状態ファイルに記録されていません。"
+        exit 1
+    fi
+
+    target_url=$(resolve_download_target_url)
+
+    echo "Downloading from: $target_url"
+
+    # --no-buffer によって、curlの内部バッファを無効化し
+    # Honoから送られてくるチャンク（パケット単位）の受信を強制的に再現する
+    http_status=$(curl -s -w "%{http_code}" --no-buffer -o "$DOWNLOADED_IMAGE" "$target_url")
+
+    if [ "$http_status" -ne "$expected_status" ]; then
+        echo "❌ Download Failed. Expected HTTP $expected_status but got $http_status."
+        exit 1
+    fi
+
+    if [ "$expected_status" -eq 200 ]; then
+        echo "  -> 🎉 Download Success (HTTP 200)."
+    else
+        echo "  -> ✅ Expected HTTP $expected_status confirmed."
+    fi
+
+    if [ "$validate_checksum" = "true" ]; then
+        # --- 同一性検証（ハッシュチェック） ---
+        echo "Checking data integrity (Checksum verification)..."
+        SRC_HASH=$(get_checksum "$TEST_IMAGE")
+        DL_HASH=$(get_checksum "$DOWNLOADED_IMAGE")
+
+        echo "  -> Source File Checksum    : $SRC_HASH"
+        echo "  -> Downloaded File Checksum: $DL_HASH"
+
+        if [ "$SRC_HASH" = "$DL_HASH" ]; then
+            echo "  ->  Validation OK! アップロードとダウンロードのデータは完全に一致しています。"
+        else
+            echo "  -> ❌ Validation Failed. データが破損または変形しています。"
+            exit 1
+        fi
+    fi
+
+    echo ""
+}
+
 # ==========================================
 # テストブロック
 # ==========================================
@@ -143,45 +203,51 @@ run_upload_test() {
 run_download_test() {
     load_state
     echo "=== 【テスト実行】静的配信ファイルのストリームダウンロード ==="
+    run_download_assertion 200 true
+}
 
-    if [ -z "$FILE_PATH" ] || [ "$FILE_PATH" = "null" ]; then
-        echo "Error: ダウンロード対象の filePath が状態ファイルに記録されていません。"
+# 4. デリートテスト (2回削除と削除後ダウンロードの確認)
+run_delete_test() {
+    load_state
+    echo "=== 【テスト実行】ファイル削除の検証 ==="
+
+    if [ -z "$FILE_ID" ] || [ "$FILE_ID" = "null" ]; then
+        echo "Error: 削除対象の fileId が状態ファイルに記録されていません。"
         exit 1
     fi
 
-    # API仕様がフルURLか相対パスかによって処理を分岐
-    TARGET_URL="$FILE_PATH"
-    if [[ "$FILE_PATH" != http* ]]; then
-        TARGET_URL="${STATIC_BASE_URL}${FILE_PATH}"
-    fi
+    echo "Deleting file (first attempt)..."
+    RES_DELETE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+        -H "Authorization: Bearer $USER_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{\"fileId\":\"$FILE_ID\"}")
+    DELETE_HTTP_STATUS=$(echo "$RES_DELETE" | tail -n 1)
+    DELETE_BODY=$(echo "$RES_DELETE" | sed '$d')
+    DELETE_SUCCESS=$(echo "$DELETE_BODY" | jq -r '.success')
 
-    echo "Downloading from: $TARGET_URL"
-
-    # --no-buffer によって、curlの内部バッファを無効化し
-    # Honoから送られてくるチャンク（パケット単位）の受信を強制的に再現する
-    HTTP_STATUS=$(curl -s -w "%{http_code}" --no-buffer -o "$DOWNLOADED_IMAGE" "$TARGET_URL")
-
-    if [ "$HTTP_STATUS" -ne 200 ]; then
-        echo "❌ Download Failed. HTTP Status: $HTTP_STATUS"
+    if [ "$DELETE_HTTP_STATUS" -ne 200 ] || [ "$DELETE_SUCCESS" != "true" ]; then
+        echo "❌ First delete failed. HTTP Status: $DELETE_HTTP_STATUS Response: $DELETE_BODY"
         exit 1
     fi
-    echo "  -> 🎉 Download Success (HTTP 200)."
+    echo "  -> 🎉 Delete Success (HTTP 200, success=true)."
 
-    # --- 同一性検証（ハッシュチェック） ---
-    echo "Checking data integrity (Checksum verification)..."
-    SRC_HASH=$(get_checksum "$TEST_IMAGE")
-    DL_HASH=$(get_checksum "$DOWNLOADED_IMAGE")
+    echo "Deleting file again (second attempt)..."
+    RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+        -H "Authorization: Bearer $USER_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{\"fileId\":\"$FILE_ID\"}")
+    DELETE_REPEAT_HTTP_STATUS=$(echo "$RES_DELETE_REPEAT" | tail -n 1)
+    DELETE_REPEAT_BODY=$(echo "$RES_DELETE_REPEAT" | sed '$d')
+    DELETE_REPEAT_SUCCESS=$(echo "$DELETE_REPEAT_BODY" | jq -r '.success')
 
-    echo "  -> Source File Checksum    : $SRC_HASH"
-    echo "  -> Downloaded File Checksum: $DL_HASH"
-
-    if [ "$SRC_HASH" = "$DL_HASH" ]; then
-        echo "  ->  Validation OK! アップロードとダウンロードのデータは完全に一致しています。"
-    else
-        echo "  -> ❌ Validation Failed. データが破損または変形しています。"
+    if [ "$DELETE_REPEAT_HTTP_STATUS" -ne 404 ] || [ "$DELETE_REPEAT_SUCCESS" != "false" ]; then
+        echo "❌ Second delete failed. HTTP Status: $DELETE_REPEAT_HTTP_STATUS Response: $DELETE_REPEAT_BODY"
         exit 1
     fi
-    echo ""
+    echo "  -> ✅ Second delete confirmed (HTTP 404, success=false)."
+
+    echo "Verifying download after deletion..."
+    run_download_assertion 404 false
 }
 
 # 4. 後処理 (ログアウト ＆ ユーザー削除 ＆ テストファイルクリーンアップ)
@@ -227,6 +293,9 @@ case "$1" in
     download)
         run_download_test
         ;;
+    delete)
+        run_delete_test
+        ;;
     cleanup)
         cleanup
         ;;
@@ -234,13 +303,15 @@ case "$1" in
         setup
         run_upload_test
         run_download_test
+        run_delete_test
         cleanup
         ;;
     *)
-        echo "使用方法: $0 {setup|upload|download|cleanup|all}"
+        echo "使用方法: $0 {setup|upload|download|delete|cleanup|all}"
         echo "  setup    : 準備（アカウント作成とダミーファイルの生成）"
         echo "  upload   : テスト実行（ストリームバイナリアップロードのテスト）"
         echo "  download : テスト実行（静的配信ファイルの取得とハッシュ検証）"
+        echo "  delete   : テスト実行（削除と削除後の404確認）"
         echo "  cleanup  : 後処理（アカウント削除、一時ファイルのクリーンアップ）"
         echo "  all      : 全ステップを連続で一括実行"
         exit 1
