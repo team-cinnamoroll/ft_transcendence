@@ -3,12 +3,12 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
-import { saveFile } from './domain/file-storage.save-file.usecase';
-import { deleteFile, FileDeleteError } from './domain/file-storage.delete-file.usecase';
+import { saveFile } from './domain/usecases/file-storage.save-file.usecase';
+import { deleteFile, FileDeleteError } from './domain/usecases/file-storage.delete-file.usecase';
 import {
   downloadPrivateFile,
   FileDownloadError,
-} from './domain/file-storage.download-private-file.usecase';
+} from './domain/usecases/file-storage.download-private-file.usecase';
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
@@ -17,8 +17,8 @@ import {
   FileMetadataIdSchema,
   SuccessResponseSchema,
 } from '@tracen/contracts';
-import { FileSaveRequestSchema } from './domain/file-storage.file-save.request';
-import { FileDeleteRequestSchema } from './domain/file-storage.file-delete.request';
+import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
+import { FileDeleteRequestSchema } from './domain/usecases/file-storage.file-delete.request';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()

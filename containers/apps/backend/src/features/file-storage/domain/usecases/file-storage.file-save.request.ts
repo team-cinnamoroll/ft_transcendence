@@ -6,7 +6,7 @@ import {
   VisibilitySchema,
   FileSizeSchema,
 } from '@tracen/contracts';
-import { OwnerIdSchema } from './file-metadata.entity';
+import { OwnerIdSchema } from '../file-metadata.entity';
 
 export const StorageDataInputSchema = z.union([
   z.instanceof(Buffer),

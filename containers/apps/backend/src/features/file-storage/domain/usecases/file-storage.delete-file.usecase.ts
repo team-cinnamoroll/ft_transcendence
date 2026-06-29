@@ -1,5 +1,5 @@
-import { FileStoragesServiceRepositorySpec } from './repositories/storage-service.repository';
-import { FileMetadataRepositorySpec } from './repositories/file-metadata.repository';
+import { FileStoragesServiceRepositorySpec } from '../repositories/storage-service.repository';
+import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
 import { type FileDeleteResponse } from '@tracen/contracts';
 import { type FileDeleteRequest } from './file-storage.file-delete.request';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';

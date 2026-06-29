@@ -4,8 +4,8 @@ import mime from 'mime';
 import {
   FileStoragesServiceRepositorySpec,
   UploadOptionsSchema,
-} from './repositories/storage-service.repository';
-import { FileMetadataRepositorySpec } from './repositories/file-metadata.repository';
+} from '../repositories/storage-service.repository';
+import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
 import { MimeType, type FileMetadataId, type FilePath, type Visibility } from '@tracen/contracts';
 import {
   FileMetadataSchema,
@@ -13,7 +13,7 @@ import {
   StorageKeySchema,
   type StorageKey,
   type BucketNameType,
-} from './file-metadata.entity';
+} from '../file-metadata.entity';
 import { type FileSaveRequest } from './file-storage.file-save.request';
 
 function createBucket(visibility: Visibility): BucketNameType {

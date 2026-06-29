@@ -1,7 +1,7 @@
-import { FileStoragesServiceRepositorySpec } from './repositories/storage-service.repository';
-import { FileMetadataRepositorySpec } from './repositories/file-metadata.repository';
+import { FileStoragesServiceRepositorySpec } from '../repositories/storage-service.repository';
+import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
 import { type FileMetadataId, type UserId } from '@tracen/contracts';
-import { type FileMetadata } from './file-metadata.entity';
+import { type FileMetadata } from '../file-metadata.entity';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 export class FileDownloadError extends Error {

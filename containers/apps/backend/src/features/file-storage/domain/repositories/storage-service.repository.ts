@@ -12,7 +12,7 @@ import {
   BucketNameTypeSchema,
   StorageKeySchema,
 } from '../file-metadata.entity';
-import { type StorageDataInput } from '../file-storage.file-save.request';
+import { type StorageDataInput } from '../usecases/file-storage.file-save.request';
 
 export const UploadOptionsSchema = z.object({
   bucket: BucketNameTypeSchema, // S3のバケット名、ローカルならルートフォルダ名（例: 'public-bucket', 'private-bucket'）

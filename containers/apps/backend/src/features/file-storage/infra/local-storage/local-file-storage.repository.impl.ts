@@ -6,7 +6,7 @@ import {
   FileStoragesServiceRepositorySpec,
   UploadOptions,
 } from '../../domain/repositories/storage-service.repository';
-import { StorageDataInput } from '../../domain/file-storage.file-save.request';
+import { StorageDataInput } from '../../domain/usecases/file-storage.file-save.request';
 import { type BucketNameType, type StorageKey } from '../../domain/file-metadata.entity';
 import { type Visibility, type FilePath, type FileMetadataId } from '@tracen/contracts';
 
