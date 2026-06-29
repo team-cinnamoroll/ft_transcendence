@@ -12,14 +12,11 @@ export const UserProfileResponseSchema = z
     name: z.string().min(1),
     avatarUrl: z.url(),
     badge: z
-      .emoji({ message: '絵文字のみを入力してください' }) // Zodの標準機能で絵文字か判定
-      .refine(
-        (val) => {
-          // 見た目上の文字数が1文字であるかを判定
-          return [...segmenter.segment(val)].length === 1;
-        },
-        { message: '絵文字は1文字だけにしてください' }
-      )
+      .emoji() // 絵文字判定（メッセージは errorMap で i18n）
+      .refine((val) => {
+        // 見た目上の文字数が1文字であるかを判定
+        return [...segmenter.segment(val)].length === 1;
+      })
       .optional(), // バッジ絵文字
   })
   .strict();
