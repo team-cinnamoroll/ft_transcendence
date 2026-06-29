@@ -324,6 +324,10 @@
     "password": {
       "tooShort": "Password must be at least {min} characters",
       "tooLong": "Password must be at most {max} characters"
+    },
+    "badge": {
+      "invalid": "Must be an emoji",
+      "single": "Must be a single emoji"
     }
   }
 }
