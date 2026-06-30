@@ -239,7 +239,8 @@
     "seedsUnit": "{count, plural, other {シード}}",
     "profile": {
       "title": "プロフィール",
-      "description": "表示名・バッジ・アバターを変更します。"
+      "description": "表示名・バッジ・アバターを変更します。",
+      "edit": "編集"
     },
     "data": {
       "title": "データとプライバシー",
@@ -249,6 +250,25 @@
       "title": "アカウント",
       "description": "アカウントを削除します。"
     }
+  },
+  "profileEditModal": {
+    "title": "プロフィールを編集",
+    "ariaLabel": "プロフィールを編集",
+    "close": "閉じる",
+    "name": "名前",
+    "required": "*",
+    "namePlaceholder": "表示名",
+    "badge": "バッジ",
+    "optional": "(任意)",
+    "badgePlaceholder": "🌟",
+    "badgeHint": "絵文字を1つだけ",
+    "avatar": "アバターURL",
+    "avatarPlaceholder": "https://example.com/avatar.png",
+    "save": "保存",
+    "saving": "保存中…",
+    "errorName": "名前を入力してください",
+    "errorBadge": "バッジは絵文字1つにしてください",
+    "errorAvatar": "有効なURLを入力してください"
   },
   "faceDetailPage": {
     "backAriaLabel": "フェイス一覧に戻る"

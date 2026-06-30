@@ -239,7 +239,8 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "profile": {
       "title": "Profile",
-      "description": "Edit your display name, badge, and avatar."
+      "description": "Edit your display name, badge, and avatar.",
+      "edit": "Edit"
     },
     "data": {
       "title": "Data & Privacy",
@@ -249,6 +250,25 @@
       "title": "Account",
       "description": "Delete your account."
     }
+  },
+  "profileEditModal": {
+    "title": "Edit Profile",
+    "ariaLabel": "Edit Profile",
+    "close": "Close",
+    "name": "Name",
+    "required": "*",
+    "namePlaceholder": "Display name",
+    "badge": "Badge",
+    "optional": "(optional)",
+    "badgePlaceholder": "🌟",
+    "badgeHint": "A single emoji",
+    "avatar": "Avatar URL",
+    "avatarPlaceholder": "https://example.com/avatar.png",
+    "save": "Save",
+    "saving": "Saving…",
+    "errorName": "Please enter a name",
+    "errorBadge": "Badge must be a single emoji",
+    "errorAvatar": "Please enter a valid URL"
   },
   "faceDetailPage": {
     "backAriaLabel": "Back to faces list"
