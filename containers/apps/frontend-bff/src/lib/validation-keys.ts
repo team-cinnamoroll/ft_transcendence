@@ -20,12 +20,10 @@ function isPasswordIssue(issue: z.core.$ZodIssue): boolean {
 export function zodIssueToKey(issue: z.core.$ZodIssue): string {
   switch (issue.code) {
     case 'invalid_type':
-      // 未入力(undefined)は必須エラー。それ以外(型不一致)は汎用エラー。
       return issue.input === undefined ? 'required' : 'invalid';
 
     case 'too_small': {
       if (isPasswordIssue(issue)) return 'password.tooShort';
-      // min(1) は実質「必須」なので required に寄せる。
       if (Number(issue.minimum) <= 1) return 'required';
       return 'tooShort';
     }
@@ -34,7 +32,6 @@ export function zodIssueToKey(issue: z.core.$ZodIssue): string {
       return isPasswordIssue(issue) ? 'password.tooLong' : 'tooLong';
 
     case 'invalid_format':
-      // z.email() / z.url() などの文字列フォーマット検証。
       if (issue.format === 'email') return 'email.invalid';
       if (issue.format === 'url') return 'url.invalid';
       if (issue.format === 'emoji') return 'badge.invalid';
@@ -44,7 +41,6 @@ export function zodIssueToKey(issue: z.core.$ZodIssue): string {
       if (issue.path.some((seg) => seg === 'badge')) return 'badge.single';
       return 'invalid';
 
-    // 専用メッセージを用意していない code は汎用エラーにフォールバック。
     default:
       return 'invalid';
   }
