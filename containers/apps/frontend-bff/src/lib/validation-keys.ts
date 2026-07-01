@@ -12,24 +12,23 @@ import type { z } from 'zod';
 // 注意: この関数は「Zod のエラーマップ内」で生 issue を渡して使うことを前提とする。
 //       生 issue は input を保持しているため、未入力判定(input === undefined)が機能する。
 
-// UserPasswordSchema を使うフィールド名は 'password'(sign-up / sign-in)。
-function isPasswordIssue(issue: z.core.$ZodIssue): boolean {
-  return issue.path.some((segment) => segment === 'password');
+function hasPathSegment(issue: z.core.$ZodRawIssue, segment: string): boolean {
+  return issue.path?.some((s) => s === segment) ?? false;
 }
 
-export function zodIssueToKey(issue: z.core.$ZodIssue): string {
+export function zodIssueToKey(issue: z.core.$ZodRawIssue): string {
   switch (issue.code) {
     case 'invalid_type':
       return issue.input === undefined ? 'required' : 'invalid';
 
     case 'too_small': {
-      if (isPasswordIssue(issue)) return 'password.tooShort';
+      if (hasPathSegment(issue, 'password')) return 'password.tooShort';
       if (Number(issue.minimum) <= 1) return 'required';
       return 'tooShort';
     }
 
     case 'too_big':
-      return isPasswordIssue(issue) ? 'password.tooLong' : 'tooLong';
+      return hasPathSegment(issue, 'password') ? 'password.tooLong' : 'tooLong';
 
     case 'invalid_format':
       if (issue.format === 'email') return 'email.invalid';
@@ -38,7 +37,7 @@ export function zodIssueToKey(issue: z.core.$ZodIssue): string {
       return 'invalid';
 
     case 'custom':
-      if (issue.path.some((seg) => seg === 'badge')) return 'badge.single';
+      if (hasPathSegment(issue, 'badge')) return 'badge.single';
       return 'invalid';
 
     default:
