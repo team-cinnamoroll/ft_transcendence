@@ -372,5 +372,21 @@
     "popularFaces": "Facettes populaires",
     "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
     "subscribeButton": "S'abonner"
+  },
+  "validation": {
+    "required": "Ce champ est requis",
+    "invalid": "Saisie invalide",
+    "tooShort": "Doit contenir au moins {min} caractères",
+    "tooLong": "Ne doit pas dépasser {max} caractères",
+    "email": { "invalid": "Saisissez une adresse e-mail valide" },
+    "url": { "invalid": "Saisissez une URL valide" },
+    "password": {
+      "tooShort": "Le mot de passe doit contenir au moins {min} caractères",
+      "tooLong": "Le mot de passe ne doit pas dépasser {max} caractères"
+    },
+    "badge": {
+      "invalid": "Doit être un emoji",
+      "single": "Doit être un emoji unique"
+    }
   }
 }
