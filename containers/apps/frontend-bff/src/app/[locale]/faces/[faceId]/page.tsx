@@ -86,6 +86,7 @@ const FaceDetailPage = async ({ params }: Props) => {
         <FaceDetailClient
           face={face}
           isOwner={isOwner}
+          currentUserId={currentUser.id}
           seeds={seeds}
           users={users}
           isSubscribed={isSubscribed}

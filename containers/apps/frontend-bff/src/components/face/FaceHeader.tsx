@@ -1,11 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { type Face } from '@/types/face';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
+import { subscribeAction, unsubscribeAction } from '@/server/actions/subscriptions';
 
 export type SortOrder = 'newest' | 'oldest' | 'images';
 
@@ -30,8 +31,21 @@ const FaceHeader = ({
 }: FaceHeaderProps) => {
   const [subscribed, setSubscribed] = useState(initialSubscribed);
   const [sort, setSort] = useState<SortOrder>('newest');
+  const [isToggling, startToggleTransition] = useTransition();
   const t = useTranslations('face');
   const tHeader = useTranslations('faceHeader');
+
+  const handleSubscribeToggle = () => {
+    const next = !subscribed;
+    setSubscribed(next);
+    startToggleTransition(async () => {
+      if (next) {
+        await subscribeAction(face.id);
+      } else {
+        await unsubscribeAction(face.id);
+      }
+    });
+  };
 
   const handleSort = (s: SortOrder) => {
     setSort(s);
@@ -105,7 +119,8 @@ const FaceHeader = ({
             {!isOwner && (
               <button
                 type="button"
-                onClick={() => setSubscribed((prev) => !prev)}
+                onClick={handleSubscribeToggle}
+                disabled={isToggling}
                 style={{
                   marginTop: 4,
                   padding: '8px 24px',
@@ -178,7 +193,8 @@ const FaceHeader = ({
           {!isOwner && (
             <button
               type="button"
-              onClick={() => setSubscribed((prev) => !prev)}
+              onClick={handleSubscribeToggle}
+                disabled={isToggling}
               style={{
                 padding: '8px 24px',
                 borderRadius: 999,

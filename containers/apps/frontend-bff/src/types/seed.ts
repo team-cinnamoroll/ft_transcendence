@@ -1,1 +1,1 @@
-export type { SeedResponse as Seed } from '@tracen/contracts';
+export type { SeedResponse as Seed, CreateSeedRequest, UpdateSeedRequest } from '@tracen/contracts';

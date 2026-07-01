@@ -1,54 +1,47 @@
 import { type Notification } from '@/types/notification';
+import { USER_IDS, FACE_IDS, SEED_IDS, NOTIF_IDS } from './ids';
 
-/**
- * currentUser（山田 太郎 / user-1）宛の通知ダミーデータ。
- *
- * - link: 誰かが user-1 のアクティビティをリンクした
- * - subscribe: 誰かが user-1 のフェイスをサブスクライブした
- *
- * createdAt 降順（最新が先頭）で定義。
- */
 export const notifications: Notification[] = [
   {
-    id: 'notif-1',
+    id: NOTIF_IDS.n1,
     type: 'subscribe',
-    fromUserId: 'user-4',
-    faceId: 'face-1-1',
+    fromUserId: USER_IDS.user4,
+    faceId: FACE_IDS.face11,
     createdAt: '2026-03-30T09:12:00+09:00',
   },
   {
-    id: 'notif-2',
+    id: NOTIF_IDS.n2,
     type: 'link',
-    fromUserId: 'user-2',
-    seedId: 'act-1-1-7',
+    fromUserId: USER_IDS.user2,
+    seedId: SEED_IDS.s1107,
     createdAt: '2026-03-28T18:45:00+09:00',
   },
   {
-    id: 'notif-3',
+    id: NOTIF_IDS.n3,
     type: 'subscribe',
-    fromUserId: 'user-3',
-    faceId: 'face-1-2',
+    fromUserId: USER_IDS.user3,
+    faceId: FACE_IDS.face12,
     createdAt: '2026-03-25T14:00:00+09:00',
   },
   {
-    id: 'notif-4',
+    id: NOTIF_IDS.n4,
     type: 'link',
-    fromUserId: 'user-3',
-    seedId: 'act-1-1-6',
+    fromUserId: USER_IDS.user3,
+    seedId: SEED_IDS.s1106,
     createdAt: '2026-03-20T21:30:00+09:00',
   },
   {
-    id: 'notif-5',
+    id: NOTIF_IDS.n5,
     type: 'subscribe',
-    fromUserId: 'user-2',
-    faceId: 'face-1-1',
+    fromUserId: USER_IDS.user2,
+    faceId: FACE_IDS.face11,
     createdAt: '2026-03-15T10:22:00+09:00',
   },
   {
-    id: 'notif-6',
+    id: NOTIF_IDS.n6,
     type: 'link',
-    fromUserId: 'user-4',
-    seedId: 'act-1-1-5',
+    fromUserId: USER_IDS.user4,
+    seedId: SEED_IDS.s1105,
     createdAt: '2026-03-10T08:05:00+09:00',
   },
 ];

@@ -5,7 +5,7 @@ import { listSeedsByUserId } from '@/server/usecases/seeds';
 const FacesPage = async () => {
   const { currentUser, myFaces } = await getViewerContext();
   const seeds = await listSeedsByUserId(currentUser.id);
-  return <FacesClient initialFaces={myFaces} seeds={seeds} />;
+  return <FacesClient initialFaces={myFaces} seeds={seeds} currentUserId={currentUser.id} />;
 };
 
 export default FacesPage;

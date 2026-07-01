@@ -14,7 +14,8 @@
     "ghcr.io/devcontainers/features/node:1": {
       "pnpmVersion": "10.33.0"
     },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "remoteEnv": {
     "TRACEN_LOCAL_CI_HOST_WORKSPACE": "${localWorkspaceFolder}"
