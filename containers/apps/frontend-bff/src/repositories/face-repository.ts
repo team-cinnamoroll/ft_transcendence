@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { type CreateFaceRequest } from '@tracen/contracts';
+import { type CreateFaceRequest, type UpdateFaceRequest } from '@/types/face';
 import { type Face } from '@/types/face';
 import { faces } from '@/mocks/faces';
 import { createSingletonProvider } from '@/repositories/provider';
@@ -10,6 +10,9 @@ import { createSingletonProvider } from '@/repositories/provider';
 /** フェイス作成時の入力型 */
 export type CreateFaceInput = CreateFaceRequest;
 
+/** フェイス更新時の入力型 */
+export type UpdateFaceInput = UpdateFaceRequest;
+
 /** FaceRepository が提供するメソッドの契約（Spec） */
 export type FaceRepositorySpec = {
   /** 指定ユーザーのフェイス一覧を取得 */
@@ -18,6 +21,10 @@ export type FaceRepositorySpec = {
   findById: (faceId: string) => Promise<Face | null>;
   /** フェイスを作成（モック実装はダミー返却） */
   create: (userId: string, input: CreateFaceInput) => Promise<Face>;
+  /** フェイスを更新（モック実装はダミー返却） */
+  update: (faceId: string, userId: string, input: UpdateFaceInput) => Promise<Face>;
+  /** フェイスを削除（モック実装はno-op） */
+  delete: (faceId: string, userId: string) => Promise<void>;
   /** 全フェイス一覧を取得（検索用） */
   listAll: () => Promise<Face[]>;
 };
@@ -42,6 +49,22 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
         ...input,
       };
       return newFace;
+    },
+
+    update: async (faceId, userId, input) => {
+      // モック実装: 既存データとマージして返却するだけ（実際には保存しない）
+      const existing = faces.find((f) => f.id === faceId && f.userId === userId);
+      const updated: Face = {
+        id: faceId,
+        userId,
+        ...(existing ?? {}),
+        ...input,
+      };
+      return updated;
+    },
+
+    delete: async (_faceId, _userId) => {
+      // モック実装: no-op（実際には削除しない）
     },
 
     listAll: async () => {

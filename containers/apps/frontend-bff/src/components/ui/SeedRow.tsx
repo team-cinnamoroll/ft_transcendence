@@ -17,6 +17,8 @@ type SeedRowProps = {
   replyChain?: boolean;
   showActions?: boolean;
   noBorder?: boolean;
+  currentUserId?: string;
+  onMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
 };
 
 const COLLAPSE_THRESHOLD = 200;
@@ -29,6 +31,8 @@ const SeedRow = ({
   replyChain = false,
   showActions = false,
   noBorder = false,
+  currentUserId,
+  onMoreOptions,
 }: SeedRowProps) => {
   const [expanded, setExpanded] = useState(false);
   const t = useTranslations('seedRow');
@@ -117,30 +121,33 @@ const SeedRow = ({
           <span style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
             {formatRelative(seed.createdAt)}
           </span>
-          <button
-            type="button"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={t('moreOptions')}
-            style={{
-              marginLeft: 'auto',
-              flexShrink: 0,
-              width: 24,
-              height: 24,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--mf-text-muted)',
-              fontSize: 15,
-              letterSpacing: 1,
-              lineHeight: 1,
-            }}
-          >
-            ···
-          </button>
+          {onMoreOptions && currentUserId === seed.userId && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onMoreOptions(e, seed); }}
+              aria-label={t('moreOptions')}
+              style={{
+                marginLeft: 'auto',
+                flexShrink: 0,
+                width: 24,
+                height: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--mf-text-muted)',
+              }}
+            >
+              <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
+                <circle cx={1.5} cy={1.5} r={1.5} />
+                <circle cx={1.5} cy={6.5} r={1.5} />
+                <circle cx={1.5} cy={11.5} r={1.5} />
+              </svg>
+            </button>
+          )}
         </div>
 
         <div

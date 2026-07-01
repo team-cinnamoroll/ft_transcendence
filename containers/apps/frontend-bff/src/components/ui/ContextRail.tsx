@@ -274,7 +274,7 @@ const CollectionRail = ({ subscribedFaces, latestSeedByFaceId, users }: Collecti
             {t('noSubscriptions')}
             <br />
             <Link
-              href="/search"
+              href="/subscriptions"
               style={{
                 color: 'var(--mf-accent)',
                 textDecoration: 'none',

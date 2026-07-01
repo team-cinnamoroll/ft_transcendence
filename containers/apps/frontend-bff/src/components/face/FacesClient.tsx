@@ -1,35 +1,101 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
 import CreateFaceModal from './CreateFaceModal';
+import EditFaceModal from './EditFaceModal';
 import SeedRow from '@/components/ui/SeedRow';
+import Pagination from '@/components/ui/Pagination';
+import EditSeedModal from '@/components/seed/EditSeedModal';
+import { deleteFaceAction } from '@/server/actions/faces';
+import { deleteSeedAction } from '@/server/actions/seeds';
 import { useTranslations } from 'next-intl';
 
 type Props = {
   initialFaces: Face[];
   seeds: Seed[];
+  currentUserId?: string;
 };
 
 type SortType = 'lastAt' | 'total' | 'name';
 type ViewType = 'grid' | 'list';
+type ActionMenu = { face: Face; top: number; right: number };
+type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 const REFERENCE_MONTH = '2026-04';
 
-const FacesClient = ({ initialFaces, seeds }: Props) => {
+const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props) => {
   const [faces, setFaces] = useState<Face[]>(initialFaces);
+  const [seeds, setSeeds] = useState(initialSeeds);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionMenu, setActionMenu] = useState<ActionMenu | null>(null);
+  const [seedActionMenu, setSeedActionMenu] = useState<SeedActionMenu | null>(null);
+  const [editingSeed, setEditingSeed] = useState<Seed | null>(null);
+  const [deletingSeed, setDeletingSeed] = useState<Seed | null>(null);
+
+  const openActionMenu = (e: React.MouseEvent<HTMLButtonElement>, face: Face) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const menuHeight = 110;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top = spaceBelow >= menuHeight + 4 ? rect.bottom + 4 : rect.top - menuHeight - 4;
+    setActionMenu({ face, top, right: window.innerWidth - rect.right });
+  };
+
+  const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const menuHeight = 110;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top = spaceBelow >= menuHeight + 4 ? rect.bottom + 4 : rect.top - menuHeight - 4;
+    setSeedActionMenu({ seed, top, right: window.innerWidth - rect.right });
+  };
+
+  const [editingFace, setEditingFace] = useState<Face | null>(null);
+  const [deletingFace, setDeletingFace] = useState<Face | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
+  const [isDeletingSeed, startSeedDeleteTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
+  const [seedsPage, setSeedsPage] = useState(1);
   const [sortType, setSortType] = useState<SortType>('lastAt');
   const [viewType, setViewType] = useState<ViewType>('grid');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const t = useTranslations('facesClient');
+  const tSeed = useTranslations('seedActions');
 
   const handleCreate = (newFace: Face) => {
     setFaces((prev) => [newFace, ...prev]);
+  };
+
+  const handleUpdate = (updatedFace: Face) => {
+    setFaces((prev) => prev.map((f) => (f.id === updatedFace.id ? updatedFace : f)));
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingFace || isDeleting) return;
+    const faceId = deletingFace.id;
+    startDeleteTransition(async () => {
+      await deleteFaceAction(faceId);
+      setFaces((prev) => prev.filter((f) => f.id !== faceId));
+      setDeletingFace(null);
+    });
+  };
+
+  const handleSeedUpdate = (updatedSeed: Seed) => {
+    setSeeds((prev) => prev.map((s) => (s.id === updatedSeed.id ? updatedSeed : s)));
+  };
+
+  const handleConfirmSeedDelete = () => {
+    if (!deletingSeed || isDeletingSeed) return;
+    const seedId = deletingSeed.id;
+    startSeedDeleteTransition(async () => {
+      await deleteSeedAction(seedId);
+      setSeeds((prev) => prev.filter((s) => s.id !== seedId));
+      setDeletingSeed(null);
+    });
   };
 
   const faceStats = useMemo(() => {
@@ -84,6 +150,13 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
     return seeds.filter((a) => faceIds.has(a.faceId) && a.body.toLowerCase().includes(q));
   }, [searchQuery, faces, seeds]);
 
+  const SEEDS_PAGE_SIZE = 10;
+  const seedsTotalPages = Math.ceil(matchingSeeds.length / SEEDS_PAGE_SIZE);
+  const pagedMatchingSeeds = matchingSeeds.slice(
+    (seedsPage - 1) * SEEDS_PAGE_SIZE,
+    seedsPage * SEEDS_PAGE_SIZE
+  );
+
   return (
     <main style={{ display: 'flex', flexDirection: 'column', paddingBottom: 24 }}>
       {/* 検索バー */}
@@ -115,7 +188,10 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSeedsPage(1);
+            }}
             placeholder={t('searchPlaceholder')}
             style={{
               flex: 1,
@@ -285,7 +361,42 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                           >
                             {getFaceTitle(face)}
                           </div>
-                          <span style={{ flexShrink: 0 }}>
+                          <button
+                            type="button"
+                            aria-label="アクションメニュー"
+                            onClick={(e) => openActionMenu(e, face)}
+                            style={{
+                              width: 22,
+                              height: 22,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: 'var(--mf-text-muted)',
+                              borderRadius: 6,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
+                              <circle cx={1.5} cy={1.5} r={1.5} />
+                              <circle cx={1.5} cy={6.5} r={1.5} />
+                              <circle cx={1.5} cy={11.5} r={1.5} />
+                            </svg>
+                          </button>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
+                            {stats?.lastDate ? stats.lastDate.replace(/-/g, '/') : '—'}
+                          </div>
+                          <span style={{ flexShrink: 0, textAlign: 'right' }}>
                             <b style={{ color: 'var(--mf-text)', fontWeight: 700, fontSize: 17 }}>
                               {stats?.total ?? 0}
                             </b>
@@ -295,9 +406,6 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                               {t('seedCount', { count: stats?.total ?? 0 })}
                             </span>
                           </span>
-                        </div>
-                        <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
-                          {stats?.lastDate ? stats.lastDate.replace(/-/g, '/') : '—'}
                         </div>
                       </div>
                     </div>
@@ -326,13 +434,28 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
               {t('noMatch')}
             </p>
           ) : (
-            <div style={{ padding: '0 20px' }}>
-              {matchingSeeds.map((act) => {
-                const face = faceMap.get(act.faceId);
-                if (!face) return null;
-                return <SeedRow key={act.id} seed={act} face={face} />;
-              })}
-            </div>
+            <>
+              <div style={{ padding: '0 20px' }}>
+                {pagedMatchingSeeds.map((act) => {
+                  const face = faceMap.get(act.faceId);
+                  if (!face) return null;
+                  return (
+                    <SeedRow
+                      key={act.id}
+                      seed={act}
+                      face={face}
+                      currentUserId={currentUserId}
+                      onMoreOptions={openSeedActionMenu}
+                    />
+                  );
+                })}
+              </div>
+              <Pagination
+                currentPage={seedsPage}
+                totalPages={seedsTotalPages}
+                onPageChange={setSeedsPage}
+              />
+            </>
           )}
         </div>
       )}
@@ -624,6 +747,41 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                           >
                             {getFaceTitle(face)}
                           </div>
+                          <button
+                            type="button"
+                            aria-label="アクションメニュー"
+                            onClick={(e) => openActionMenu(e, face)}
+                            style={{
+                              width: 22,
+                              height: 22,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: 'var(--mf-text-muted)',
+                              borderRadius: 6,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
+                              <circle cx={1.5} cy={1.5} r={1.5} />
+                              <circle cx={1.5} cy={6.5} r={1.5} />
+                              <circle cx={1.5} cy={11.5} r={1.5} />
+                            </svg>
+                          </button>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
+                            {stats?.lastDate ? stats.lastDate.replace(/-/g, '/') : '—'}
+                          </div>
                           <span style={{ flexShrink: 0, textAlign: 'right' }}>
                             <b style={{ color: 'var(--mf-text)', fontWeight: 700, fontSize: 17 }}>
                               {stats?.total ?? 0}
@@ -634,9 +792,6 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                               {t('seedCount', { count: stats?.total ?? 0 })}
                             </span>
                           </span>
-                        </div>
-                        <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
-                          {stats?.lastDate ? stats.lastDate.replace(/-/g, '/') : '—'}
                         </div>
                       </div>
                     </div>
@@ -759,6 +914,31 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
                           {t('seedCount', { count: stats?.total ?? 0 })}
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        aria-label="アクションメニュー"
+                        onClick={(e) => openActionMenu(e, face)}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--mf-text-muted)',
+                          borderRadius: 8,
+                          flexShrink: 0,
+                          marginLeft: 10,
+                        }}
+                      >
+                        <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
+                          <circle cx={1.5} cy={1.5} r={1.5} />
+                          <circle cx={1.5} cy={6.5} r={1.5} />
+                          <circle cx={1.5} cy={11.5} r={1.5} />
+                        </svg>
+                      </button>
                     </div>
                   </Link>
                 );
@@ -814,6 +994,432 @@ const FacesClient = ({ initialFaces, seeds }: Props) => {
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreate}
       />
+
+      {/* ケバブドロップダウン */}
+      {actionMenu && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+            onClick={() => setActionMenu(null)}
+            aria-hidden="true"
+          />
+          <div
+            role="menu"
+            style={{
+              position: 'fixed',
+              top: actionMenu.top,
+              right: actionMenu.right,
+              zIndex: 50,
+              minWidth: 180,
+              borderRadius: 12,
+              background: 'var(--mf-bg-light)',
+              border: '0.5px solid var(--mf-line)',
+              boxShadow: '0 8px 32px rgba(30,42,74,0.18)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* フェイス名ヘッダー */}
+            <div style={{ padding: '10px 16px 8px', borderBottom: '0.5px solid var(--mf-line)' }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: 'var(--mf-text-muted)',
+                  margin: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontWeight: 600,
+                }}
+              >
+                {getFaceTitle(actionMenu.face)}
+              </p>
+            </div>
+
+            {/* 編集ボタン */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setEditingFace(actionMenu.face);
+                setActionMenu(null);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                borderBottom: '0.5px solid var(--mf-line)',
+                cursor: 'pointer',
+                color: 'var(--mf-text)',
+                textAlign: 'left',
+              }}
+            >
+              <svg
+                width={15}
+                height={15}
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
+              </svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{t('editFace')}</span>
+            </button>
+
+            {/* 削除ボタン */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setDeletingFace(actionMenu.face);
+                setActionMenu(null);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--mf-danger, #e53e3e)',
+                textAlign: 'left',
+              }}
+            >
+              <svg
+                width={15}
+                height={15}
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2 3.5h10M5.5 3.5V2h3v1.5M3.5 3.5l.7 8h5.6l.7-8" />
+              </svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{t('deleteFace')}</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {editingFace && (
+        <EditFaceModal
+          isOpen={true}
+          face={editingFace}
+          onClose={() => setEditingFace(null)}
+          onUpdate={(updated) => {
+            handleUpdate(updated);
+            setEditingFace(null);
+          }}
+        />
+      )}
+
+      {deletingFace && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              background: 'rgba(20,24,36,0.50)',
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => {
+              if (!isDeleting) setDeletingFace(null);
+            }}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%,-50%)',
+              zIndex: 50,
+              width: 'calc(100% - 2rem)',
+              maxWidth: 360,
+              borderRadius: 18,
+              background: 'var(--mf-bg-light)',
+              border: '0.5px solid var(--mf-line)',
+              boxShadow: '0 20px 60px rgba(30,42,74,0.18)',
+              padding: '24px 20px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
+              {t('deleteConfirmTitle')}
+            </h2>
+            <p style={{ fontSize: 13.5, color: 'var(--mf-text-sub)', margin: 0, lineHeight: 1.6 }}>
+              {t('deleteConfirmMessage', { name: getFaceTitle(deletingFace) })}
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setDeletingFace(null)}
+                disabled={isDeleting}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: 10,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  background: 'var(--mf-surface)',
+                  border: '0.5px solid var(--mf-line)',
+                  color: 'var(--mf-text)',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {t('deleteCancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: 10,
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  background: isDeleting ? 'var(--mf-surface-tint)' : 'var(--mf-danger, #e53e3e)',
+                  border: 'none',
+                  color: isDeleting ? 'var(--mf-text-faint)' : '#fff',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {isDeleting ? t('deleting') : t('deleteConfirmButton')}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+      {/* シードアクションドロップダウン */}
+      {seedActionMenu && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+            onClick={() => setSeedActionMenu(null)}
+            aria-hidden="true"
+          />
+          <div
+            role="menu"
+            style={{
+              position: 'fixed',
+              top: seedActionMenu.top,
+              right: seedActionMenu.right,
+              zIndex: 50,
+              minWidth: 180,
+              borderRadius: 12,
+              background: 'var(--mf-bg-light)',
+              border: '0.5px solid var(--mf-line)',
+              boxShadow: '0 8px 32px rgba(30,42,74,0.18)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ padding: '10px 16px 8px', borderBottom: '0.5px solid var(--mf-line)' }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: 'var(--mf-text-muted)',
+                  margin: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontWeight: 600,
+                }}
+              >
+                {seedActionMenu.seed.body.slice(0, 30)}
+                {seedActionMenu.seed.body.length > 30 ? '…' : ''}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setEditingSeed(seedActionMenu.seed);
+                setSeedActionMenu(null);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                borderBottom: '0.5px solid var(--mf-line)',
+                cursor: 'pointer',
+                color: 'var(--mf-text)',
+                textAlign: 'left',
+              }}
+            >
+              <svg
+                width={15}
+                height={15}
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" />
+              </svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{tSeed('editSeed')}</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setDeletingSeed(seedActionMenu.seed);
+                setSeedActionMenu(null);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--mf-danger, #e53e3e)',
+                textAlign: 'left',
+              }}
+            >
+              <svg
+                width={15}
+                height={15}
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2 3.5h10M5.5 3.5V2h3v1.5M3.5 3.5l.7 8h5.6l.7-8" />
+              </svg>
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{tSeed('deleteSeed')}</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* シード編集モーダル */}
+      {editingSeed && (
+        <EditSeedModal
+          isOpen={true}
+          seed={editingSeed}
+          onClose={() => setEditingSeed(null)}
+          onUpdate={(updated) => {
+            handleSeedUpdate(updated);
+            setEditingSeed(null);
+          }}
+        />
+      )}
+
+      {/* シード削除確認ダイアログ */}
+      {deletingSeed && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              background: 'rgba(20,24,36,0.50)',
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => {
+              if (!isDeletingSeed) setDeletingSeed(null);
+            }}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%,-50%)',
+              zIndex: 50,
+              width: 'calc(100% - 2rem)',
+              maxWidth: 320,
+              borderRadius: 18,
+              background: 'var(--mf-bg-light)',
+              border: '0.5px solid var(--mf-line)',
+              boxShadow: '0 20px 60px rgba(30,42,74,0.18)',
+              padding: '24px 20px 20px',
+            }}
+          >
+            <h2
+              style={{ fontSize: 15, fontWeight: 700, color: 'var(--mf-brand)', margin: '0 0 8px' }}
+            >
+              {tSeed('deleteConfirmTitle')}
+            </h2>
+            <p
+              style={{
+                fontSize: 13,
+                color: 'var(--mf-text-sub)',
+                margin: '0 0 20px',
+                lineHeight: 1.6,
+              }}
+            >
+              {tSeed('deleteConfirmMessage')}
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setDeletingSeed(null)}
+                disabled={isDeletingSeed}
+                style={{
+                  flex: 1,
+                  padding: '10px 0',
+                  borderRadius: 10,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  border: '0.5px solid var(--mf-line)',
+                  background: 'none',
+                  color: 'var(--mf-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                {tSeed('deleteCancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSeedDelete}
+                disabled={isDeletingSeed}
+                style={{
+                  flex: 1,
+                  padding: '10px 0',
+                  borderRadius: 10,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  border: 'none',
+                  background: 'var(--mf-danger, #e53e3e)',
+                  color: '#fff',
+                  cursor: isDeletingSeed ? 'not-allowed' : 'pointer',
+                  opacity: isDeletingSeed ? 0.7 : 1,
+                }}
+              >
+                {isDeletingSeed ? tSeed('deleting') : tSeed('deleteConfirmButton')}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </main>
   );
 };

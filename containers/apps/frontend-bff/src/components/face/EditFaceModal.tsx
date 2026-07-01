@@ -2,25 +2,26 @@
 
 import { useState, useTransition } from 'react';
 import type { Face } from '@/types/face';
-import { createFaceAction } from '@/server/actions/faces';
+import { updateFaceAction } from '@/server/actions/faces';
 import { useTranslations } from 'next-intl';
 
 type FieldErrors = Record<string, string[]>;
 
 type Props = {
   isOpen: boolean;
+  face: Face;
   onClose: () => void;
-  onCreate: (face: Face) => void;
+  onUpdate: (face: Face) => void;
 };
 
-const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
-  const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('');
-  const [description, setDescription] = useState('');
-  const [isPrivate, setIsPrivate] = useState(false);
+const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
+  const [name, setName] = useState(face.name);
+  const [emoji, setEmoji] = useState(face.emoji ?? '');
+  const [description, setDescription] = useState(face.description ?? '');
+  const [isPrivate, setIsPrivate] = useState(face.isPrivate);
   const [isPending, startTransition] = useTransition();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
-  const t = useTranslations('createFaceModal');
+  const t = useTranslations('editFaceModal');
 
   const isValid = name.trim().length > 0;
 
@@ -28,7 +29,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
     if (!isValid || isPending) return;
 
     startTransition(async () => {
-      const result = await createFaceAction({
+      const result = await updateFaceAction(face.id, {
         name: name.trim(),
         emoji: emoji.trim() || undefined,
         description: description.trim() || undefined,
@@ -39,16 +40,12 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
         return;
       }
       setFieldErrors(null);
-      onCreate(result.data);
-      handleClose();
+      onUpdate(result.data);
+      onClose();
     });
   };
 
   const handleClose = () => {
-    setName('');
-    setEmoji('');
-    setDescription('');
-    setIsPrivate(false);
     setFieldErrors(null);
     onClose();
   };
@@ -133,12 +130,12 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 18px 20px' }}>
           {/* 名前（必須） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="face-name" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label htmlFor="edit-face-name" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('name')}
               <span style={{ marginLeft: 4, color: 'var(--mf-accent)' }}>{t('required')}</span>
             </label>
             <input
-              id="face-name"
+              id="edit-face-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -154,12 +151,12 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
 
           {/* 絵文字（任意） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="face-emoji" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label htmlFor="edit-face-emoji" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('emoji')}
               <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
             <input
-              id="face-emoji"
+              id="edit-face-emoji"
               type="text"
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
@@ -170,12 +167,12 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
 
           {/* 説明文（任意） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="face-description" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label htmlFor="edit-face-description" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('description')}
               <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
             <textarea
-              id="face-description"
+              id="edit-face-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('descriptionPlaceholder')}
@@ -233,7 +230,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             </button>
           </div>
 
-          {/* 作成ボタン */}
+          {/* 保存ボタン */}
           <button
             type="button"
             onClick={handleSubmit}
@@ -260,4 +257,4 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
   );
 };
 
-export default CreateFaceModal;
+export default EditFaceModal;
