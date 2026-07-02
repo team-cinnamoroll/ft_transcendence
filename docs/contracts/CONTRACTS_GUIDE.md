@@ -259,15 +259,16 @@ export type UserViewModel = UserResponse & {
 
 `src/types/` で re-export する際は、以下のルールで型名を変換します。
 
-| 種類 | contracts での名前 | src/types/ での名前 | 規則 |
-|---|---|---|---|
-| レスポンス型 | `FaceResponse` | `Face` | `Response` サフィックスを除去 |
-| レスポンス型 | `UserResponse` | `User` | `Response` サフィックスを除去 |
-| レスポンス型 | `AuthSignUpResponse` | `AuthSignUp` | `Response` サフィックスを除去 |
-| リクエスト型 | `CreateFaceRequest` | `CreateFaceRequest` | そのまま（変更しない） |
-| リクエスト型 | `SignUpRequest` | `SignUpRequest` | そのまま（変更しない） |
+| 種類         | contracts での名前   | src/types/ での名前 | 規則                          |
+| ------------ | -------------------- | ------------------- | ----------------------------- |
+| レスポンス型 | `FaceResponse`       | `Face`              | `Response` サフィックスを除去 |
+| レスポンス型 | `UserResponse`       | `User`              | `Response` サフィックスを除去 |
+| レスポンス型 | `AuthSignUpResponse` | `AuthSignUp`        | `Response` サフィックスを除去 |
+| リクエスト型 | `CreateFaceRequest`  | `CreateFaceRequest` | そのまま（変更しない）        |
+| リクエスト型 | `SignUpRequest`      | `SignUpRequest`     | そのまま（変更しない）        |
 
 **理由:**
+
 - `Response` はサーバー・API 側の概念。フロントエンドから見れば単にドメインオブジェクトなので除去する
 - `Request` はサーバーへ送るデータであることを示す有効な情報のため、そのまま残す
 - contracts の命名規則（`XxxResponse` / `XxxRequest`）が異なるため衝突は発生しない

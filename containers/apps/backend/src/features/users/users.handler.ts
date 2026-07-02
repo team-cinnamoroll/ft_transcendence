@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
 import { UserIdParamSchema } from '@tracen/contracts';
-import { type UsersHandlerEnv, injectUsersDeps } from './domain/users.di';
+import { type UsersHandlerEnv, injectUsersDeps } from './users.di';
 import { deleteUserById, getUserResponseById } from './domain/users.usecase';
 
 // handlerでは入力に対してのバリデーションしかしない。出力のバリデーションはドメイン層で行う。

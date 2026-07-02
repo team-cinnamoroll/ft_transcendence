@@ -80,7 +80,14 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
         }}
       >
         {/* ヘッダー */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px 12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 18px 12px',
+          }}
+        >
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
             {t('title')}
           </h2>
@@ -101,7 +108,15 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
               color: 'var(--mf-text-muted)',
             }}
           >
-            <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+            <svg
+              width={16}
+              height={16}
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              strokeLinecap="round"
+            >
               <path d="M2 2l12 12M14 2L2 14" />
             </svg>
           </button>
@@ -110,7 +125,10 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 18px 20px' }}>
           {/* 本文 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="edit-seed-body" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label
+              htmlFor="edit-seed-body"
+              style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
+            >
               {t('body')}
               <span style={{ marginLeft: 4, color: 'var(--mf-accent)' }}>{t('required')}</span>
             </label>

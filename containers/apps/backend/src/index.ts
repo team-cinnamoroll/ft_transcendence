@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { jwk } from 'hono/jwk';
 import { readFileSync } from 'node:fs';
 import { createServer as createHttpsServer } from 'node:https';
@@ -11,8 +12,8 @@ import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
 
 import type { AppEnv } from './shared/types/hono';
-import { publicRouter } from './public.handler';
-import { protectedRouter } from './protected.handler';
+import { publicApiRouter } from './public.handler';
+import { protectedApiRouter } from './protected.handler';
 
 const config = parseEnv(process.env);
 
@@ -20,11 +21,35 @@ if (config.RUN_MIGRATIONS) {
   await runMigrationsOnce(config.DATABASE_URL);
 }
 
-const app = new Hono<AppEnv>().basePath('/api/v1');
+const app = new Hono<AppEnv>();
 
-const routes = app
-  .use('*', injectConfig(config))
-  .route('/', publicRouter())
+// 全局共通ミドルウェア
+app.use('*', injectConfig(config));
+
+// 静的ファイル配信ミドルウェア
+const staticRoot = `${config.FILE_STORAGE_BASE_DIR || '/app/uploads'}/public-bucket/`;
+app.use(
+  '/static/public-bucket/*',
+  serveStatic({
+    root: staticRoot,
+    rewriteRequestPath: (path) => {
+      const rewritten = path.replace(/^\/static\/public-bucket\//, '');
+      // console.log(`[serveStatic DEBUG] Incoming URL: "${path}" --> Rewritten to: "${rewritten}"`);
+      return rewritten;
+    },
+    // onNotFound: (path, c) => {
+    //   console.log(`[serveStatic DEBUG] ❌ 404 NOT FOUND`);
+    //   console.log(`  - staticRoot (設定されたルート): "${staticRoot}"`);
+    //   console.log(`  - Honoが結合しようとしたファイル相対パス: "${path}"`);
+    // },
+  })
+);
+
+// APIルートの設定
+const apiApp = new Hono<AppEnv>();
+const apiRoutes = apiApp
+  .basePath('/api/v1')
+  .route('/', publicApiRouter())
   .use(
     '*',
     jwk({
@@ -39,10 +64,12 @@ const routes = app
       alg: ['RS256'],
     })
   )
-  .route('/', protectedRouter());
+  .route('/', protectedApiRouter());
 
-export type AppType = typeof routes;
-export default routes;
+app.route('/', apiRoutes);
+
+export type AppType = typeof apiRoutes;
+export default app;
 
 const isDirectRun = process.argv[1]
   ? resolve(process.argv[1]) === fileURLToPath(import.meta.url)
@@ -56,7 +83,7 @@ if (isDirectRun) {
 
   if (tlsCertPath && tlsKeyPath) {
     serve({
-      fetch: routes.fetch,
+      fetch: app.fetch,
       port,
       hostname: '0.0.0.0',
       createServer: createHttpsServer,
@@ -67,7 +94,7 @@ if (isDirectRun) {
     });
   } else {
     serve({
-      fetch: routes.fetch,
+      fetch: app.fetch,
       port,
       hostname: '0.0.0.0',
     });

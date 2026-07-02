@@ -307,7 +307,6 @@ const SubscriptionSeed = ({
   subscribedSeeds,
   allSeeds,
   faces,
-  users: _users,
   currentUserId,
 }: Props) => {
   const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
@@ -428,21 +427,18 @@ const SubscriptionSeed = ({
   const PAGE_SIZE = 10;
 
   const seedTotalPages = Math.ceil(filteredSeeds.length / PAGE_SIZE);
-  const pagedFilteredSeeds = filteredSeeds.slice(
-    (seedPage - 1) * PAGE_SIZE,
-    seedPage * PAGE_SIZE,
-  );
+  const pagedFilteredSeeds = filteredSeeds.slice((seedPage - 1) * PAGE_SIZE, seedPage * PAGE_SIZE);
 
   const subscribedSeedsTotalPages = Math.ceil(subscribedMatchingSeeds.length / PAGE_SIZE);
   const pagedSubscribedSeeds = subscribedMatchingSeeds.slice(
     (searchSeedsPage - 1) * PAGE_SIZE,
-    searchSeedsPage * PAGE_SIZE,
+    searchSeedsPage * PAGE_SIZE
   );
 
   const otherSeedsTotalPages = Math.ceil(otherMatchingSeeds.length / PAGE_SIZE);
   const pagedOtherSeeds = otherMatchingSeeds.slice(
     (searchSeedsPage - 1) * PAGE_SIZE,
-    searchSeedsPage * PAGE_SIZE,
+    searchSeedsPage * PAGE_SIZE
   );
 
   return (
@@ -457,9 +453,7 @@ const SubscriptionSeed = ({
             padding: '10px 14px',
             background: 'var(--mf-surface)',
             borderRadius: 12,
-            border: isSearchFocused
-              ? '1px solid var(--mf-accent)'
-              : '0.5px solid var(--mf-line)',
+            border: isSearchFocused ? '1px solid var(--mf-accent)' : '0.5px solid var(--mf-line)',
             transition: 'border-color 0.15s',
           }}
         >
@@ -479,7 +473,10 @@ const SubscriptionSeed = ({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); setSearchSeedsPage(1); }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSearchSeedsPage(1);
+            }}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
             placeholder={t('filterPlaceholder')}
@@ -597,7 +594,10 @@ const SubscriptionSeed = ({
                 <button
                   key={tab}
                   type="button"
-                  onClick={() => { setSearchTab(tab); setSearchSeedsPage(1); }}
+                  onClick={() => {
+                    setSearchTab(tab);
+                    setSearchSeedsPage(1);
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -636,11 +636,21 @@ const SubscriptionSeed = ({
               {subscribedMatchingFaces.length > 0 && (
                 <>
                   <div style={{ padding: '12px 20px 6px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--mf-text-muted)',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       {t('searchSubscribedFacesSection', { n: subscribedMatchingFaces.length })}
                     </span>
                   </div>
-                  <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div
+                    style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}
+                  >
                     {subscribedMatchingFaces.map((face) => (
                       <SearchFaceRow
                         key={face.id}
@@ -656,7 +666,15 @@ const SubscriptionSeed = ({
               {subscribedMatchingSeeds.length > 0 && (
                 <>
                   <div style={{ padding: '16px 20px 6px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--mf-text-muted)',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       {t('searchSubscribedSeedsSection', { n: subscribedMatchingSeeds.length })}
                     </span>
                   </div>
@@ -697,11 +715,21 @@ const SubscriptionSeed = ({
               {otherMatchingFaces.length > 0 && (
                 <>
                   <div style={{ padding: '12px 20px 6px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--mf-text-muted)',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       {t('searchOtherFacesSection', { n: otherMatchingFaces.length })}
                     </span>
                   </div>
-                  <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div
+                    style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}
+                  >
                     {otherMatchingFaces.map((face) => (
                       <SearchFaceRow
                         key={face.id}
@@ -717,7 +745,15 @@ const SubscriptionSeed = ({
               {otherMatchingSeeds.length > 0 && (
                 <>
                   <div style={{ padding: '16px 20px 6px' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--mf-text-muted)', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--mf-text-muted)',
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       {t('searchOtherSeedsSection', { n: otherMatchingSeeds.length })}
                     </span>
                   </div>

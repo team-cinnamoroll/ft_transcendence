@@ -6,7 +6,7 @@ import { authRouter } from './app_services/auth/auth.handler';
 
 import { getRedisClient } from './shared/infra/redis/client';
 
-export function publicRouter() {
+export function publicApiRouter() {
   return new Hono<AppEnv>()
     .get('/hello', (c) => {
       return c.json({ message: 'Hello from Hono!' });

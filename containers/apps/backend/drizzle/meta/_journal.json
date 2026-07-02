@@ -15,6 +15,13 @@
       "when": 1778163848260,
       "tag": "0001_overrated_thundra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782788161930,
+      "tag": "0002_absurd_king_cobra",
+      "breakpoints": true
     }
   ]
 }

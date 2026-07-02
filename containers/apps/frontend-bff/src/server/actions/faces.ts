@@ -26,7 +26,10 @@ export async function createFaceAction(input: unknown): Promise<ActionResult<Fac
   return { success: true, data: face };
 }
 
-export async function updateFaceAction(faceId: string, input: unknown): Promise<ActionResult<Face>> {
+export async function updateFaceAction(
+  faceId: string,
+  input: unknown
+): Promise<ActionResult<Face>> {
   const parsed = UpdateFaceRequestSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, errors: z.flattenError(parsed.error).fieldErrors };

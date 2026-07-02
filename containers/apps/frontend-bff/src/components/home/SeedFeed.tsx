@@ -16,11 +16,15 @@ type SeedFeedProps = {
   onSeedMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
 };
 
-const SeedFeed = ({ faces, seeds, selectedFaceId, currentUserId, onSeedMoreOptions }: SeedFeedProps) => {
+const SeedFeed = ({
+  faces,
+  seeds,
+  selectedFaceId,
+  currentUserId,
+  onSeedMoreOptions,
+}: SeedFeedProps) => {
   const t = useTranslations('seedFeed');
-  const displaySeeds = selectedFaceId
-    ? seeds.filter((s) => s.faceId === selectedFaceId)
-    : seeds;
+  const displaySeeds = selectedFaceId ? seeds.filter((s) => s.faceId === selectedFaceId) : seeds;
 
   const faceCache = createLookupMap(faces, (face) => face.id);
 

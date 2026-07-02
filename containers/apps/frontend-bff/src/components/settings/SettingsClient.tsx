@@ -46,7 +46,13 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
           }}
         >
           <div
-            style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              flexShrink: 0,
+            }}
           >
             <Image
               src={profile.avatarUrl}

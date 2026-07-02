@@ -124,7 +124,10 @@ const SeedRow = ({
           {onMoreOptions && currentUserId === seed.userId && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onMoreOptions(e, seed); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoreOptions(e, seed);
+              }}
               aria-label={t('moreOptions')}
               style={{
                 marginLeft: 'auto',
@@ -220,9 +223,7 @@ const SeedRow = ({
         )}
 
         {showActions ? (
-          <div
-            style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 16 }}
-          >
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 16 }}>
             {linkedCount > 0 && (
               <button
                 type="button"

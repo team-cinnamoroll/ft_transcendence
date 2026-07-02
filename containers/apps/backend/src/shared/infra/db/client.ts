@@ -2,9 +2,15 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import * as schema from './schema';
+import * as usersSchema from '../../../features/users/infra/db/schema';
+import * as fileStorageSchema from '../../../features/file-storage/infra/db/schema';
 
-export type TracenDb = PostgresJsDatabase<typeof schema>;
+export const appSchema = {
+  ...usersSchema,
+  ...fileStorageSchema,
+};
+
+export type TracenDb = PostgresJsDatabase<typeof appSchema>;
 
 type GlobalDbCache = {
   __tracenDb?: TracenDb;
@@ -19,7 +25,7 @@ export function getDb(databaseUrl: string): TracenDb {
   }
 
   const sql = postgres(databaseUrl);
-  const db = drizzle(sql, { schema });
+  const db = drizzle(sql, { schema: appSchema });
 
   globalCache.__tracenDb = db;
   globalCache.__tracenDbUrl = databaseUrl;
