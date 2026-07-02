@@ -9,6 +9,10 @@ import { createSingletonProvider } from '@/repositories/provider';
 export type SubscriptionRepositorySpec = {
   /** ログイン中ユーザーがサブスクライブしているフェイスID一覧を取得 */
   getSubscribedFaceIds: () => Promise<string[]>;
+  /** 指定フェイスをサブスクライブ */
+  subscribe: (faceId: string) => Promise<void>;
+  /** 指定フェイスのサブスクライブを解除 */
+  unsubscribe: (faceId: string) => Promise<void>;
 };
 
 // ─── モック実装 ────────────────────────────────────────────────
@@ -17,6 +21,17 @@ export function createSubscriptionMockRepositoryImpl(): SubscriptionRepositorySp
   return {
     getSubscribedFaceIds: async () => {
       return subscribedFaceIds;
+    },
+    subscribe: async (faceId) => {
+      if (!subscribedFaceIds.includes(faceId)) {
+        subscribedFaceIds.push(faceId);
+      }
+    },
+    unsubscribe: async (faceId) => {
+      const index = subscribedFaceIds.indexOf(faceId);
+      if (index !== -1) {
+        subscribedFaceIds.splice(index, 1);
+      }
     },
   };
 }

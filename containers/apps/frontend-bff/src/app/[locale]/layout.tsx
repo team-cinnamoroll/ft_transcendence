@@ -43,11 +43,22 @@ export default async function RootLayout({
     layoutData;
 
   return (
-    <html lang={locale} className="h-full scroll-smooth" style={{ background: 'var(--mf-bg-light)' }}>
-      <body className="min-h-full" style={{ background: 'var(--mf-bg-light)', color: 'var(--mf-text)' }}>
+    <html
+      lang={locale}
+      className="h-full scroll-smooth"
+      data-scroll-behavior="smooth"
+      style={{ background: 'var(--mf-bg-light)' }}
+    >
+      <body
+        className="min-h-full"
+        style={{ background: 'var(--mf-bg-light)', color: 'var(--mf-text)' }}
+      >
         <NextIntlClientProvider messages={messages}>
           <DetailPanelProvider>
-            <div className="flex h-screen w-full overflow-hidden" style={{ background: 'var(--mf-bg-light)' }}>
+            <div
+              className="flex h-screen w-full overflow-hidden"
+              style={{ background: 'var(--mf-bg-light)' }}
+            >
               <SideNav
                 faces={myFaces}
                 user={currentUser}

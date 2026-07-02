@@ -60,6 +60,23 @@
     "submit": "Créer",
     "submitting": "Création…"
   },
+  "editFaceModal": {
+    "title": "Modifier la facette",
+    "ariaLabel": "Modifier la facette",
+    "close": "Fermer",
+    "name": "Nom",
+    "required": "*",
+    "nameExample": "ex : Lecture",
+    "emoji": "Emoji",
+    "optional": "(facultatif)",
+    "emojiExample": "ex : 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez cette facette",
+    "privateLabel": "Privé",
+    "privateDescription": "Seul vous pouvez voir cette facette",
+    "submit": "Enregistrer",
+    "submitting": "Enregistrement…"
+  },
   "face": {
     "private": "Privé",
     "subscribe": "S'abonner",
@@ -110,7 +127,14 @@
     "listView": "Vue liste",
     "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "createFirstFace": "Créer votre première facette",
-    "createNewCard": "Nouvelle facette"
+    "createNewCard": "Nouvelle facette",
+    "editFace": "Modifier",
+    "deleteFace": "Supprimer",
+    "deleteConfirmTitle": "Confirmer la suppression",
+    "deleteConfirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
+    "deleteCancel": "Annuler",
+    "deleteConfirmButton": "Supprimer",
+    "deleting": "Suppression…"
   },
   "faceSeedFeed": {
     "noSeeds": "Aucune graine pour l'instant",
@@ -153,15 +177,28 @@
     "weekRecord": "enregistrement(s)",
     "noRecord": "Aucune graine cette semaine"
   },
-  "subscriptionFeed": {
+  "subscriptionSeed": {
     "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "searchLink": "Rechercher des facettes",
     "timelineTab": "Fil d'actualité",
     "subscriptionsTab": "Abonnements",
-    "filterPlaceholder": "Rechercher facettes & graines",
+    "filterPlaceholder": "Trouver de nouveaux visages / graines",
     "filterByFace": "Filtrer par facette",
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
+    "sectionTitle": "Semences d'abonnement récentes",
+    "exploringAll": "Exploration globale",
+    "explorePromptTitle": "Entrez un mot-clé",
+    "explorePromptHint": "Recherchez toutes les facettes et graines, abonnées ou non",
+    "searchTabSubscribed": "Abonnés",
+    "searchTabOther": "Autres",
+    "searchSubscribedFacesSection": "Facettes abonnées ({n})",
+    "searchOtherFacesSection": "Autres facettes ({n})",
+    "searchSubscribedSeedsSection": "Graines abonnées ({n})",
+    "searchOtherSeedsSection": "Autres graines ({n})",
+    "subscribe": "S'abonner",
+    "subscribed": "✓ Abonné",
+    "subscribeAriaLabel": "S'abonner à {name}",
+    "unsubscribeAriaLabel": "Se désabonner de {name}",
     "noMatch": "Aucun résultat",
     "seedCount": "{count, plural, one {Graine} other {Graines}}",
     "noFilteredSeeds": "Aucune graine trouvée",
@@ -192,29 +229,6 @@
     "linkedPreview": "Une graine liée",
     "updatedPreview": "Nouvelle graine publiée sur {faceName}"
   },
-  "searchBar": {
-    "placeholder": "Rechercher par mot-clé..."
-  },
-  "searchScopeSelector": {
-    "all": "Tout",
-    "mine": "Le mien",
-    "subscribed": "Abonnements"
-  },
-  "searchResults": {
-    "emptyTitle": "Saisissez un mot-clé pour rechercher",
-    "emptyHint": "Recherche dans les noms de facettes et le contenu des activités selon la portée",
-    "noResultsTitle": "Aucun résultat pour « {query} »",
-    "noResultsHint": "Essayez un autre mot-clé ou une autre portée",
-    "facesSection": "Facettes",
-    "seedsSection": "Graines",
-    "subscribe": "S'abonner",
-    "subscribed": "Abonné",
-    "subscribeAriaLabel": "S'abonner à {name}",
-    "unsubscribeAriaLabel": "Se désabonner de {name}"
-  },
-  "searchClient": {
-    "title": "Recherche"
-  },
   "home": {
     "title": "Accueil"
   },
@@ -239,7 +253,8 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "profile": {
       "title": "Profil",
-      "description": "Modifiez votre nom, votre badge et votre avatar."
+      "description": "Modifiez votre nom, votre badge et votre avatar.",
+      "edit": "Modifier"
     },
     "data": {
       "title": "Données et confidentialité",
@@ -249,6 +264,25 @@
       "title": "Compte",
       "description": "Supprimez votre compte."
     }
+  },
+  "profileEditModal": {
+    "title": "Modifier le profil",
+    "ariaLabel": "Modifier le profil",
+    "close": "Fermer",
+    "name": "Nom",
+    "required": "*",
+    "namePlaceholder": "Nom affiché",
+    "badge": "Badge",
+    "optional": "(facultatif)",
+    "badgePlaceholder": "🌟",
+    "badgeHint": "Un seul emoji",
+    "avatar": "URL de l'avatar",
+    "avatarPlaceholder": "https://example.com/avatar.png",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "errorName": "Veuillez saisir un nom",
+    "errorBadge": "Le badge doit être un seul emoji",
+    "errorAvatar": "Veuillez saisir une URL valide"
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour à la liste des facettes"
@@ -276,6 +310,25 @@
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"
   },
+  "editSeedModal": {
+    "title": "Modifier la graine",
+    "ariaLabel": "Modifier la graine",
+    "close": "Fermer",
+    "body": "Contenu",
+    "required": "*",
+    "bodyPlaceholder": "Écrivez quelque chose…",
+    "submit": "Enregistrer",
+    "submitting": "Enregistrement…"
+  },
+  "seedActions": {
+    "editSeed": "Modifier",
+    "deleteSeed": "Supprimer",
+    "deleteConfirmTitle": "Confirmer la suppression",
+    "deleteConfirmMessage": "Supprimer cette graine ? Cette action est irréversible.",
+    "deleteCancel": "Annuler",
+    "deleteConfirmButton": "Supprimer",
+    "deleting": "Suppression…"
+  },
   "seedRow": {
     "readMore": "Lire la suite",
     "collapse": "Réduire",
@@ -298,6 +351,12 @@
     "showMore": "Voir {count} de plus →",
     "imageAlt": "Image {n}"
   },
+  "pagination": {
+    "ariaLabel": "Pagination",
+    "prev": "Page précédente",
+    "next": "Page suivante",
+    "page": "Page {n}"
+  },
   "contextRail": {
     "onThisDay": "Ce jour il y a un an",
     "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
@@ -313,5 +372,21 @@
     "popularFaces": "Facettes populaires",
     "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
     "subscribeButton": "S'abonner"
+  },
+  "validation": {
+    "required": "Ce champ est requis",
+    "invalid": "Saisie invalide",
+    "tooShort": "Doit contenir au moins {min} caractères",
+    "tooLong": "Ne doit pas dépasser {max} caractères",
+    "email": { "invalid": "Saisissez une adresse e-mail valide" },
+    "url": { "invalid": "Saisissez une URL valide" },
+    "password": {
+      "tooShort": "Le mot de passe doit contenir au moins {min} caractères",
+      "tooLong": "Le mot de passe ne doit pas dépasser {max} caractères"
+    },
+    "badge": {
+      "invalid": "Doit être un emoji",
+      "single": "Doit être un emoji unique"
+    }
   }
 }

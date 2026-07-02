@@ -13,9 +13,17 @@ type FaceSeedFeedProps = {
   seeds: Seed[];
   users?: UserProfile[];
   sortOrder?: SortOrder;
+  currentUserId?: string;
+  onSeedMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
 };
 
-const FaceSeedFeed = ({ face, seeds, sortOrder = 'newest' }: FaceSeedFeedProps) => {
+const FaceSeedFeed = ({
+  face,
+  seeds,
+  sortOrder = 'newest',
+  currentUserId,
+  onSeedMoreOptions,
+}: FaceSeedFeedProps) => {
   const t = useTranslations('faceSeedFeed');
 
   const sorted = useMemo(() => {
@@ -26,7 +34,14 @@ const FaceSeedFeed = ({ face, seeds, sortOrder = 'newest' }: FaceSeedFeedProps) 
 
   if (sorted.length === 0) {
     return (
-      <p style={{ padding: '64px 0', textAlign: 'center', fontSize: 13, color: 'var(--mf-text-muted)' }}>
+      <p
+        style={{
+          padding: '64px 0',
+          textAlign: 'center',
+          fontSize: 13,
+          color: 'var(--mf-text-muted)',
+        }}
+      >
         {sortOrder === 'images' ? t('noImageSeeds') : t('noSeeds')}
       </p>
     );
@@ -40,6 +55,8 @@ const FaceSeedFeed = ({ face, seeds, sortOrder = 'newest' }: FaceSeedFeedProps) 
           seed={seed}
           face={face}
           noBorder={index === sorted.length - 1}
+          currentUserId={currentUserId}
+          onMoreOptions={onSeedMoreOptions}
         />
       ))}
     </div>

@@ -60,6 +60,23 @@
     "submit": "Create",
     "submitting": "Creating..."
   },
+  "editFaceModal": {
+    "title": "Edit Face",
+    "ariaLabel": "Edit Face",
+    "close": "Close",
+    "name": "Name",
+    "required": "*",
+    "nameExample": "e.g. Reading",
+    "emoji": "Emoji",
+    "optional": "(optional)",
+    "emojiExample": "e.g. 📚",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe this face",
+    "privateLabel": "Private",
+    "privateDescription": "Only you can view this face",
+    "submit": "Save",
+    "submitting": "Saving..."
+  },
   "face": {
     "private": "Private",
     "subscribe": "Subscribe",
@@ -110,7 +127,14 @@
     "listView": "List view",
     "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "createFirstFace": "Create your first face",
-    "createNewCard": "New face"
+    "createNewCard": "New face",
+    "editFace": "Edit",
+    "deleteFace": "Delete",
+    "deleteConfirmTitle": "Confirm delete",
+    "deleteConfirmMessage": "Delete \"{name}\"? This action cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirmButton": "Delete",
+    "deleting": "Deleting..."
   },
   "faceSeedFeed": {
     "noSeeds": "No seeds yet",
@@ -153,15 +177,28 @@
     "weekRecord": "record",
     "noRecord": "No seeds this week"
   },
-  "subscriptionFeed": {
+  "subscriptionSeed": {
     "noSubscriptions": "You haven't subscribed to any faces yet",
-    "searchLink": "Search for faces",
     "timelineTab": "Timeline",
     "subscriptionsTab": "Subscriptions",
-    "filterPlaceholder": "Search faces & seeds",
+    "filterPlaceholder": "Find a new face / seed",
     "filterByFace": "Filter by face",
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
+    "sectionTitle": "Recent subscription seed",
+    "exploringAll": "Exploring all",
+    "explorePromptTitle": "Enter a keyword",
+    "explorePromptHint": "Search all faces and seeds — subscribed or not",
+    "searchTabSubscribed": "Subscribed",
+    "searchTabOther": "Others",
+    "searchSubscribedFacesSection": "Subscribed Faces ({n})",
+    "searchOtherFacesSection": "Other Faces ({n})",
+    "searchSubscribedSeedsSection": "Subscribed Seeds ({n})",
+    "searchOtherSeedsSection": "Other Seeds ({n})",
+    "subscribe": "Subscribe",
+    "subscribed": "✓ Subscribed",
+    "subscribeAriaLabel": "Subscribe to {name}",
+    "unsubscribeAriaLabel": "Unsubscribe from {name}",
     "noMatch": "No results",
     "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "noFilteredSeeds": "No seeds found",
@@ -192,29 +229,6 @@
     "linkedPreview": "A linked seed",
     "updatedPreview": "New seed posted to {faceName}"
   },
-  "searchBar": {
-    "placeholder": "Search by keyword..."
-  },
-  "searchScopeSelector": {
-    "all": "All",
-    "mine": "Mine",
-    "subscribed": "Subscribed"
-  },
-  "searchResults": {
-    "emptyTitle": "Enter a keyword to search",
-    "emptyHint": "Search face names and seed content by scope",
-    "noResultsTitle": "No results for \"{query}\"",
-    "noResultsHint": "Try a different keyword or scope",
-    "facesSection": "Faces",
-    "seedsSection": "Seeds",
-    "subscribe": "Subscribe",
-    "subscribed": "Subscribed",
-    "subscribeAriaLabel": "Subscribe to {name}",
-    "unsubscribeAriaLabel": "Unsubscribe from {name}"
-  },
-  "searchClient": {
-    "title": "Search"
-  },
   "home": {
     "title": "Home"
   },
@@ -239,7 +253,8 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "profile": {
       "title": "Profile",
-      "description": "Edit your display name, badge, and avatar."
+      "description": "Edit your display name, badge, and avatar.",
+      "edit": "Edit"
     },
     "data": {
       "title": "Data & Privacy",
@@ -249,6 +264,25 @@
       "title": "Account",
       "description": "Delete your account."
     }
+  },
+  "profileEditModal": {
+    "title": "Edit Profile",
+    "ariaLabel": "Edit Profile",
+    "close": "Close",
+    "name": "Name",
+    "required": "*",
+    "namePlaceholder": "Display name",
+    "badge": "Badge",
+    "optional": "(optional)",
+    "badgePlaceholder": "🌟",
+    "badgeHint": "A single emoji",
+    "avatar": "Avatar URL",
+    "avatarPlaceholder": "https://example.com/avatar.png",
+    "save": "Save",
+    "saving": "Saving…",
+    "errorName": "Please enter a name",
+    "errorBadge": "Badge must be a single emoji",
+    "errorAvatar": "Please enter a valid URL"
   },
   "faceDetailPage": {
     "backAriaLabel": "Back to faces list"
@@ -276,6 +310,25 @@
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
   },
+  "editSeedModal": {
+    "title": "Edit Seed",
+    "ariaLabel": "Edit Seed",
+    "close": "Close",
+    "body": "Content",
+    "required": "*",
+    "bodyPlaceholder": "Write something…",
+    "submit": "Save",
+    "submitting": "Saving…"
+  },
+  "seedActions": {
+    "editSeed": "Edit",
+    "deleteSeed": "Delete",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Delete this seed? This action cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirmButton": "Delete",
+    "deleting": "Deleting…"
+  },
   "seedRow": {
     "readMore": "Read more",
     "collapse": "Collapse",
@@ -298,6 +351,12 @@
     "showMore": "Show {count} more →",
     "imageAlt": "Image {n}"
   },
+  "pagination": {
+    "ariaLabel": "Pagination",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {n}"
+  },
   "contextRail": {
     "onThisDay": "On This Day",
     "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
@@ -313,5 +372,21 @@
     "popularFaces": "Popular Faces",
     "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
     "subscribeButton": "Subscribe"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalid": "Invalid input",
+    "tooShort": "Must be at least {min} characters",
+    "tooLong": "Must be at most {max} characters",
+    "email": { "invalid": "Enter a valid email address" },
+    "url": { "invalid": "Enter a valid URL" },
+    "password": {
+      "tooShort": "Password must be at least {min} characters",
+      "tooLong": "Password must be at most {max} characters"
+    },
+    "badge": {
+      "invalid": "Must be an emoji",
+      "single": "Must be a single emoji"
+    }
   }
 }

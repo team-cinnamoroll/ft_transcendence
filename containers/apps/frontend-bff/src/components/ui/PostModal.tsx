@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import type { Face } from '@/types/face';
+import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
+import { createSeedAction } from '@/server/actions/seeds';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -16,10 +18,13 @@ type AttachedImage = {
   objectUrl: string;
 };
 
+type FieldErrors = Record<string, string[]>;
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   defaultFaceId?: string;
+  onCreate?: (seed: Seed) => void;
 };
 
 type ViewerApiResponse = {
@@ -29,10 +34,12 @@ type ViewerApiResponse = {
 
 const EMPTY_FACES: Face[] = [];
 
-const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
+const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const t = useTranslations('postModal');
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
   const imagesRef = useRef<AttachedImage[]>([]);
 
   useEffect(() => {
@@ -100,6 +107,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       setText('');
       setSelectedFaceId(initialSelectedFaceId);
       setShowFacePicker(false);
+      setFieldErrors(null);
     } else {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
@@ -110,6 +118,20 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       imagesRef.current.forEach((img) => URL.revokeObjectURL(img.objectUrl));
     };
   }, []);
+
+  const handleSubmit = () => {
+    if (!canPost || !selectedFaceId) return;
+    setFieldErrors(null);
+    startTransition(async () => {
+      const result = await createSeedAction({ faceId: selectedFaceId, body: text });
+      if (!result.success) {
+        setFieldErrors(result.errors);
+        return;
+      }
+      onCreate?.(result.data);
+      onClose();
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -175,7 +197,15 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
             padding: '6px 4px',
           }}
         >
-          <svg width={20} height={20} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round">
+          <svg
+            width={20}
+            height={20}
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+          >
             <path d="M5 5l10 10M15 5L5 15" />
           </svg>
           {t('cancel')}
@@ -185,7 +215,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           {/* 公開設定 */}
           <button
             type="button"
-            onClick={() => setVisibility(v => v === 'public' ? 'private' : 'public')}
+            onClick={() => setVisibility((v) => (v === 'public' ? 'private' : 'public'))}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -202,7 +232,15 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           >
             {visibility === 'public' ? (
               <>
-                <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+                <svg
+                  width={12}
+                  height={12}
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                >
                   <circle cx={8} cy={8} r={6} />
                   <path d="M2.5 8c0-1 1-3 5.5-3s5.5 2 5.5 3-1 3-5.5 3S2.5 9 2.5 8z" />
                   <circle cx={8} cy={8} r={2} fill="currentColor" />
@@ -211,7 +249,15 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               </>
             ) : (
               <>
-                <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+                <svg
+                  width={12}
+                  height={12}
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                >
                   <rect x={4} y={7} width={8} height={7} rx={1.5} />
                   <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
                 </svg>
@@ -223,23 +269,24 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           {/* 投稿ボタン */}
           <button
             type="button"
-            disabled={!canPost}
+            disabled={!canPost || isPending}
+            onClick={handleSubmit}
             style={{
               padding: '8px 18px',
               borderRadius: 999,
-              background: canPost ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
-              color: canPost ? '#fff' : 'var(--mf-text-faint)',
+              background: canPost && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
+              color: canPost && !isPending ? '#fff' : 'var(--mf-text-faint)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: 0.3,
               border: 'none',
-              cursor: canPost ? 'pointer' : 'not-allowed',
+              cursor: canPost && !isPending ? 'pointer' : 'not-allowed',
               whiteSpace: 'nowrap',
-              boxShadow: canPost ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              boxShadow: canPost && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
               transition: 'background 0.15s, box-shadow 0.15s',
             }}
           >
-            {t('submit')}
+            {isPending ? t('submitting') : t('submit')}
           </button>
         </div>
       </div>
@@ -255,7 +302,9 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               alignItems: 'center',
               gap: 7,
               padding: '6px 12px 6px 6px',
-              background: selectedFace ? `${getFaceColor(selectedFace.id)}12` : 'var(--mf-surface-tint)',
+              background: selectedFace
+                ? `${getFaceColor(selectedFace.id)}12`
+                : 'var(--mf-surface-tint)',
               borderRadius: 999,
               border: 'none',
               cursor: 'pointer',
@@ -263,14 +312,34 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
             }}
           >
             {selectedFace && <FaceBadge face={selectedFace} size={22} radius={6} />}
-            <span style={{ fontSize: 13, fontWeight: 700, color: selectedFace ? getFaceColor(selectedFace.id) : 'var(--mf-text-muted)' }}>
-              {isViewerLoading ? t('loading') : selectedFace ? getFaceTitle(selectedFace) : t('selectFace')}
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: selectedFace ? getFaceColor(selectedFace.id) : 'var(--mf-text-muted)',
+              }}
+            >
+              {isViewerLoading
+                ? t('loading')
+                : selectedFace
+                  ? getFaceTitle(selectedFace)
+                  : t('selectFace')}
             </span>
-            <svg width={9} height={9} viewBox="0 0 10 7" fill="none" stroke={selectedFace ? getFaceColor(selectedFace.id) : 'var(--mf-text-muted)'} strokeWidth={1.6} strokeLinecap="round">
+            <svg
+              width={9}
+              height={9}
+              viewBox="0 0 10 7"
+              fill="none"
+              stroke={selectedFace ? getFaceColor(selectedFace.id) : 'var(--mf-text-muted)'}
+              strokeWidth={1.6}
+              strokeLinecap="round"
+            >
               <path d="M1 1l4 4 4-4" />
             </svg>
           </button>
-          <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>{t('writeToThisFace')}</span>
+          <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>
+            {t('writeToThisFace')}
+          </span>
         </div>
 
         {/* フェイス選択ドロップダウン */}
@@ -310,7 +379,16 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
                   {getFaceTitle(face)}
                 </span>
                 {face.id === selectedFaceId && (
-                  <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="var(--mf-accent)" strokeWidth={2} strokeLinecap="round" style={{ marginLeft: 'auto' }}>
+                  <svg
+                    width={14}
+                    height={14}
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    stroke="var(--mf-accent)"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    style={{ marginLeft: 'auto' }}
+                  >
                     <path d="M2 7l4 4 6-7" />
                   </svg>
                 )}
@@ -343,6 +421,18 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
             caretColor: 'var(--mf-accent)',
           }}
         />
+
+        {/* バリデーションエラー */}
+        {fieldErrors?.body && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {fieldErrors.body[0]}
+          </p>
+        )}
+        {fieldErrors?.faceId && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {fieldErrors.faceId[0]}
+          </p>
+        )}
 
         {/* 画像プレビュー */}
         {images.length > 0 && (
@@ -393,7 +483,15 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
                   }}
                   aria-label={t('removeImageAriaLabel', { n: index + 1 })}
                 >
-                  <svg width={10} height={10} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                  <svg
+                    width={10}
+                    height={10}
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                  >
                     <path d="M5 5l10 10M15 5L5 15" />
                   </svg>
                 </button>
@@ -444,7 +542,16 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               color: images.length >= MAX_IMAGES ? 'var(--mf-text-faint)' : 'var(--mf-brand)',
             }}
           >
-            <svg width={20} height={20} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width={20}
+              height={20}
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x={3} y={3} width={14} height={14} rx={2} />
               <circle cx={7} cy={7.5} r={1.2} />
               <path d="M3 14l4-4 4 4 3-3 3 3" />
@@ -491,7 +598,16 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
               color: 'var(--mf-brand)',
             }}
           >
-            <svg width={18} height={18} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M6.5 9.5a3.54 3.54 0 005 0l2-2a3.54 3.54 0 00-5-5l-1 1" />
               <path d="M9.5 6.5a3.54 3.54 0 00-5 0l-2 2a3.54 3.54 0 005 5l1-1" />
             </svg>
@@ -499,9 +615,20 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
         </div>
 
         {/* 文字数カウント + 下書き */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11.5, color: 'var(--mf-text-muted)', whiteSpace: 'nowrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 11.5,
+            color: 'var(--mf-text-muted)',
+            whiteSpace: 'nowrap',
+          }}
+        >
           <span>{t('charCount', { n: text.length })}</span>
-          <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-line-soft)' }} />
+          <div
+            style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-line-soft)' }}
+          />
           <span>{t('draftSaved')}</span>
         </div>
       </div>

@@ -12,13 +12,19 @@ type SeedFeedProps = {
   faces: Face[];
   seeds: Seed[];
   selectedFaceId?: string | null;
+  currentUserId?: string;
+  onSeedMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
 };
 
-const SeedFeed = ({ faces, seeds, selectedFaceId }: SeedFeedProps) => {
+const SeedFeed = ({
+  faces,
+  seeds,
+  selectedFaceId,
+  currentUserId,
+  onSeedMoreOptions,
+}: SeedFeedProps) => {
   const t = useTranslations('seedFeed');
-  const displaySeeds = selectedFaceId
-    ? seeds.filter((s) => s.faceId === selectedFaceId)
-    : seeds;
+  const displaySeeds = selectedFaceId ? seeds.filter((s) => s.faceId === selectedFaceId) : seeds;
 
   const faceCache = createLookupMap(faces, (face) => face.id);
 
@@ -48,6 +54,8 @@ const SeedFeed = ({ faces, seeds, selectedFaceId }: SeedFeedProps) => {
             seed={seed}
             face={face}
             noBorder={index === displaySeeds.length - 1}
+            currentUserId={currentUserId}
+            onMoreOptions={onSeedMoreOptions}
           />
         );
       })}
