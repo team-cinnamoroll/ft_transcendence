@@ -5,7 +5,7 @@ import { type UserEntity, UserEntitySchema } from '../../domain/users.entity';
 import type { UserRepositorySpec } from '../../domain/users.repository';
 
 import type { TracenDb } from '../../../../shared/infra/db/client';
-import { users, type UserRow } from '../../../../shared/infra/db/schema';
+import { users, type UserRow } from './schema';
 
 function mapUser(row: UserRow): UserEntity {
   return UserEntitySchema.parse({

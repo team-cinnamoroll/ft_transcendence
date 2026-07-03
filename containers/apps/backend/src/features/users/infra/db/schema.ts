@@ -11,9 +11,7 @@ export const users = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    emailUnique: uniqueIndex('users_email_unique').on(table.email),
-  })
+  (table) => [uniqueIndex('users_email_unique').on(table.email)]
 );
 
 export type UserRow = typeof users.$inferSelect;

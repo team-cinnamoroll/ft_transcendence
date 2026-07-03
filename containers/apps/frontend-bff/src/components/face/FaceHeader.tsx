@@ -75,7 +75,8 @@ const FaceHeader = ({
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to top, rgba(20,24,36,0.80) 0%, rgba(20,24,36,0.35) 50%, transparent 100%)',
+              background:
+                'linear-gradient(to top, rgba(20,24,36,0.80) 0%, rgba(20,24,36,0.35) 50%, transparent 100%)',
             }}
           />
           <div
@@ -194,7 +195,7 @@ const FaceHeader = ({
             <button
               type="button"
               onClick={handleSubscribeToggle}
-                disabled={isToggling}
+              disabled={isToggling}
               style={{
                 padding: '8px 24px',
                 borderRadius: 999,

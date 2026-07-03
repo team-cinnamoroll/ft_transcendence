@@ -100,7 +100,14 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
         }}
       >
         {/* ヘッダー */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px 12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 18px 12px',
+          }}
+        >
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)', margin: 0 }}>
             {t('title')}
           </h2>
@@ -121,7 +128,15 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
               color: 'var(--mf-text-muted)',
             }}
           >
-            <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+            <svg
+              width={16}
+              height={16}
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              strokeLinecap="round"
+            >
               <path d="M2 2l12 12M14 2L2 14" />
             </svg>
           </button>
@@ -130,7 +145,10 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 18px 20px' }}>
           {/* 名前（必須） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="edit-face-name" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label
+              htmlFor="edit-face-name"
+              style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
+            >
               {t('name')}
               <span style={{ marginLeft: 4, color: 'var(--mf-accent)' }}>{t('required')}</span>
             </label>
@@ -151,7 +169,10 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
 
           {/* 絵文字（任意） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="edit-face-emoji" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label
+              htmlFor="edit-face-emoji"
+              style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
+            >
               {t('emoji')}
               <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
@@ -167,7 +188,10 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
 
           {/* 説明文（任意） */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label htmlFor="edit-face-description" style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+            <label
+              htmlFor="edit-face-description"
+              style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
+            >
               {t('description')}
               <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
@@ -194,8 +218,12 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--mf-text)' }}>{t('privateLabel')}</span>
-              <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>{t('privateDescription')}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--mf-text)' }}>
+                {t('privateLabel')}
+              </span>
+              <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>
+                {t('privateDescription')}
+              </span>
             </div>
             <button
               type="button"

@@ -63,8 +63,9 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
       return updated;
     },
 
-    delete: async (_faceId, _userId) => {
+    delete: async () => {
       // モック実装: no-op（実際には削除しない）
+      // 本番実装では、_faceId, _userIdの二つの引数を定義する
     },
 
     listAll: async () => {

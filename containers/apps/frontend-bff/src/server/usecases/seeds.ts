@@ -3,7 +3,11 @@ import 'server-only';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { type CreateSeedInput, type UpdateSeedInput, getSeedRepository } from '@/repositories/seed-repository';
+import {
+  type CreateSeedInput,
+  type UpdateSeedInput,
+  getSeedRepository,
+} from '@/repositories/seed-repository';
 import { findFaceById } from './faces';
 import { getCurrentUser, findUserById, listAllUsers } from './users';
 
@@ -47,7 +51,10 @@ export async function createSeedForCurrentUser(input: CreateSeedInput): Promise<
   return getSeedRepository().create(currentUser.id, input);
 }
 
-export async function updateSeedForCurrentUser(seedId: string, input: UpdateSeedInput): Promise<Seed> {
+export async function updateSeedForCurrentUser(
+  seedId: string,
+  input: UpdateSeedInput
+): Promise<Seed> {
   const currentUser = await getCurrentUser();
   return getSeedRepository().update(seedId, currentUser.id, input);
 }

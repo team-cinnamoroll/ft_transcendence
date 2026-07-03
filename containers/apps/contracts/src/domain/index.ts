@@ -4,3 +4,4 @@ export * from './notification';
 export * from './seed';
 export * from './user';
 export * from './presence';
+export * from './file-storage';

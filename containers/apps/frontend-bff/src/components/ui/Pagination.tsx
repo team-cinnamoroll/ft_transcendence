@@ -13,7 +13,7 @@ function buildPageList(current: number, total: number): (number | '...')[] {
     return Array.from({ length: total }, (_, i) => i + 1);
   }
   const around = new Set(
-    [1, total, current - 1, current, current + 1].filter((p) => p >= 1 && p <= total),
+    [1, total, current - 1, current, current + 1].filter((p) => p >= 1 && p <= total)
   );
   const sorted = [...around].sort((a, b) => a - b);
   const result: (number | '...')[] = [];
@@ -52,7 +52,13 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: Props) => {
   return (
     <nav
       aria-label={t('ariaLabel')}
-      style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', padding: '16px 0' }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+        justifyContent: 'center',
+        padding: '16px 0',
+      }}
     >
       <button
         type="button"
@@ -66,7 +72,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: Props) => {
 
       {pages.map((p, i) =>
         p === '...' ? (
-          <span key={`dots-${i}`} style={{ padding: '0 2px', color: 'var(--mf-text-muted)', fontSize: 13 }}>
+          <span
+            key={`dots-${i}`}
+            style={{ padding: '0 2px', color: 'var(--mf-text-muted)', fontSize: 13 }}
+          >
             …
           </span>
         ) : (
@@ -80,7 +89,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: Props) => {
           >
             {p}
           </button>
-        ),
+        )
       )}
 
       <button

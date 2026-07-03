@@ -372,5 +372,21 @@
     "popularFaces": "人気のフェイス",
     "subscribersUnit": "{count, plural, other {サブスク}}",
     "subscribeButton": "サブスク"
+  },
+  "validation": {
+    "required": "必須項目です",
+    "invalid": "入力内容が正しくありません",
+    "tooShort": "{min}文字以上で入力してください",
+    "tooLong": "{max}文字以内で入力してください",
+    "email": { "invalid": "メールアドレスの形式が正しくありません" },
+    "url": { "invalid": "URLの形式が正しくありません" },
+    "password": {
+      "tooShort": "パスワードは{min}文字以上で入力してください",
+      "tooLong": "パスワードは{max}文字以内で入力してください"
+    },
+    "badge": {
+      "invalid": "絵文字のみを入力してください",
+      "single": "絵文字は1文字だけ入力してください"
+    }
   }
 }

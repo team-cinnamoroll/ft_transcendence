@@ -43,6 +43,7 @@ const EnvSchema = z
       message:
         "REFRESH_TOKEN_EXPIRES_IN は '15m', '2h', '7d' のような形式（数値 + s/m/h/d/w/y）で指定してください",
     }),
+    FILE_STORAGE_BASE_DIR: z.string().min(1).default('/app/uploads'),
   })
   .strict()
   .superRefine((val, ctx) => {
@@ -154,5 +155,6 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     REDIS_URL: raw.REDIS_URL,
     ACCESS_TOKEN_EXPIRES_IN: raw.ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN,
+    FILE_STORAGE_BASE_DIR: raw.FILE_STORAGE_BASE_DIR,
   });
 }
