@@ -57,15 +57,35 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
     },
 
     signOut: async (refreshToken) => {
-      const res = await createBackendClient().api.v1.auth.refresh.$delete({
-        json: { refreshToken },
-      });
-      if (!res.ok) {
-        // ログアウトはベストエフォート: バックエンド呼び出しが失敗しても
-        // 呼び出し側（Usecase）でローカルのセッション（Cookie）は必ず破棄する想定のため、
-        // ここでは例外を投げず警告ログのみ残す。
-        console.error('AuthRepository.signOut: backend request failed', res.status);
+      // signOutだけ複数回リトライしている理由:
+      // - signUp/signIn/refreshは「意味のある結果」を返す約束（例: Promise<AuthSignUp>）をしているため、
+      //   通信が一時的に不調でも、リトライで誤魔化さずその場で失敗を呼び出し元に伝えるべき処理。
+      // - 一方signOutは「削除に成功したか」を呼び出し元に一切伝えない（Promise<void>）。
+      //   1回失敗しただけで諦めてしまうと、本来なら一瞬の通信不調で成功したはずの削除まで
+      //   見逃してしまう。返り値で失敗を伝えられない分、ここで粘って確実性を上げる必要がある。
+      //
+      // なお、これはあくまで「一時的な不調」を救うための軽い対応であり、
+      // バックエンド自体が長時間停止しているような障害までは救えない（docs/frontend-bff/AUTH.md 参照）。
+      const maxAttempts = 3;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const res = await createBackendClient().api.v1.auth.refresh.$delete({
+            json: { refreshToken },
+          });
+          if (res.ok) return;
+          console.error(
+            `AuthRepository.signOut: backend request failed (attempt ${attempt}/${maxAttempts})`,
+            res.status
+          );
+        } catch (err) {
+          console.error(
+            `AuthRepository.signOut: request threw (attempt ${attempt}/${maxAttempts})`,
+            err
+          );
+        }
       }
+      // ここまで来たら全て失敗。ログアウトはベストエフォートなので、これ以上は追わず
+      // 呼び出し側（Usecase）でのローカルセッション（Cookie）破棄に処理を委ねる。
     },
   };
 }
