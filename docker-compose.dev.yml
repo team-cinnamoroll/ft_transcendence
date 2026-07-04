@@ -7,6 +7,7 @@ services:
       - .:/workspace:cached
       - workspace_node_modules:/workspace/node_modules
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.claude:/home/node/.claude:cached
     working_dir: /workspace
     command: sleep infinity
     extra_hosts:
