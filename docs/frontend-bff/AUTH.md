@@ -1,40 +1,20 @@
-# ログイン導線 実装計画
+# ログイン導線 実装スコープ
 
 > ゴール: サインアップ／ログイン／ログアウトの画面と仕組みを実装し、バックエンドの認証APIと実際につながる状態にする
 
 ---
 
-## 0. まず言葉の説明（知っている人は読み飛ばしてOK）
+## 1. 背景（なぜこの整理が必要か）
 
-| 用語                    | かんたんな説明                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Cookie                  | ブラウザに保存される小さなデータ。サーバーが「保存して」と指示し、以後のリクエストで自動的に一緒に送られてくる。    |
-| httpOnly Cookie         | ブラウザ内の JavaScript からは読み取れない Cookie。トークンのような重要な情報を置くのに向いている（盗まれにくい）。 |
-| アクセストークン（JWT） | 「私はログイン済みです」を証明する短命の通行証。バックエンドAPIを呼ぶときに一緒に送る。                             |
-| リフレッシュトークン    | アクセストークンが切れたときに、再発行してもらうための通行証。アクセストークンより長持ちする。                      |
-| セッション              | 「今このブラウザは誰としてログイン中か」という状態のこと。今回はこれを Cookie で持たせる。                          |
-| モック                  | 本物のバックエンドの代わりに使う、あらかじめ用意した仮のデータ。                                                    |
+現在の frontend-bff は、ほぼ全ての画面が **モックデータ** で動いている。`getCurrentUser()`（[repositories/user-repository.ts](../../containers/apps/frontend-bff/src/repositories/user-repository.ts)）は `mocks/users.ts` の固定ユーザーを常に返し、フェイス・アクティビティなどのモックデータも全てこの固定ユーザーの ID に紐づいている。
 
----
+一方バックエンド（`containers/apps/backend`）にはサインアップ・ログイン・ログアウト・トークン再発行のAPIが実装済みで動作確認も取れている（詳細は [BACKEND_ARCHITECTURE.md](../architecture/BACKEND_ARCHITECTURE.md)）。
 
-## 1. 背景（なぜこの計画が必要か）
-
-現在の frontend-bff は、ほぼ全ての画面が **モックデータ** で動いている。
-`getCurrentUser()`（[repositories/user-repository.ts](../../containers/apps/frontend-bff/src/repositories/user-repository.ts)）は `mocks/users.ts` の固定ユーザー（山田太郎）を常に返し、フェイス・アクティビティなどのモックデータもすべてこの固定ユーザーの ID に紐づいている。
-
-一方バックエンド（`containers/apps/backend`）にはサインアップ・ログイン・ログアウト・トークン再発行のAPIがすでに実装済みで動作確認も取れている（詳細は [BACKEND_ARCHITECTURE.md](../architecture/BACKEND_ARCHITECTURE.md)）。
-
-ここでそのまま「ログインだけ本物のバックエンドにつなぐ」と、ログインした人の ID は本物の（バックエンドが発行した）ID になる。しかしフェイスやアクティビティなどのモックデータは相変わらず固定の山田太郎の ID しか知らないため、**ログインした人と、画面に表示される中身が一致しなくなる**（＝モックが機能しなくなる）という問題が起きる。
+このままログインだけ本物のバックエンドにつなぐと、ログインした人の ID は本物のIDになる一方、フェイスやアクティビティは相変わらず固定ユーザーのモックのままなので、**ログインした人と画面に表示される中身が一致しなくなる**（＝モックが機能しなくなる）問題が起きる。
 
 ## 2. 方針（結論）
 
 **「ログインしているかどうか（認証）」と「画面にどのデータを表示するか（コンテンツの持ち主）」を、いったん別々のものとして扱う。**
-
-- ログイン・サインアップ・ログアウトの仕組みは、最初から本物のバックエンドAPIにつなぐ（この部分に関してはモック実装を作らない）。
-- 画面に表示するフェイスやアクティビティは、これまで通り `getCurrentUser()` が返す固定ユーザーのモックデータを使い続ける。**`getCurrentUser()` の中身は今回変更しない。**
-- 「今ログイン中の本人（バックエンドのユーザー）」の情報は、`getCurrentUser()` とは別の新しい仕組み（後述の `getAuthSession()`）で取得する。
-
-この2つを分けておくことで、ログイン機能を先に本物につなぎつつ、フェイス・アクティビティなど他の画面のモックを壊さずに済む。
 
 | 項目                                 | 今回どうするか                              |
 | ------------------------------------ | ------------------------------------------- |
@@ -43,7 +23,7 @@
 | フェイス・アクティビティ等の表示内容 | 今まで通りモックのまま（変更しない）        |
 | `getCurrentUser()` の中身            | 変更しない                                  |
 
-> ⚠️ 補足: 将来「ログインした人のフェイスが本当に表示される」ようにするには、`user-repository` や `face-repository` などを API 実装に差し替える別の作業が必要になる。これは今回のスコープ外とする（[CRUD.md](CRUD.md) 参照）。
+> ⚠️ 将来「ログインした人のフェイスが本当に表示される」ようにするには、`user-repository` や `face-repository` などを API 実装に差し替える別の作業が必要になる（[CONNECTION_PLAN.md](CONNECTION_PLAN.md) 参照）。
 
 ## 3. 全体像
 
@@ -68,183 +48,67 @@
 
 画面表示側（フェイス一覧など）はこの流れとは別に、今まで通り `getCurrentUser()` → モックデータ、という流れのまま変わらない。
 
-## 4. 新規に作るもの・変更するもの
+## 4. 今回実装するもの
 
-| 種類                       | パス                                                | 内容                                                                                                         |
-| -------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 型（contracts）            | （追加不要）                                        | サインアップ／ログイン等の型は `@tracen/contracts` にすでにある（`AuthSignUpRequest` など）                  |
-| Repository                 | `src/repositories/auth-repository.ts`（新規）       | サインアップ／ログイン／ログアウト／トークン再発行をバックエンドAPIに問い合わせる窓口                        |
-| セッション用ユーティリティ | `src/lib/session.ts`（新規）                        | Cookie にトークンを保存・削除・読み取りする関数（server-only）                                               |
-| Usecase                    | `src/server/usecases/auth.ts`（新規）               | サインアップ／ログイン／ログアウトの一連の処理をまとめる。ログイン中かの判定 `getAuthSession()` もここに置く |
-| Server Actions             | `src/server/actions/auth.ts`（新規）                | フォームから呼べる「サインアップする」「ログインする」「ログアウトする」の入口                               |
-| ページ                     | `src/app/[locale]/sign-up/page.tsx`（新規）         | サインアップ画面                                                                                             |
-| ページ                     | `src/app/[locale]/sign-in/page.tsx`（新規）         | ログイン画面                                                                                                 |
-| コンポーネント             | `src/components/auth/SignUpForm.tsx`（新規）        | サインアップフォーム（Client Component）                                                                     |
-| コンポーネント             | `src/components/auth/SignInForm.tsx`（新規）        | ログインフォーム（Client Component）                                                                         |
-| 既存コンポーネント変更     | `src/components/ui/AccountMenu.tsx`                 | ログイン中はログアウトボタンを表示。未ログインならログイン画面への導線を表示                                 |
-| i18n                       | `src/i18n/messages/{ja,en,fr}.json`                 | `signUp` / `signIn` / 関連メッセージの名前空間を追加                                                         |
-| Storybook                  | `src/components/auth/stories/*.stories.tsx`（新規） | フォームの見た目確認用                                                                                       |
+| 種類                       | パス                                                                         | 内容                                                                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Repository                 | `src/repositories/auth-repository.ts`（新規）                                | サインアップ／ログイン／ログアウト／トークン再発行をバックエンドAPIに問い合わせる窓口。他のrepositoryと異なりモック実装は作らない |
+| セッション用ユーティリティ | `src/lib/session.ts`（新規）                                                 | Cookie にトークンを保存・削除・読み取りする関数（server-only）                                                                    |
+| Usecase                    | `src/server/usecases/auth.ts`（新規）                                        | サインアップ／ログイン／ログアウトの一連の処理と、ログイン中かの判定 `getAuthSession()`                                           |
+| Server Actions             | `src/server/actions/auth.ts`（新規）                                         | フォームから呼べる「サインアップする」「ログインする」「ログアウトする」の入口                                                    |
+| ページ／コンポーネント     | `app/[locale]/sign-up`, `app/[locale]/sign-in`, `components/auth/*` （新規） | サインアップ／ログイン画面                                                                                                        |
+| 既存コンポーネント変更     | `src/components/ui/AccountMenu.tsx`                                          | ログイン中はログアウトボタンを表示。未ログインならログイン画面への導線を表示                                                      |
+| i18n / Storybook           | `src/i18n/messages/{ja,en,fr}.json`, `components/auth/stories/*`             | 既存の他機能と同じ形式で追加                                                                                                      |
+| 動作確認ページ（一時的）   | `src/app/[locale]/auth-check/page.tsx`（新規・仮称）                         | 今回実装するコンポーネント一式と、実際のログイン情報を目視確認するための専用ページ。詳細は下記「5. 動作確認ページ（一時的）」参照   |
 
-`getCurrentUser()` を含む以下のファイルは **変更しない**:
+`getCurrentUser()` を含む以下のファイルは **変更しない**: `src/repositories/user-repository.ts` / `face-repository.ts` / `seed-repository.ts` / `subscription-repository.ts` / `notification-repository.ts` / `src/mocks/*`
 
-- `src/repositories/user-repository.ts`
-- `src/repositories/face-repository.ts` / `seed-repository.ts` / `subscription-repository.ts` / `notification-repository.ts`
-- `src/mocks/*`
+## 5. 動作確認ページ（一時的）
 
-## 5. フェーズ別の進め方
+### 何のためのページか
 
-### Phase 0: ブランチ準備
+今回の実装は「ログイン機能は本物のバックエンドにつながるが、画面の表示データはモックのまま」という状態になる（[方針](#2-方針結論)参照）。そのため、通常の画面（ホームやAccountMenuなど）を見ても、実際にサインアップ・ログインできているか、バックエンドが返してきた本物のユーザー情報が何かを確認する手段がない。
 
-```bash
-git checkout -b feat/auth-flow
-```
+これを確認するためだけの、**一時的な専用ページ**を新規に用意する。
 
-### Phase 1: `auth-repository` を作る（バックエンドと話す窓口）
+### 表示する内容
 
-既存の `repositories/face-repository.ts` などと同じ形（Spec / Impl / Provider）に揃える。他の repository と違い、モック実装は用意しない（ログイン処理をモックで再現しても意味が薄いため）。
+| 内容 | 説明 |
+| --- | --- |
+| 今回実装したコンポーネント一覧 | `SignUpForm` / `SignInForm` / ログイン中・未ログインそれぞれの `AccountMenu` の見た目など、今回の実装対象を1ページにまとめて表示する |
+| 現在のログイン状態 | `getAuthSession()` の結果（ログイン中かどうか） |
+| バックエンドから取得した本物のユーザー情報 | ログイン中の場合、Cookieのアクセストークンを使って backend の `GET /users/:id` を呼び出し、返ってきた `id` / `email` / `name` / `createdAt` をそのまま表示する。`getCurrentUser()`（モック）とは別経路で取得し、あえて並べて表示することで「本物のログインができているか」を目視確認できるようにする |
 
-```ts
-// src/repositories/auth-repository.ts
-import 'server-only';
+### 本番相当環境では表示しない
 
-import type {
-  AuthSignUpRequest,
-  AuthSignInRequest,
-  AuthSignUpResponse,
-  AuthSignInResponse,
-  AuthRefreshResponse,
-} from '@tracen/contracts';
-import { createBackendClient } from '@/lib/backend-client';
-import { createSingletonProvider } from '@/repositories/provider';
+このページはアクセストークンやバックエンドから取得した本物のユーザー情報（emailなど）をそのまま表示するため、開発環境以外に残ってしまうと情報露出のリスクになる。そのため、ページの先頭で `process.env.NODE_ENV` を確認し、本番相当環境（`production`）では `notFound()`（`next/navigation`）で 404 として扱い、事実上非表示にする。
 
-export type AuthRepositorySpec = {
-  signUp: (input: AuthSignUpRequest) => Promise<AuthSignUpResponse>;
-  signIn: (input: AuthSignInRequest) => Promise<AuthSignInResponse>;
-  refresh: (refreshToken: string) => Promise<AuthRefreshResponse>;
-  signOut: (refreshToken: string) => Promise<void>;
-};
+```tsx
+// src/app/[locale]/auth-check/page.tsx
+import { notFound } from 'next/navigation';
 
-export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
-  return {
-    signUp: async (input) => {
-      const res = await createBackendClient().api.v1.auth['sign-up'].$post({ json: input });
-      return res.json();
-    },
-    signIn: async (input) => {
-      const res = await createBackendClient().api.v1.auth['sign-in'].$post({ json: input });
-      return res.json();
-    },
-    refresh: async (refreshToken) => {
-      const res = await createBackendClient().api.v1.auth.refresh.$post({
-        json: { refreshToken },
-      });
-      return res.json();
-    },
-    signOut: async (refreshToken) => {
-      await createBackendClient().api.v1.auth.refresh.$delete({ json: { refreshToken } });
-    },
-  };
-}
+export default function AuthCheckPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
 
-export const authApiRepositoryImpl: AuthRepositorySpec = createAuthApiRepositoryImpl();
-
-export const getAuthRepository = createSingletonProvider<AuthRepositorySpec>(
-  () => authApiRepositoryImpl
-);
-```
-
-> 上のコードは方向性を示すためのイメージ。実装時はエラーハンドリング（`res.ok` チェックなど）を必ず入れる。既存の [server/usecases/health.ts](../../containers/apps/frontend-bff/src/server/usecases/health.ts) がバックエンド呼び出しの参考になる。
-
-### Phase 2: ログイン状態を Cookie に持たせる仕組みを作る
-
-「ログイン中かどうか」をブラウザに覚えておいてもらうために、httpOnly Cookie にトークンを保存する。
-
-```ts
-// src/lib/session.ts
-import 'server-only';
-
-import { cookies } from 'next/headers';
-
-const ACCESS_TOKEN_COOKIE = 'mf_access_token';
-const REFRESH_TOKEN_COOKIE = 'mf_refresh_token';
-
-export async function setSessionTokens(accessToken: string, refreshToken: string) {
-  const store = await cookies();
-  store.set(ACCESS_TOKEN_COOKIE, accessToken, { httpOnly: true, sameSite: 'lax', path: '/' });
-  store.set(REFRESH_TOKEN_COOKIE, refreshToken, { httpOnly: true, sameSite: 'lax', path: '/' });
-}
-
-export async function clearSessionTokens() {
-  const store = await cookies();
-  store.delete(ACCESS_TOKEN_COOKIE);
-  store.delete(REFRESH_TOKEN_COOKIE);
-}
-
-export async function getSessionTokens() {
-  const store = await cookies();
-  return {
-    accessToken: store.get(ACCESS_TOKEN_COOKIE)?.value,
-    refreshToken: store.get(REFRESH_TOKEN_COOKIE)?.value,
-  };
+  // ...確認用の中身...
 }
 ```
 
-> Cookie は Server Action や Route Handler など「サーバー側の処理の中」からしか読み書きできない。Client Component から直接この関数を呼ばないこと（既存ルール「server-only はClientから import しない」を参照）。
+Next.js は `next dev`（開発環境）と `next build` → `next start`（ローカル本番相当・本番）とで `NODE_ENV` を自動的に切り替えるため、追加の環境変数やミドルウェアの変更は不要。
 
-### Phase 3: Usecase を作る（サインアップ／ログイン／ログアウト／ログイン判定）
+### 削除するタイミング
 
-`src/server/usecases/auth.ts` に、画面から使う単位でまとめる。
+このページは、**モック実装と本物のログイン実装が一時的に共存しているために必要**なものであり、恒久的な機能ではない。[CONNECTION_PLAN.md](CONNECTION_PLAN.md) の繋ぎ込みが進み、通常画面（AccountMenuや設定ページなど）で本物のログイン情報がそのまま確認できるようになった時点で、**このページ自体を削除する**。着手時に、この削除作業自体もタスク／Issueとして一緒に切っておき、対応漏れを防ぐ。
 
-- `signUpAndStartSession(input)` : サインアップ → 成功したらトークンを Cookie に保存
-- `signInAndStartSession(input)` : ログイン → 成功したらトークンを Cookie に保存
-- `signOutAndClearSession()` : Cookie のリフレッシュトークンでバックエンドにログアウトを伝える → Cookie を削除
-- `getAuthSession()` : 今ログイン中かどうかを調べる（Cookie のアクセストークンを [lib/backend-client.ts](../../containers/apps/frontend-bff/src/lib/backend-client.ts) の `verifyToken()` で検証し、有効なら本人の `userId` などを返す。無効・未ログインなら `null`）
+## 6. 今回実装しないもの（理由と再検討タイミング）
 
-`getAuthSession()` はバックエンドに問い合わせずに済む（`verifyToken()` は公開鍵で署名を検証するだけ）。これを使えば「ログイン中かどうか」を毎回APIを叩かず判定できる。
+| 項目                                                           | 実装しない理由                                                                                                                                                                                                                  | 再検討するタイミング                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| ページ保護（未ログイン時に `/login` へリダイレクト）           | 表示データが依然モックのため、実装すると「本人確認はできているのに画面には別人（モックの固定ユーザー）が表示される」という体験の食い違いが起きる                                                                                | `user-repository` を実データに差し替えてから（[CONNECTION_PLAN.md](CONNECTION_PLAN.md) 手順2・9） |
+| アクセストークンの自動リフレッシュ                             | ページ保護がない現状では効果が薄い。加えて Next.js の制約上 Cookie の書き込みは Server Action / Route Handler内でしかできず、実装には専用の置き場所（ミドルウェアなど）の設計が必要で、ページ保護と合わせて検討すべき内容のため | ページ保護を実装するタイミングと同時                                                              |
+| フェイス・アクティビティ等、ログインした本人のデータの出し分け | バックエンドに `faces` / `seeds` 等のAPIがまだ存在しないため                                                                                                                                                                    | 各機能のバックエンド実装完了後（[CONNECTION_PLAN.md](CONNECTION_PLAN.md) 参照）                   |
+| パスワード再設定・メールアドレス確認                           | 未着手の別機能のため                                                                                                                                                                                                            | 別途Issue化                                                                                       |
 
-### Phase 4: Server Actions を作る（フォームからの入口）
-
-`src/server/actions/auth.ts` に、既存の `server/actions/faces.ts` と同じ形で `signUpAction` / `signInAction` / `signOutAction` を作る。中身は Phase 3 の Usecase を呼ぶだけの薄い入口にする。
-
-### Phase 5: 画面を作る
-
-- `app/[locale]/sign-up/page.tsx` + `components/auth/SignUpForm.tsx`
-- `app/[locale]/sign-in/page.tsx` + `components/auth/SignInForm.tsx`
-
-フォームの作り方は既存の `components/settings/ProfileEditModal.tsx` と同じく `useState` + `'use client'` の素朴な形に揃える（新しいフォームライブラリは導入しない）。
-
-サインアップ／ログイン成功後は `signInAction` / `signUpAction` の戻り値を見て、ホーム（`/`）へ遷移させる。
-
-### Phase 6: ログイン状態をヘッダーに反映する
-
-`components/ui/AccountMenu.tsx` に「ログアウト」項目を追加する。表示の出し分け（ログイン中 / 未ログイン）は Phase 3 の `getAuthSession()` を呼び出した親（Server Component）から props で渡す。
-
-### Phase 7: i18n（多言語対応）
-
-`ja.json` / `en.json` / `fr.json` に `signUp` / `signIn` の名前空間を追加する（既存の `settings` 等と同じ構成に揃える）。
-
-### Phase 8: Storybook
-
-`components/auth/stories/SignUpForm.stories.tsx` / `SignInForm.stories.tsx` を追加する。
-
-### Phase 9: 検証
-
-```bash
-pnpm --filter @tracen/frontend-bff typecheck
-pnpm --filter @tracen/frontend-bff lint
-pnpm --filter @tracen/frontend-bff build-storybook
-```
-
-さらに、実際に開発環境（`pnpm dev` または Dev Container）でサインアップ→ログイン→ログアウトを手動で一通り試す。
-
-## 6. 今回やらないこと（将来の課題）
-
-- フェイス・アクティビティなど、ログインした本人のデータを実際に出し分けること（`user-repository` 等のバックエンド移行が必要）
-- パスワードを忘れた場合の再設定
-- メールアドレスの確認（本人確認メール）
-- アクセストークンが切れた際の自動リフレッシュ（今回は「切れたら再ログインしてもらう」until 別途対応）
-- ログインしていないと全ページに入れないようにする、といった全体アクセス制御（下記「確認したい点」参照）
-
-## 7. 確認しておきたい点（実装前にすり合わせたいこと）
-
-- **未ログイン時のアクセス制御について**: 今回はサインアップ／ログイン画面とログアウト導線の追加のみをスコープとし、「ログインしていないとフェイス一覧などの既存ページに入れない」という制御は別Issueとして切り出す想定です。この認識で問題ないか確認したいです（現状はどのページもモックの固定ユーザー前提で誰でも見える状態のため、ここを今回一緒に変えるかどうかで作業量が変わります）。
+`getAuthSession()` は今回、Cookie のアクセストークンの有効性を読むだけのシンプルな実装にとどめる（無効・期限切れなら素直に「未ログイン」として扱う）。
