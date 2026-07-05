@@ -20,9 +20,6 @@ pnpm-debug.log*
 
 # Linting
 .eslintcache
-# Formatting
-.prettierignore
-
 
 # Environment files
 .env*
