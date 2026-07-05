@@ -16,6 +16,7 @@ const meta: Meta<typeof SideNav> = {
     user: currentUser,
     faceCount: faces.filter((f) => f.userId === 'user-1').length,
     seedCount: seeds.filter((s) => s.userId === 'user-1').length,
+    isAuthenticated: true,
   },
 };
 

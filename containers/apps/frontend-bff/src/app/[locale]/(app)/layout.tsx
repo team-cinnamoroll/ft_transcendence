@@ -5,10 +5,14 @@ import ContextRail from '@/components/ui/ContextRail';
 import MobileComposeBar from '@/components/ui/MobileComposeBar';
 import { DetailPanelProvider } from '@/lib/detail-panel-context';
 import { getLayoutData } from '@/server/usecases/layout';
+import { getAuthSession } from '@/server/usecases/auth';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
-    await getLayoutData();
+  const [
+    { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers },
+    session,
+  ] = await Promise.all([getLayoutData(), getAuthSession()]);
+  const isAuthenticated = session !== null;
 
   return (
     <DetailPanelProvider>
@@ -22,9 +26,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           seeds={mySeeds}
           faceCount={myFaces.length}
           seedCount={mySeeds.length}
+          isAuthenticated={isAuthenticated}
         />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-          <AppHeader user={currentUser} faceCount={myFaces.length} seedCount={mySeeds.length} />
+          <AppHeader
+            user={currentUser}
+            faceCount={myFaces.length}
+            seedCount={mySeeds.length}
+            isAuthenticated={isAuthenticated}
+          />
           <div className="flex flex-1 min-h-0 overflow-hidden">
             <main
               className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0"

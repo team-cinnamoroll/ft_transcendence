@@ -305,7 +305,8 @@
     "help": "Help",
     "facesUnit": "{count, plural, one {Face} other {Faces}}",
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
-    "logout": "Log out"
+    "logout": "Log out",
+    "login": "Log in"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"

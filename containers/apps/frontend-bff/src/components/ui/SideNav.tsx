@@ -66,9 +66,10 @@ type Props = {
   seeds: Seed[];
   faceCount: number;
   seedCount: number;
+  isAuthenticated: boolean;
 };
 
-const SideNav = ({ faces, user, seeds, faceCount, seedCount }: Props) => {
+const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
@@ -281,6 +282,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount }: Props) => {
         faceCount={faceCount}
         seedCount={seedCount}
         isOpen={menuOpen}
+        isAuthenticated={isAuthenticated}
         onClose={() => setMenuOpen(false)}
         anchorRef={userButtonRef}
       />
