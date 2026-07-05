@@ -388,5 +388,36 @@
       "invalid": "Doit être un emoji",
       "single": "Doit être un emoji unique"
     }
+  },
+  "signUp": {
+    "title": "Créer un compte",
+    "name": "Nom",
+    "namePlaceholder": "Nom affiché",
+    "email": "E-mail",
+    "emailPlaceholder": "you@example.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "8 caractères minimum",
+    "submit": "S'inscrire",
+    "submitting": "Inscription…",
+    "errorName": "Veuillez saisir un nom",
+    "errorEmail": "Veuillez saisir une adresse e-mail valide",
+    "errorPassword": "Le mot de passe doit contenir au moins 8 caractères",
+    "errorGeneric": "L'inscription a échoué. Veuillez réessayer plus tard.",
+    "switchToSignInPrompt": "Vous avez déjà un compte ?",
+    "switchToSignInLink": "Se connecter"
+  },
+  "signIn": {
+    "title": "Se connecter",
+    "email": "E-mail",
+    "emailPlaceholder": "you@example.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion…",
+    "errorEmail": "Veuillez saisir une adresse e-mail valide",
+    "errorPassword": "Veuillez saisir votre mot de passe",
+    "errorGeneric": "Connexion échouée. Veuillez vérifier votre e-mail et votre mot de passe.",
+    "switchToSignUpPrompt": "Vous n'avez pas de compte ?",
+    "switchToSignUpLink": "S'inscrire"
   }
 }

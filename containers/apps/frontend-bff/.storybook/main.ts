@@ -21,6 +21,10 @@ const config: StorybookConfig = {
             find: '@/server/actions/faces',
             replacement: path.resolve(__dirname, 'mocks/server-actions.ts'),
           },
+          {
+            find: '@/server/actions/auth',
+            replacement: path.resolve(__dirname, 'mocks/auth-actions.ts'),
+          },
           // Next.js / Node.js サーバー専用モジュールをスタブ化
           { find: 'server-only', replacement: path.resolve(__dirname, 'mocks/server-only.ts') },
           // Next.js 固有モジュールをモック化
