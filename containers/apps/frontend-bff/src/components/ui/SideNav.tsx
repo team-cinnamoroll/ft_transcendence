@@ -21,7 +21,16 @@ type NavItem = {
 };
 
 const HomeIcon = ({ active }: { active: boolean }) => (
-  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 22 22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path
       d="M3 10L11 3L19 10V19H3V10Z"
       fill={active ? 'currentColor' : 'none'}
@@ -32,7 +41,16 @@ const HomeIcon = ({ active }: { active: boolean }) => (
 );
 
 const LayersIcon = ({ active }: { active: boolean }) => (
-  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 22 22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M11 3L3 7l8 4 8-4-8-4z" fill={active ? 'currentColor' : 'none'} />
     <path d="M3 11l8 4 8-4" opacity={active ? 0.6 : 1} />
     {!active && <path d="M3 15l8 4 8-4" />}
@@ -41,13 +59,30 @@ const LayersIcon = ({ active }: { active: boolean }) => (
 
 const CompassIcon = ({ active }: { active: boolean }) => (
   <svg width={22} height={22} viewBox="0 0 22 22" fill="none">
-    <circle cx={11} cy={11} r={8} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.18 : 0} stroke="currentColor" strokeWidth={1.6} />
+    <circle
+      cx={11}
+      cy={11}
+      r={8}
+      fill={active ? 'currentColor' : 'none'}
+      fillOpacity={active ? 0.18 : 0}
+      stroke="currentColor"
+      strokeWidth={1.6}
+    />
     <path d="M14.5 7.5L12.5 12.5 7.5 14.5 9.5 9.5z" fill="currentColor" />
   </svg>
 );
 
 const BellIcon = ({ active }: { active: boolean }) => (
-  <svg width={22} height={22} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={active ? 2 : 1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M4.5 14.5h11l-1.3-1.7c-.5-.7-.8-1.5-.8-2.3V7.8a3.4 3.4 0 00-6.8 0v2.7c0 .8-.3 1.6-.8 2.3l-1.3 1.7z" />
     <path d="M8.5 16.5a1.5 1.5 0 003 0" />
   </svg>
@@ -56,7 +91,11 @@ const BellIcon = ({ active }: { active: boolean }) => (
 const NAV_ITEMS: NavItem[] = [
   { href: '/', labelKey: 'nav.home', icon: (a) => <HomeIcon active={a} /> },
   { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
-  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: (a) => <CompassIcon active={a} /> },
+  {
+    href: '/subscriptions',
+    labelKey: 'nav.subscriptions',
+    icon: (a) => <CompassIcon active={a} />,
+  },
   { href: '/notifications', labelKey: 'nav.notifications', icon: (a) => <BellIcon active={a} /> },
 ];
 
@@ -168,7 +207,16 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             cursor: 'pointer',
           }}
         >
-          <svg width={16} height={16} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M3 17l1-3.5L13 4.5l3.5 3.5L7.5 17H3z" />
             <path d="M12 5.5l3.5 3.5" />
           </svg>
@@ -189,7 +237,16 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
           >
             {t('sideNav.facesSection')}
           </div>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <ul
+            style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+            }}
+          >
             {faces.map((face) => (
               <FaceNavItem
                 key={face.id}
@@ -222,7 +279,15 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             color: 'var(--mf-text-muted)',
           }}
         >
-          <svg width={14} height={14} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
             <path d="M10 4v12M4 10h12" />
           </svg>
           {t('sideNav.createFace')}
@@ -247,7 +312,15 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             width: '100%',
           }}
         >
-          <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              flexShrink: 0,
+            }}
+          >
             <Image
               src={user.avatarUrl}
               alt={user.name}
@@ -272,7 +345,9 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             </div>
           </div>
           <svg width={16} height={16} viewBox="0 0 18 18" fill="var(--mf-text-muted)">
-            <circle cx={3} cy={9} r={1.5} /><circle cx={9} cy={9} r={1.5} /><circle cx={15} cy={9} r={1.5} />
+            <circle cx={3} cy={9} r={1.5} />
+            <circle cx={9} cy={9} r={1.5} />
+            <circle cx={15} cy={9} r={1.5} />
           </svg>
         </button>
       </nav>
@@ -293,10 +368,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
         onCreate={() => setIsCreateModalOpen(false)}
       />
 
-      <PostModal
-        isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
-      />
+      <PostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
     </>
   );
 };

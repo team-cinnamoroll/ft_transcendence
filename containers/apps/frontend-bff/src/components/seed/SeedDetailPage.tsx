@@ -90,13 +90,7 @@ type Props = {
   users: UserProfile[];
 };
 
-const SeedDetailPage = ({
-  seed,
-  face,
-  isOwner,
-  outgoingLinks,
-  incomingLinks,
-}: Props) => {
+const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: Props) => {
   const t = useTranslations('seedDetail');
   const isPrivate = face.isPrivate;
 
@@ -295,9 +289,7 @@ const SeedDetailPage = ({
       {/* 発信リンク */}
       {outgoingLinks.length > 0 && (
         <div style={{ marginBottom: 22 }}>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
             <svg
               width={14}
               height={14}
@@ -327,9 +319,7 @@ const SeedDetailPage = ({
       {/* 被リンク */}
       {incomingLinks.length > 0 && (
         <div>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
             <svg
               width={14}
               height={14}
