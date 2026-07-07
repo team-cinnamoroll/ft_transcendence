@@ -8,12 +8,7 @@ type FaceChipProps = {
   className?: string;
 };
 
-const FaceChip = ({
-  title,
-  faceId,
-  size = 'sm',
-  className,
-}: FaceChipProps) => {
+const FaceChip = ({ title, faceId, size = 'sm', className }: FaceChipProps) => {
   const color = getFaceColor(faceId);
   const dotSize = size === 'sm' ? 5 : 6;
   const fontSize = size === 'sm' ? 11 : 12;

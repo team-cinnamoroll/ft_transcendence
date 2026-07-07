@@ -62,7 +62,9 @@ const FaceNavItem = ({ face, activeFaceId, seedCount, onClick }: Props) => {
           </svg>
         )}
         {seedCount !== undefined && (
-          <span style={{ fontSize: 11, color: 'var(--mf-text-muted)', fontWeight: 600, flexShrink: 0 }}>
+          <span
+            style={{ fontSize: 11, color: 'var(--mf-text-muted)', fontWeight: 600, flexShrink: 0 }}
+          >
             {seedCount}
           </span>
         )}

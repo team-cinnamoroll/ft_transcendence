@@ -32,12 +32,7 @@ export default async function NotificationsPage() {
             {t('count', { count })}
           </p>
         )}
-        <NotificationList
-          notifications={notifications}
-          users={users}
-          faces={faces}
-          seeds={seeds}
-        />
+        <NotificationList notifications={notifications} users={users} faces={faces} seeds={seeds} />
       </main>
     </div>
   );

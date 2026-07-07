@@ -1,22 +1,36 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
+import { signOutAction } from '@/server/actions/auth';
 
 type Props = {
   user: UserProfile;
   faceCount: number;
   seedCount: number;
   isOpen: boolean;
+  isAuthenticated: boolean;
   onClose: () => void;
   anchorRef?: React.RefObject<HTMLElement | null>;
 };
 
-const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => {
+const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onClose }: Props) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations('accountMenu');
+
+  const handleSignOut = () => {
+    if (isPending) return;
+    startTransition(async () => {
+      await signOutAction();
+      onClose();
+      router.push('/sign-in');
+    });
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -266,9 +280,44 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
             borderTop: '0.5px solid var(--mf-line)',
           }}
         >
-          <button
-            type="button"
-            style={{
+          {(() => {
+            const iconWrapper = (
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 9,
+                  background: 'rgba(212,146,42,0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <svg
+                  width={15}
+                  height={15}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="var(--mf-accent)"
+                  strokeWidth={1.6}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M13 15l4-5-4-5" />
+                  <path d="M17 10H7" />
+                  <path d="M7 3H4a1 1 0 00-1 1v12a1 1 0 001 1h3" />
+                </svg>
+              </div>
+            );
+            const labelStyle: React.CSSProperties = {
+              flex: 1,
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: 'var(--mf-accent)',
+              textAlign: 'left',
+            };
+            const actionStyle: React.CSSProperties = {
               width: '100%',
               display: 'flex',
               alignItems: 'center',
@@ -277,47 +326,30 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, onClose }: Props) => 
               border: 'none',
               cursor: 'pointer',
               padding: 0,
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9,
-                background: 'rgba(212,146,42,0.12)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <svg
-                width={15}
-                height={15}
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="var(--mf-accent)"
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M13 15l4-5-4-5" />
-                <path d="M17 10H7" />
-                <path d="M7 3H4a1 1 0 00-1 1v12a1 1 0 001 1h3" />
-              </svg>
-            </div>
-            <div
-              style={{
-                flex: 1,
-                fontSize: 13.5,
-                fontWeight: 700,
-                color: 'var(--mf-accent)',
-                textAlign: 'left',
-              }}
-            >
-              {t('logout')}
-            </div>
-          </button>
+              textDecoration: 'none',
+            };
+
+            if (isAuthenticated) {
+              return (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={isPending}
+                  style={actionStyle}
+                >
+                  {iconWrapper}
+                  <div style={labelStyle}>{t('logout')}</div>
+                </button>
+              );
+            }
+
+            return (
+              <Link href="/sign-in" onClick={onClose} style={actionStyle}>
+                {iconWrapper}
+                <div style={labelStyle}>{t('login')}</div>
+              </Link>
+            );
+          })()}
         </div>
       </div>
     </>

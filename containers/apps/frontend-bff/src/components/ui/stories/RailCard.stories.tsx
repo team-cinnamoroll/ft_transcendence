@@ -44,9 +44,7 @@ export const WithTitleAndAction: Story = {
 export const NoTitle: Story = {
   args: {
     children: (
-      <p style={{ fontSize: 12.5, color: 'var(--mf-text-sub)', margin: 0 }}>
-        タイトルなしのカード
-      </p>
+      <p style={{ fontSize: 12.5, color: 'var(--mf-text-sub)', margin: 0 }}>タイトルなしのカード</p>
     ),
   },
 };

@@ -12,7 +12,16 @@ type NavItem = {
 };
 
 const HomeIcon = ({ active }: { active: boolean }) => (
-  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 22 22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path
       d="M3 10L11 3L19 10V19H3V10Z"
       fill={active ? 'currentColor' : 'none'}
@@ -23,7 +32,16 @@ const HomeIcon = ({ active }: { active: boolean }) => (
 );
 
 const LayersIcon = ({ active }: { active: boolean }) => (
-  <svg width={22} height={22} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 22 22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M11 3L3 7l8 4 8-4-8-4z" fill={active ? 'currentColor' : 'none'} />
     <path d="M3 11l8 4 8-4" opacity={active ? 0.6 : 1} />
     {!active && <path d="M3 15l8 4 8-4" />}
@@ -32,7 +50,15 @@ const LayersIcon = ({ active }: { active: boolean }) => (
 
 const CompassIcon = ({ active }: { active: boolean }) => (
   <svg width={22} height={22} viewBox="0 0 22 22" fill="none">
-    <circle cx={11} cy={11} r={8} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.18 : 0} stroke="currentColor" strokeWidth={1.6} />
+    <circle
+      cx={11}
+      cy={11}
+      r={8}
+      fill={active ? 'currentColor' : 'none'}
+      fillOpacity={active ? 0.18 : 0}
+      stroke="currentColor"
+      strokeWidth={1.6}
+    />
     <path d="M14.5 7.5L12.5 12.5 7.5 14.5 9.5 9.5z" fill="currentColor" />
   </svg>
 );
@@ -40,7 +66,11 @@ const CompassIcon = ({ active }: { active: boolean }) => (
 const NAV_ITEMS: NavItem[] = [
   { href: '/', labelKey: 'nav.home', icon: (a) => <HomeIcon active={a} /> },
   { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
-  { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: (a) => <CompassIcon active={a} /> },
+  {
+    href: '/subscriptions',
+    labelKey: 'nav.subscriptions',
+    icon: (a) => <CompassIcon active={a} />,
+  },
 ];
 
 type Props = {
@@ -53,7 +83,10 @@ const BottomNav = ({ className }: Props = {}) => {
 
   return (
     <nav
-      className={cn('md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center', className)}
+      className={cn(
+        'md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center',
+        className
+      )}
       style={{
         paddingBottom: 26,
         paddingTop: 10,

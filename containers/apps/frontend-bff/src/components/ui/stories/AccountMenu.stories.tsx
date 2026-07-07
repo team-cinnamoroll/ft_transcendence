@@ -24,6 +24,7 @@ export const Open: Story = {
     faceCount: 5,
     seedCount: 42,
     isOpen: true,
+    isAuthenticated: true,
     onClose: () => {},
   },
 };
@@ -34,6 +35,18 @@ export const Closed: Story = {
     faceCount: 5,
     seedCount: 42,
     isOpen: false,
+    isAuthenticated: true,
+    onClose: () => {},
+  },
+};
+
+export const LoggedOut: Story = {
+  args: {
+    user: mockUser,
+    faceCount: 5,
+    seedCount: 42,
+    isOpen: true,
+    isAuthenticated: false,
     onClose: () => {},
   },
 };

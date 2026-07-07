@@ -38,10 +38,7 @@ export async function getSeedDetailPanelData(seedId: string): Promise<SeedDetail
     return { seed: null, user: null, face: null };
   }
 
-  const [user, face] = await Promise.all([
-    findUserById(seed.userId),
-    findFaceById(seed.faceId),
-  ]);
+  const [user, face] = await Promise.all([findUserById(seed.userId), findFaceById(seed.faceId)]);
 
   return { seed, user, face };
 }

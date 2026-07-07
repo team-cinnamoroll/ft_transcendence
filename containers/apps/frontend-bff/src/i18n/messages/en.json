@@ -305,7 +305,8 @@
     "help": "Help",
     "facesUnit": "{count, plural, one {Face} other {Faces}}",
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
-    "logout": "Log out"
+    "logout": "Log out",
+    "login": "Log in"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
@@ -388,5 +389,36 @@
       "invalid": "Must be an emoji",
       "single": "Must be a single emoji"
     }
+  },
+  "signUp": {
+    "title": "Create account",
+    "name": "Name",
+    "namePlaceholder": "Display name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "submit": "Sign up",
+    "submitting": "Signing up…",
+    "errorName": "Please enter a name",
+    "errorEmail": "Please enter a valid email address",
+    "errorPassword": "Password must be at least 8 characters",
+    "errorGeneric": "Sign up failed. Please try again later.",
+    "switchToSignInPrompt": "Already have an account?",
+    "switchToSignInLink": "Sign in"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "errorEmail": "Please enter a valid email address",
+    "errorPassword": "Please enter your password",
+    "errorGeneric": "Sign in failed. Please check your email and password.",
+    "switchToSignUpPrompt": "Don't have an account?",
+    "switchToSignUpLink": "Sign up"
   }
 }

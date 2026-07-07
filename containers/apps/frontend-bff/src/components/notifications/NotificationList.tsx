@@ -43,7 +43,13 @@ const NotifItem = ({
     : { label: typeUpdateLabel, bg: 'rgba(212,146,42,0.10)', color: 'var(--mf-accent)' };
 
   const mockFace = faceId
-    ? { id: faceId, name: faceName ?? '', userId: '', isPrivate: false, imageUrl: faceImageUrl ?? undefined }
+    ? {
+        id: faceId,
+        name: faceName ?? '',
+        userId: '',
+        isPrivate: false,
+        imageUrl: faceImageUrl ?? undefined,
+      }
     : null;
 
   return (
@@ -92,7 +98,15 @@ const NotifItem = ({
             flexShrink: 0,
           }}
         >
-          <svg width={14} height={14} viewBox="0 0 20 20" fill="none" stroke="var(--mf-text-muted)" strokeWidth={1.6} strokeLinecap="round">
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="var(--mf-text-muted)"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+          >
             <path d="M5 5l10 10M15 5L5 15" />
           </svg>
         </div>
@@ -127,11 +141,26 @@ const NotifItem = ({
             {typeMeta.label}
           </div>
           {faceName && (
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mf-brand)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span
+              style={{
+                fontSize: 12.5,
+                fontWeight: 700,
+                color: 'var(--mf-brand)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {faceName}
             </span>
           )}
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
+          <span
+            style={{
+              marginLeft: 'auto',
+              fontSize: 11,
+              color: 'var(--mf-text-muted)',
+              flexShrink: 0,
+            }}
+          >
             {relativeTime(notification.createdAt)}
           </span>
         </div>
@@ -203,7 +232,14 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
   return (
     <div>
       {/* フィルターピル */}
-      <div style={{ padding: '14px 18px 10px', display: 'flex', gap: 6, borderBottom: '0.5px solid var(--mf-line-soft)' }}>
+      <div
+        style={{
+          padding: '14px 18px 10px',
+          display: 'flex',
+          gap: 6,
+          borderBottom: '0.5px solid var(--mf-line-soft)',
+        }}
+      >
         {FILTER_LABELS.map(({ key, label }) => (
           <button
             key={key}
@@ -227,8 +263,19 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
       </div>
 
       {filtered.length === 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '80px 0', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noNotificationsFiltered')}</p>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 16,
+            padding: '80px 0',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>
+            {t('noNotificationsFiltered')}
+          </p>
         </div>
       ) : (
         grouped.map(({ dateKey, items }) => (
@@ -263,7 +310,11 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
                   faceName={face ? getFaceTitle(face) : undefined}
                   faceId={face?.id}
                   faceImageUrl={face?.imageUrl}
-                  preview={face ? t('updatedPreview', { faceName: getFaceTitle(face) }) : t('noNotifications')}
+                  preview={
+                    face
+                      ? t('updatedPreview', { faceName: getFaceTitle(face) })
+                      : t('noNotifications')
+                  }
                   typeLinkLabel={t('typeLinkLabel')}
                   typeUpdateLabel={t('typeUpdateLabel')}
                 />
