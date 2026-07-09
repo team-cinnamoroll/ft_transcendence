@@ -16,7 +16,6 @@ type Props = {
 // 設定ページの器（shell）。各操作 UI は子 Issue が各セクションのスロットに差し込む。
 const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
   const t = useTranslations('settings');
-  const [profile, setProfile] = useState(user);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   return (
@@ -55,8 +54,8 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
             }}
           >
             <Image
-              src={profile.avatarUrl}
-              alt={profile.name}
+              src={user.avatarUrl}
+              alt={user.name}
               width={52}
               height={52}
               style={{ objectFit: 'cover', display: 'block' }}
@@ -65,9 +64,9 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
           <div style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--mf-brand)' }}>
-                {profile.name}
+                {user.name}
               </span>
-              {profile.badge && <span style={{ fontSize: 14 }}>{profile.badge}</span>}
+              {user.badge && <span style={{ fontSize: 14 }}>{user.badge}</span>}
             </div>
             <div
               style={{
@@ -114,16 +113,7 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
         </SettingsSection>
       </div>
 
-      {isEditOpen && (
-        <ProfileEditModal
-          user={profile}
-          onClose={() => setIsEditOpen(false)}
-          onSaved={(updated) => {
-            setProfile(updated);
-            setIsEditOpen(false);
-          }}
-        />
-      )}
+      {isEditOpen && <ProfileEditModal user={user} onClose={() => setIsEditOpen(false)} />}
     </>
   );
 };
