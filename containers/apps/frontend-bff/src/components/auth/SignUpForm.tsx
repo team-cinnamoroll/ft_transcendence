@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AuthSignUpRequestSchema } from '@tracen/contracts';
+import type { AuthSignUpRequest } from '@/types/auth';
 import { signUpAction } from '@/server/actions/auth';
 
 const inputStyle: React.CSSProperties = {
@@ -28,34 +32,30 @@ const labelStyle: React.CSSProperties = {
 const SignUpForm = () => {
   const t = useTranslations('signUp');
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = () => {
+  const { register, handleSubmit } = useForm<AuthSignUpRequest>({
+    resolver: zodResolver(AuthSignUpRequestSchema),
+  });
+
+  const fieldErrorMessage = (field: keyof AuthSignUpRequest): string => {
+    switch (field) {
+      case 'name':
+        return t('errorName');
+      case 'email':
+        return t('errorEmail');
+      case 'password':
+        return t('errorPassword');
+    }
+  };
+
+  const onValid = (data: AuthSignUpRequest) => {
     if (isPending) return;
-
-    const trimmedEmail = email.trim();
-    const trimmedName = name.trim();
-
-    if (trimmedName.length === 0) {
-      setError(t('errorName'));
-      return;
-    }
-    if (!trimmedEmail.includes('@')) {
-      setError(t('errorEmail'));
-      return;
-    }
-    if (password.length < 8) {
-      setError(t('errorPassword'));
-      return;
-    }
 
     setError(null);
     startTransition(async () => {
-      const result = await signUpAction({ email: trimmedEmail, name: trimmedName, password });
+      const result = await signUpAction(data);
 
       if (!result.success) {
         const firstFieldError = Object.values(result.errors)[0]?.[0];
@@ -69,6 +69,11 @@ const SignUpForm = () => {
 
       router.push('/');
     });
+  };
+
+  const onInvalid = (formErrors: FieldErrors<AuthSignUpRequest>) => {
+    const firstField = Object.keys(formErrors)[0] as keyof AuthSignUpRequest | undefined;
+    setError(firstField ? fieldErrorMessage(firstField) : t('errorGeneric'));
   };
 
   return (
@@ -93,8 +98,7 @@ const SignUpForm = () => {
         <input
           id="sign-up-name"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          {...register('name', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('namePlaceholder')}
           style={inputStyle}
         />
@@ -107,8 +111,7 @@ const SignUpForm = () => {
         <input
           id="sign-up-email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register('email', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('emailPlaceholder')}
           style={inputStyle}
         />
@@ -121,8 +124,7 @@ const SignUpForm = () => {
         <input
           id="sign-up-password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register('password')}
           placeholder={t('passwordPlaceholder')}
           style={inputStyle}
         />
@@ -136,7 +138,7 @@ const SignUpForm = () => {
 
       <button
         type="button"
-        onClick={handleSubmit}
+        onClick={handleSubmit(onValid, onInvalid)}
         disabled={isPending}
         style={{
           width: '100%',

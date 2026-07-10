@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AuthSignInRequestSchema } from '@tracen/contracts';
+import type { AuthSignInRequest } from '@/types/auth';
 import { signInAction } from '@/server/actions/auth';
 
 const inputStyle: React.CSSProperties = {
@@ -28,28 +32,28 @@ const labelStyle: React.CSSProperties = {
 const SignInForm = () => {
   const t = useTranslations('signIn');
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = () => {
+  const { register, handleSubmit } = useForm<AuthSignInRequest>({
+    resolver: zodResolver(AuthSignInRequestSchema),
+  });
+
+  const fieldErrorMessage = (field: keyof AuthSignInRequest): string => {
+    switch (field) {
+      case 'email':
+        return t('errorEmail');
+      case 'password':
+        return t('errorPassword');
+    }
+  };
+
+  const onValid = (data: AuthSignInRequest) => {
     if (isPending) return;
-
-    const trimmedEmail = email.trim();
-
-    if (!trimmedEmail.includes('@')) {
-      setError(t('errorEmail'));
-      return;
-    }
-    if (password.length === 0) {
-      setError(t('errorPassword'));
-      return;
-    }
 
     setError(null);
     startTransition(async () => {
-      const result = await signInAction({ email: trimmedEmail, password });
+      const result = await signInAction(data);
 
       if (!result.success) {
         const firstFieldError = Object.values(result.errors)[0]?.[0];
@@ -63,6 +67,11 @@ const SignInForm = () => {
 
       router.push('/');
     });
+  };
+
+  const onInvalid = (formErrors: FieldErrors<AuthSignInRequest>) => {
+    const firstField = Object.keys(formErrors)[0] as keyof AuthSignInRequest | undefined;
+    setError(firstField ? fieldErrorMessage(firstField) : t('errorGeneric'));
   };
 
   return (
@@ -87,8 +96,7 @@ const SignInForm = () => {
         <input
           id="sign-in-email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register('email', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('emailPlaceholder')}
           style={inputStyle}
         />
@@ -101,8 +109,7 @@ const SignInForm = () => {
         <input
           id="sign-in-password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register('password')}
           placeholder={t('passwordPlaceholder')}
           style={inputStyle}
         />
@@ -116,7 +123,7 @@ const SignInForm = () => {
 
       <button
         type="button"
-        onClick={handleSubmit}
+        onClick={handleSubmit(onValid, onInvalid)}
         disabled={isPending}
         style={{
           width: '100%',
