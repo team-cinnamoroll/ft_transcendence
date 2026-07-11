@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useForm, type FieldErrors } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -35,7 +35,11 @@ const SignUpForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const { register, handleSubmit } = useForm<AuthSignUpRequest>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AuthSignUpRequest>({
     resolver: zodResolver(AuthSignUpRequestSchema),
   });
 
@@ -71,11 +75,6 @@ const SignUpForm = () => {
     });
   };
 
-  const onInvalid = (formErrors: FieldErrors<AuthSignUpRequest>) => {
-    const firstField = Object.keys(formErrors)[0] as keyof AuthSignUpRequest | undefined;
-    setError(firstField ? fieldErrorMessage(firstField) : t('errorGeneric'));
-  };
-
   return (
     <div
       style={{
@@ -101,7 +100,18 @@ const SignUpForm = () => {
           {...register('name', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('namePlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'sign-up-name-error' : undefined}
         />
+        {errors.name && (
+          <p
+            id="sign-up-name-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {fieldErrorMessage('name')}
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -114,7 +124,18 @@ const SignUpForm = () => {
           {...register('email', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('emailPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'sign-up-email-error' : undefined}
         />
+        {errors.email && (
+          <p
+            id="sign-up-email-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {fieldErrorMessage('email')}
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -127,7 +148,18 @@ const SignUpForm = () => {
           {...register('password')}
           placeholder={t('passwordPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? 'sign-up-password-error' : undefined}
         />
+        {errors.password && (
+          <p
+            id="sign-up-password-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {fieldErrorMessage('password')}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -138,7 +170,7 @@ const SignUpForm = () => {
 
       <button
         type="button"
-        onClick={handleSubmit(onValid, onInvalid)}
+        onClick={handleSubmit(onValid)}
         disabled={isPending}
         style={{
           width: '100%',
