@@ -26,7 +26,8 @@ export function fileStorageRouter() {
     .post('/upload', zValidator('header', FileUploadRequestHeaderSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
-      if (!fileStorageRepo || !fileMetadataRepo) {
+      const fileUrlGenerator = c.get('fileUrlGenerator');
+      if (!fileStorageRepo || !fileMetadataRepo || !fileUrlGenerator) {
         return c.json(
           FileUploadResponseSchema.parse({
             success: false,
@@ -61,6 +62,7 @@ export function fileStorageRouter() {
         const { fileId, filePath } = await saveFile(
           fileStorageRepo,
           fileMetadataRepo,
+          fileUrlGenerator,
           fileSaveRequest
         );
 

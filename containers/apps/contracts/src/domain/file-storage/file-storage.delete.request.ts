@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { FileMetadataIdSchema } from './file-storage.upload';
+import { FileMetadataIdSchema } from '../../shared/file-metadata';
 
 export const FileDeleteRequestSchema = z.object({
   fileId: FileMetadataIdSchema.optional(),

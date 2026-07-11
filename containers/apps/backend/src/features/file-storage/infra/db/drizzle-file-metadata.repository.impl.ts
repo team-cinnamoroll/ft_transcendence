@@ -1,24 +1,12 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
-import { BucketNameTypeSchema } from '../../domain/file-metadata.entity';
 import { type FileMetadataId } from '@tracen/contracts';
 import type { FileMetadata } from '../../domain/file-metadata.entity';
 import type { FileMetadataRepositorySpec } from '../../domain/repositories/file-metadata.repository';
 
 import type { TracenDb } from '../../../../shared/infra/db/client';
-import { fileMetadata, type FileMetadataRow, type NewFileMetadataRow } from './schema';
-
-function mapFileMetadata(row: FileMetadataRow): FileMetadata {
-  return {
-    id: row.id,
-    ownerId: row.ownerId,
-    bucket: BucketNameTypeSchema.parse(row.bucket),
-    storageKey: row.storageKey,
-    fileName: row.fileName,
-    mimeType: row.mimeType,
-    fileSize: row.fileSize,
-  };
-}
+import { fileMetadata, type NewFileMetadataRow } from './schema';
+import { mapFileMetadata } from './drizzle-mapper';
 
 class FileMetadataDBRepositoryImpl implements FileMetadataRepositorySpec {
   constructor(private readonly db: TracenDb) {}
@@ -28,6 +16,15 @@ class FileMetadataDBRepositoryImpl implements FileMetadataRepositorySpec {
 
     if (rows.length === 0) return null;
     return mapFileMetadata(rows[0]);
+  }
+
+  async findByIds(ids: FileMetadataId[]): Promise<FileMetadata[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const rows = await this.db.select().from(fileMetadata).where(inArray(fileMetadata.id, ids));
+
+    return rows.map(mapFileMetadata);
   }
 
   async create(metadata: FileMetadata): Promise<void> {
