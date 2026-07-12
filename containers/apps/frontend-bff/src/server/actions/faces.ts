@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { z } from 'zod';
+import { getTranslations } from 'next-intl/server';
 import { CreateFaceRequestSchema, UpdateFaceRequestSchema } from '@tracen/contracts';
 import type { Face } from '@/types/face';
 import {
@@ -10,10 +11,12 @@ import {
   updateFaceForCurrentUser,
   deleteFaceForCurrentUser,
 } from '@/server/usecases/faces';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 import type { ActionResult } from './result';
 
 export async function createFaceAction(input: unknown): Promise<ActionResult<Face>> {
-  const parsed = CreateFaceRequestSchema.safeParse(input);
+  const t = await getTranslations('validation');
+  const parsed = CreateFaceRequestSchema.safeParse(input, { error: buildZodErrorMap(t) });
   if (!parsed.success) {
     return { success: false, errors: z.flattenError(parsed.error).fieldErrors };
   }
@@ -30,7 +33,8 @@ export async function updateFaceAction(
   faceId: string,
   input: unknown
 ): Promise<ActionResult<Face>> {
-  const parsed = UpdateFaceRequestSchema.safeParse(input);
+  const t = await getTranslations('validation');
+  const parsed = UpdateFaceRequestSchema.safeParse(input, { error: buildZodErrorMap(t) });
   if (!parsed.success) {
     return { success: false, errors: z.flattenError(parsed.error).fieldErrors };
   }

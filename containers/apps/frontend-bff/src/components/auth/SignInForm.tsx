@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { AuthSignInRequestSchema } from '@tracen/contracts';
 import type { AuthSignInRequest } from '@/types/auth';
 import { signInAction } from '@/server/actions/auth';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -31,6 +32,7 @@ const labelStyle: React.CSSProperties = {
 
 const SignInForm = () => {
   const t = useTranslations('signIn');
+  const tValidation = useTranslations('validation');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -40,17 +42,8 @@ const SignInForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<AuthSignInRequest>({
-    resolver: zodResolver(AuthSignInRequestSchema),
+    resolver: zodResolver(AuthSignInRequestSchema, { error: buildZodErrorMap(tValidation) }),
   });
-
-  const fieldErrorMessage = (field: keyof AuthSignInRequest): string => {
-    switch (field) {
-      case 'email':
-        return t('errorEmail');
-      case 'password':
-        return t('errorPassword');
-    }
-  };
 
   const onValid = (data: AuthSignInRequest) => {
     if (isPending) return;
@@ -107,7 +100,7 @@ const SignInForm = () => {
             role="alert"
             style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
           >
-            {fieldErrorMessage('email')}
+            {errors.email?.message}
           </p>
         )}
       </div>
@@ -131,7 +124,7 @@ const SignInForm = () => {
             role="alert"
             style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
           >
-            {fieldErrorMessage('password')}
+            {errors.password?.message}
           </p>
         )}
       </div>

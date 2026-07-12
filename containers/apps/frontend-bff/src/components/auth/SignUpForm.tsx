@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { AuthSignUpRequestSchema } from '@tracen/contracts';
 import type { AuthSignUpRequest } from '@/types/auth';
 import { signUpAction } from '@/server/actions/auth';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -31,6 +32,7 @@ const labelStyle: React.CSSProperties = {
 
 const SignUpForm = () => {
   const t = useTranslations('signUp');
+  const tValidation = useTranslations('validation');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -40,19 +42,8 @@ const SignUpForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<AuthSignUpRequest>({
-    resolver: zodResolver(AuthSignUpRequestSchema),
+    resolver: zodResolver(AuthSignUpRequestSchema, { error: buildZodErrorMap(tValidation) }),
   });
-
-  const fieldErrorMessage = (field: keyof AuthSignUpRequest): string => {
-    switch (field) {
-      case 'name':
-        return t('errorName');
-      case 'email':
-        return t('errorEmail');
-      case 'password':
-        return t('errorPassword');
-    }
-  };
 
   const onValid = (data: AuthSignUpRequest) => {
     if (isPending) return;
@@ -109,7 +100,7 @@ const SignUpForm = () => {
             role="alert"
             style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
           >
-            {fieldErrorMessage('name')}
+            {errors.name?.message}
           </p>
         )}
       </div>
@@ -133,7 +124,7 @@ const SignUpForm = () => {
             role="alert"
             style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
           >
-            {fieldErrorMessage('email')}
+            {errors.email?.message}
           </p>
         )}
       </div>
@@ -157,7 +148,7 @@ const SignUpForm = () => {
             role="alert"
             style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
           >
-            {fieldErrorMessage('password')}
+            {errors.password?.message}
           </p>
         )}
       </div>
