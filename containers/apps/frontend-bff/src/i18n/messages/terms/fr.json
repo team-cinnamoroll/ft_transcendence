@@ -1,0 +1,82 @@
+{
+  "title": "Conditions d'utilisation",
+  "sections": [
+    {
+      "heading": "Article 1 (Champ d'application)",
+      "paragraphs": [
+        "Les présentes conditions d'utilisation définissent les conditions de fourniture de MultiFace (le « Service ») ainsi que les droits et obligations entre l'exploitant du Service (l'« Exploitant ») et les utilisateurs. L'utilisateur utilise le Service après avoir accepté les présentes conditions."
+      ]
+    },
+    {
+      "heading": "Article 2 (Présentation du Service)",
+      "paragraphs": [
+        "1. Le Service est une application web destinée à permettre à l'utilisateur d'« écrire pour soi-même ». Plutôt que de viser principalement la mise en relation des personnes entre elles, il est conçu en mettant l'accent sur l'enregistrement des pensées et des notes personnelles de l'utilisateur.",
+        "2. L'utilisateur peut créer plusieurs « faces » correspondant à différents thèmes ou facettes de lui-même et rédiger des publications (seeds) séparément pour chaque face. Chaque face et chaque publication peuvent être définies comme publiques ou privées.",
+        "3. Le Service fournit des fonctionnalités telles que la création de compte et les paramètres de profil, la création et la modification de faces et de publications, la recherche, les abonnements, les notifications, la gestion des fichiers et l'affichage multilingue.",
+        "4. L'Exploitant peut ajouter, modifier ou supprimer une partie des fonctionnalités du Service (les modifications, l'interruption et la cessation sont prévues à l'article 7)."
+      ]
+    },
+    {
+      "heading": "Article 3 (Création de compte)",
+      "paragraphs": [
+        "1. L'utilisateur peut utiliser le Service en enregistrant une adresse e-mail, un nom d'affichage et un mot de passe. Les informations enregistrées doivent être exactes et à jour.",
+        "2. Les mots de passe sont conservés sous forme hachée, et l'authentification utilise des jetons d'accès (JWT) et des jetons de rafraîchissement.",
+        "3. L'utilisateur est responsable de la bonne gestion des informations de son compte et ne doit pas en permettre l'utilisation par un tiers."
+      ]
+    },
+    {
+      "heading": "Article 4 (Traitement du contenu)",
+      "paragraphs": [
+        "1. L'utilisateur peut créer et modifier des contenus tels que des faces, des publications (seeds), des images et des fichiers sur le Service.",
+        "2. Les droits relatifs au contenu appartiennent en principe à l'utilisateur qui l'a créé. Toutefois, l'Exploitant peut l'utiliser dans la mesure nécessaire à la fourniture, à l'affichage et à la conservation du Service.",
+        "3. L'utilisateur peut choisir de rendre chaque face ou publication publique ou privée. Les contenus et fichiers privés ne sont accessibles qu'aux utilisateurs disposant des autorisations appropriées."
+      ]
+    },
+    {
+      "heading": "Article 5 (Actes interdits)",
+      "paragraphs": [
+        "Lors de l'utilisation du Service, l'utilisateur ne doit pas se livrer aux actes suivants."
+      ],
+      "list": [
+        "Actes contraires aux lois, aux règlements ou à l'ordre public et aux bonnes mœurs",
+        "Actes portant atteinte aux droits de propriété intellectuelle, à la vie privée, à la réputation ou à d'autres droits d'autrui",
+        "Usurpation de l'identité d'autrui ou enregistrement d'informations fausses",
+        "Accès non autorisé, exploitation de vulnérabilités, ingénierie inverse, etc.",
+        "Actes entravant l'exploitation du Service ou lui imposant une charge excessive",
+        "Tout autre acte que l'Exploitant juge inapproprié"
+      ]
+    },
+    {
+      "heading": "Article 6 (Suspension et suppression de compte)",
+      "paragraphs": [
+        "Si un utilisateur enfreint les présentes conditions, l'Exploitant peut prendre des mesures telles que la suspension ou la suppression du compte sans préavis."
+      ]
+    },
+    {
+      "heading": "Article 7 (Modification, interruption et cessation du Service)",
+      "paragraphs": [
+        "L'Exploitant peut modifier le contenu du Service, ou en interrompre ou cesser la fourniture, sans préavis à l'utilisateur. L'Exploitant n'est pas responsable des dommages qui en résulteraient pour l'utilisateur."
+      ]
+    },
+    {
+      "heading": "Article 8 (Clause de non-responsabilité)",
+      "paragraphs": [
+        "1. L'Exploitant ne garantit pas, expressément ou implicitement, l'exhaustivité, l'exactitude, l'utilité, la disponibilité ou d'autres qualités du Service.",
+        "2. L'Exploitant n'est pas responsable des dommages subis par l'utilisateur du fait de l'utilisation ou de l'impossibilité d'utiliser le Service, dans la mesure permise par la loi.",
+        "3. L'utilisateur effectue, sous sa propre responsabilité, la sauvegarde de ses publications et autres données."
+      ]
+    },
+    {
+      "heading": "Article 9 (Modification des conditions)",
+      "paragraphs": [
+        "L'Exploitant peut modifier les présentes conditions si nécessaire. Les conditions modifiées prennent effet à compter de leur publication sur le Service."
+      ]
+    },
+    {
+      "heading": "Article 10 (Loi applicable et juridiction compétente)",
+      "paragraphs": [
+        "L'interprétation et l'application des présentes conditions sont régies par le droit japonais. En cas de litige relatif au Service, le tribunal du ressort du siège de l'Exploitant est seul compétent par convention exclusive."
+      ]
+    }
+  ]
+}
