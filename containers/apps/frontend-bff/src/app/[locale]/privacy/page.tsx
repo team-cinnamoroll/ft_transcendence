@@ -1,42 +1,37 @@
-import React from 'react';
+import { getTranslations } from 'next-intl/server';
 
-export default function PrivacyPolicyPage() {
+type Section = {
+  heading: string;
+  paragraphs?: string[];
+  list?: string[];
+};
+
+export default async function PrivacyPolicyPage() {
+  const t = await getTranslations('Privacy');
+  const sections = t.raw('sections') as Section[];
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('title')}</h1>
 
-      <div className="prose dark:prose-invert max-w-none">
-        <p className="mb-4 text-gray-500">
-          ※これはプレースホルダーです。本番環境へのデプロイ前に i18n
-          対応と正式な文章への差し替えが必要です。
-        </p>
-
-        <h2>1. 収集する情報</h2>
-        <p>
-          当サービスでは、アカウント作成時および利用時に以下の情報を収集します：
-          メールアドレス、パスワード（ハッシュ化されて保存されます）、ユーザープロフィール、投稿コンテンツ、および操作ログ等。
-        </p>
-
-        <h2>2. 情報の用途</h2>
-        <p>
-          収集した情報は、サービスの提供、機能の改善、ユーザーサポート、およびセキュリティ維持のために利用します。
-        </p>
-
-        <h2>3. 第三者への提供および Cookie の利用</h2>
-        <p>
-          法令に基づく場合を除き、ユーザーの同意なく第三者に個人情報を提供することはありません。また、当サービスではセッション管理およびセキュリティ目的のために
-          Cookie を使用しています。
-        </p>
-
-        <h2>4. データの保存期間とユーザーの権利</h2>
-        <p>
-          データはサービス提供に必要な期間保存されます。ユーザーは自身のデータのエクスポート、およびアカウントの完全な削除を要求する権利を有します。
-        </p>
-
-        <h2>5. お問い合わせ窓口</h2>
-        <p>
-          本ポリシーに関するお問い合わせは、指定の連絡先またはサポート窓口までお願いいたします。
-        </p>
+      <div>
+        {sections.map((section, index) => (
+          <section key={index}>
+            <h2 className="text-lg font-semibold mt-8 mb-2">{section.heading}</h2>
+            {section.paragraphs?.map((paragraph, i) => (
+              <p key={i} className="mb-4 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+            {section.list && (
+              <ul className="list-disc pl-6 mb-4 space-y-1">
+                {section.list.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
       </div>
     </div>
   );

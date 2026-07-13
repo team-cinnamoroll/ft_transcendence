@@ -1,40 +1,37 @@
-import React from 'react';
+import { getTranslations } from 'next-intl/server';
 
-export default function TermsOfServicePage() {
+type Section = {
+  heading: string;
+  paragraphs?: string[];
+  list?: string[];
+};
+
+export default async function TermsOfServicePage() {
+  const t = await getTranslations('Terms');
+  const sections = t.raw('sections') as Section[];
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('title')}</h1>
 
-      <div className="prose dark:prose-invert max-w-none">
-        <p className="mb-4 text-gray-500">
-          ※これはプレースホルダーです。本番環境へのデプロイ前に i18n
-          対応と正式な文章への差し替えが必要です。
-        </p>
-
-        <h2>1. サービスのご利用について</h2>
-        <p>
-          本利用規約は、ユーザーが当サービスを利用する際の条件を定めるものです。サービスを利用することにより、本規約に同意したものとみなされます。
-        </p>
-
-        <h2>2. アカウント管理</h2>
-        <p>
-          ユーザーは、自身のメールアドレスおよびパスワードを厳重に管理する責任を負います。アカウントの不正利用によって生じた損害について、運営側は一切の責任を負いません。
-        </p>
-
-        <h2>3. コンテンツの権利と禁止事項</h2>
-        <p>
-          ユーザーが投稿したコンテンツの著作権はユーザーに帰属します。ただし、法令違反、他者の権利侵害、または公序良俗に反するコンテンツの投稿は禁止されており、運営側の判断で削除される場合があります。
-        </p>
-
-        <h2>4. 免責事項</h2>
-        <p>
-          当サービスは「現状有姿」で提供されます。運営側は、システムの障害、データの消失、またはサービスの中断によって生じた損害について、いかなる責任も負いません。
-        </p>
-
-        <h2>5. 規約の変更</h2>
-        <p>
-          運営側は、必要に応じて本規約を変更することができます。重要な変更がある場合は、サービス内でお知らせします。
-        </p>
+      <div>
+        {sections.map((section, index) => (
+          <section key={index}>
+            <h2 className="text-lg font-semibold mt-8 mb-2">{section.heading}</h2>
+            {section.paragraphs?.map((paragraph, i) => (
+              <p key={i} className="mb-4 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+            {section.list && (
+              <ul className="list-disc pl-6 mb-4 space-y-1">
+                {section.list.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
       </div>
     </div>
   );
