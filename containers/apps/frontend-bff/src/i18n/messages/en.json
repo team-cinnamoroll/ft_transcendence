@@ -263,6 +263,13 @@
     "account": {
       "title": "Account",
       "description": "Delete your account."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Switch the display language.",
+      "ja": "日本語",
+      "en": "English",
+      "fr": "Français"
     }
   },
   "profileEditModal": {

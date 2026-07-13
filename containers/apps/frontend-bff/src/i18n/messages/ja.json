@@ -263,6 +263,13 @@
     "account": {
       "title": "アカウント",
       "description": "アカウントを削除します。"
+    },
+    "language": {
+      "title": "言語",
+      "description": "表示する言語を切り替えます。",
+      "ja": "日本語",
+      "en": "English",
+      "fr": "Français"
     }
   },
   "profileEditModal": {
