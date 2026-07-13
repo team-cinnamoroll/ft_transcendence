@@ -43,9 +43,9 @@ const preview: Preview = {
     backgrounds: {
       default: 'app',
       values: [
-        { name: 'app',   value: '#f8f6f1' },
+        { name: 'app', value: '#f8f6f1' },
         { name: 'white', value: '#ffffff' },
-        { name: 'dark',  value: '#141824' },
+        { name: 'dark', value: '#141824' },
       ],
     },
     controls: {

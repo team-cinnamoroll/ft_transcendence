@@ -22,7 +22,6 @@ export const Default: Story = {
   args: {
     user: mockUser,
     onClose: () => {},
-    onSaved: () => {},
   },
 };
 
@@ -30,6 +29,5 @@ export const WithoutBadge: Story = {
   args: {
     user: { ...mockUser, badge: undefined },
     onClose: () => {},
-    onSaved: () => {},
   },
 };

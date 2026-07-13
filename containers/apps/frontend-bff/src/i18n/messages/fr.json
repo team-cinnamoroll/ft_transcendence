@@ -305,7 +305,8 @@
     "help": "Aide",
     "facesUnit": "{count, plural, one {Facette} other {Facettes}}",
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "login": "Se connecter"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"
@@ -380,6 +381,7 @@
     "tooLong": "Ne doit pas dépasser {max} caractères",
     "email": { "invalid": "Saisissez une adresse e-mail valide" },
     "url": { "invalid": "Saisissez une URL valide" },
+    "id": { "invalid": "Format d'identifiant invalide" },
     "password": {
       "tooShort": "Le mot de passe doit contenir au moins {min} caractères",
       "tooLong": "Le mot de passe ne doit pas dépasser {max} caractères"
@@ -388,5 +390,31 @@
       "invalid": "Doit être un emoji",
       "single": "Doit être un emoji unique"
     }
+  },
+  "signUp": {
+    "title": "Créer un compte",
+    "name": "Nom",
+    "namePlaceholder": "Nom affiché",
+    "email": "E-mail",
+    "emailPlaceholder": "you@example.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "8 caractères minimum",
+    "submit": "S'inscrire",
+    "submitting": "Inscription…",
+    "errorGeneric": "L'inscription a échoué. Veuillez réessayer plus tard.",
+    "switchToSignInPrompt": "Vous avez déjà un compte ?",
+    "switchToSignInLink": "Se connecter"
+  },
+  "signIn": {
+    "title": "Se connecter",
+    "email": "E-mail",
+    "emailPlaceholder": "you@example.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion…",
+    "errorGeneric": "Connexion échouée. Veuillez vérifier votre e-mail et votre mot de passe.",
+    "switchToSignUpPrompt": "Vous n'avez pas de compte ?",
+    "switchToSignUpLink": "S'inscrire"
   }
 }

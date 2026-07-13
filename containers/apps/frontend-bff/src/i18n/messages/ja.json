@@ -305,7 +305,8 @@
     "help": "ヘルプ",
     "facesUnit": "{count, plural, other {フェイス}}",
     "seedsUnit": "{count, plural, other {シード}}",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "login": "ログイン"
   },
   "appHeader": {
     "accountMenuAriaLabel": "アカウントメニュー"
@@ -380,6 +381,7 @@
     "tooLong": "{max}文字以内で入力してください",
     "email": { "invalid": "メールアドレスの形式が正しくありません" },
     "url": { "invalid": "URLの形式が正しくありません" },
+    "id": { "invalid": "IDの形式が正しくありません" },
     "password": {
       "tooShort": "パスワードは{min}文字以上で入力してください",
       "tooLong": "パスワードは{max}文字以内で入力してください"
@@ -388,5 +390,31 @@
       "invalid": "絵文字のみを入力してください",
       "single": "絵文字は1文字だけ入力してください"
     }
+  },
+  "signUp": {
+    "title": "アカウントを作成",
+    "name": "名前",
+    "namePlaceholder": "表示名",
+    "email": "メールアドレス",
+    "emailPlaceholder": "you@example.com",
+    "password": "パスワード",
+    "passwordPlaceholder": "8文字以上",
+    "submit": "登録する",
+    "submitting": "登録中…",
+    "errorGeneric": "登録に失敗しました。時間をおいて再度お試しください。",
+    "switchToSignInPrompt": "すでにアカウントをお持ちですか？",
+    "switchToSignInLink": "ログイン"
+  },
+  "signIn": {
+    "title": "ログイン",
+    "email": "メールアドレス",
+    "emailPlaceholder": "you@example.com",
+    "password": "パスワード",
+    "passwordPlaceholder": "パスワード",
+    "submit": "ログイン",
+    "submitting": "ログイン中…",
+    "errorGeneric": "ログインに失敗しました。メールアドレスまたはパスワードをご確認ください。",
+    "switchToSignUpPrompt": "アカウントをお持ちでないですか？",
+    "switchToSignUpLink": "新規登録"
   }
 }

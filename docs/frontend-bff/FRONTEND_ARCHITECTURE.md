@@ -22,6 +22,9 @@
 
 統合のときに「全部書き直し」になるのを防ぐために、**今のうちから「差し替えやすい設計」** で書いておくのがこのドキュメントの目的です。
 
+> 補足: 一部はすでにモックではなく実際に backend へ接続する実装に差し替わっています。
+> `repositories/backend-health-repository.ts`（動作確認用）が先行例で、ログイン機能についても [AUTH.md](AUTH.md) / [CONNECTION_PLAN.md](CONNECTION_PLAN.md) の計画に沿って backend 接続を進めています。
+
 ---
 
 ## 2. 全体アーキテクチャの中でフロントエンドはどこにいるか
@@ -106,10 +109,18 @@
 
 ```
 src/
-├── app/                          # Next.js App Router
-│   ├── layout.tsx                # 全体レイアウト（Server Component）
-│   ├── page.tsx                  # ホーム（Server Component）
+├── app/
+│   ├── [locale]/                 # next-intl によるロケール別ルーティング（ja/en/fr）
+│   │   ├── layout.tsx            # 全体レイアウト（Server Component）
+│   │   ├── page.tsx              # ホーム（Server Component）
+│   │   ├── faces/
+│   │   ├── seeds/[seedId]/
+│   │   ├── subscriptions/
+│   │   ├── notifications/
+│   │   └── settings/
 │   └── api/                      # Route Handlers（BFF の HTTP 入口）
+│       ├── hello/route.ts
+│       ├── health/route.ts
 │       ├── viewer/route.ts
 │       └── detail/
 │           ├── face/[faceId]/route.ts
@@ -119,9 +130,10 @@ src/
 │   ├── ui/
 │   ├── home/
 │   ├── face/
+│   ├── seed/
 │   ├── subscriptions/
-│   ├── search/
-│   └── notifications/
+│   ├── notifications/
+│   └── settings/
 │
 ├── server/                       # ★ server-only
 │   ├── usecases/                 # 画面向けの集約・整形ロジック（Repository を呼ぶ）
@@ -133,12 +145,18 @@ src/
 │   ├── seed-repository.ts
 │   ├── user-repository.ts
 │   ├── subscription-repository.ts
-│   └── notification-repository.ts
+│   ├── notification-repository.ts
+│   └── backend-health-repository.ts  # モックではなく実際に backend へ接続する先行例
 │
+├── i18n/                         # next-intl 設定（routing.ts / messages/{ja,en,fr}.json）
 ├── mocks/                        # モックデータ（Repository が参照）
 ├── types/                        # 型定義
-└── lib/                          # ユーティリティ
+├── lib/                          # ユーティリティ・クライアント
+└── proxy.ts                      # Next.js middleware（next-intl のロケール振り分け）
 ```
+
+> 補足: `search` はその後 `subscriptions` タブへ機能統合され、コンポーネントとしては廃止されています。
+> `seed` / `settings` は新規に追加されたカテゴリです。
 
 ---
 
@@ -222,12 +240,15 @@ import { faces } from '@/mocks/faces';
 import { createSingletonProvider } from '@/repositories/provider';
 
 export type CreateFaceInput = Omit<Face, 'id' | 'userId'>;
+export type UpdateFaceInput = Partial<CreateFaceInput>;
 
 // 契約（Spec）: 必ず Promise を返す
 export type FaceRepositorySpec = {
   listByUserId: (userId: string) => Promise<Face[]>;
   findById: (faceId: string) => Promise<Face | null>;
   create: (userId: string, input: CreateFaceInput) => Promise<Face>;
+  update: (faceId: string, userId: string, input: UpdateFaceInput) => Promise<Face>;
+  delete: (faceId: string, userId: string) => Promise<void>;
   listAll: () => Promise<Face[]>;
 };
 
@@ -237,6 +258,13 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
     listByUserId: async (userId) => faces.filter((face) => face.userId === userId),
     findById: async (faceId) => faces.find((face) => face.id === faceId) ?? null,
     create: async (userId, input) => ({ id: `face-mock-${Date.now()}`, userId, ...input }),
+    update: async (faceId, userId, input) => {
+      const existing = faces.find((f) => f.id === faceId && f.userId === userId);
+      return { id: faceId, userId, ...(existing ?? {}), ...input } as Face;
+    },
+    delete: async () => {
+      // モック実装: no-op（実際には削除しない）
+    },
     listAll: async () => faces,
   };
 }
@@ -290,14 +318,14 @@ export async function getViewerContext() {
 
 ### 8-1. Server Component から（推奨）: Usecase を直呼びして props 注入
 
-例: `src/app/layout.tsx`
+例: `src/app/[locale]/layout.tsx`（イメージ。実際は `getLayoutData()` がフェイス・シード・サブスクライブ等をまとめて集約している）
 
 ```tsx
 import SideNav from '@/components/ui/SideNav';
-import { getViewerContext } from '@/server/usecases/viewer';
+import { getLayoutData } from '@/server/usecases/layout';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { myFaces } = await getViewerContext();
+  const { myFaces } = await getLayoutData();
   return (
     <html lang="ja">
       <body>

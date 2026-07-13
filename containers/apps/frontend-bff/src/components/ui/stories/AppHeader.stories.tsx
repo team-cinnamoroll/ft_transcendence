@@ -27,6 +27,7 @@ export const Default: Story = {
     faceCount: 5,
     seedCount: 42,
     unreadCount: 0,
+    isAuthenticated: true,
   },
 };
 
@@ -36,5 +37,6 @@ export const WithUnread: Story = {
     faceCount: 5,
     seedCount: 42,
     unreadCount: 3,
+    isAuthenticated: true,
   },
 };

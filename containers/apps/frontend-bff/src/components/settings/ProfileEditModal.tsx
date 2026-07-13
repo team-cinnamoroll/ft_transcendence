@@ -1,69 +1,19 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
-import { updateProfileAction } from '@/server/actions/users';
 
 type Props = {
   user: UserProfile;
   onClose: () => void;
-  onSaved: (profile: UserProfile) => void;
 };
 
-// バッジが絵文字1つかを判定するため、見た目上の文字数（書記素）で数える
-const graphemeCount = (value: string): number => {
-  const segmenter = new Intl.Segmenter('ja', { granularity: 'grapheme' });
-  return [...segmenter.segment(value)].length;
-};
-
-const isValidUrl = (value: string): boolean => {
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const ProfileEditModal = ({ user, onClose, onSaved }: Props) => {
+const ProfileEditModal = ({ user, onClose }: Props) => {
   const t = useTranslations('profileEditModal');
   const [name, setName] = useState(user.name);
   const [badge, setBadge] = useState(user.badge ?? '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = () => {
-    if (isPending) return;
-
-    const trimmedName = name.trim();
-    const trimmedBadge = badge.trim();
-    const trimmedAvatar = avatarUrl.trim();
-
-    if (trimmedName.length === 0) {
-      setError(t('errorName'));
-      return;
-    }
-    if (trimmedBadge.length > 0 && graphemeCount(trimmedBadge) !== 1) {
-      setError(t('errorBadge'));
-      return;
-    }
-    if (!isValidUrl(trimmedAvatar)) {
-      setError(t('errorAvatar'));
-      return;
-    }
-
-    setError(null);
-    startTransition(async () => {
-      const updated = await updateProfileAction({
-        name: trimmedName,
-        avatarUrl: trimmedAvatar,
-        badge: trimmedBadge.length > 0 ? trimmedBadge : undefined,
-      });
-      onSaved(updated);
-    });
-  };
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
@@ -208,16 +158,9 @@ const ProfileEditModal = ({ user, onClose, onSaved }: Props) => {
             />
           </div>
 
-          {error && (
-            <p role="alert" style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}>
-              {error}
-            </p>
-          )}
-
           <button
             type="button"
-            onClick={handleSubmit}
-            disabled={isPending}
+            disabled
             style={{
               width: '100%',
               padding: '12px 0',
@@ -225,14 +168,13 @@ const ProfileEditModal = ({ user, onClose, onSaved }: Props) => {
               fontSize: 14,
               fontWeight: 700,
               border: 'none',
-              cursor: isPending ? 'not-allowed' : 'pointer',
-              background: isPending ? 'var(--mf-surface-tint)' : 'var(--mf-accent)',
-              color: isPending ? 'var(--mf-text-faint)' : '#fff',
-              boxShadow: isPending ? 'none' : '0 2px 10px rgba(212,146,42,0.25)',
-              transition: 'background 0.15s',
+              cursor: 'not-allowed',
+              background: 'var(--mf-surface-tint)',
+              color: 'var(--mf-text-faint)',
+              boxShadow: 'none',
             }}
           >
-            {isPending ? t('saving') : t('save')}
+            {t('save')}
           </button>
         </div>
       </div>

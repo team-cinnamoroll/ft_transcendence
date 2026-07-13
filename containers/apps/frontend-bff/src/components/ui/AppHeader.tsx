@@ -13,9 +13,16 @@ type Props = {
   faceCount?: number;
   seedCount?: number;
   unreadCount?: number;
+  isAuthenticated: boolean;
 };
 
-const AppHeader = ({ user, faceCount = 0, seedCount = 0, unreadCount = 0 }: Props) => {
+const AppHeader = ({
+  user,
+  faceCount = 0,
+  seedCount = 0,
+  unreadCount = 0,
+  isAuthenticated,
+}: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('appHeader');
   const tNav = useTranslations('nav');
@@ -106,6 +113,7 @@ const AppHeader = ({ user, faceCount = 0, seedCount = 0, unreadCount = 0 }: Prop
         faceCount={faceCount}
         seedCount={seedCount}
         isOpen={menuOpen}
+        isAuthenticated={isAuthenticated}
         onClose={() => setMenuOpen(false)}
       />
     </>
