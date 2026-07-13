@@ -1,10 +1,15 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AuthSignInRequestSchema } from '@tracen/contracts';
+import type { AuthSignInRequest } from '@/types/auth';
 import { signInAction } from '@/server/actions/auth';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -27,29 +32,25 @@ const labelStyle: React.CSSProperties = {
 
 const SignInForm = () => {
   const t = useTranslations('signIn');
+  const tValidation = useTranslations('validation');
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AuthSignInRequest>({
+    resolver: zodResolver(AuthSignInRequestSchema, { error: buildZodErrorMap(tValidation) }),
+  });
+
+  const onValid = (data: AuthSignInRequest) => {
     if (isPending) return;
-
-    const trimmedEmail = email.trim();
-
-    if (!trimmedEmail.includes('@')) {
-      setError(t('errorEmail'));
-      return;
-    }
-    if (password.length === 0) {
-      setError(t('errorPassword'));
-      return;
-    }
 
     setError(null);
     startTransition(async () => {
-      const result = await signInAction({ email: trimmedEmail, password });
+      const result = await signInAction(data);
 
       if (!result.success) {
         const firstFieldError = Object.values(result.errors)[0]?.[0];
@@ -87,11 +88,21 @@ const SignInForm = () => {
         <input
           id="sign-in-email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register('email', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('emailPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'sign-in-email-error' : undefined}
         />
+        {errors.email && (
+          <p
+            id="sign-in-email-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {errors.email?.message}
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -101,11 +112,21 @@ const SignInForm = () => {
         <input
           id="sign-in-password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register('password')}
           placeholder={t('passwordPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? 'sign-in-password-error' : undefined}
         />
+        {errors.password && (
+          <p
+            id="sign-in-password-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {errors.password?.message}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -116,7 +137,7 @@ const SignInForm = () => {
 
       <button
         type="button"
-        onClick={handleSubmit}
+        onClick={handleSubmit(onValid)}
         disabled={isPending}
         style={{
           width: '100%',

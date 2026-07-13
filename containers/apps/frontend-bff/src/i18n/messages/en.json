@@ -381,6 +381,7 @@
     "tooLong": "Must be at most {max} characters",
     "email": { "invalid": "Enter a valid email address" },
     "url": { "invalid": "Enter a valid URL" },
+    "id": { "invalid": "Invalid ID format" },
     "password": {
       "tooShort": "Password must be at least {min} characters",
       "tooLong": "Password must be at most {max} characters"
@@ -400,9 +401,6 @@
     "passwordPlaceholder": "At least 8 characters",
     "submit": "Sign up",
     "submitting": "Signing up…",
-    "errorName": "Please enter a name",
-    "errorEmail": "Please enter a valid email address",
-    "errorPassword": "Password must be at least 8 characters",
     "errorGeneric": "Sign up failed. Please try again later.",
     "switchToSignInPrompt": "Already have an account?",
     "switchToSignInLink": "Sign in"
@@ -415,8 +413,6 @@
     "passwordPlaceholder": "Password",
     "submit": "Sign in",
     "submitting": "Signing in…",
-    "errorEmail": "Please enter a valid email address",
-    "errorPassword": "Please enter your password",
     "errorGeneric": "Sign in failed. Please check your email and password.",
     "switchToSignUpPrompt": "Don't have an account?",
     "switchToSignUpLink": "Sign up"
