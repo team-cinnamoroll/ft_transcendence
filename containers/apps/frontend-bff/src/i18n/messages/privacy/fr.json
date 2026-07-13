@@ -1,0 +1,65 @@
+{
+  "title": "Politique de confidentialité",
+  "sections": [
+    {
+      "heading": "1. Informations collectées",
+      "paragraphs": [
+        "Pour fournir ses fonctionnalités, le Service collecte et conserve les informations suivantes."
+      ],
+      "list": [
+        "Informations de compte : adresse e-mail, nom d'affichage, mot de passe (conservé sous forme hachée) et date de création",
+        "Informations de profil : image d'avatar et emoji de badge",
+        "Informations de contenu : faces (nom, emoji, description, image, paramètres de visibilité), publications (seeds : texte, images jointes, liens entre publications, date de création et face associée), ainsi que les fichiers téléversés et leurs métadonnées (nom, type, taille, propriétaire et visibilité)",
+        "Informations d'utilisation : relations d'abonnement, notifications et statut en ligne (présence)",
+        "Informations d'authentification : jetons d'accès (JWT) et jetons de rafraîchissement (heure d'émission, identifiant de génération et état activé/désactivé)"
+      ]
+    },
+    {
+      "heading": "2. Finalités d'utilisation",
+      "list": [
+        "Fournir le Service, authentifier les utilisateurs et contrôler les accès",
+        "Fournir des fonctionnalités d'affichage, de conservation et de recherche des contenus tels que les publications et les faces",
+        "Fournir des fonctionnalités telles que les abonnements, les notifications et le statut en ligne",
+        "Prévenir les usages abusifs et améliorer la qualité du Service"
+      ]
+    },
+    {
+      "heading": "3. Communication à des tiers",
+      "paragraphs": [
+        "Sauf dans les cas prévus par la loi, l'Exploitant ne communique pas d'informations personnelles à des tiers sans avoir obtenu au préalable le consentement de la personne concernée."
+      ]
+    },
+    {
+      "heading": "4. Utilisation des cookies et des jetons",
+      "paragraphs": [
+        "Le Service utilise des mécanismes tels que des jetons (jeton d'accès / jeton de rafraîchissement) afin de maintenir l'état de connexion et d'assurer l'authentification."
+      ]
+    },
+    {
+      "heading": "5. Mesures de sécurité",
+      "list": [
+        "Les mots de passe sont conservés sous forme hachée.",
+        "Dans les environnements équivalents à la production, les communications sont chiffrées au moyen de HTTPS.",
+        "Les faces, publications et fichiers privés ne sont affichés et diffusés qu'après vérification des autorisations d'accès."
+      ]
+    },
+    {
+      "heading": "6. Durée de conservation et suppression",
+      "paragraphs": [
+        "Les informations collectées sont conservées dans la mesure nécessaire à la réalisation des finalités d'utilisation ; les informations devenues inutiles, notamment du fait de la suppression du compte, sont supprimées sans délai."
+      ]
+    },
+    {
+      "heading": "7. Demandes de divulgation, de rectification, de suppression, etc.",
+      "paragraphs": [
+        "L'utilisateur peut demander la divulgation, la rectification, la suppression ou tout autre traitement de ses propres informations personnelles. Pour le détail de la procédure, veuillez contacter le service de renseignements de l'Exploitant."
+      ]
+    },
+    {
+      "heading": "8. Révision de la présente politique",
+      "paragraphs": [
+        "La présente politique peut être modifiée si nécessaire. Le contenu modifié s'applique à compter de sa publication sur le Service."
+      ]
+    }
+  ]
+}
