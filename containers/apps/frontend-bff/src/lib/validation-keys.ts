@@ -6,7 +6,7 @@ import type { z } from 'zod';
 //
 // 対応キー: i18n/messages/*.json の "validation"
 //   required / invalid / tooShort {min} / tooLong {max}
-//   email.invalid / url.invalid
+//   email.invalid / url.invalid / id.invalid
 //   password.tooShort {min} / password.tooLong {max}
 //
 // 注意: この関数は「Zod のエラーマップ内」で生 issue を渡して使うことを前提とする。
@@ -34,6 +34,7 @@ export function zodIssueToKey(issue: z.core.$ZodRawIssue): string {
       if (issue.format === 'email') return 'email.invalid';
       if (issue.format === 'url') return 'url.invalid';
       if (issue.format === 'emoji') return 'badge.invalid';
+      if (issue.format === 'uuid') return 'id.invalid';
       return 'invalid';
 
     case 'custom':

@@ -381,6 +381,7 @@
     "tooLong": "{max}文字以内で入力してください",
     "email": { "invalid": "メールアドレスの形式が正しくありません" },
     "url": { "invalid": "URLの形式が正しくありません" },
+    "id": { "invalid": "IDの形式が正しくありません" },
     "password": {
       "tooShort": "パスワードは{min}文字以上で入力してください",
       "tooLong": "パスワードは{max}文字以内で入力してください"
@@ -400,9 +401,6 @@
     "passwordPlaceholder": "8文字以上",
     "submit": "登録する",
     "submitting": "登録中…",
-    "errorName": "名前を入力してください",
-    "errorEmail": "有効なメールアドレスを入力してください",
-    "errorPassword": "パスワードは8文字以上で入力してください",
     "errorGeneric": "登録に失敗しました。時間をおいて再度お試しください。",
     "switchToSignInPrompt": "すでにアカウントをお持ちですか？",
     "switchToSignInLink": "ログイン"
@@ -415,8 +413,6 @@
     "passwordPlaceholder": "パスワード",
     "submit": "ログイン",
     "submitting": "ログイン中…",
-    "errorEmail": "有効なメールアドレスを入力してください",
-    "errorPassword": "パスワードを入力してください",
     "errorGeneric": "ログインに失敗しました。メールアドレスまたはパスワードをご確認ください。",
     "switchToSignUpPrompt": "アカウントをお持ちでないですか？",
     "switchToSignUpLink": "新規登録"

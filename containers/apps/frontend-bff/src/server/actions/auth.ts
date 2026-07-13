@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import { getTranslations } from 'next-intl/server';
 import { AuthSignUpRequestSchema, AuthSignInRequestSchema } from '@tracen/contracts';
 import type { AuthSignUp, AuthSignIn } from '@/types/auth';
 import {
@@ -8,10 +9,12 @@ import {
   signInAndStartSession,
   signOutAndClearSession,
 } from '@/server/usecases/auth';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 import type { ActionResult } from './result';
 
 export async function signUpAction(input: unknown): Promise<ActionResult<AuthSignUp>> {
-  const parsed = AuthSignUpRequestSchema.safeParse(input);
+  const t = await getTranslations('validation');
+  const parsed = AuthSignUpRequestSchema.safeParse(input, { error: buildZodErrorMap(t) });
   if (!parsed.success) {
     return { success: false, errors: z.flattenError(parsed.error).fieldErrors };
   }
@@ -22,7 +25,8 @@ export async function signUpAction(input: unknown): Promise<ActionResult<AuthSig
 }
 
 export async function signInAction(input: unknown): Promise<ActionResult<AuthSignIn>> {
-  const parsed = AuthSignInRequestSchema.safeParse(input);
+  const t = await getTranslations('validation');
+  const parsed = AuthSignInRequestSchema.safeParse(input, { error: buildZodErrorMap(t) });
   if (!parsed.success) {
     return { success: false, errors: z.flattenError(parsed.error).fieldErrors };
   }

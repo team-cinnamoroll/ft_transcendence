@@ -1,10 +1,15 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AuthSignUpRequestSchema } from '@tracen/contracts';
+import type { AuthSignUpRequest } from '@/types/auth';
 import { signUpAction } from '@/server/actions/auth';
+import { buildZodErrorMap } from '@/lib/zod-error-map';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -27,35 +32,25 @@ const labelStyle: React.CSSProperties = {
 
 const SignUpForm = () => {
   const t = useTranslations('signUp');
+  const tValidation = useTranslations('validation');
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AuthSignUpRequest>({
+    resolver: zodResolver(AuthSignUpRequestSchema, { error: buildZodErrorMap(tValidation) }),
+  });
+
+  const onValid = (data: AuthSignUpRequest) => {
     if (isPending) return;
-
-    const trimmedEmail = email.trim();
-    const trimmedName = name.trim();
-
-    if (trimmedName.length === 0) {
-      setError(t('errorName'));
-      return;
-    }
-    if (!trimmedEmail.includes('@')) {
-      setError(t('errorEmail'));
-      return;
-    }
-    if (password.length < 8) {
-      setError(t('errorPassword'));
-      return;
-    }
 
     setError(null);
     startTransition(async () => {
-      const result = await signUpAction({ email: trimmedEmail, name: trimmedName, password });
+      const result = await signUpAction(data);
 
       if (!result.success) {
         const firstFieldError = Object.values(result.errors)[0]?.[0];
@@ -93,11 +88,21 @@ const SignUpForm = () => {
         <input
           id="sign-up-name"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          {...register('name', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('namePlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'sign-up-name-error' : undefined}
         />
+        {errors.name && (
+          <p
+            id="sign-up-name-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {errors.name?.message}
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -107,11 +112,21 @@ const SignUpForm = () => {
         <input
           id="sign-up-email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register('email', { setValueAs: (v: string) => v.trim() })}
           placeholder={t('emailPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'sign-up-email-error' : undefined}
         />
+        {errors.email && (
+          <p
+            id="sign-up-email-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {errors.email?.message}
+          </p>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -121,11 +136,21 @@ const SignUpForm = () => {
         <input
           id="sign-up-password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register('password')}
           placeholder={t('passwordPlaceholder')}
           style={inputStyle}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? 'sign-up-password-error' : undefined}
         />
+        {errors.password && (
+          <p
+            id="sign-up-password-error"
+            role="alert"
+            style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}
+          >
+            {errors.password?.message}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -136,7 +161,7 @@ const SignUpForm = () => {
 
       <button
         type="button"
-        onClick={handleSubmit}
+        onClick={handleSubmit(onValid)}
         disabled={isPending}
         style={{
           width: '100%',
