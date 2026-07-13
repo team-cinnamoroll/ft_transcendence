@@ -263,6 +263,13 @@
     "account": {
       "title": "Compte",
       "description": "Supprimez votre compte."
+    },
+    "language": {
+      "title": "Langue",
+      "description": "Changez la langue d'affichage.",
+      "ja": "日本語",
+      "en": "English",
+      "fr": "Français"
     }
   },
   "profileEditModal": {
