@@ -363,7 +363,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           </div>
                           <button
                             type="button"
-                            aria-label="アクションメニュー"
+                            aria-label={t('actionMenu')}
                             onClick={(e) => openActionMenu(e, face)}
                             style={{
                               width: 22,
@@ -749,7 +749,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           </div>
                           <button
                             type="button"
-                            aria-label="アクションメニュー"
+                            aria-label={t('actionMenu')}
                             onClick={(e) => openActionMenu(e, face)}
                             style={{
                               width: 22,
@@ -916,7 +916,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       </div>
                       <button
                         type="button"
-                        aria-label="アクションメニュー"
+                        aria-label={t('actionMenu')}
                         onClick={(e) => openActionMenu(e, face)}
                         style={{
                           width: 32,

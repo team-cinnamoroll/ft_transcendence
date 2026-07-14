@@ -125,6 +125,7 @@
     "sortName": "名前順",
     "gridView": "グリッド表示",
     "listView": "リスト表示",
+    "actionMenu": "アクションメニュー",
     "seedCount": "{count, plural, other {シード}}",
     "createFirstFace": "最初のフェイスを作る",
     "createNewCard": "新しいフェイスを作る",

@@ -125,6 +125,7 @@
     "sortName": "Name",
     "gridView": "Grid view",
     "listView": "List view",
+    "actionMenu": "Action menu",
     "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "createFirstFace": "Create your first face",
     "createNewCard": "New face",
