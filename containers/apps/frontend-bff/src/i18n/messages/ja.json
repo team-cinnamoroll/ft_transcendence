@@ -175,7 +175,7 @@
     "dayCount": "{count}件",
     "few": "少",
     "many": "多",
-    "weekRecord": "の記録",
+    "weekRecord": "{range}の記録",
     "noRecord": "この週には記録がありません"
   },
   "subscriptionSeed": {

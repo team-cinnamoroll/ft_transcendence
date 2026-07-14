@@ -175,7 +175,7 @@
     "dayCount": "{count}",
     "few": "Less",
     "many": "More",
-    "weekRecord": "record",
+    "weekRecord": "{range} record",
     "noRecord": "No seeds this week"
   },
   "subscriptionSeed": {
