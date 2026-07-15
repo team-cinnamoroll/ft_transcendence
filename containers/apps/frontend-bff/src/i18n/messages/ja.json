@@ -1,4 +1,29 @@
 {
+  "admin": {
+    "title": "管理コンソール",
+    "subtitle": "ユーザーとコンテンツの管理、アクセスログの可視化を行います。",
+    "users": {
+      "title": "ユーザー管理",
+      "description": "登録ユーザーの一覧と利用制限を管理します。",
+      "status": {
+        "active": "アクティブ"
+      },
+      "restrict": "利用制限"
+    },
+    "content": {
+      "title": "コンテンツ管理",
+      "description": "フェイスとアクティビティを管理します。",
+      "facesLabel": "フェイス",
+      "activitiesLabel": "アクティビティ",
+      "note": "個別の削除・管理操作は今後のアップデートで追加されます。"
+    },
+    "analytics": {
+      "title": "分析（Kibana）",
+      "description": "ログインやアクティビティの傾向を可視化します。",
+      "open": "Kibana を開く",
+      "unavailable": "準備中"
+    }
+  },
   "metadata": {
     "title": "MultiFace",
     "description": "フェイス（多面性）で記録する SNS"

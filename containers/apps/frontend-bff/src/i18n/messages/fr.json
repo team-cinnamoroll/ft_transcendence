@@ -1,4 +1,29 @@
 {
+  "admin": {
+    "title": "Console d'administration",
+    "subtitle": "Gérez les utilisateurs et le contenu, et visualisez les journaux d'accès.",
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "description": "Consultez les utilisateurs inscrits et gérez les restrictions d'usage.",
+      "status": {
+        "active": "Actif"
+      },
+      "restrict": "Restreindre"
+    },
+    "content": {
+      "title": "Gestion du contenu",
+      "description": "Gérez les facettes et les activités.",
+      "facesLabel": "Facettes",
+      "activitiesLabel": "Activités",
+      "note": "Les actions de suppression et de gestion par élément seront ajoutées ultérieurement."
+    },
+    "analytics": {
+      "title": "Analytique (Kibana)",
+      "description": "Visualisez les tendances de connexion et d'activité.",
+      "open": "Ouvrir Kibana",
+      "unavailable": "Bientôt disponible"
+    }
+  },
   "metadata": {
     "title": "MultiFace",
     "description": "Un SNS pour enregistrer vos multiples facettes"

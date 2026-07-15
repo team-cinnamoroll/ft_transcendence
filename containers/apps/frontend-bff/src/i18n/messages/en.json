@@ -1,4 +1,29 @@
 {
+  "admin": {
+    "title": "Admin Console",
+    "subtitle": "Manage users and content, and visualize access logs.",
+    "users": {
+      "title": "User Management",
+      "description": "View registered users and manage usage restrictions.",
+      "status": {
+        "active": "Active"
+      },
+      "restrict": "Restrict"
+    },
+    "content": {
+      "title": "Content Management",
+      "description": "Manage faces and activities.",
+      "facesLabel": "Faces",
+      "activitiesLabel": "Activities",
+      "note": "Per-item deletion and management actions will be added in a future update."
+    },
+    "analytics": {
+      "title": "Analytics (Kibana)",
+      "description": "Visualize login and activity trends.",
+      "open": "Open Kibana",
+      "unavailable": "Coming soon"
+    }
+  },
   "metadata": {
     "title": "MultiFace",
     "description": "A short-text SNS to record your many faces"
