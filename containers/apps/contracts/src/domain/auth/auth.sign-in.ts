@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import { AccessTokenSchema, RefreshTokenSchema } from './auth.tokens';
-import { UserResponseSchema } from '../user';
-import { SuccessResponseSchema } from '../../shared/response';
+import { AuthTokensDataSchema } from './auth.tokens';
+import { UserInformationDataSchema } from '../user';
+import { createApiResponseSchema } from '../../shared/response';
 
-export const AuthSignInResponseSchema = SuccessResponseSchema.extend({
-  accessToken: AccessTokenSchema.optional(), // サインイン成功時に発行されるJWT
-  refreshToken: RefreshTokenSchema.optional(), // サインイン成功時に発行されるリフレッシュトークン
-  user: UserResponseSchema.optional(),
-}).strict();
+export const AuthSignInResponseSchema = createApiResponseSchema(
+  z.object({ ...AuthTokensDataSchema.shape, ...UserInformationDataSchema.shape })
+);
 
 export type AuthSignInResponse = z.infer<typeof AuthSignInResponseSchema>;
