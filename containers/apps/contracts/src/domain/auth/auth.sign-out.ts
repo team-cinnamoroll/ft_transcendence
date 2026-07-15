@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { SuccessResponseSchema } from '../../shared';
+import { type SimpleApiResponse, SimpleApiResponseSchema } from '../../shared/response';
 
-export const AuthSignOutResponseSchema = SuccessResponseSchema;
-export type AuthSignOutResponse = z.infer<typeof AuthSignOutResponseSchema>;
+export const AuthSignOutResponseSchema = SimpleApiResponseSchema;
+export type AuthSignOutResponse = SimpleApiResponse;
