@@ -1,9 +1,6 @@
 import { z } from 'zod';
-import { AccessTokenSchema, RefreshTokenSchema } from './auth.tokens';
-import { SuccessResponseSchema } from '../../shared/response';
+import { AuthTokensDataSchema } from './auth.tokens';
+import { createApiResponseSchema } from '../../shared/response';
 
-export const AuthRefreshResponseSchema = SuccessResponseSchema.extend({
-  accessToken: AccessTokenSchema.optional(), // 新しいJWT
-  refreshToken: RefreshTokenSchema.optional(), // 新しいリフレッシュトークン
-});
+export const AuthRefreshResponseSchema = createApiResponseSchema(AuthTokensDataSchema);
 export type AuthRefreshResponse = z.infer<typeof AuthRefreshResponseSchema>;
