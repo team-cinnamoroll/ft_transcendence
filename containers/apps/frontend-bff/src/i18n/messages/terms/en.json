@@ -1,0 +1,82 @@
+{
+  "title": "Terms of Service",
+  "sections": [
+    {
+      "heading": "Article 1 (Application)",
+      "paragraphs": [
+        "These Terms of Service set out the conditions for providing MultiFace (the \"Service\") and govern the rights and obligations between the operator of the Service (the \"Operator\") and users. Users shall use the Service only after agreeing to these Terms."
+      ]
+    },
+    {
+      "heading": "Article 2 (Overview of the Service)",
+      "paragraphs": [
+        "1. The Service is a web application intended to let users \"write for themselves.\" Rather than being primarily about connecting people with one another, it is designed with a focus on allowing users to record their own thoughts and notes.",
+        "2. Users may create multiple \"faces\" for different themes or aspects of themselves and write posts (seeds) separately for each face. Each face and each post can be set to public or private.",
+        "3. The Service provides features such as account registration and profile settings, creation and editing of faces and posts, search, subscriptions, notifications, file management, and multilingual display.",
+        "4. The Operator may add, change, or discontinue part of the features of the Service (changes, suspension, and termination are set out in Article 7)."
+      ]
+    },
+    {
+      "heading": "Article 3 (Account Registration)",
+      "paragraphs": [
+        "1. Users may use the Service by registering an email address, display name, and password. Registered information must be accurate and up to date.",
+        "2. Passwords are stored in hashed form, and authentication uses access tokens (JWT) and refresh tokens.",
+        "3. Users are responsible for appropriately managing their own account information and must not allow any third party to use it."
+      ]
+    },
+    {
+      "heading": "Article 4 (Handling of Content)",
+      "paragraphs": [
+        "1. Users may create and edit content such as faces, posts (seeds), images, and files on the Service.",
+        "2. Rights to content belong, in principle, to the user who created it. However, the Operator may use such content to the extent necessary to provide, display, and store the Service.",
+        "3. Users may choose whether each face or post is public or private. Private content and files can be accessed only by users who have the appropriate permissions."
+      ]
+    },
+    {
+      "heading": "Article 5 (Prohibited Acts)",
+      "paragraphs": [
+        "When using the Service, users must not engage in any of the following acts."
+      ],
+      "list": [
+        "Acts that violate laws, regulations, or public order and morals",
+        "Acts that infringe the intellectual property rights, privacy, reputation, or other rights of others",
+        "Impersonating others or registering false information",
+        "Unauthorized access, exploitation of vulnerabilities, reverse engineering, and the like",
+        "Acts that interfere with the operation of the Service or impose an excessive load on it",
+        "Any other act that the Operator deems inappropriate"
+      ]
+    },
+    {
+      "heading": "Article 6 (Suspension and Deletion of Accounts)",
+      "paragraphs": [
+        "If a user violates these Terms, the Operator may take measures such as suspending or deleting the account without prior notice."
+      ]
+    },
+    {
+      "heading": "Article 7 (Change, Suspension, and Termination of the Service)",
+      "paragraphs": [
+        "The Operator may change the content of the Service, or suspend or terminate its provision, without prior notice to users. The Operator shall not be liable for any damage arising to users as a result."
+      ]
+    },
+    {
+      "heading": "Article 8 (Disclaimer)",
+      "paragraphs": [
+        "1. The Operator makes no warranty, whether express or implied, as to the completeness, accuracy, usefulness, availability, or other qualities of the Service.",
+        "2. The Operator shall not be liable for any damage arising to users from the use of or inability to use the Service, to the extent permitted by law.",
+        "3. Users shall back up their posts and other data at their own responsibility."
+      ]
+    },
+    {
+      "heading": "Article 9 (Changes to the Terms)",
+      "paragraphs": [
+        "The Operator may change these Terms as necessary. The revised Terms take effect from the time they are posted on the Service."
+      ]
+    },
+    {
+      "heading": "Article 10 (Governing Law and Jurisdiction)",
+      "paragraphs": [
+        "The interpretation and application of these Terms shall be governed by the laws of Japan. In the event of any dispute concerning the Service, the court having jurisdiction over the location of the Operator shall have exclusive agreed jurisdiction."
+      ]
+    }
+  ]
+}

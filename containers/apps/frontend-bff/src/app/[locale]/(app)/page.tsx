@@ -2,12 +2,14 @@ import HomeProfile from '@/components/home/HomeProfile';
 import HomeClient from '@/components/home/HomeClient';
 import { listSeedsByUserId } from '@/server/usecases/seeds';
 import { getViewerContext } from '@/server/usecases/viewer';
+import { getFormatter } from 'next-intl/server';
 
 const REFERENCE_DATE = new Date('2026-03-31');
 
 export default async function Home() {
   const { currentUser, myFaces } = await getViewerContext();
   const seeds = await listSeedsByUserId(currentUser.id);
+  const format = await getFormatter();
 
   // On This Day: 同じ月日の過去シードを探す
   const today = REFERENCE_DATE;
@@ -20,9 +22,11 @@ export default async function Home() {
   const yearsAgo = onThisDay
     ? today.getFullYear() - parseInt(onThisDay.createdAt.slice(0, 4), 10)
     : 0;
-  const weekday = ['日', '月', '火', '水', '木', '金', '土'][today.getDay()];
-  const dateLabel = `${today.getMonth() + 1}月${today.getDate()}日 (${weekday})`;
-
+  const dateLabel = format.dateTime(today, {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  });
   return (
     <div className="flex flex-col">
       <main>

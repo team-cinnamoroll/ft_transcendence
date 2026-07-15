@@ -125,6 +125,7 @@
     "sortName": "Name",
     "gridView": "Grid view",
     "listView": "List view",
+    "actionMenu": "Action menu",
     "seedCount": "{count, plural, one {Seed} other {Seeds}}",
     "createFirstFace": "Create your first face",
     "createNewCard": "New face",
@@ -174,7 +175,7 @@
     "dayCount": "{count}",
     "few": "Less",
     "many": "More",
-    "weekRecord": "record",
+    "weekRecord": "{range} record",
     "noRecord": "No seeds this week"
   },
   "subscriptionSeed": {
@@ -263,6 +264,13 @@
     "account": {
       "title": "Account",
       "description": "Delete your account."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Switch the display language.",
+      "ja": "日本語",
+      "en": "English",
+      "fr": "Français"
     }
   },
   "profileEditModal": {

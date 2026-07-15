@@ -8,9 +8,22 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
+  const baseMessages = (
+    (await import(`./messages/${locale}.json`)) as { default: Record<string, unknown> }
+  ).default;
+  const termsMessages = (
+    (await import(`./messages/terms/${locale}.json`)) as { default: Record<string, unknown> }
+  ).default;
+  const privacyMessages = (
+    (await import(`./messages/privacy/${locale}.json`)) as { default: Record<string, unknown> }
+  ).default;
+
   return {
     locale,
-    messages: ((await import(`./messages/${locale}.json`)) as { default: Record<string, unknown> })
-      .default,
+    messages: {
+      ...baseMessages,
+      Terms: termsMessages,
+      Privacy: privacyMessages,
+    },
   };
 });

@@ -1,0 +1,65 @@
+{
+  "title": "Privacy Policy",
+  "sections": [
+    {
+      "heading": "1. Information We Collect",
+      "paragraphs": [
+        "In providing its features, the Service collects and stores the following information."
+      ],
+      "list": [
+        "Account information: email address, display name, password (stored in hashed form), and date of creation",
+        "Profile information: avatar image and badge emoji",
+        "Content information: faces (name, emoji, description, image, visibility settings), posts (seeds: body text, attached images, links between posts, creation date, and associated face), and uploaded files and their metadata (file name, type, size, owner, and visibility)",
+        "Usage information: subscription relationships, notifications, and online status (presence)",
+        "Authentication information: access tokens (JWT) and refresh tokens (issuance time, generation identifier, and enabled/disabled status)"
+      ]
+    },
+    {
+      "heading": "2. Purposes of Use",
+      "list": [
+        "Providing the Service, authenticating users, and controlling access",
+        "Providing features for displaying, storing, and searching content such as posts and faces",
+        "Providing features such as subscriptions, notifications, and online status",
+        "Preventing misuse and improving the quality of the Service"
+      ]
+    },
+    {
+      "heading": "3. Provision to Third Parties",
+      "paragraphs": [
+        "Except as provided by laws and regulations, the Operator will not provide personal information to third parties without obtaining the individual's prior consent."
+      ]
+    },
+    {
+      "heading": "4. Use of Cookies and Tokens",
+      "paragraphs": [
+        "The Service uses mechanisms such as tokens (access tokens / refresh tokens) to maintain login status and perform authentication."
+      ]
+    },
+    {
+      "heading": "5. Security Measures",
+      "list": [
+        "Passwords are stored in hashed form.",
+        "In production-equivalent environments, communications are encrypted using HTTPS.",
+        "Private faces, posts, and files are displayed and delivered only after access permissions have been verified."
+      ]
+    },
+    {
+      "heading": "6. Retention Period and Deletion",
+      "paragraphs": [
+        "Collected information is retained to the extent necessary to achieve the purposes of use, and information that becomes unnecessary, such as through account deletion, is promptly deleted."
+      ]
+    },
+    {
+      "heading": "7. Requests for Disclosure, Correction, Deletion, etc.",
+      "paragraphs": [
+        "Users may request the disclosure, correction, deletion, or other handling of their own personal information. For details of the procedure, please contact the Operator's inquiry desk."
+      ]
+    },
+    {
+      "heading": "8. Revisions to This Policy",
+      "paragraphs": [
+        "This Policy may be changed as necessary. The revised content applies from the time it is posted on the Service."
+      ]
+    }
+  ]
+}

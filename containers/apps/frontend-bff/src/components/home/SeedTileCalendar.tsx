@@ -231,10 +231,13 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
       {selectedWeekIdx !== null && (
         <div style={{ marginTop: 14 }}>
           <p style={{ fontSize: 11.5, color: 'var(--mf-text-muted)', marginBottom: 8 }}>
-            {toDateKey(weeks[selectedWeekIdx].startDate).replace(/-/g, '/')}
-            {' 〜 '}
-            {toDateKey(weeks[selectedWeekIdx].endDate).replace(/-/g, '/')}
-            {t('weekRecord')}
+            {t('weekRecord', {
+              range: format.dateTimeRange(
+                weeks[selectedWeekIdx].startDate,
+                weeks[selectedWeekIdx].endDate,
+                { month: 'short', day: 'numeric' }
+              ),
+            })}
           </p>
           {selectedWeekSeeds.length === 0 ? (
             <p

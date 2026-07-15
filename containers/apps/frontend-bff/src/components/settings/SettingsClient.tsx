@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import type { UserProfile } from '@/types/user-profile';
 import ProfileEditModal from './ProfileEditModal';
+import LanguageSwitcher from './LanguageSwitcher';
 
 type Props = {
   user: UserProfile;
@@ -102,6 +103,10 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
           <button type="button" onClick={() => setIsEditOpen(true)} style={sectionActionStyle}>
             {t('profile.edit')}
           </button>
+        </SettingsSection>
+
+        <SettingsSection title={t('language.title')} description={t('language.description')}>
+          <LanguageSwitcher />
         </SettingsSection>
 
         <SettingsSection title={t('data.title')} description={t('data.description')}>
