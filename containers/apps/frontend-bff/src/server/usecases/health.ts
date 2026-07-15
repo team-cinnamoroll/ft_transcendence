@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 
 import {
   AuthSignUpRequestSchema,
-  type UserResponse,
+  type User,
   type AuthSignUpResponse,
   type AuthSignInResponse,
   type AuthRefreshResponse,
@@ -169,7 +169,16 @@ export async function runApiHealthCheck(
     }
 
     const created = (await createRes.json()) as AuthSignUpResponse;
-    const createdUserId = created.user?.id;
+    if (!created.success) {
+      log(`FAIL (create-user): response JSON success=false, message=${created.message}`);
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: `create user failed: ${created.message}` },
+      };
+    }
+    const createdUserId = created.data.user.id;
     if (!createdUserId) {
       log('FAIL (create-user): response JSON missing id');
       return {
@@ -179,8 +188,88 @@ export async function runApiHealthCheck(
         error: { message: 'create user response missing id' },
       };
     }
+    const createdUserName = created.data.user.name;
+    if (!createdUserName) {
+      log('FAIL (create-user): response JSON missing name');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response missing name' },
+      };
+    }
+    const createdUserProfileName = created.data.userProfile.name;
+    if (!createdUserProfileName) {
+      log('FAIL (create-user): response JSON missing userProfile.name');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response missing userProfile.name' },
+      };
+    }
+    if (createdUserName !== createdUserProfileName) {
+      log(
+        `FAIL (create-user): response JSON user.name and userProfile.name mismatch (user.name=${createdUserName}, userProfile.name=${createdUserProfileName})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response user.name and userProfile.name mismatch' },
+      };
+    }
+    const createdUserProfileUserId = created.data.userProfile.userId;
+    if (!createdUserProfileUserId) {
+      log('FAIL (create-user): response JSON missing userProfile.userId');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response missing userProfile.userId' },
+      };
+    }
+    if (createdUserId !== createdUserProfileUserId) {
+      log(
+        `FAIL (create-user): response JSON user.id and userProfile.userId mismatch (user.id=${createdUserId}, userProfile.userId=${createdUserProfileUserId})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: { message: 'create user response user.id and userProfile.userId mismatch' },
+      };
+    }
+    const createdUserProfileAvatarUrl = created.data.userProfile.avatarUrl;
+    if (createdUserProfileAvatarUrl) {
+      log(
+        `FAIL (create-user): response JSON userProfile.avatarUrl should be undefined on creation (got=${createdUserProfileAvatarUrl})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: {
+          message: 'create user response userProfile.avatarUrl should be undefined on creation',
+        },
+      };
+    }
+    const createdUserProfileBadge = created.data.userProfile.badge;
+    if (createdUserProfileBadge) {
+      log(
+        `FAIL (create-user): response JSON userProfile.badge should be undefined on creation (got=${createdUserProfileBadge})`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'create-user',
+        error: {
+          message: 'create user response userProfile.badge should be undefined on creation',
+        },
+      };
+    }
     log(`OK (create-user): id=${createdUserId}`);
-    const createdJwt = created.accessToken;
+    const createdJwt = created.data.accessToken;
     if (!createdJwt) {
       log('FAIL (create-user): response JSON missing accessToken');
       return {
@@ -191,7 +280,7 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (create-user): accessToken=${createdJwt}`);
-    const createdRefreshToken = created.refreshToken;
+    const createdRefreshToken = created.data.refreshToken;
     if (!createdRefreshToken) {
       log('FAIL (create-user): response JSON missing refreshToken');
       return {
@@ -236,8 +325,17 @@ export async function runApiHealthCheck(
       );
     }
     const refreshJson = (await refreshRes.json()) as AuthRefreshResponse;
+    if (!refreshJson.success) {
+      log(`FAIL (refresh-token): response JSON success=false, message=${refreshJson.message}`);
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: `refresh token failed: ${refreshJson.message}` },
+      };
+    }
     log(`OK (refresh-token): refresh token response ${JSON.stringify(refreshJson)}`);
-    const refreshedAccessToken = refreshJson.accessToken;
+    const refreshedAccessToken = refreshJson.data.accessToken;
     if (!refreshedAccessToken) {
       log('FAIL (refresh-token): response JSON missing accessToken');
       return {
@@ -275,7 +373,7 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (refresh-token): refresh token JWT payload sub matches created user id`);
-    if (!refreshJson.refreshToken) {
+    if (!refreshJson.data.refreshToken) {
       log('FAIL (refresh-token): response JSON missing refreshToken');
       return {
         ok: false,
@@ -284,7 +382,7 @@ export async function runApiHealthCheck(
         error: { message: 'refresh token response missing refreshToken' },
       };
     }
-    if (refreshJson.refreshToken === createdRefreshToken) {
+    if (refreshJson.data.refreshToken === createdRefreshToken) {
       log('FAIL (refresh-token): response JSON refreshToken mismatch');
       return {
         ok: false,
@@ -294,7 +392,7 @@ export async function runApiHealthCheck(
       };
     }
     log(
-      `OK (refresh-token): refresh token response includes new refreshToken=${refreshJson.refreshToken}`
+      `OK (refresh-token): refresh token response includes new refreshToken=${refreshJson.data.refreshToken}`
     );
 
     // API: 失効したリフレッシュトークンを使用する
@@ -309,7 +407,7 @@ export async function runApiHealthCheck(
     log('OK (refresh-token): revoked refresh token cannot be used');
 
     // API: 追放したリフレッシュトークンを使用する
-    const noRefreshRes2 = await repo.refreshToken(refreshJson.refreshToken);
+    const noRefreshRes2 = await repo.refreshToken(refreshJson.data.refreshToken);
     if (noRefreshRes2.ok) {
       return await failWithResponse(
         'refresh-token',
@@ -326,7 +424,7 @@ export async function runApiHealthCheck(
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
-    const user = (await getExistsRes.json()) as UserResponse;
+    const user = (await getExistsRes.json()) as User;
     if (user.id !== createdUserId) {
       log(
         `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${user.id})`
@@ -361,7 +459,16 @@ export async function runApiHealthCheck(
     }
     const signInJson = (await signInRes.json()) as AuthSignInResponse;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
-    const signInJwt = signInJson.accessToken;
+    if (!signInJson.success) {
+      log(`FAIL (sign-in-user): response JSON success=false, message=${signInJson.message}`);
+      return {
+        ok: false,
+        logs,
+        failedStep: 'sign-in-user',
+        error: { message: `sign in failed: ${signInJson.message}` },
+      };
+    }
+    const signInJwt = signInJson.data.accessToken;
     if (!signInJwt) {
       log('FAIL (sign-in-user): sign in response JSON missing accessToken');
       return {
@@ -372,7 +479,7 @@ export async function runApiHealthCheck(
       };
     }
     log(`OK (sign-in-user): sign in returned accessToken=${signInJwt}`);
-    const signInRefreshToken = signInJson.refreshToken;
+    const signInRefreshToken = signInJson.data.refreshToken;
     if (!signInRefreshToken) {
       log('FAIL (sign-in-user): sign in response JSON missing refreshToken');
       return {
