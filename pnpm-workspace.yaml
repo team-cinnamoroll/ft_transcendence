@@ -1,2 +1,31 @@
 packages:
   - 'containers/apps/*'
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  gitleaks-secret-scanner: true
+  sharp: true
+  unrs-resolver: true
+overrides:
+  'vite@7.3.1': '7.3.2'
+  postcss: '^8.5.10'
+  esbuild: '^0.25.0'
+  tar: '^7.5.11'
+  uuid: '>=14.0.0'
+  'hono@<4.12.18': '>=4.12.18'
+  'next@>=16.0.0 <16.2.6': '>=16.2.6 <17'
+  'brace-expansion@>=5.0.0 <5.0.6': '>=5.0.6'
+  'ws@>=8.0.0 <8.20.1': '>=8.20.1'
+  'vitest@<4.1.0': '>=4.1.0'
+  'hono@<4.12.21': '>=4.12.21'
+  'esbuild@>=0.17.0 <0.28.1': '>=0.28.1'
+  'ws@>=8.0.0 <8.21.0': '>=8.21.0'
+  'form-data@>=4.0.0 <4.0.6': '>=4.0.6'
+  'tar@<=7.5.15': '>=7.5.16'
+  'vite@>=8.0.0 <=8.0.15': '>=8.0.16'
+  'js-yaml@<=4.1.1': '>=4.2.0'
+  '@babel/core@<=7.29.0': '>=7.29.6'
+  'react-docgen>@babel/core': '^7.29.6'
+  'hono@<4.12.25': '>=4.12.25'
