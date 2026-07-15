@@ -8,8 +8,8 @@ import { verifyToken } from '@/lib/backend-client';
 /** サインアップし、成功した場合は発行されたトークンでセッションを開始する */
 export async function signUpAndStartSession(input: AuthSignUpRequest): Promise<AuthSignUp> {
   const result = await getAuthRepository().signUp(input);
-  if (result.success && result.accessToken && result.refreshToken) {
-    await setSessionTokens(result.accessToken, result.refreshToken);
+  if (result.success && result.data.accessToken && result.data.refreshToken) {
+    await setSessionTokens(result.data.accessToken, result.data.refreshToken);
   }
   return result;
 }
@@ -17,8 +17,8 @@ export async function signUpAndStartSession(input: AuthSignUpRequest): Promise<A
 /** ログインし、成功した場合は発行されたトークンでセッションを開始する */
 export async function signInAndStartSession(input: AuthSignInRequest): Promise<AuthSignIn> {
   const result = await getAuthRepository().signIn(input);
-  if (result.success && result.accessToken && result.refreshToken) {
-    await setSessionTokens(result.accessToken, result.refreshToken);
+  if (result.success && result.data.accessToken && result.data.refreshToken) {
+    await setSessionTokens(result.data.accessToken, result.data.refreshToken);
   }
   return result;
 }
