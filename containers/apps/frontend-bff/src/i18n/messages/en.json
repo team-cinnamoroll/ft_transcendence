@@ -258,7 +258,12 @@
     },
     "data": {
       "title": "Data & Privacy",
-      "description": "Export your data."
+      "description": "Export your data.",
+      "export": {
+        "button": "Export my data",
+        "loading": "Exporting…",
+        "error": "Export failed. Please try again later."
+      }
     },
     "account": {
       "title": "Account",
