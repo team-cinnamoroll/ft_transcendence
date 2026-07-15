@@ -49,8 +49,11 @@
 
 サーバーからクライアントへ返すデータのスキーマです。
 
-- 例: `UserResponseSchema`
-- 内容: サーバーで生成されたID、作成日時、公開可能なプロフィール情報など。
+- 例: `AuthSignUpResponseSchema`
+- 内容: successフラグ、dataオブジェクト（JWTトークン、リフレッシュトークン、ユーザー情報など）など。
+- ResponseSchemaは必ず、successフラグを含む共通のレスポンス形式を採用します。
+- successがtrueの場合は、dataに必要な情報を格納します。(dataが必要ない場合はundefined)
+- successがfalseの場合は、dataは含まれず、messageにエラーメッセージを格納します。
 - **重要:** パスワードハッシュなどの機密情報は、ここには**絶対に含まない**でください。
 
 ### 3.3. 共通バリデーションルール
@@ -83,7 +86,7 @@ import {
 export const UserIdSchema = UuidSchema;
 export type UserId = Uuid;
 
-export const UserResponseSchema = z
+export const UserSchema = z
   .object({
     id: UserIdSchema,
     email: EmailSchema,
@@ -91,7 +94,7 @@ export const UserResponseSchema = z
     createdAt: IsoDateTimeStringSchema,
   })
   .strict();
-export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type User = z.infer<typeof UserSchema>;
 ```
 
 ```typescript
@@ -115,11 +118,11 @@ export type AuthSignUpRequest = z.infer<typeof AuthSignUpRequestSchema>;
 ```typescript
 // containers/apps/backend/src/features/user/domain/users.entity.ts
 import { z } from 'zod';
-import { UserResponseSchema } from '@tracen/contracts';
+import { UserSchema } from '@tracen/contracts';
 
 // 3. 内部でのみ扱うドメインエンティティ
 // contracts のスキーマを継承して、機密情報を追加する
-export const UserEntitySchema = UserResponseSchema.extend({
+export const UserEntitySchema = UserSchema.extend({
   password_hash: z.string().min(1), // バックエンド専用の秘密情報
 }).strict();
 export type UserEntity = z.infer<typeof UserEntitySchema>;
@@ -162,10 +165,10 @@ export type UserEntity = z.infer<typeof UserEntitySchema>;
 ```typescript
 // containers/apps/backend/src/features/user/domain/users.entity.ts
 import { z } from 'zod';
-import { UserResponseSchema } from '@tracen/contracts';
+import { UserSchema } from '@tracen/contracts';
 
 // contractsの定義を拡張して、永続化に必要な機密情報を追加
-export const UserEntitySchema = UserResponseSchema.extend({
+export const UserEntitySchema = UserSchema.extend({
   password_hash: z.string().min(1),
 }).strict();
 
@@ -179,10 +182,10 @@ export type UserEntity = z.infer<typeof UserEntitySchema>;
 **実装例:**
 
 ```typescript
-import { UserResponse } from '@tracen/contracts';
+import { User } from '@tracen/contracts';
 
 // contractsの型に、UI制御用のフラグを交差型で追加
-export type UserViewModel = UserResponse & {
+export type UserViewModel = User & {
   isSelected: boolean;
   isDeleting: boolean;
 };
@@ -262,7 +265,6 @@ export type UserViewModel = UserResponse & {
 | 種類         | contracts での名前   | src/types/ での名前 | 規則                          |
 | ------------ | -------------------- | ------------------- | ----------------------------- |
 | レスポンス型 | `FaceResponse`       | `Face`              | `Response` サフィックスを除去 |
-| レスポンス型 | `UserResponse`       | `User`              | `Response` サフィックスを除去 |
 | レスポンス型 | `AuthSignUpResponse` | `AuthSignUp`        | `Response` サフィックスを除去 |
 | リクエスト型 | `CreateFaceRequest`  | `CreateFaceRequest` | そのまま（変更しない）        |
 | リクエスト型 | `SignUpRequest`      | `SignUpRequest`     | そのまま（変更しない）        |
@@ -289,10 +291,10 @@ export type {
 } from '@tracen/contracts';
 
 // src/types/user.ts
-export type { UserResponse as User } from '@tracen/contracts';
+export type { User } from '@tracen/contracts';
 
 // src/types/user-profile.ts
-export type { UserProfileResponse as UserProfile } from '@tracen/contracts';
+export type { UserProfile } from '@tracen/contracts';
 ```
 
 ### 11.3. Zod スキーマは `@tracen/contracts` から直接 import する
