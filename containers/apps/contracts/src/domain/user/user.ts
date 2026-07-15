@@ -11,13 +11,16 @@ import {
 export const UserIdSchema = UuidSchema;
 export type UserId = Uuid;
 
+export const UserNameSchema = z.string().min(1).max(100);
+export type UserName = z.infer<typeof UserNameSchema>;
+
 // ユーザーデータのレスポンススキーマと型
-export const UserResponseSchema = z
+export const UserSchema = z
   .object({
     id: UserIdSchema,
     email: EmailSchema,
-    name: z.string().min(1),
+    name: UserNameSchema,
     createdAt: IsoDateTimeStringSchema,
   })
   .strict();
-export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type User = z.infer<typeof UserSchema>;

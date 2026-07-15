@@ -1,12 +1,9 @@
-import { type UserId, type UserResponse, UserResponseSchema } from '@tracen/contracts';
+import { type UserId, type User, UserSchema } from '@tracen/contracts';
 import { type UserEntity, UserEntitySchema } from './users.entity';
 import type { UserRepositorySpec } from './users.repository';
 import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
 
-export async function createUser(
-  repo: UserRepositorySpec,
-  newUser: UserEntity
-): Promise<UserResponse> {
+export async function createUser(repo: UserRepositorySpec, newUser: UserEntity): Promise<User> {
   const existingUser = await repo.findById(newUser.id);
   if (existingUser) {
     throw new UserAlreadyExistsError();
@@ -16,7 +13,7 @@ export async function createUser(
     throw new EmailAlreadyExistsError();
   }
   const created = await repo.create(newUser);
-  return UserResponseSchema.parse({
+  return UserSchema.parse({
     id: created.id,
     email: created.email,
     name: created.name,
@@ -24,15 +21,12 @@ export async function createUser(
   });
 }
 
-export async function getUserResponseById(
-  repo: UserRepositorySpec,
-  id: UserId
-): Promise<UserResponse | null> {
+export async function getUserById(repo: UserRepositorySpec, id: UserId): Promise<User | null> {
   const user = await repo.findById(id);
   if (!user) {
     return null;
   }
-  return UserResponseSchema.parse({
+  return UserSchema.parse({
     id: user.id,
     email: user.email,
     name: user.name,
