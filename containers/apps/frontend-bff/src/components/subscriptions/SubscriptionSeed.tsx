@@ -133,165 +133,170 @@ const RECOMMENDED_FACES = [
   },
 ];
 
-const EmptyState = () => (
-  <div>
-    {/* Quiet Feed バナー */}
-    <div
-      style={{
-        margin: '20px 18px 0',
-        padding: '24px 22px',
-        borderRadius: 16,
-        background: 'var(--mf-brand)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+const EmptyState = () => {
+  const t = useTranslations('subscriptionSeed');
+  return (
+    <div>
+      {/* Quiet Feed バナー */}
       <div
         style={{
-          position: 'absolute',
-          top: -50,
-          right: -50,
-          width: 140,
-          height: 140,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle at 35% 35%, rgba(248,246,241,0.18) 0%, rgba(248,246,241,0.04) 60%, transparent 100%)',
-          pointerEvents: 'none',
+          margin: '20px 18px 0',
+          padding: '24px 22px',
+          borderRadius: 16,
+          background: 'var(--mf-brand)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
-      />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-        <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-accent)' }} />
+      >
         <div
           style={{
-            fontSize: 10.5,
-            color: 'var(--mf-accent)',
-            letterSpacing: 1,
-            textTransform: 'uppercase',
+            position: 'absolute',
+            top: -50,
+            right: -50,
+            width: 140,
+            height: 140,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle at 35% 35%, rgba(248,246,241,0.18) 0%, rgba(248,246,241,0.04) 60%, transparent 100%)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          <div
+            style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-accent)' }}
+          />
+          <div
+            style={{
+              fontSize: 10.5,
+              color: 'var(--mf-accent)',
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              fontWeight: 700,
+            }}
+          >
+            Quiet Feed
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: 17,
+            lineHeight: 1.55,
             fontWeight: 700,
+            color: '#F8F6F1',
+            letterSpacing: 0.2,
+            position: 'relative',
           }}
         >
-          Quiet Feed
+          {t.rich('emptyHeadline', { br: () => <br /> })}
         </div>
-      </div>
-      <div
-        style={{
-          fontSize: 17,
-          lineHeight: 1.55,
-          fontWeight: 700,
-          color: '#F8F6F1',
-          letterSpacing: 0.2,
-          position: 'relative',
-        }}
-      >
-        まだ、誰のフェイスも
-        <br />
-        サブスクライブしていない。
-      </div>
-      <div
-        style={{
-          marginTop: 8,
-          fontSize: 12,
-          lineHeight: 1.7,
-          color: 'rgba(248,246,241,0.7)',
-          position: 'relative',
-        }}
-      >
-        気になるフェイスを1つだけ、まず選んでみる。
-        <br />
-        通知の重みを大切にする設計です。
-      </div>
-    </div>
-
-    {/* おすすめのフェイス */}
-    <div style={{ marginTop: 20 }}>
-      <div
-        style={{
-          padding: '0 18px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          marginBottom: 10,
-        }}
-      >
         <div
-          style={{ fontSize: 13, fontWeight: 700, color: 'var(--mf-brand)', letterSpacing: 0.2 }}
-        >
-          おすすめのフェイス
-        </div>
-        <div style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>· あなたに合いそうな</div>
-      </div>
-      {RECOMMENDED_FACES.map((r, i) => (
-        <div
-          key={r.handle}
           style={{
-            padding: '12px 18px',
-            borderBottom:
-              i < RECOMMENDED_FACES.length - 1 ? '0.5px solid var(--mf-line-soft)' : 'none',
+            marginTop: 8,
+            fontSize: 12,
+            lineHeight: 1.7,
+            color: 'rgba(248,246,241,0.7)',
+            position: 'relative',
+          }}
+        >
+          {t.rich('emptyBody', { br: () => <br /> })}
+        </div>
+      </div>
+
+      {/* おすすめのフェイス */}
+      <div style={{ marginTop: 20 }}>
+        <div
+          style={{
+            padding: '0 18px',
             display: 'flex',
-            gap: 12,
             alignItems: 'center',
+            gap: 6,
+            marginBottom: 10,
           }}
         >
           <div
+            style={{ fontSize: 13, fontWeight: 700, color: 'var(--mf-brand)', letterSpacing: 0.2 }}
+          >
+            {t('recommendedTitle')}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--mf-text-muted)' }}>
+            {t('recommendedSubtitle')}
+          </div>
+        </div>
+        {RECOMMENDED_FACES.map((r, i) => (
+          <div
+            key={r.handle}
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 11,
-              background: r.color,
-              color: '#fff',
-              fontFamily: 'var(--mf-font-serif)',
-              fontSize: 20,
-              fontWeight: 500,
+              padding: '12px 18px',
+              borderBottom:
+                i < RECOMMENDED_FACES.length - 1 ? '0.5px solid var(--mf-line-soft)' : 'none',
               display: 'flex',
+              gap: 12,
               alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
             }}
           >
-            {r.kanji}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, whiteSpace: 'nowrap' }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>
-                {r.name}
-              </div>
-              <div style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>@{r.handle}</div>
-            </div>
             <div
               style={{
-                marginTop: 2,
-                fontSize: 11.5,
-                color: 'var(--mf-text-sub)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                width: 42,
+                height: 42,
+                borderRadius: 11,
+                background: r.color,
+                color: '#fff',
+                fontFamily: 'var(--mf-font-serif)',
+                fontSize: 20,
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
-              {r.desc} · {r.subs} サブスク
+              {r.kanji}
             </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{ display: 'flex', alignItems: 'baseline', gap: 6, whiteSpace: 'nowrap' }}
+              >
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>
+                  {r.name}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>@{r.handle}</div>
+              </div>
+              <div
+                style={{
+                  marginTop: 2,
+                  fontSize: 11.5,
+                  color: 'var(--mf-text-sub)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {r.desc} · {t('subscriberCount', { n: r.subs })}
+              </div>
+            </div>
+            <button
+              type="button"
+              style={{
+                padding: '7px 14px',
+                borderRadius: 999,
+                background: i === 0 ? 'var(--mf-brand)' : 'transparent',
+                border: i === 0 ? 'none' : '1px solid var(--mf-brand)',
+                color: i === 0 ? '#F8F6F1' : 'var(--mf-brand)',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              {t('subscribeAction')}
+            </button>
           </div>
-          <button
-            type="button"
-            style={{
-              padding: '7px 14px',
-              borderRadius: 999,
-              background: i === 0 ? 'var(--mf-brand)' : 'transparent',
-              border: i === 0 ? 'none' : '1px solid var(--mf-brand)',
-              color: i === 0 ? '#F8F6F1' : 'var(--mf-brand)',
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            サブスク
-          </button>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 type Props = {
   subscribedFaceIds: string[];
