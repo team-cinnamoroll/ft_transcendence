@@ -8,7 +8,7 @@ export async function upsertUserProfile(
   userProfileRepo: UserProfileRepositorySpec,
   userId: UserId,
   upsertRequest: UserProfileUpsertRequest
-): Promise<UserProfileEntity> {
+): Promise<{ userProfile: UserProfileEntity; isExisted: boolean }> {
   const newProfileId = uuidv4();
   const userProfile = UserProfileEntitySchema.parse({
     id: newProfileId,
@@ -17,7 +17,11 @@ export async function upsertUserProfile(
   });
   try {
     const result = await userProfileRepo.upsertUserProfile(userProfile);
-    return result;
+    if (result.id === newProfileId) {
+      return { userProfile: result, isExisted: false };
+    } else {
+      return { userProfile: result, isExisted: true };
+    }
   } catch (error) {
     console.error('Error upserting user profile:', error);
     throw error;

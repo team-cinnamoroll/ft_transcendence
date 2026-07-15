@@ -17,6 +17,9 @@ export function injectUserProfileDeps(): MiddlewareHandler<UserProfileHandlerEnv
       return c.json({ message: 'Config is required' }, 500);
     }
     const userProfileRepo = getUserProfileRepository(config.DATABASE_URL);
+    if (!userProfileRepo) {
+      return c.json({ message: 'User profile repository is not initialized' }, 500);
+    }
     c.set('userProfileRepo', userProfileRepo);
     await next();
   };

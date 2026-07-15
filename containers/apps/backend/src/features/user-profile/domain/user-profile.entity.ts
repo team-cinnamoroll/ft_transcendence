@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { UserProfileUpsertRequestSchema, UserIdSchema } from '@tracen/contracts';
 
+export const UserProfileIdSchema = z.uuid();
+
 export const UserProfileEntitySchema = UserProfileUpsertRequestSchema.extend({
-  id: z.uuid(),
+  id: UserProfileIdSchema,
   userId: UserIdSchema,
 });
 
