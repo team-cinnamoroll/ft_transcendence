@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import type { UserProfile } from '@/types/user-profile';
 import ProfileEditModal from './ProfileEditModal';
 import LanguageSwitcher from './LanguageSwitcher';
+import DataExportButton from './DataExportButton';
 
 type Props = {
   user: UserProfile;
@@ -110,7 +111,7 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
         </SettingsSection>
 
         <SettingsSection title={t('data.title')} description={t('data.description')}>
-          {/* slot: #148 データエクスポート UI */}
+          <DataExportButton />
         </SettingsSection>
 
         <SettingsSection title={t('account.title')} description={t('account.description')}>
