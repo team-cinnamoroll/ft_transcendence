@@ -3,6 +3,8 @@ import type { MiddlewareHandler } from 'hono';
 import { AppEnv } from '../../shared/types/hono';
 import type { UserRepositorySpec } from '../../features/users/domain/users.repository';
 import { getUserRepository } from '../../features/users/infra/users.repository.di';
+import type { UserProfileRepositorySpec } from '../../features/user-profile/domain/user-profile.repository';
+import { getUserProfileRepository } from '../../features/user-profile/infra/user-profile.repository.di';
 import type {
   AuthPassWorkerSpec,
   AuthAccessTokenWorkerSpec,
@@ -18,6 +20,7 @@ import { getAuthRefreshTokenRepository } from '../../features/auth/infra/auth.re
 export type AuthHandlerEnv = AppEnv & {
   Variables: {
     userRepo: UserRepositorySpec;
+    userProfileRepo: UserProfileRepositorySpec;
     authPassWorker: AuthPassWorkerSpec;
     authAccessTokenWorker: AuthAccessTokenWorkerSpec;
     authRefreshTokenRepository: AuthRefreshTokenRepositorySpec;
@@ -37,6 +40,7 @@ export function injectAuthDeps(): MiddlewareHandler<AuthHandlerEnv> {
     c.set('authPassWorker', authPassWorker);
     c.set('authAccessTokenWorker', authAccessTokenWorker);
     c.set('authRefreshTokenRepository', getAuthRefreshTokenRepository(config.REDIS_URL));
+    c.set('userProfileRepo', getUserProfileRepository(config.DATABASE_URL));
     await next();
   };
 }
