@@ -259,7 +259,12 @@
     },
     "data": {
       "title": "Données et confidentialité",
-      "description": "Exportez vos données."
+      "description": "Exportez vos données.",
+      "export": {
+        "button": "Exporter mes données",
+        "loading": "Exportation en cours…",
+        "error": "Échec de l'exportation. Veuillez réessayer plus tard."
+      }
     },
     "account": {
       "title": "Compte",
