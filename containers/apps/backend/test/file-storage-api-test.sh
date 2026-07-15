@@ -143,9 +143,9 @@ setup() {
         exit 1
     fi
 
-    USER_TOKEN=$(echo "$RES" | jq -r '.accessToken')
-    USER_REFRESH=$(echo "$RES" | jq -r '.refreshToken')
-    USER_ID=$(echo "$RES" | jq -r '.user.id')
+    USER_TOKEN=$(echo "$RES" | jq -r '.data.accessToken')
+    USER_REFRESH=$(echo "$RES" | jq -r '.data.refreshToken')
+    USER_ID=$(echo "$RES" | jq -r '.data.user.id')
 
     echo "  -> Success! User ID: $USER_ID"
 
