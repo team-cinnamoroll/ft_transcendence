@@ -21,7 +21,7 @@ export async function toUserProfile(
     const avatarUrl = avatarUrlsMap.get(profileEntity.avatarFileId) || undefined;
 
     return UserProfileSchema.parse({
-      userId: profileEntity.userId,
+      id: profileEntity.userId,
       name: profileEntity.name,
       avatarUrl,
       badge: profileEntity.badge,
@@ -29,7 +29,7 @@ export async function toUserProfile(
   }
 
   return UserProfileSchema.parse({
-    userId: profileEntity.userId,
+    id: profileEntity.userId,
     name: profileEntity.name,
     avatarUrl: undefined,
     badge: profileEntity.badge,

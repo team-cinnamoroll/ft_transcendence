@@ -219,25 +219,25 @@ export async function runApiHealthCheck(
         error: { message: 'create user response user.name and userProfile.name mismatch' },
       };
     }
-    const createdUserProfileUserId = created.data.userProfile.userId;
+    const createdUserProfileUserId = created.data.userProfile.id;
     if (!createdUserProfileUserId) {
-      log('FAIL (create-user): response JSON missing userProfile.userId');
+      log('FAIL (create-user): response JSON missing userProfile.id');
       return {
         ok: false,
         logs,
         failedStep: 'create-user',
-        error: { message: 'create user response missing userProfile.userId' },
+        error: { message: 'create user response missing userProfile.id' },
       };
     }
     if (createdUserId !== createdUserProfileUserId) {
       log(
-        `FAIL (create-user): response JSON user.id and userProfile.userId mismatch (user.id=${createdUserId}, userProfile.userId=${createdUserProfileUserId})`
+        `FAIL (create-user): response JSON user.id and userProfile.id mismatch (user.id=${createdUserId}, userProfile.id=${createdUserProfileUserId})`
       );
       return {
         ok: false,
         logs,
         failedStep: 'create-user',
-        error: { message: 'create user response user.id and userProfile.userId mismatch' },
+        error: { message: 'create user response user.id and userProfile.id mismatch' },
       };
     }
     const createdUserProfileAvatarUrl = created.data.userProfile.avatarUrl;

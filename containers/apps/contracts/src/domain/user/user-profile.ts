@@ -19,7 +19,7 @@ export const AvatarBadgeSchema = z
 // ユーザーデータのレスポンススキーマと型
 export const UserProfileSchema = z
   .object({
-    userId: UserIdSchema,
+    id: UserIdSchema,
     name: UserNicknameSchema,
     avatarUrl: FileUrlSchema.optional(),
     badge: AvatarBadgeSchema.optional(),
