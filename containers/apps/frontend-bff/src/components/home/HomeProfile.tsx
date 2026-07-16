@@ -22,7 +22,7 @@ const HomeProfile = ({ user, faces, seeds }: Props) => {
           style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}
         >
           <Image
-            src={user.avatarUrl}
+            src={user.avatarUrl || '/images/default-avatar.png'}
             alt={user.name}
             width={44}
             height={44}
