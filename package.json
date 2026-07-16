@@ -5,7 +5,7 @@
   "scripts": {
     "install:all": "pnpm install && pnpm run husky:install",
     "dev": "pnpm -r --parallel dev",
-    "prepare": "husky",
+    "prepare": "sh -c 'if command -v husky >/dev/null 2>&1; then husky; fi'",
     "husky:install": "pnpm exec husky",
     "typecheck": "pnpm -r typecheck",
     "local-prod:setup-tls": "bash scripts/setup-local-prod-tls.sh",
