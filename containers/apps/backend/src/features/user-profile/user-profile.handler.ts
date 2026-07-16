@@ -55,7 +55,6 @@ export function userProfileRouter() {
             return c.json(
               SimpleApiResponseSchema.parse({
                 success: true,
-                message: 'User profile updated successfully',
               }),
               200
             );
