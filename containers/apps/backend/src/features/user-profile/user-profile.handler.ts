@@ -62,7 +62,6 @@ export function userProfileRouter() {
             return c.json(
               SimpleApiResponseSchema.parse({
                 success: true,
-                message: 'User profile created successfully',
               }),
               201
             );
