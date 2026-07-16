@@ -19,7 +19,7 @@ import { type GlobalErrorResponse, globalErrorHandler } from './global.error.han
 
 const config = parseEnv(process.env);
 
-if (config.RUN_MIGRATIONS) {
+if (config.RUN_MIGRATIONS && config.NODE_ENV === 'production') {
   await runMigrationsOnce(config.DATABASE_URL);
 }
 
