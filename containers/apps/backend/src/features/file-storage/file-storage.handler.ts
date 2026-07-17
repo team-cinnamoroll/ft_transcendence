@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
@@ -9,9 +8,8 @@ import { downloadPrivateFile } from './domain/usecases/file-storage.download-pri
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
-  FileDeleteRequestSchema,
+  FileRequestSchema,
   FileDeleteResponseSchema,
-  FileMetadataIdSchema,
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
@@ -80,7 +78,7 @@ export function fileStorageRouter() {
         throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
-    .post('/delete', zValidator('json', FileDeleteRequestSchema), async (c) => {
+    .get('/download/:fileId', zValidator('param', FileRequestSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       try {
@@ -89,9 +87,73 @@ export function fileStorageRouter() {
         if (!clientId) {
           throw new ValidationError('JWT token is invalid: sub (userId) is missing');
         }
-        const deleteRequestBody = c.req.valid('json');
+        const { fileId } = c.req.valid('param');
+        const { stream, metadata } = await downloadPrivateFile(
+          fileStorageRepo,
+          fileMetadataRepo,
+          fileId,
+          clientId
+        );
+        c.header('Content-Type', metadata.mimeType);
+        c.header('Content-Length', metadata.fileSize.toString());
+        // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
+        const encodedFileName = encodeURIComponent(metadata.fileName);
+        c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
+        c.status(200);
+        return c.body(stream);
+      } catch (error) {
+        console.error('File download failed:', error);
+        if (error instanceof ZodError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: 'Invalid request data',
+            }),
+            400
+          );
+        }
+        if (error instanceof ValidationError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            400
+          );
+        }
+        if (error instanceof ForbiddenError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            403
+          );
+        }
+        if (error instanceof NotFoundError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            404
+          );
+        }
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
+      }
+    })
+    .delete('/delete/:fileId', zValidator('param', FileRequestSchema), async (c) => {
+      const fileStorageRepo = c.get('fileStorageRepo');
+      const fileMetadataRepo = c.get('fileMetadataRepo');
+      try {
+        const jwtPayload = c.get('jwtPayload');
+        const clientId = jwtPayload.sub;
+        if (!clientId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const { fileId } = c.req.valid('param');
         const deleteRequest = FileDeleteOperationRequestSchema.parse({
-          fileId: deleteRequestBody.fileId,
+          fileId,
           clientId,
         });
         await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
@@ -141,78 +203,5 @@ export function fileStorageRouter() {
         }
         throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
-    })
-    .get(
-      '/download/:fileId',
-      zValidator(
-        'param',
-        z.object({
-          fileId: FileMetadataIdSchema,
-        })
-      ),
-      async (c) => {
-        const fileStorageRepo = c.get('fileStorageRepo');
-        const fileMetadataRepo = c.get('fileMetadataRepo');
-        try {
-          const jwtPayload = c.get('jwtPayload');
-          const clientId = jwtPayload.sub;
-          if (!clientId) {
-            throw new ValidationError('JWT token is invalid: sub (userId) is missing');
-          }
-          const { fileId } = c.req.valid('param');
-          const { stream, metadata } = await downloadPrivateFile(
-            fileStorageRepo,
-            fileMetadataRepo,
-            fileId,
-            clientId
-          );
-          c.header('Content-Type', metadata.mimeType);
-          c.header('Content-Length', metadata.fileSize.toString());
-          // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
-          const encodedFileName = encodeURIComponent(metadata.fileName);
-          c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
-          c.status(200);
-          return c.body(stream);
-        } catch (error) {
-          console.error('File download failed:', error);
-          if (error instanceof ZodError) {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: false,
-                message: 'Invalid request data',
-              }),
-              400
-            );
-          }
-          if (error instanceof ValidationError) {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: false,
-                message: error.message,
-              }),
-              400
-            );
-          }
-          if (error instanceof ForbiddenError) {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: false,
-                message: error.message,
-              }),
-              403
-            );
-          }
-          if (error instanceof NotFoundError) {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: false,
-                message: error.message,
-              }),
-              404
-            );
-          }
-          throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
-        }
-      }
-    );
+    });
 }

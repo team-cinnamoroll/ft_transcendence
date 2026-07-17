@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 import { FileMetadataIdSchema } from '../../shared/file-metadata';
 
-export const FileDeleteRequestSchema = z.object({
+export const FileRequestSchema = z.object({
   fileId: FileMetadataIdSchema,
 });
 
-export type FileDeleteRequest = z.infer<typeof FileDeleteRequestSchema>;
+export type FileRequest = z.infer<typeof FileRequestSchema>;

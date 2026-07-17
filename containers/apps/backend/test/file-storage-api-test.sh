@@ -217,10 +217,9 @@ run_delete_test() {
     fi
 
     echo "Deleting file (first attempt)..."
-    RES_DELETE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+    RES_DELETE=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/file-storage/delete/$FILE_ID" \
         -H "Authorization: Bearer $USER_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "{\"fileId\":\"$FILE_ID\"}")
+        -H "Content-Type: application/json")
     DELETE_HTTP_STATUS=$(echo "$RES_DELETE" | tail -n 1)
     DELETE_BODY=$(echo "$RES_DELETE" | sed '$d')
     DELETE_SUCCESS=$(echo "$DELETE_BODY" | jq -r '.success')
@@ -232,10 +231,9 @@ run_delete_test() {
     echo "  -> 🎉 Delete Success (HTTP 200, success=true)."
 
     echo "Deleting file again (second attempt)..."
-    RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+    RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/file-storage/delete/$FILE_ID" \
         -H "Authorization: Bearer $USER_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "{\"fileId\":\"$FILE_ID\"}")
+        -H "Content-Type: application/json")
     DELETE_REPEAT_HTTP_STATUS=$(echo "$RES_DELETE_REPEAT" | tail -n 1)
     DELETE_REPEAT_BODY=$(echo "$RES_DELETE_REPEAT" | sed '$d')
     DELETE_REPEAT_SUCCESS=$(echo "$DELETE_REPEAT_BODY" | jq -r '.success')
