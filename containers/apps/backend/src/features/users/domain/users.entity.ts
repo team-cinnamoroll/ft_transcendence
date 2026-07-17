@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import crypto from 'crypto';
-import { UserResponseSchema } from '@tracen/contracts';
+import { UserSchema } from '@tracen/contracts';
 
 // UserEntityのスキーマと型
-export const UserEntitySchema = UserResponseSchema.extend({
+export const UserEntitySchema = UserSchema.extend({
   password_hash: z.string().min(1),
 }).strict();
 export type UserEntity = z.infer<typeof UserEntitySchema>;

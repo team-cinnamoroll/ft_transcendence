@@ -1,38 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
-import mime from 'mime';
 
 import {
   FileStoragesServiceRepositorySpec,
   UploadOptionsSchema,
 } from '../repositories/storage-service.repository';
 import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
-import { MimeType, type FileMetadataId, type FilePath, type Visibility } from '@tracen/contracts';
-import {
-  FileMetadataSchema,
-  BucketNameTypeSchema,
-  StorageKeySchema,
-  type StorageKey,
-  type BucketNameType,
-} from '../file-metadata.entity';
+import { FileUrlGeneratorSpec } from '../file-url-generator';
+import type { FileMetadataId, FilePath } from '@tracen/contracts';
+import { FileMetadataSchema } from '../file-metadata.entity';
 import { type FileSaveRequest } from './file-storage.file-save.request';
-
-function createBucket(visibility: Visibility): BucketNameType {
-  return BucketNameTypeSchema.parse(`${visibility}-bucket`);
-}
-
-function createStorageKey(fileMetadataId: FileMetadataId, mimeType: MimeType): StorageKey {
-  const fileExtension = mime.getExtension(mimeType) ?? 'bin';
-  return StorageKeySchema.parse(`${fileMetadataId}.${fileExtension}`);
-}
 
 export async function saveFile(
   storageRepo: FileStoragesServiceRepositorySpec,
   fileMetadataRepo: FileMetadataRepositorySpec,
+  fileUrlGenerator: FileUrlGeneratorSpec,
   saveRequest: FileSaveRequest
 ): Promise<{ fileId: FileMetadataId; filePath: FilePath }> {
   const fileMetadataId: FileMetadataId = uuidv4();
-  const storageKey = createStorageKey(fileMetadataId, saveRequest.mimeType);
-  const bucket = createBucket(saveRequest.visibility);
+  const storageKey = fileUrlGenerator.getStorageKey(fileMetadataId, saveRequest.mimeType);
+  const bucket = fileUrlGenerator.getBucketName(saveRequest.visibility);
 
   const uploadOptions = UploadOptionsSchema.parse({
     bucket,
@@ -47,12 +33,7 @@ export async function saveFile(
     // 上位のユースケースにエラーを再スローする
     throw error;
   }
-  const filePath: FilePath = await storageRepo.resolveUrl(
-    bucket,
-    storageKey,
-    fileMetadataId,
-    saveRequest.visibility
-  );
+  const filePath: FilePath = fileUrlGenerator.generateFileUrl(bucket, storageKey, fileMetadataId);
 
   const fileMetadata = FileMetadataSchema.parse({
     id: fileMetadataId,

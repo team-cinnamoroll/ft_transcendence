@@ -181,11 +181,11 @@ export function usersRouter() {
     .get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
       const { id } = c.req.valid('param');
       const userRepo = c.get('userRepo');
-      const userResponse = await getUserResponseById(userRepo, id);
-      if (!userResponse) {
+      const user = await getUserById(userRepo, id);
+      if (!user) {
         return c.json({ message: 'user not found' }, 404);
       }
-      return c.json(userResponse);
+      return c.json(user);
     });
 }
 ```
@@ -310,7 +310,7 @@ contracts/src/
 ├── index.ts                 # barrel export（domain + shared をまとめて export）
 ├── domain/
 │   ├── users/
-│   │   ├── user.ts          # UserResponseSchema / UserIdSchema など
+│   │   ├── user.ts          # UserSchema / UserIdSchema など
 │   │   └── user.request.ts  # UserIdParamSchema など
 │   └── auth/
 │       ├── auth.sign-up.request.ts  # AuthSignUpRequestSchema

@@ -150,9 +150,9 @@ setup() {
             exit 1
         fi
 
-        declare U${i}_TOKEN=$(echo "$RES" | jq -r '.accessToken')
-        declare U${i}_REFRESH=$(echo "$RES" | jq -r '.refreshToken')
-        declare U${i}_ID=$(echo "$RES" | jq -r '.user.id')
+        declare U${i}_TOKEN=$(echo "$RES" | jq -r '.data.accessToken')
+        declare U${i}_REFRESH=$(echo "$RES" | jq -r '.data.refreshToken')
+        declare U${i}_ID=$(echo "$RES" | jq -r '.data.user.id')
 
         eval current_id=\$U${i}_ID
         echo "  -> Success! User $i ID: $current_id"

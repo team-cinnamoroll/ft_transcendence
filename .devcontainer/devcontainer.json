@@ -11,8 +11,9 @@
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
   "postStartCommand": "bash .devcontainer/scripts/fix-docker-sock-perms.sh || true; bash .devcontainer/scripts/fix-node-modules-perms.sh",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "pnpmVersion": "10.33.0"
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "lts",
+      "pnpmVersion": "11.13.1"
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}

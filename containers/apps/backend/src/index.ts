@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import type { ApplyGlobalResponse } from 'hono/client';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { jwk } from 'hono/jwk';
 import { readFileSync } from 'node:fs';
@@ -14,10 +15,11 @@ import { injectConfig } from './shared/middleware/inject-config';
 import type { AppEnv } from './shared/types/hono';
 import { publicApiRouter } from './public.handler';
 import { protectedApiRouter } from './protected.handler';
+import { type GlobalErrorResponse, globalErrorHandler } from './global.error.handler';
 
 const config = parseEnv(process.env);
 
-if (config.RUN_MIGRATIONS) {
+if (config.RUN_MIGRATIONS && config.NODE_ENV === 'production') {
   await runMigrationsOnce(config.DATABASE_URL);
 }
 
@@ -68,7 +70,10 @@ const apiRoutes = apiApp
 
 app.route('/', apiRoutes);
 
-export type AppType = typeof apiRoutes;
+// グローバルエラーハンドラを設定
+app.onError(globalErrorHandler);
+
+export type AppType = ApplyGlobalResponse<typeof apiRoutes, GlobalErrorResponse>;
 export default app;
 
 const isDirectRun = process.argv[1]

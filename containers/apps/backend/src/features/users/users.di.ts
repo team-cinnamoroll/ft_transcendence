@@ -15,6 +15,9 @@ export function injectUsersDeps(): MiddlewareHandler<UsersHandlerEnv> {
       return c.json({ message: 'Config is required' }, 500);
     }
     const userRepo = getUserRepository(config.DATABASE_URL);
+    if (!userRepo) {
+      return c.json({ message: 'UserRepository is required' }, 500);
+    }
     c.set('userRepo', userRepo);
     await next();
   };

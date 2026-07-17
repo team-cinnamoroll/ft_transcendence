@@ -2,7 +2,11 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
-import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
+import {
+  AuthRefreshRequestSchema,
+  AuthRefreshResponseSchema,
+  SimpleApiResponseSchema,
+} from '@tracen/contracts';
 import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
 import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
 
@@ -26,8 +30,10 @@ export function refreshRouter() {
           );
           const validatedResponse = AuthRefreshResponseSchema.parse({
             success: true,
-            accessToken: userTokens.accessToken,
-            refreshToken: userTokens.refreshToken,
+            data: {
+              accessToken: userTokens.accessToken,
+              refreshToken: userTokens.refreshToken,
+            },
           });
           return c.json(validatedResponse, 200);
         }
@@ -58,7 +64,7 @@ export function refreshRouter() {
       try {
         await logoutByRefreshToken(authRefreshTokenRepository, request.refreshToken);
         return c.json(
-          AuthRefreshResponseSchema.parse({
+          SimpleApiResponseSchema.parse({
             success: true,
           }),
           200
@@ -66,7 +72,7 @@ export function refreshRouter() {
       } catch (err) {
         console.error('Logout error:', err);
         return c.json(
-          AuthRefreshResponseSchema.parse({
+          SimpleApiResponseSchema.parse({
             success: false,
             message: 'Internal server error',
           }),

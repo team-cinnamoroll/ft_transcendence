@@ -322,7 +322,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             }}
           >
             <Image
-              src={user.avatarUrl}
+              src={user.avatarUrl || '/images/default-avatar.png'}
               alt={user.name}
               width={44}
               height={44}
