@@ -18,13 +18,14 @@ export function signInRouter() {
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
       const config = c.get('config');
       try {
-        const response = await signIn(userRepo, authPassWorker, request);
-        if (response.success && response.user) {
+        const { response, role } = await signIn(userRepo, authPassWorker, request);
+        if (response.success && response.user && role) {
           const userTokens = await makeNewUserTokens(
             authAccessTokenWorker,
             authRefreshTokenRepository,
             config,
-            response.user.id
+            response.user.id,
+            role
           );
           const validatedResponse = AuthSignInResponseSchema.parse({
             ...response,
@@ -33,7 +34,7 @@ export function signInRouter() {
           });
           return c.json(validatedResponse, 200);
         }
-        // success: false の場合はドメインエラー（例：emailまたはパスワードが無効）→ 401 Unauthorized
+        // success: false の場合はドメインエラー（無効な認証情報 / 利用停止）→ 401 Unauthorized
         return c.json(response, 401);
       } catch (err) {
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error

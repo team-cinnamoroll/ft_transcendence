@@ -1,4 +1,4 @@
-import { type RefreshToken } from '@tracen/contracts';
+import { type RefreshToken, type UserRole } from '@tracen/contracts';
 import { AuthAccessTokenWorkerSpec } from './auth.worker';
 import { AuthRefreshTokenRepositorySpec } from './auth.repository';
 import { createJWTPayload, createRefreshToken } from './auth.entity';
@@ -8,11 +8,12 @@ export async function makeNewUserTokens(
   authAccessTokenWorker: AuthAccessTokenWorkerSpec,
   authRefreshTokenRepository: AuthRefreshTokenRepositorySpec,
   config: Config,
-  userId: string
+  userId: string,
+  role: UserRole
 ) {
   const accessTokenExpiresIn = config.ACCESS_TOKEN_EXPIRES_IN;
   const refreshTokenExpiresIn = config.REFRESH_TOKEN_EXPIRES_IN;
-  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn);
+  const payload = createJWTPayload(userId, role, accessTokenExpiresIn);
   const accessToken = await authAccessTokenWorker.createJWT(payload);
   const newRefreshToken = createRefreshToken(userId);
   await authRefreshTokenRepository.saveToken(
@@ -32,11 +33,12 @@ export async function refreshUserTokens(
   config: Config,
   oldRefreshToken: RefreshToken,
   userId: string,
-  familyId: string
+  familyId: string,
+  role: UserRole
 ) {
   const accessTokenExpiresIn = config.ACCESS_TOKEN_EXPIRES_IN;
   const refreshTokenExpiresIn = config.REFRESH_TOKEN_EXPIRES_IN;
-  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn);
+  const payload = createJWTPayload(userId, role, accessTokenExpiresIn);
   const accessToken = await authAccessTokenWorker.createJWT(payload);
   const newRefreshToken = createRefreshToken(userId, familyId);
   await authRefreshTokenRepository.revokeToken(oldRefreshToken); // トークンを使用済みにする（状態をrevokedに変更）

@@ -13,6 +13,8 @@ function mapUser(row: UserRow): UserEntity {
     email: row.email,
     name: row.name,
     password_hash: row.passwordHash,
+    role: row.role,
+    status: row.status,
     createdAt: row.createdAt.toISOString(),
   });
 }

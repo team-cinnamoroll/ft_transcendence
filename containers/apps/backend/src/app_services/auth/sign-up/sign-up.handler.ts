@@ -24,7 +24,9 @@ export function signUpRouter() {
             authAccessTokenWorker,
             authRefreshTokenRepository,
             config,
-            response.user.id
+            response.user.id,
+            // 新規登録ユーザーは常に一般ユーザー（admin 昇格は ADMIN_EMAILS 経由 / #262 以降）
+            'user'
           );
           const validatedResponse = AuthSignUpResponseSchema.parse({
             ...response,

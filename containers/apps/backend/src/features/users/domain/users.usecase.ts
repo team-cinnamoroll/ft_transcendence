@@ -51,6 +51,18 @@ export async function getUserEntityByEmail(
   return UserEntitySchema.parse(user);
 }
 
+// role / status を含むユーザー実体を ID で取得（トークン発行・認可判定で使用）
+export async function getUserEntityById(
+  repo: UserRepositorySpec,
+  id: UserId
+): Promise<UserEntity | null> {
+  const user = await repo.findById(id);
+  if (!user) {
+    return null;
+  }
+  return UserEntitySchema.parse(user);
+}
+
 export async function deleteUserById(repo: UserRepositorySpec, id: UserId): Promise<boolean> {
   return repo.deleteById(id);
 }
