@@ -197,7 +197,7 @@ run_upload_test() {
             exit 1
         fi
 
-        local current_file_id=$(echo "$RES_UPLOAD" | jq -r '.fileId')
+        local current_file_id=$(echo "$RES_UPLOAD" | jq -r '.data.fileId')
         declare U${i}_FILE_ID=$current_file_id
 
         echo "  -> 🎉 Upload Success! User $i Returned File ID: $current_file_id"

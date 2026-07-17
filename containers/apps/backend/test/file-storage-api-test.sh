@@ -188,8 +188,8 @@ run_upload_test() {
         exit 1
     fi
 
-    FILE_ID=$(echo "$RES_UPLOAD" | jq -r '.fileId')
-    FILE_PATH=$(echo "$RES_UPLOAD" | jq -r '.filePath')
+    FILE_ID=$(echo "$RES_UPLOAD" | jq -r '.data.fileId')
+    FILE_PATH=$(echo "$RES_UPLOAD" | jq -r '.data.filePath')
 
     echo "  -> 🎉 Upload Success!"
     echo "  -> Returned File ID  : $FILE_ID"

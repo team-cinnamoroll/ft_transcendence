@@ -5,17 +5,14 @@ import { zValidator } from '@hono/zod-validator';
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/usecases/file-storage.save-file.usecase';
 import { deleteFile } from './domain/usecases/file-storage.delete-file.usecase';
-import {
-  downloadPrivateFile,
-  FileDownloadError,
-} from './domain/usecases/file-storage.download-private-file.usecase';
+import { downloadPrivateFile } from './domain/usecases/file-storage.download-private-file.usecase';
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
   FileDeleteRequestSchema,
   FileDeleteResponseSchema,
   FileMetadataIdSchema,
-  SuccessResponseSchema,
+  SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
 import { FileDeleteOperationRequestSchema } from './domain/usecases/file-storage.file-delete.request';
@@ -29,21 +26,13 @@ export function fileStorageRouter() {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       const fileUrlGenerator = c.get('fileUrlGenerator');
-
-      const jwtPayload = c.get('jwtPayload');
-      const ownerId = jwtPayload.sub;
-      if (!ownerId) {
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
-      const headers = c.req.valid('header');
-
       try {
+        const jwtPayload = c.get('jwtPayload');
+        const ownerId = jwtPayload.sub;
+        if (!ownerId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const headers = c.req.valid('header');
         const fileSaveRequest = FileSaveRequestSchema.parse({
           ownerId,
           fileName: headers['x-file-name'],
@@ -58,17 +47,36 @@ export function fileStorageRouter() {
           fileUrlGenerator,
           fileSaveRequest
         );
-
         return c.json(
           FileUploadResponseSchema.parse({
             success: true,
-            fileId,
-            filePath,
+            data: {
+              fileId,
+              filePath,
+            },
           }),
           200
         );
       } catch (error) {
         console.error('File upload failed:', error);
+        if (error instanceof ZodError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: 'Invalid request data',
+            }),
+            400
+          );
+        }
+        if (error instanceof ValidationError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            400
+          );
+        }
         throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
@@ -145,22 +153,13 @@ export function fileStorageRouter() {
       async (c) => {
         const fileStorageRepo = c.get('fileStorageRepo');
         const fileMetadataRepo = c.get('fileMetadataRepo');
-
-        const jwtPayload = c.get('jwtPayload');
-        const clientId = jwtPayload.sub;
-        if (!clientId) {
-          return c.json(
-            SuccessResponseSchema.parse({
-              success: false,
-              message: 'JWT token is invalid: sub (userId) is missing',
-            }),
-            400
-          );
-        }
-
-        const { fileId } = c.req.valid('param');
-
         try {
+          const jwtPayload = c.get('jwtPayload');
+          const clientId = jwtPayload.sub;
+          if (!clientId) {
+            throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+          }
+          const { fileId } = c.req.valid('param');
           const { stream, metadata } = await downloadPrivateFile(
             fileStorageRepo,
             fileMetadataRepo,
@@ -172,16 +171,44 @@ export function fileStorageRouter() {
           // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
           const encodedFileName = encodeURIComponent(metadata.fileName);
           c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
+          c.status(200);
           return c.body(stream);
         } catch (error) {
           console.error('File download failed:', error);
-          if (error instanceof FileDownloadError) {
+          if (error instanceof ZodError) {
             return c.json(
-              SuccessResponseSchema.parse({
+              SimpleApiResponseSchema.parse({
+                success: false,
+                message: 'Invalid request data',
+              }),
+              400
+            );
+          }
+          if (error instanceof ValidationError) {
+            return c.json(
+              SimpleApiResponseSchema.parse({
                 success: false,
                 message: error.message,
               }),
-              error.code
+              400
+            );
+          }
+          if (error instanceof ForbiddenError) {
+            return c.json(
+              SimpleApiResponseSchema.parse({
+                success: false,
+                message: error.message,
+              }),
+              403
+            );
+          }
+          if (error instanceof NotFoundError) {
+            return c.json(
+              SimpleApiResponseSchema.parse({
+                success: false,
+                message: error.message,
+              }),
+              404
             );
           }
           throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
