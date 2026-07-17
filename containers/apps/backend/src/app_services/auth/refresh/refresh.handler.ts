@@ -48,13 +48,7 @@ export function refreshRouter() {
       } catch (err) {
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
         console.error('Refresh error:', err);
-        return c.json(
-          AuthRefreshResponseSchema.parse({
-            success: false,
-            message: 'Internal server error',
-          }),
-          500
-        );
+        throw err; // グローバルエラーハンドラーに任せる
       }
     })
     .delete('/', zValidator('json', AuthRefreshRequestSchema), async (c) => {
@@ -71,13 +65,7 @@ export function refreshRouter() {
         );
       } catch (err) {
         console.error('Logout error:', err);
-        return c.json(
-          SimpleApiResponseSchema.parse({
-            success: false,
-            message: 'Internal server error',
-          }),
-          500
-        );
+        throw err; // グローバルエラーハンドラーに任せる
       }
     });
 }

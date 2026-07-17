@@ -11,6 +11,7 @@ import { verifyUser } from './sign-in.verify-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { getOrCreateUserProfile } from '../../../features/user-profile/domain/user-profile.get-or-create.usecase';
 import { ValidationError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { ZodError } from 'zod';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -51,6 +52,14 @@ export function signInRouter() {
           200
         );
       } catch (err) {
+        console.error('Error during sign-in:', err);
+        if (err instanceof ZodError) {
+          // Zodによるバリデーションエラー → 400 Bad Request
+          return c.json(
+            AuthSignInResponseSchema.parse({ success: false, message: 'Invalid request data' }),
+            400
+          );
+        }
         if (err instanceof ValidationError) {
           // バリデーションエラー → 400 Bad Request
           return c.json(
