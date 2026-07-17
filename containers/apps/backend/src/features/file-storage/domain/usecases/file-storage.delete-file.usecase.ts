@@ -1,39 +1,33 @@
 import { FileStoragesServiceRepositorySpec } from '../repositories/storage-service.repository';
 import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
-import { type FileDeleteResponse } from '@tracen/contracts';
 import { type FileDeleteRequest } from './file-storage.file-delete.request';
-import type { ContentfulStatusCode } from 'hono/utils/http-status';
-
-export class FileDeleteError extends Error {
-  public readonly code: ContentfulStatusCode;
-  constructor(message: string, code: ContentfulStatusCode) {
-    super(message);
-    this.name = 'FileDeleteError';
-    this.code = code;
-  }
-}
+import {
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+} from '../../../../shared/errors/global.error';
 
 export async function deleteFile(
   storageRepo: FileStoragesServiceRepositorySpec,
   fileMetadataRepo: FileMetadataRepositorySpec,
   deleteRequest: FileDeleteRequest
-): Promise<FileDeleteResponse> {
+): Promise<void> {
   const { fileId, clientId } = deleteRequest;
 
   if (!fileId) {
-    throw new FileDeleteError('File ID is required for deletion.', 400);
+    throw new ValidationError('File ID is required for deletion.');
   }
 
   // Fetch the file metadata to get the file path
   const fileMetadata = await fileMetadataRepo.findById(fileId);
   if (!fileMetadata) {
-    throw new FileDeleteError(`File with ID ${fileId} not found.`, 404);
+    throw new NotFoundError(`File with ID ${fileId} not found.`);
   }
 
   const { bucket, storageKey, ownerId } = fileMetadata;
 
   if (clientId !== ownerId) {
-    throw new FileDeleteError('You do not have permission to delete this file.', 403);
+    throw new ForbiddenError('You do not have permission to delete this file.');
   }
 
   try {
@@ -41,7 +35,7 @@ export async function deleteFile(
     await storageRepo.delete(bucket, storageKey);
   } catch (error) {
     console.error('Failed to delete file from storage:', error);
-    throw new FileDeleteError('Failed to delete file from storage.', 500);
+    throw error;
   }
 
   try {
@@ -49,8 +43,6 @@ export async function deleteFile(
     await fileMetadataRepo.deleteById(fileId);
   } catch (error) {
     console.error('Failed to delete file metadata:', error);
-    throw new FileDeleteError('Failed to delete file metadata.', 500);
+    throw error;
   }
-
-  return { success: true };
 }

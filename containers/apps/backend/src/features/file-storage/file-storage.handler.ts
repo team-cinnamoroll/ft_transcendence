@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/usecases/file-storage.save-file.usecase';
-import { deleteFile, FileDeleteError } from './domain/usecases/file-storage.delete-file.usecase';
+import { deleteFile } from './domain/usecases/file-storage.delete-file.usecase';
 import {
   downloadPrivateFile,
   FileDownloadError,
@@ -19,6 +19,7 @@ import {
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
 import { FileDeleteRequestSchema } from './domain/usecases/file-storage.file-delete.request';
+import { ValidationError, NotFoundError, ForbiddenError } from '../../shared/errors/global.error';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -27,15 +28,6 @@ export function fileStorageRouter() {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       const fileUrlGenerator = c.get('fileUrlGenerator');
-      if (!fileStorageRepo || !fileMetadataRepo || !fileUrlGenerator) {
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'File storage dependencies are not initialized',
-          }),
-          500
-        );
-      }
 
       const jwtPayload = c.get('jwtPayload');
       const ownerId = jwtPayload.sub;
@@ -76,27 +68,12 @@ export function fileStorageRouter() {
         );
       } catch (error) {
         console.error('File upload failed:', error);
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'File upload failed',
-          }),
-          500
-        );
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
     .post('/delete', zValidator('json', FileDeleteApiRequestSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
-      if (!fileStorageRepo || !fileMetadataRepo) {
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'File storage dependencies are not initialized',
-          }),
-          500
-        );
-      }
 
       const jwtPayload = c.get('jwtPayload');
       const clientId = jwtPayload.sub;
@@ -117,26 +94,43 @@ export function fileStorageRouter() {
           fileId: deleteRequestBody.fileId,
           clientId,
         });
-        const result = await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
-        return c.json(result, 200);
+        await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
+        return c.json(
+          FileDeleteResponseSchema.parse({
+            success: true,
+          }),
+          200
+        );
       } catch (error) {
         console.error('File deletion failed:', error);
-        if (error instanceof FileDeleteError) {
+        if (error instanceof ValidationError) {
           return c.json(
             FileDeleteResponseSchema.parse({
               success: false,
               message: error.message,
             }),
-            error.code
+            400
           );
         }
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'File deletion failed',
-          }),
-          500
-        );
+        if (error instanceof ForbiddenError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            403
+          );
+        }
+        if (error instanceof NotFoundError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            404
+          );
+        }
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
     .get(
@@ -150,15 +144,6 @@ export function fileStorageRouter() {
       async (c) => {
         const fileStorageRepo = c.get('fileStorageRepo');
         const fileMetadataRepo = c.get('fileMetadataRepo');
-        if (!fileStorageRepo || !fileMetadataRepo) {
-          return c.json(
-            SuccessResponseSchema.parse({
-              success: false,
-              message: 'File storage dependencies are not initialized',
-            }),
-            500
-          );
-        }
 
         const jwtPayload = c.get('jwtPayload');
         const clientId = jwtPayload.sub;
@@ -198,13 +183,7 @@ export function fileStorageRouter() {
               error.code
             );
           }
-          return c.json(
-            SuccessResponseSchema.parse({
-              success: false,
-              message: 'File download failed',
-            }),
-            500
-          );
+          throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
         }
       }
     );

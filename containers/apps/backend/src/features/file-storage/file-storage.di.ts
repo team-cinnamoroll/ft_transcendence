@@ -27,6 +27,9 @@ export function injectFileStorageDeps(): MiddlewareHandler<FileStorageHandlerEnv
     const fileStorageRepo = getFileStorageServiceRepository(config.FILE_STORAGE_BASE_DIR);
     const fileMetadataRepo = getFileMetadataRepository(config.DATABASE_URL);
     const fileUrlGenerator = getFileUrlGenerator();
+    if (!fileStorageRepo || !fileMetadataRepo || !fileUrlGenerator) {
+      return c.json({ message: 'File storage dependencies are not initialized' }, 500);
+    }
     c.set('fileStorageRepo', fileStorageRepo);
     c.set('fileMetadataRepo', fileMetadataRepo);
     c.set('fileUrlGenerator', fileUrlGenerator);
