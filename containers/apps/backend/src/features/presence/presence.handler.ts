@@ -84,7 +84,9 @@ export function presenceRouter() {
       }
       try {
         const onlineStatuses = await getOnlineStatuses(presenceRepo, userIds);
-        return c.json(PresenceStatusResponseSchema.parse({ success: true, onlineStatuses }));
+        return c.json(
+          PresenceStatusResponseSchema.parse({ success: true, data: { onlineStatuses } })
+        );
       } catch (error) {
         console.error('Error getting online statuses:', error);
         return c.json(

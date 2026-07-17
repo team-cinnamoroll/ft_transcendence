@@ -1,4 +1,4 @@
-import type { UserId } from '@tracen/contracts';
+import type { UserId, IsOnline } from '@tracen/contracts';
 import { PresenceRepositorySpec } from '../../domain/presence.repository';
 import { RedisClient } from '../../../../shared/infra/redis/client';
 
@@ -25,13 +25,13 @@ class RedisPresenceRepositoryImpl implements PresenceRepositorySpec {
   }
 
   // ページネーションポーリング用：複数IDの状態をMGETで一括取得
-  async getOnlineStatuses(userIds: UserId[]): Promise<Record<UserId, boolean>> {
+  async getOnlineStatuses(userIds: UserId[]): Promise<Record<UserId, IsOnline>> {
     if (userIds.length === 0) {
       return {};
     }
     const keys = userIds.map((userId) => `${onlineKeyPrefix}${userId}`);
     const values = await this.redisClient.mget(...keys);
-    const result: Record<UserId, boolean> = {};
+    const result: Record<UserId, IsOnline> = {};
     userIds.forEach((userId, index) => {
       result[userId] = values[index] !== null; // キーが存在すればオンラインとみなす（値は常に'1'）
     });
