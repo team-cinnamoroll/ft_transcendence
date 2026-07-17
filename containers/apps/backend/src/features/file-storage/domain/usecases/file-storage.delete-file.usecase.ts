@@ -1,6 +1,6 @@
 import { FileStoragesServiceRepositorySpec } from '../repositories/storage-service.repository';
 import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
-import { type FileDeleteRequest } from './file-storage.file-delete.request';
+import { type FileDeleteOperationRequest } from './file-storage.file-delete.request';
 import {
   ValidationError,
   NotFoundError,
@@ -10,7 +10,7 @@ import {
 export async function deleteFile(
   storageRepo: FileStoragesServiceRepositorySpec,
   fileMetadataRepo: FileMetadataRepositorySpec,
-  deleteRequest: FileDeleteRequest
+  deleteRequest: FileDeleteOperationRequest
 ): Promise<void> {
   const { fileId, clientId } = deleteRequest;
 

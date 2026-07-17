@@ -1,12 +1,9 @@
 import { z } from 'zod';
 
-import {
-  FileDeleteRequestSchema as FileDeleteRequestApiSchema,
-  UserIdSchema,
-} from '@tracen/contracts';
+import { FileDeleteRequestSchema, UserIdSchema } from '@tracen/contracts';
 
-export const FileDeleteRequestSchema = FileDeleteRequestApiSchema.extend({
+export const FileDeleteOperationRequestSchema = FileDeleteRequestSchema.extend({
   clientId: UserIdSchema,
 });
 
-export type FileDeleteRequest = z.infer<typeof FileDeleteRequestSchema>;
+export type FileDeleteOperationRequest = z.infer<typeof FileDeleteOperationRequestSchema>;

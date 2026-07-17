@@ -12,14 +12,15 @@ import {
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
-  FileDeleteRequestSchema as FileDeleteApiRequestSchema,
+  FileDeleteRequestSchema,
   FileDeleteResponseSchema,
   FileMetadataIdSchema,
   SuccessResponseSchema,
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
-import { FileDeleteRequestSchema } from './domain/usecases/file-storage.file-delete.request';
+import { FileDeleteOperationRequestSchema } from './domain/usecases/file-storage.file-delete.request';
 import { ValidationError, NotFoundError, ForbiddenError } from '../../shared/errors/global.error';
+import { ZodError } from 'zod';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -71,26 +72,17 @@ export function fileStorageRouter() {
         throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
-    .post('/delete', zValidator('json', FileDeleteApiRequestSchema), async (c) => {
+    .post('/delete', zValidator('json', FileDeleteRequestSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
-
-      const jwtPayload = c.get('jwtPayload');
-      const clientId = jwtPayload.sub;
-      if (!clientId) {
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
-
-      const deleteRequestBody = c.req.valid('json');
-
       try {
-        const deleteRequest = FileDeleteRequestSchema.parse({
+        const jwtPayload = c.get('jwtPayload');
+        const clientId = jwtPayload.sub;
+        if (!clientId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const deleteRequestBody = c.req.valid('json');
+        const deleteRequest = FileDeleteOperationRequestSchema.parse({
           fileId: deleteRequestBody.fileId,
           clientId,
         });
@@ -103,6 +95,15 @@ export function fileStorageRouter() {
         );
       } catch (error) {
         console.error('File deletion failed:', error);
+        if (error instanceof ZodError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: 'Invalid request data',
+            }),
+            400
+          );
+        }
         if (error instanceof ValidationError) {
           return c.json(
             FileDeleteResponseSchema.parse({
