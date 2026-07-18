@@ -321,6 +321,10 @@
     "logout": "Log out",
     "login": "Log in"
   },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
   },
