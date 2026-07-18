@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
@@ -28,6 +29,7 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 const REFERENCE_MONTH = '2026-04';
 
 const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props) => {
+  const router = useRouter();
   const [faces, setFaces] = useState<Face[]>(initialFaces);
   const [seeds, setSeeds] = useState(initialSeeds);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -446,6 +448,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       face={face}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
+                      onClick={() => router.push(`/seeds/${act.id}`)}
                     />
                   );
                 })}

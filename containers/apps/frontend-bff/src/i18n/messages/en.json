@@ -298,7 +298,7 @@
     "errorAvatar": "Please enter a valid URL"
   },
   "faceDetailPage": {
-    "backAriaLabel": "Back to faces list"
+    "backAriaLabel": "Go back"
   },
   "relativeTime": {
     "justNow": "Just now",
