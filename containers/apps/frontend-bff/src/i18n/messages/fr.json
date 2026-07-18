@@ -321,6 +321,11 @@
     "logout": "Se déconnecter",
     "login": "Se connecter"
   },
+  "legal": {
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "copyright": "© {year} MultiFace"
+  },
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"
   },

@@ -321,6 +321,11 @@
     "logout": "Log out",
     "login": "Log in"
   },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© {year} MultiFace"
+  },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
   },
