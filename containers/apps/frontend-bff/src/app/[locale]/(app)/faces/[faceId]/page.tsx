@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import FaceDetailClient from '@/components/face/FaceDetailClient';
+import FaceBackButton from '@/components/face/FaceBackButton';
 import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
-import { getTranslations } from 'next-intl/server';
 import type { Face } from '@/types/face';
 
 type Props = {
@@ -22,12 +21,11 @@ const FaceDetailPage = async ({ params }: Props) => {
 
   const face = maybeFace as Face;
 
-  const [currentUser, seeds, users, subscribedFaceIds, t] = await Promise.all([
+  const [currentUser, seeds, users, subscribedFaceIds] = await Promise.all([
     getCurrentUser(),
     listSeedsByFaceId(faceId),
     listAllUsers(),
     getSubscribedFaceIds(),
-    getTranslations('faceDetailPage'),
   ]);
 
   const isOwner = face.userId === currentUser.id;
@@ -48,35 +46,7 @@ const FaceDetailPage = async ({ params }: Props) => {
           padding: '12px 16px',
         }}
       >
-        <Link
-          href="/faces"
-          aria-label={t('backAriaLabel')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 30,
-            height: 30,
-            borderRadius: '50%',
-            color: 'var(--mf-text-muted)',
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
+        <FaceBackButton />
         <h2
           style={{
             fontSize: 15,

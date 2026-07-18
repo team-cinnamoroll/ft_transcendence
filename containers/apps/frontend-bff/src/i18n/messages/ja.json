@@ -298,7 +298,7 @@
     "errorAvatar": "有効なURLを入力してください"
   },
   "faceDetailPage": {
-    "backAriaLabel": "フェイス一覧に戻る"
+    "backAriaLabel": "前のページに戻る"
   },
   "relativeTime": {
     "justNow": "たった今",
