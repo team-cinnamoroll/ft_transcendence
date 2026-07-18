@@ -4,7 +4,7 @@ import { createBackendClient } from '@/lib/backend-client';
 import SignUpForm from '@/components/auth/SignUpForm';
 import SignInForm from '@/components/auth/SignInForm';
 import AccountMenuPreview from './AccountMenuPreview';
-import type { User } from '@/types/user';
+import type { UserMeResponse } from '@tracen/contracts';
 
 const sectionStyle: React.CSSProperties = {
   display: 'flex',
@@ -31,14 +31,12 @@ const preStyle: React.CSSProperties = {
 
 // getCurrentUser()（モック）とは別経路で、本物のbackendから直接ユーザー情報を取得する。
 // このページが削除されるまでの一時的な確認用ロジックのため、repository化はしていない。
-async function fetchBackendUser(userId: string, accessToken: string): Promise<User | null> {
-  const res = await createBackendClient(accessToken).api.v1.users[':id'].$get({
-    param: { id: userId },
-  });
+async function fetchBackendUser(accessToken: string): Promise<UserMeResponse | null> {
+  const res = await createBackendClient(accessToken).api.v1.users.me.$get();
   if (!res.ok) {
     return null;
   }
-  return (await res.json()) as User;
+  return (await res.json()) as UserMeResponse;
 }
 
 export default async function AuthCheckPage() {
@@ -48,7 +46,7 @@ export default async function AuthCheckPage() {
   }
 
   const session = await getAuthSession();
-  const backendUser = session ? await fetchBackendUser(session.userId, session.accessToken) : null;
+  const backendUser = session ? await fetchBackendUser(session.accessToken) : null;
 
   return (
     <div
@@ -93,7 +91,9 @@ export default async function AuthCheckPage() {
             取得に失敗しました（backendに存在しないユーザー、通信エラー等）。
           </p>
         )}
-        {backendUser && <pre style={preStyle}>{JSON.stringify(backendUser, null, 2)}</pre>}
+        {backendUser && backendUser.success === true && (
+          <pre style={preStyle}>{JSON.stringify(backendUser.data.user, null, 2)}</pre>
+        )}
       </section>
 
       <section style={sectionStyle}>
