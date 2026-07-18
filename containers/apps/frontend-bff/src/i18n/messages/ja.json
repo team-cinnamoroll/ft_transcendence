@@ -321,6 +321,11 @@
     "logout": "ログアウト",
     "login": "ログイン"
   },
+  "legal": {
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "copyright": "© {year} MultiFace"
+  },
   "appHeader": {
     "accountMenuAriaLabel": "アカウントメニュー"
   },
