@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-const BackButton = () => {
+const SeedBackButton = () => {
   const router = useRouter();
   const t = useTranslations('seedDetail');
 
@@ -41,4 +41,4 @@ const BackButton = () => {
   );
 };
 
-export default BackButton;
+export default SeedBackButton;
