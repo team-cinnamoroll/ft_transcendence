@@ -33,7 +33,8 @@ export type JWTPayload = z.infer<typeof jwtPayloadSchema>;
 export function createJWTPayload(
   userId: string,
   role: 'admin' | 'user',
-  expiresIn: number
+  expiresIn: number,
+  issuer: string
 ): JWTPayload {
   const now = Math.floor(Date.now() / 1000); // 現在のUnixタイムスタンプ
   return jwtPayloadSchema.parse({
@@ -41,7 +42,7 @@ export function createJWTPayload(
     role,
     iat: now, // 発行時刻を現在のUnixタイムスタンプで設定
     exp: now + expiresIn, // 有効期限を秒単位で設定
-    iss: 'https://ft_transcendence.42.fr/', // 発行元を設定
+    iss: issuer, // 発行元を設定
   });
 }
 
