@@ -298,7 +298,7 @@
     "errorAvatar": "Veuillez saisir une URL valide"
   },
   "faceDetailPage": {
-    "backAriaLabel": "Retour à la liste des facettes"
+    "backAriaLabel": "Retour"
   },
   "relativeTime": {
     "justNow": "À l'instant",
@@ -320,6 +320,11 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Se déconnecter",
     "login": "Se connecter"
+  },
+  "legal": {
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "copyright": "© {year} MultiFace"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"

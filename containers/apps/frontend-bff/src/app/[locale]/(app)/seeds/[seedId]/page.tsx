@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import SeedDetailPage from '@/components/seed/SeedDetailPage';
 import { getSeedDetailData } from '@/server/usecases/seeds';
-import BackButton from '@/components/seed/BackButton';
+import SeedBackButton from '@/components/seed/SeedBackButton';
 
 type Props = {
   params: Promise<{ seedId: string }>;
@@ -27,7 +27,7 @@ const SeedPage = async ({ params }: Props) => {
           background: 'var(--mf-bg-light)',
         }}
       >
-        <BackButton />
+        <SeedBackButton />
         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>
           {t('title')}
         </span>

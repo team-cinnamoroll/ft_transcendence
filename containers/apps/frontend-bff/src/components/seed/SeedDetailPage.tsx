@@ -183,21 +183,21 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
+            gridTemplateColumns: `repeat(${Math.min(seed.imageUrls.length, 2)}, 1fr)`,
             gap: 3,
             borderRadius: 14,
             overflow: 'hidden',
-            height: 180,
             border: '0.5px solid var(--mf-line-soft)',
             marginBottom: 14,
+            maxWidth: '50%',
           }}
         >
-          {seed.imageUrls.slice(0, 3).map((url, i) => (
+          {seed.imageUrls.slice(0, 4).map((url, i) => (
             <div
               key={i}
               style={{
                 position: 'relative',
-                gridRow: i === 0 ? '1 / 3' : undefined,
+                aspectRatio: seed.imageUrls!.length === 1 ? '16/10' : '1/1',
               }}
             >
               <Image

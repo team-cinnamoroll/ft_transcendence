@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
@@ -314,6 +315,7 @@ const SubscriptionSeed = ({
   faces,
   currentUserId,
 }: Props) => {
+  const router = useRouter();
   const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
   const [showFaceFilter, setShowFaceFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -694,6 +696,7 @@ const SubscriptionSeed = ({
                           face={face}
                           currentUserId={currentUserId}
                           onMoreOptions={openSeedActionMenu}
+                          onClick={() => router.push(`/seeds/${seed.id}`)}
                         />
                       );
                     })}
@@ -766,7 +769,14 @@ const SubscriptionSeed = ({
                     {pagedOtherSeeds.map((seed) => {
                       const face = allFaceMap.get(seed.faceId);
                       if (!face) return null;
-                      return <SeedRow key={seed.id} seed={seed} face={face} />;
+                      return (
+                        <SeedRow
+                          key={seed.id}
+                          seed={seed}
+                          face={face}
+                          onClick={() => router.push(`/seeds/${seed.id}`)}
+                        />
+                      );
                     })}
                   </div>
                   <Pagination
@@ -982,6 +992,7 @@ const SubscriptionSeed = ({
                       face={face}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
+                      onClick={() => router.push(`/seeds/${act.id}`)}
                     />
                   );
                 })}

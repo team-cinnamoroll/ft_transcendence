@@ -298,7 +298,7 @@
     "errorAvatar": "Please enter a valid URL"
   },
   "faceDetailPage": {
-    "backAriaLabel": "Back to faces list"
+    "backAriaLabel": "Go back"
   },
   "relativeTime": {
     "justNow": "Just now",
@@ -320,6 +320,11 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Log out",
     "login": "Log in"
+  },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© {year} MultiFace"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
