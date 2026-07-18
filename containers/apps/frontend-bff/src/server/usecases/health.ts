@@ -4,10 +4,10 @@ import crypto from 'node:crypto';
 
 import {
   AuthSignUpRequestSchema,
-  type User,
   type AuthSignUpResponse,
   type AuthSignInResponse,
   type AuthRefreshResponse,
+  type UserMeResponse,
 } from '@tracen/contracts';
 
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
@@ -420,14 +420,23 @@ export async function runApiHealthCheck(
     log('STEP 3/5: backend GET /users/:id (exists check)');
 
     // API: ユーザー情報の取得（存在確認）
-    const getExistsRes = await repo.getUserById(createdUserId, createdJwt);
+    const getExistsRes = await repo.getMeUser(createdJwt);
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
-    const user = (await getExistsRes.json()) as User;
-    if (user.id !== createdUserId) {
+    const userMe = (await getExistsRes.json()) as UserMeResponse;
+    if (!userMe.success) {
+      log(`FAIL (get-user-exists): response JSON success=false, message=${userMe.message}`);
+      return {
+        ok: false,
+        logs,
+        failedStep: 'get-user-exists',
+        error: { message: `get user failed: ${userMe.message}` },
+      };
+    }
+    if (userMe.data.user.id !== createdUserId) {
       log(
-        `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${user.id})`
+        `FAIL (get-user-exists): returned id mismatch (expected=${createdUserId}, got=${userMe.data.user.id})`
       );
       return {
         ok: false,
@@ -436,8 +445,10 @@ export async function runApiHealthCheck(
         error: { message: 'returned user id mismatch' },
       };
     }
-    if (user.email !== email) {
-      log(`FAIL (get-user-exists): returned email mismatch (expected=${email}, got=${user.email})`);
+    if (userMe.data.user.email !== email) {
+      log(
+        `FAIL (get-user-exists): returned email mismatch (expected=${email}, got=${userMe.data.user.email})`
+      );
       return {
         ok: false,
         logs,
@@ -445,7 +456,7 @@ export async function runApiHealthCheck(
         error: { message: 'returned user email mismatch' },
       };
     }
-    log(`OK (get-user-exists): id=${user.id} email=${user.email}`);
+    log(`OK (get-user-exists): id=${userMe.data.user.id} email=${userMe.data.user.email}`);
 
     log('STEP 3.5/5: backend POST /auth/sign-in (sign in with created user)');
     // API: （既存ユーザーで）サインインする
@@ -531,7 +542,7 @@ export async function runApiHealthCheck(
     log('STEP 5/5: backend GET /users/:id (deleted check)');
 
     // API: ユーザー情報の取得（削除確認）
-    const getDeletedRes = await repo.getUserById(createdUserId, createdJwt);
+    const getDeletedRes = await repo.getMeUser(createdJwt);
     if (getDeletedRes.status !== 404) {
       return await failWithResponse(
         'get-user-deleted',

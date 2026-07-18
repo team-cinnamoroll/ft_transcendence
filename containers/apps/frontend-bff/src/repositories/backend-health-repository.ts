@@ -11,7 +11,7 @@ export type BackendHealthRepositorySpec = {
   getJWKS: () => Promise<Response>;
   signUpUser: (input: AuthSignUpRequest) => Promise<Response>;
   signInUser: (input: AuthSignInRequest) => Promise<Response>;
-  getUserById: (id: string, token: string) => Promise<Response>;
+  getMeUser: (token: string) => Promise<Response>;
   deleteUserById: (id: string, token: string) => Promise<Response>;
   refreshToken: (refreshToken: string) => Promise<Response>;
   logout: (refreshToken: string) => Promise<Response>;
@@ -39,8 +39,8 @@ export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec
       return await createBackendClient().api.v1.auth['sign-in'].$post({ json: input });
     },
 
-    getUserById: async (id, token) => {
-      return await createBackendClient(token).api.v1.users[':id'].$get({ param: { id } });
+    getMeUser: async (token) => {
+      return await createBackendClient(token).api.v1.users.me.$get();
     },
 
     deleteUserById: async (id, token) => {
