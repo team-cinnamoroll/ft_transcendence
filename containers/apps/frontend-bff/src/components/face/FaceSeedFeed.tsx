@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { type Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
@@ -25,6 +26,7 @@ const FaceSeedFeed = ({
   onSeedMoreOptions,
 }: FaceSeedFeedProps) => {
   const t = useTranslations('faceSeedFeed');
+  const router = useRouter();
 
   const sorted = useMemo(() => {
     if (sortOrder === 'oldest') return [...seeds].reverse();
@@ -57,6 +59,7 @@ const FaceSeedFeed = ({
           noBorder={index === sorted.length - 1}
           currentUserId={currentUserId}
           onMoreOptions={onSeedMoreOptions}
+          onClick={() => router.push(`/seeds/${seed.id}`)}
         />
       ))}
     </div>
