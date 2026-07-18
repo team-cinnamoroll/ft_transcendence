@@ -11,9 +11,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <footer
         style={{
           display: 'flex',
-          flexDirection: 'column', // ← 横並び→縦積みに
-          alignItems: 'center', // ← 各行を中央寄せ
-          gap: 8, // ← 行間（flexWrap の gap は不要に）
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 8,
           padding: '20px 16px',
           borderTop: '0.5px solid var(--mf-line)',
           fontSize: 12,
