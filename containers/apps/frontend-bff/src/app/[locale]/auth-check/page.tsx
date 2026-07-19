@@ -4,7 +4,7 @@ import { createBackendClient } from '@/lib/backend-client';
 import SignUpForm from '@/components/auth/SignUpForm';
 import SignInForm from '@/components/auth/SignInForm';
 import AccountMenuPreview from './AccountMenuPreview';
-import type { UserMeResponse } from '@tracen/contracts';
+import type { UserMe } from '@/types/user';
 
 const sectionStyle: React.CSSProperties = {
   display: 'flex',
@@ -31,12 +31,12 @@ const preStyle: React.CSSProperties = {
 
 // getCurrentUser()（モック）とは別経路で、本物のbackendから直接ユーザー情報を取得する。
 // このページが削除されるまでの一時的な確認用ロジックのため、repository化はしていない。
-async function fetchBackendUser(accessToken: string): Promise<UserMeResponse | null> {
+async function fetchBackendUser(accessToken: string): Promise<UserMe | null> {
   const res = await createBackendClient(accessToken).api.v1.users.me.$get();
   if (!res.ok) {
     return null;
   }
-  return (await res.json()) as UserMeResponse;
+  return (await res.json()) as UserMe;
 }
 
 export default async function AuthCheckPage() {

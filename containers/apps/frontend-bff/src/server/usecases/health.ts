@@ -2,14 +2,10 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 
-import {
-  AuthSignUpRequestSchema,
-  type AuthSignUpResponse,
-  type AuthSignInResponse,
-  type AuthRefreshResponse,
-  type UserMeResponse,
-} from '@tracen/contracts';
+import { AuthSignUpRequestSchema } from '@tracen/contracts';
 
+import type { AuthSignUp, AuthSignIn, AuthRefresh } from '@/types/auth';
+import type { UserMe } from '@/types/user';
 import { getBackendHealthRepository } from '@/repositories/backend-health-repository';
 import { verifyToken } from '@/lib/backend-client';
 
@@ -168,7 +164,7 @@ export async function runApiHealthCheck(
       return await failWithResponse('create-user', createRes, 'user creation returned non-2xx');
     }
 
-    const created = (await createRes.json()) as AuthSignUpResponse;
+    const created = (await createRes.json()) as AuthSignUp;
     if (!created.success) {
       log(`FAIL (create-user): response JSON success=false, message=${created.message}`);
       return {
@@ -324,7 +320,7 @@ export async function runApiHealthCheck(
         'refresh token endpoint returned non-2xx'
       );
     }
-    const refreshJson = (await refreshRes.json()) as AuthRefreshResponse;
+    const refreshJson = (await refreshRes.json()) as AuthRefresh;
     if (!refreshJson.success) {
       log(`FAIL (refresh-token): response JSON success=false, message=${refreshJson.message}`);
       return {
@@ -424,7 +420,7 @@ export async function runApiHealthCheck(
     if (!getExistsRes.ok) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
-    const userMe = (await getExistsRes.json()) as UserMeResponse;
+    const userMe = (await getExistsRes.json()) as UserMe;
     if (!userMe.success) {
       log(`FAIL (get-user-exists): response JSON success=false, message=${userMe.message}`);
       return {
@@ -468,7 +464,7 @@ export async function runApiHealthCheck(
         'sign in with created user returned non-2xx'
       );
     }
-    const signInJson = (await signInRes.json()) as AuthSignInResponse;
+    const signInJson = (await signInRes.json()) as AuthSignIn;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
     if (!signInJson.success) {
       log(`FAIL (sign-in-user): response JSON success=false, message=${signInJson.message}`);
