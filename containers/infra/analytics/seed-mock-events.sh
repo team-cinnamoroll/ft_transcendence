@@ -5,6 +5,8 @@ ES_URL="${ES_URL:-http://localhost:9200}"
 KIBANA_URL="${KIBANA_URL:-http://localhost:5601}"
 EVENT_COUNT="${EVENT_COUNT:-2500}"
 INDEX="events"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KIBANA_OBJECTS="$SCRIPT_DIR/kibana-objects.ndjson"
 TMP_NDJSON="$(mktemp)"
 trap 'rm -f "$TMP_NDJSON"' EXIT
 
@@ -55,7 +57,9 @@ curl -s -H 'Content-Type: application/x-ndjson' -X POST "$ES_URL/_bulk" --data-b
 curl -s -X POST "$ES_URL/$INDEX/_refresh" >/dev/null
 echo "ES count: $(curl -s "$ES_URL/$INDEX/_count" | python3 -c "import sys,json;print(json.load(sys.stdin)['count'])")"
 
-curl -s -X POST "$KIBANA_URL/api/data_views/data_view" \
-  -H 'Content-Type: application/json' -H 'kbn-xsrf: true' \
-  -d '{"data_view":{"title":"events*","name":"events","timeFieldName":"@timestamp"}}' >/dev/null || true
-echo "done. Kibana: $KIBANA_URL"
+if [ -f "$KIBANA_OBJECTS" ]; then
+  curl -s -X POST "$KIBANA_URL/api/saved_objects/_import?overwrite=true" \
+    -H 'kbn-xsrf: true' -F "file=@$KIBANA_OBJECTS;type=application/ndjson" >/dev/null || true
+  echo "Kibana objects imported."
+fi
+echo "done. Dashboard: $KIBANA_URL/app/dashboards#/view/events-overview"
