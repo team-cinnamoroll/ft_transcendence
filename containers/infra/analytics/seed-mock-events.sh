@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ES_URL="${ES_URL:-http://localhost:9200}"
-KIBANA_URL="${KIBANA_URL:-http://localhost:5601}"
+KIBANA_URL="${KIBANA_URL:-http://localhost:5601/kibana}"
 EVENT_COUNT="${EVENT_COUNT:-2500}"
 INDEX="events"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -144,6 +144,9 @@ services:
     profiles: ['analytics']
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_BASEPATH=/kibana
+      - SERVER_REWRITEBASEPATH=true
+      - SERVER_PUBLICBASEURL=http://localhost:8080/kibana
     ports:
       - '5601:5601'
     depends_on:
