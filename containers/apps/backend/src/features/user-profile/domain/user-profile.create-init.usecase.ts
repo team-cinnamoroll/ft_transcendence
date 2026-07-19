@@ -18,12 +18,12 @@ export async function toUserProfile(
 ): Promise<UserProfile> {
   if (profileEntity.avatarFileId) {
     const avatarUrlsMap = await fileQueryService.getFileUrlsByFileIds([profileEntity.avatarFileId]);
-    const avatarUrl = avatarUrlsMap.get(profileEntity.avatarFileId) || undefined;
+    const fileDto = avatarUrlsMap.get(profileEntity.avatarFileId) || undefined;
 
     return UserProfileSchema.parse({
       id: profileEntity.userId,
       name: profileEntity.name,
-      avatarUrl,
+      avatarUrl: fileDto?.url,
       badge: profileEntity.badge,
     });
   }

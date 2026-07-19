@@ -12,7 +12,8 @@ export async function makeNewUserTokens(
 ) {
   const accessTokenExpiresIn = config.ACCESS_TOKEN_EXPIRES_IN;
   const refreshTokenExpiresIn = config.REFRESH_TOKEN_EXPIRES_IN;
-  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn);
+  const issuer = config.JWT_ISSUER;
+  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn, issuer);
   const accessToken = await authAccessTokenWorker.createJWT(payload);
   const newRefreshToken = createRefreshToken(userId);
   await authRefreshTokenRepository.saveToken(
@@ -36,7 +37,8 @@ export async function refreshUserTokens(
 ) {
   const accessTokenExpiresIn = config.ACCESS_TOKEN_EXPIRES_IN;
   const refreshTokenExpiresIn = config.REFRESH_TOKEN_EXPIRES_IN;
-  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn);
+  const issuer = config.JWT_ISSUER;
+  const payload = createJWTPayload(userId, 'user', accessTokenExpiresIn, issuer);
   const accessToken = await authAccessTokenWorker.createJWT(payload);
   const newRefreshToken = createRefreshToken(userId, familyId);
   await authRefreshTokenRepository.revokeToken(oldRefreshToken); // トークンを使用済みにする（状態をrevokedに変更）

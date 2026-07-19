@@ -46,10 +46,3 @@ export function createApiResponseSchema<T extends z.ZodTypeAny>(
 
 export const SimpleApiResponseSchema = createApiResponseSchema();
 export type SimpleApiResponse = z.infer<typeof SimpleApiResponseSchema>;
-
-export const SuccessResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(), // success: falseのときのエラーメッセージ
-});
-
-export type SuccessResponse = z.infer<typeof SuccessResponseSchema>;

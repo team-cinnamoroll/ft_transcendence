@@ -12,15 +12,6 @@ import { NotFoundError, ValidationError } from '../../shared/errors/global.error
 export function usersRouter() {
   return new Hono()
     .use('*', injectUsersDeps())
-    .get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
-      const { id } = c.req.valid('param');
-      const userRepo = c.get('userRepo');
-      const user = await getUserById(userRepo, id);
-      if (!user) {
-        return c.json({ message: 'user not found' }, 404);
-      }
-      return c.json(user);
-    })
     .delete('/:id', zValidator('param', UserIdParamSchema), async (c) => {
       const { id } = c.req.valid('param');
       const userRepo = c.get('userRepo');
