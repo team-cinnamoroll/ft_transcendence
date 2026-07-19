@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import { AuthSignUpRequestSchema, AuthSignInRequestSchema } from '@tracen/contracts';
 import type { AuthSignUp, AuthSignIn } from '@/types/auth';
+import type { ApiErrorKind } from '@/lib/api-error';
 import {
   signUpAndStartSession,
   signInAndStartSession,
@@ -11,6 +12,24 @@ import {
 } from '@/server/usecases/auth';
 import { buildZodErrorMap } from '@/lib/zod-error-map';
 import type { ActionResult } from './result';
+
+type AuthMessageTranslator = Awaited<ReturnType<typeof getTranslations>>;
+
+/** サインアップ失敗時の errorKind を、i18n対応した表示文言に変換する */
+function resolveSignUpErrorMessage(t: AuthMessageTranslator, errorKind: ApiErrorKind): string {
+  if (errorKind === 'CONFLICT') {
+    return t('errorEmailAlreadyExists');
+  }
+  return t('errorGeneric');
+}
+
+/** サインイン失敗時の errorKind を、i18n対応した表示文言に変換する */
+function resolveSignInErrorMessage(t: AuthMessageTranslator, errorKind: ApiErrorKind): string {
+  if (errorKind === 'UNAUTHORIZED') {
+    return t('errorGeneric');
+  }
+  return t('errorUnexpected');
+}
 
 export async function signUpAction(input: unknown): Promise<ActionResult<AuthSignUp>> {
   const t = await getTranslations('validation');
@@ -20,8 +39,15 @@ export async function signUpAction(input: unknown): Promise<ActionResult<AuthSig
   }
 
   const result = await signUpAndStartSession(parsed.data);
+  if (!result.success) {
+    const tSignUp = await getTranslations('signUp');
+    return {
+      success: true,
+      data: { success: false, message: resolveSignUpErrorMessage(tSignUp, result.errorKind) },
+    };
+  }
 
-  return { success: true, data: result };
+  return { success: true, data: { success: true, data: result.data } };
 }
 
 export async function signInAction(input: unknown): Promise<ActionResult<AuthSignIn>> {
@@ -32,8 +58,15 @@ export async function signInAction(input: unknown): Promise<ActionResult<AuthSig
   }
 
   const result = await signInAndStartSession(parsed.data);
+  if (!result.success) {
+    const tSignIn = await getTranslations('signIn');
+    return {
+      success: true,
+      data: { success: false, message: resolveSignInErrorMessage(tSignIn, result.errorKind) },
+    };
+  }
 
-  return { success: true, data: result };
+  return { success: true, data: { success: true, data: result.data } };
 }
 
 export async function signOutAction(): Promise<ActionResult<void>> {

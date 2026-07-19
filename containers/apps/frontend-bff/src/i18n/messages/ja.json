@@ -420,6 +420,7 @@
     "submit": "登録する",
     "submitting": "登録中…",
     "errorGeneric": "登録に失敗しました。時間をおいて再度お試しください。",
+    "errorEmailAlreadyExists": "このメールアドレスは既に登録されています。",
     "switchToSignInPrompt": "すでにアカウントをお持ちですか？",
     "switchToSignInLink": "ログイン"
   },
@@ -432,6 +433,7 @@
     "submit": "ログイン",
     "submitting": "ログイン中…",
     "errorGeneric": "ログインに失敗しました。メールアドレスまたはパスワードをご確認ください。",
+    "errorUnexpected": "エラーが発生しました。時間をおいて再度お試しください。",
     "switchToSignUpPrompt": "アカウントをお持ちでないですか？",
     "switchToSignUpLink": "新規登録"
   }

@@ -420,6 +420,7 @@
     "submit": "Sign up",
     "submitting": "Signing up…",
     "errorGeneric": "Sign up failed. Please try again later.",
+    "errorEmailAlreadyExists": "This email address is already registered.",
     "switchToSignInPrompt": "Already have an account?",
     "switchToSignInLink": "Sign in"
   },
@@ -432,6 +433,7 @@
     "submit": "Sign in",
     "submitting": "Signing in…",
     "errorGeneric": "Sign in failed. Please check your email and password.",
+    "errorUnexpected": "Something went wrong. Please try again later.",
     "switchToSignUpPrompt": "Don't have an account?",
     "switchToSignUpLink": "Sign up"
   }

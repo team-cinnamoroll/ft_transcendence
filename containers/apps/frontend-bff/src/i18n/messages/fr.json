@@ -420,6 +420,7 @@
     "submit": "S'inscrire",
     "submitting": "Inscription…",
     "errorGeneric": "L'inscription a échoué. Veuillez réessayer plus tard.",
+    "errorEmailAlreadyExists": "Cette adresse e-mail est déjà utilisée.",
     "switchToSignInPrompt": "Vous avez déjà un compte ?",
     "switchToSignInLink": "Se connecter"
   },
@@ -432,6 +433,7 @@
     "submit": "Se connecter",
     "submitting": "Connexion…",
     "errorGeneric": "Connexion échouée. Veuillez vérifier votre e-mail et votre mot de passe.",
+    "errorUnexpected": "Une erreur est survenue. Veuillez réessayer plus tard.",
     "switchToSignUpPrompt": "Vous n'avez pas de compte ?",
     "switchToSignUpLink": "S'inscrire"
   }
