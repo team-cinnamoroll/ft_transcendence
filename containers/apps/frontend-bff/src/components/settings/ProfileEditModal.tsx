@@ -146,7 +146,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
               style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
             >
               {t('avatar')}
-              <span style={{ marginLeft: 4, color: 'var(--mf-accent)' }}>{t('required')}</span>
+              <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
             <input
               id="profile-avatar"
