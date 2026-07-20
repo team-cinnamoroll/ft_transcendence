@@ -13,6 +13,7 @@ import PostModal from '@/components/ui/PostModal';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 
 type NavItem = {
   href: string;
@@ -322,7 +323,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
             }}
           >
             <Image
-              src={user.avatarUrl || '/images/default-avatar.png'}
+              src={getAvatarUrl(user)}
               alt={user.name}
               width={44}
               height={44}

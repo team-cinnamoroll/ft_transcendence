@@ -2,6 +2,7 @@ import Image from 'next/image';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import SeedTileCalendar from './SeedTileCalendar';
 import { useTranslations } from 'next-intl';
 
@@ -22,7 +23,7 @@ const HomeProfile = ({ user, faces, seeds }: Props) => {
           style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}
         >
           <Image
-            src={user.avatarUrl || '/images/default-avatar.png'}
+            src={getAvatarUrl(user)}
             alt={user.name}
             width={44}
             height={44}

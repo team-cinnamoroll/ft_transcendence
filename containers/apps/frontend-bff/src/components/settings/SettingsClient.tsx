@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import ProfileEditModal from './ProfileEditModal';
 import LanguageSwitcher from './LanguageSwitcher';
 import DataExportButton from './DataExportButton';
@@ -56,7 +57,7 @@ const SettingsClient = ({ user, faceCount, seedCount }: Props) => {
             }}
           >
             <Image
-              src={user.avatarUrl || '/images/default-avatar.png'}
+              src={getAvatarUrl(user)}
               alt={user.name}
               width={52}
               height={52}
