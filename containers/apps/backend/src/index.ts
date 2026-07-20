@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import type { ApplyGlobalResponse } from 'hono/client';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { jwk } from 'hono/jwk';
 import { readFileSync } from 'node:fs';
 import { createServer as createHttpsServer } from 'node:https';
 import { resolve } from 'node:path';
@@ -11,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { runMigrationsOnce } from './shared/infra/db/migrate';
 import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
+import { injectJwtAuthDeps } from './shared/middleware/inject-jwk-auth';
 
 import type { AppEnv } from './shared/types/hono';
 import { publicApiRouter } from './public.handler';
@@ -52,20 +52,7 @@ const apiApp = new Hono<AppEnv>();
 const apiRoutes = apiApp
   .basePath('/api/v1')
   .route('/', publicApiRouter())
-  .use(
-    '*',
-    jwk({
-      // 関数形式で、メモリ内の jwksCache.keys 配列を直接返す
-      keys: async (c) => {
-        const jwksCache = c.get('config').JWKS_PUBLIC;
-        if (!jwksCache) return [];
-        // Zodのパースを通過した安全な JWK 配列をそのまま流し込む
-        return jwksCache.keys;
-      },
-      // ⚠️ 許可する非対称鍵アルゴリズムを明示（必須）
-      alg: ['RS256'],
-    })
-  )
+  .use('*', injectJwtAuthDeps())
   .route('/', protectedApiRouter());
 
 app.route('/', apiRoutes);

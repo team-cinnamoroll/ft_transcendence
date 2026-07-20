@@ -17,3 +17,7 @@ export type IsoDateTimeString = z.infer<typeof IsoDateTimeStringSchema>;
 // ファイルパス
 export const FilePathSchema = z.string().min(1).max(255);
 export type FilePath = z.infer<typeof FilePathSchema>;
+
+// オンライン状態
+export const IsOnlineSchema = z.boolean();
+export type IsOnline = z.infer<typeof IsOnlineSchema>;

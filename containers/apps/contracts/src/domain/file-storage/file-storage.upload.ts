@@ -1,8 +1,13 @@
+import { z } from 'zod';
 import { FilePathSchema } from '../../shared/primitives';
-import { SuccessResponseSchema } from '../../shared/response';
+import { createApiResponseSchema } from '../../shared/response';
 import { FileMetadataIdSchema } from '../../shared/file-metadata';
 
-export const FileUploadResponseSchema = SuccessResponseSchema.extend({
-  fileId: FileMetadataIdSchema.optional(),
-  filePath: FilePathSchema.optional(),
-}).strict();
+const FileUploadResponseDataSchema = z
+  .object({
+    fileId: FileMetadataIdSchema,
+    filePath: FilePathSchema,
+  })
+  .strict();
+
+export const FileUploadResponseSchema = createApiResponseSchema(FileUploadResponseDataSchema);

@@ -298,7 +298,7 @@
     "errorAvatar": "Veuillez saisir une URL valide"
   },
   "faceDetailPage": {
-    "backAriaLabel": "Retour à la liste des facettes"
+    "backAriaLabel": "Retour"
   },
   "relativeTime": {
     "justNow": "À l'instant",

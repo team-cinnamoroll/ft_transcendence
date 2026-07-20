@@ -2,16 +2,7 @@ import { FileStoragesServiceRepositorySpec } from '../repositories/storage-servi
 import { FileMetadataRepositorySpec } from '../repositories/file-metadata.repository';
 import { type FileMetadataId, type UserId } from '@tracen/contracts';
 import { type FileMetadata } from '../file-metadata.entity';
-import type { ContentfulStatusCode } from 'hono/utils/http-status';
-
-export class FileDownloadError extends Error {
-  public readonly code: ContentfulStatusCode;
-  constructor(message: string, code: ContentfulStatusCode) {
-    super(message);
-    this.name = 'FileDownloadError';
-    this.code = code;
-  }
-}
+import { NotFoundError, ForbiddenError } from '../../../../shared/errors/global.error';
 
 export async function downloadPrivateFile(
   storageRepo: FileStoragesServiceRepositorySpec,
@@ -22,24 +13,24 @@ export async function downloadPrivateFile(
   // Fetch the file metadata to get the file path
   const fileMetadata = await fileMetadataRepo.findById(fileId);
   if (!fileMetadata) {
-    throw new FileDownloadError(`File with ID ${fileId} not found.`, 404);
+    throw new NotFoundError(`File with ID ${fileId} not found.`);
   }
 
   const { bucket, storageKey, ownerId } = fileMetadata;
 
   if (clientId !== ownerId) {
-    throw new FileDownloadError('You do not have permission to download this file.', 403);
+    throw new ForbiddenError('You do not have permission to download this file.');
   }
 
   try {
     // Get the file from storage as a ReadableStream
     const stream = await storageRepo.get(bucket, storageKey);
     if (!stream) {
-      throw new FileDownloadError('File not found in storage.', 404);
+      throw new NotFoundError('File not found in storage.');
     }
     return { stream, metadata: fileMetadata };
   } catch (error) {
     console.error('Failed to download file from storage:', error);
-    throw new FileDownloadError('Failed to download file from storage.', 500);
+    throw error;
   }
 }

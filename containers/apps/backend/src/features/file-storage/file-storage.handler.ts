@@ -1,24 +1,21 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/usecases/file-storage.save-file.usecase';
-import { deleteFile, FileDeleteError } from './domain/usecases/file-storage.delete-file.usecase';
-import {
-  downloadPrivateFile,
-  FileDownloadError,
-} from './domain/usecases/file-storage.download-private-file.usecase';
+import { deleteFile } from './domain/usecases/file-storage.delete-file.usecase';
+import { downloadPrivateFile } from './domain/usecases/file-storage.download-private-file.usecase';
 import {
   FileUploadRequestHeaderSchema,
   FileUploadResponseSchema,
-  FileDeleteRequestSchema as FileDeleteApiRequestSchema,
+  FileRequestSchema,
   FileDeleteResponseSchema,
-  FileMetadataIdSchema,
-  SuccessResponseSchema,
+  SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
-import { FileDeleteRequestSchema } from './domain/usecases/file-storage.file-delete.request';
+import { FileDeleteOperationRequestSchema } from './domain/usecases/file-storage.file-delete.request';
+import { ValidationError, NotFoundError, ForbiddenError } from '../../shared/errors/global.error';
+import { ZodError } from 'zod';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -27,30 +24,13 @@ export function fileStorageRouter() {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       const fileUrlGenerator = c.get('fileUrlGenerator');
-      if (!fileStorageRepo || !fileMetadataRepo || !fileUrlGenerator) {
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'File storage dependencies are not initialized',
-          }),
-          500
-        );
-      }
-
-      const jwtPayload = c.get('jwtPayload');
-      const ownerId = jwtPayload.sub;
-      if (!ownerId) {
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
-      const headers = c.req.valid('header');
-
       try {
+        const jwtPayload = c.get('jwtPayload');
+        const ownerId = jwtPayload.sub;
+        if (!ownerId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const headers = c.req.valid('header');
         const fileSaveRequest = FileSaveRequestSchema.parse({
           ownerId,
           fileName: headers['x-file-name'],
@@ -65,147 +45,163 @@ export function fileStorageRouter() {
           fileUrlGenerator,
           fileSaveRequest
         );
-
         return c.json(
           FileUploadResponseSchema.parse({
             success: true,
-            fileId,
-            filePath,
+            data: {
+              fileId,
+              filePath,
+            },
           }),
           200
         );
       } catch (error) {
         console.error('File upload failed:', error);
-        return c.json(
-          FileUploadResponseSchema.parse({
-            success: false,
-            message: 'File upload failed',
-          }),
-          500
-        );
-      }
-    })
-    .post('/delete', zValidator('json', FileDeleteApiRequestSchema), async (c) => {
-      const fileStorageRepo = c.get('fileStorageRepo');
-      const fileMetadataRepo = c.get('fileMetadataRepo');
-      if (!fileStorageRepo || !fileMetadataRepo) {
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'File storage dependencies are not initialized',
-          }),
-          500
-        );
-      }
-
-      const jwtPayload = c.get('jwtPayload');
-      const clientId = jwtPayload.sub;
-      if (!clientId) {
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
-
-      const deleteRequestBody = c.req.valid('json');
-
-      try {
-        const deleteRequest = FileDeleteRequestSchema.parse({
-          fileId: deleteRequestBody.fileId,
-          clientId,
-        });
-        const result = await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
-        return c.json(result, 200);
-      } catch (error) {
-        console.error('File deletion failed:', error);
-        if (error instanceof FileDeleteError) {
+        if (error instanceof ZodError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: 'Invalid request data',
+            }),
+            400
+          );
+        }
+        if (error instanceof ValidationError) {
           return c.json(
             FileDeleteResponseSchema.parse({
               success: false,
               message: error.message,
             }),
-            error.code
+            400
           );
         }
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: false,
-            message: 'File deletion failed',
-          }),
-          500
-        );
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
-    .get(
-      '/download/:fileId',
-      zValidator(
-        'param',
-        z.object({
-          fileId: FileMetadataIdSchema,
-        })
-      ),
-      async (c) => {
-        const fileStorageRepo = c.get('fileStorageRepo');
-        const fileMetadataRepo = c.get('fileMetadataRepo');
-        if (!fileStorageRepo || !fileMetadataRepo) {
-          return c.json(
-            SuccessResponseSchema.parse({
-              success: false,
-              message: 'File storage dependencies are not initialized',
-            }),
-            500
-          );
-        }
-
+    .get('/download/:fileId', zValidator('param', FileRequestSchema), async (c) => {
+      const fileStorageRepo = c.get('fileStorageRepo');
+      const fileMetadataRepo = c.get('fileMetadataRepo');
+      try {
         const jwtPayload = c.get('jwtPayload');
         const clientId = jwtPayload.sub;
         if (!clientId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const { fileId } = c.req.valid('param');
+        const { stream, metadata } = await downloadPrivateFile(
+          fileStorageRepo,
+          fileMetadataRepo,
+          fileId,
+          clientId
+        );
+        c.header('Content-Type', metadata.mimeType);
+        c.header('Content-Length', metadata.fileSize.toString());
+        // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
+        const encodedFileName = encodeURIComponent(metadata.fileName);
+        c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
+        c.status(200);
+        return c.body(stream);
+      } catch (error) {
+        console.error('File download failed:', error);
+        if (error instanceof ZodError) {
           return c.json(
-            SuccessResponseSchema.parse({
+            SimpleApiResponseSchema.parse({
               success: false,
-              message: 'JWT token is invalid: sub (userId) is missing',
+              message: 'Invalid request data',
             }),
             400
           );
         }
-
-        const { fileId } = c.req.valid('param');
-
-        try {
-          const { stream, metadata } = await downloadPrivateFile(
-            fileStorageRepo,
-            fileMetadataRepo,
-            fileId,
-            clientId
-          );
-          c.header('Content-Type', metadata.mimeType);
-          c.header('Content-Length', metadata.fileSize.toString());
-          // 日本語ファイル名の文字化けを防ぐための RFC 5987 準拠のエンコーディング
-          const encodedFileName = encodeURIComponent(metadata.fileName);
-          c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
-          return c.body(stream);
-        } catch (error) {
-          console.error('File download failed:', error);
-          if (error instanceof FileDownloadError) {
-            return c.json(
-              SuccessResponseSchema.parse({
-                success: false,
-                message: error.message,
-              }),
-              error.code
-            );
-          }
+        if (error instanceof ValidationError) {
           return c.json(
-            SuccessResponseSchema.parse({
+            SimpleApiResponseSchema.parse({
               success: false,
-              message: 'File download failed',
+              message: error.message,
             }),
-            500
+            400
           );
         }
+        if (error instanceof ForbiddenError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            403
+          );
+        }
+        if (error instanceof NotFoundError) {
+          return c.json(
+            SimpleApiResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            404
+          );
+        }
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
-    );
+    })
+    .delete('/delete/:fileId', zValidator('param', FileRequestSchema), async (c) => {
+      const fileStorageRepo = c.get('fileStorageRepo');
+      const fileMetadataRepo = c.get('fileMetadataRepo');
+      try {
+        const jwtPayload = c.get('jwtPayload');
+        const clientId = jwtPayload.sub;
+        if (!clientId) {
+          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
+        }
+        const { fileId } = c.req.valid('param');
+        const deleteRequest = FileDeleteOperationRequestSchema.parse({
+          fileId,
+          clientId,
+        });
+        await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
+        return c.json(
+          FileDeleteResponseSchema.parse({
+            success: true,
+          }),
+          200
+        );
+      } catch (error) {
+        console.error('File deletion failed:', error);
+        if (error instanceof ZodError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: 'Invalid request data',
+            }),
+            400
+          );
+        }
+        if (error instanceof ValidationError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            400
+          );
+        }
+        if (error instanceof ForbiddenError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            403
+          );
+        }
+        if (error instanceof NotFoundError) {
+          return c.json(
+            FileDeleteResponseSchema.parse({
+              success: false,
+              message: error.message,
+            }),
+            404
+          );
+        }
+        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
+      }
+    });
 }

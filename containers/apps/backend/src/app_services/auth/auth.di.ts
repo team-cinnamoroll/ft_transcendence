@@ -36,6 +36,9 @@ export function injectAuthDeps(): MiddlewareHandler<AuthHandlerEnv> {
     const userRepo = getUserRepository(config.DATABASE_URL);
     const authPassWorker = getAuthPassWorker(config.PEPPER);
     const authAccessTokenWorker = getAuthAccessTokenWorker(config.JWT_PRIVATE_KEY_PEM);
+    if (!userRepo || !authPassWorker || !authAccessTokenWorker) {
+      return c.json({ message: 'Failed to initialize dependencies' }, 500);
+    }
     c.set('userRepo', userRepo);
     c.set('authPassWorker', authPassWorker);
     c.set('authAccessTokenWorker', authAccessTokenWorker);

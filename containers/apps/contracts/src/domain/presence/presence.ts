@@ -1,10 +1,16 @@
 import { z } from 'zod';
-import { SuccessResponseSchema } from '../../shared/response';
+import { SimpleApiResponseSchema, createApiResponseSchema } from '../../shared/response';
+import { UserIdSchema } from '../user/user';
+import { IsOnlineSchema } from '../../shared/primitives';
 
-export const PresenceUpdateResponseSchema = SuccessResponseSchema;
+export const PresenceUpdateResponseSchema = SimpleApiResponseSchema;
 export type PresenceUpdateResponse = z.infer<typeof PresenceUpdateResponseSchema>;
 
-export const PresenceStatusResponseSchema = SuccessResponseSchema.extend({
-  onlineStatuses: z.record(z.string(), z.boolean()), // ユーザーIDをキー、オンライン状態を値とするオブジェクト
-});
+const PresenceStatusDataSchema = z
+  .object({
+    onlineStatuses: z.record(UserIdSchema, IsOnlineSchema), // ユーザーIDをキー、オンライン状態を値とするオブジェクト
+  })
+  .strict();
+
+export const PresenceStatusResponseSchema = createApiResponseSchema(PresenceStatusDataSchema);
 export type PresenceStatusResponse = z.infer<typeof PresenceStatusResponseSchema>;
