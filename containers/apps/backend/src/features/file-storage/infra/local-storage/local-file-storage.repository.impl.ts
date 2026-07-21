@@ -9,6 +9,7 @@ import {
 import { StorageDataInput } from '../../domain/usecases/file-storage.file-save.request';
 import { type BucketNameType, type StorageKey } from '../../domain/file-metadata.entity';
 import { type Visibility, type FilePath, type FileMetadataId } from '@tracen/contracts';
+import { StorageQuotaExceededError, InternalStorageError } from '../../domain/file-storage.error';
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error;
@@ -29,24 +30,38 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
   async save(options: UploadOptions, data: StorageDataInput): Promise<void> {
     // 例: /app/uploads/public-bucket/avatars/user-123.png
     const fullPath = path.join(this.baseDir, options.bucket, options.storageKey);
+    try {
+      // 保存先ディレクトリ（階層）がなければ再帰的に作成する
+      await fs.mkdir(path.dirname(fullPath), { recursive: true });
 
-    // 保存先ディレクトリ（階層）がなければ再帰的に作成する
-    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+      if (data instanceof Buffer) {
+        // 1. Buffer（メモリ一括）の場合の書き込み
+        await fs.writeFile(fullPath, data);
+      } else {
+        // 2. ReadableStream（パケット・チャンク単位）の場合のストリーミング書き込み
+        // Web標準の ReadableStream を Node.js の生ストリームに変換
+        const nodeReadable = Readable.fromWeb(data as Parameters<typeof Readable.fromWeb>[0]);
 
-    if (data instanceof Buffer) {
-      // 1. Buffer（メモリ一括）の場合の書き込み
-      await fs.writeFile(fullPath, data);
-    } else {
-      // 2. ReadableStream（パケット・チャンク単位）の場合のストリーミング書き込み
-      // Web標準の ReadableStream を Node.js の生ストリームに変換
-      const nodeReadable = Readable.fromWeb(data as Parameters<typeof Readable.fromWeb>[0]);
+        // 書き込み用のストリームを作成
+        const writeStream = (await fs.open(fullPath, 'w')).createWriteStream();
 
-      // 書き込み用のストリームを作成
-      const writeStream = (await fs.open(fullPath, 'w')).createWriteStream();
-
-      // パイプで繋いでデータを流し込み、完了を待つ（サーバーのメモリを消費しない）
-      nodeReadable.pipe(writeStream);
-      await finished(writeStream);
+        // パイプで繋いでデータを流し込み、完了を待つ（サーバーのメモリを消費しない）
+        nodeReadable.pipe(writeStream);
+        await finished(writeStream);
+      }
+    } catch (error: unknown) {
+      if (isErrnoException(error)) {
+        // ディスク容量不足
+        if (error.code === 'ENOSPC') {
+          throw new StorageQuotaExceededError('Storage is full. Cannot save the file.');
+        }
+        // パーミッションエラー
+        if (error.code === 'EACCES' || error.code === 'EPERM') {
+          throw new InternalStorageError('Permission denied writing to local storage.');
+        }
+      }
+      console.error(`Error saving file ${fullPath}:`, error);
+      throw new Error('Failed to save file to local storage', { cause: error });
     }
   }
 
@@ -71,10 +86,17 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
 
       // HonoやWeb標準で扱えるように ReadableStream<Uint8Array> に変換して返す
       return Readable.toWeb(nodeStream) as ReadableStream<Uint8Array>;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error reading file ${fullPath}:`, error);
       // ファイルが存在しない、または読み込めない場合は不整合を防ぐため null を返す
-      return null;
+      if (isErrnoException(error) && error.code === 'ENOENT') {
+        // 純粋にファイルが存在しない場合のみ null を返す
+        return null;
+      }
+
+      // 権限エラーなど、それ以外の障害は握りつぶさずにエラーとして投げる
+      console.error(`System error reading file ${fullPath}:`, error);
+      throw new Error(`Failed to read file from storage.`, { cause: error });
     }
   }
 
@@ -85,14 +107,14 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
     const fullPath = path.join(this.baseDir, bucket, storageKey);
     try {
       await fs.unlink(fullPath);
-    } catch (error) {
+    } catch (error: unknown) {
       // ファイルが既に存在しない場合の例外（ENOENT）は正常終了とみなす
       if (isErrnoException(error) && error.code === 'ENOENT') {
         return; // 正常終了
       }
 
       console.error(`Error deleting file ${fullPath}:`, error);
-      throw error;
+      throw new Error(`Failed to delete file from storage.`, { cause: error });
     }
   }
 

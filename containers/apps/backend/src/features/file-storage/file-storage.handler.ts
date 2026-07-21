@@ -15,7 +15,9 @@ import {
 import { FileSaveRequestSchema } from './domain/usecases/file-storage.file-save.request';
 import { FileDeleteOperationRequestSchema } from './domain/usecases/file-storage.file-delete.request';
 import { ValidationError, NotFoundError, ForbiddenError } from '../../shared/errors/global.error';
+import { StorageQuotaExceededError, InternalStorageError } from './domain/file-storage.error';
 import { ZodError } from 'zod';
+import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -46,7 +48,7 @@ export function fileStorageRouter() {
           fileSaveRequest
         );
         return c.json(
-          FileUploadResponseSchema.parse({
+          makeSafeResponse(FileUploadResponseSchema, {
             success: true,
             data: {
               fileId,
@@ -55,27 +57,43 @@ export function fileStorageRouter() {
           }),
           200
         );
-      } catch (error) {
-        console.error('File upload failed:', error);
-        if (error instanceof ZodError) {
+      } catch (err) {
+        console.error('File upload failed:', err);
+        if (err instanceof ZodError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
+            makeSafeResponse(FileDeleteResponseSchema, {
               success: false,
               message: 'Invalid request data',
             }),
             400
           );
         }
-        if (error instanceof ValidationError) {
+        if (err instanceof ValidationError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
             400
           );
         }
-        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
+        if (err instanceof StorageQuotaExceededError) {
+          return c.json(
+            makeSafeResponse(SimpleApiResponseSchema, {
+              success: false,
+              message: 'Storage is full. Cannot save the file.',
+            }),
+            507 // Insufficient Storage
+          );
+        }
+
+        if (err instanceof InternalStorageError) {
+          return c.json(
+            makeSafeResponse(SimpleApiResponseSchema, {
+              success: false,
+              message: 'Permission denied writing to local storage.',
+            }),
+            500 // Internal Server Error
+          );
+        }
+        throw err; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
     .get('/download/:fileId', zValidator('param', FileRequestSchema), async (c) => {
@@ -101,45 +119,36 @@ export function fileStorageRouter() {
         c.header('Content-Disposition', `attachment; filename*=UTF-8''${encodedFileName}`);
         c.status(200);
         return c.body(stream);
-      } catch (error) {
-        console.error('File download failed:', error);
-        if (error instanceof ZodError) {
+      } catch (err) {
+        console.error('File download failed:', err);
+        if (err instanceof ZodError) {
           return c.json(
-            SimpleApiResponseSchema.parse({
+            makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
               message: 'Invalid request data',
             }),
             400
           );
         }
-        if (error instanceof ValidationError) {
+        if (err instanceof ValidationError) {
           return c.json(
-            SimpleApiResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(SimpleApiResponseSchema, { success: false, message: err.message }),
             400
           );
         }
-        if (error instanceof ForbiddenError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
-            SimpleApiResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(SimpleApiResponseSchema, { success: false, message: err.message }),
             403
           );
         }
-        if (error instanceof NotFoundError) {
+        if (err instanceof NotFoundError) {
           return c.json(
-            SimpleApiResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(SimpleApiResponseSchema, { success: false, message: err.message }),
             404
           );
         }
-        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
+        throw err; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
     .delete('/delete/:fileId', zValidator('param', FileRequestSchema), async (c) => {
@@ -157,51 +166,37 @@ export function fileStorageRouter() {
           clientId,
         });
         await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
-        return c.json(
-          FileDeleteResponseSchema.parse({
-            success: true,
-          }),
-          200
-        );
-      } catch (error) {
-        console.error('File deletion failed:', error);
-        if (error instanceof ZodError) {
+        return c.json(makeSafeResponse(FileDeleteResponseSchema, { success: true }), 200);
+      } catch (err) {
+        console.error('File deletion failed:', err);
+        if (err instanceof ZodError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
+            makeSafeResponse(FileDeleteResponseSchema, {
               success: false,
               message: 'Invalid request data',
             }),
             400
           );
         }
-        if (error instanceof ValidationError) {
+        if (err instanceof ValidationError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
             400
           );
         }
-        if (error instanceof ForbiddenError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
             403
           );
         }
-        if (error instanceof NotFoundError) {
+        if (err instanceof NotFoundError) {
           return c.json(
-            FileDeleteResponseSchema.parse({
-              success: false,
-              message: error.message,
-            }),
+            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
             404
           );
         }
-        throw error; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
+        throw err; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     });
 }
