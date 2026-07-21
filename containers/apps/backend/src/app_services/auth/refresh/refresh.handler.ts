@@ -9,6 +9,7 @@ import {
 } from '@tracen/contracts';
 import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
 import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
+import { makeSafeResponse } from '../../../shared/utils/validation';
 
 export function refreshRouter() {
   return new Hono<AuthHandlerEnv>()
@@ -28,18 +29,20 @@ export function refreshRouter() {
             response.userId,
             response.familyId
           );
-          const validatedResponse = AuthRefreshResponseSchema.parse({
-            success: true,
-            data: {
-              accessToken: userTokens.accessToken,
-              refreshToken: userTokens.refreshToken,
-            },
-          });
-          return c.json(validatedResponse, 200);
+          return c.json(
+            makeSafeResponse(AuthRefreshResponseSchema, {
+              success: true,
+              data: {
+                accessToken: userTokens.accessToken,
+                refreshToken: userTokens.refreshToken,
+              },
+            }),
+            200
+          );
         }
         // success: false の場合はドメインエラー（例：リフレッシュトークンが無効）→ 401 Unauthorized
         return c.json(
-          AuthRefreshResponseSchema.parse({
+          makeSafeResponse(AuthRefreshResponseSchema, {
             success: false,
             message: 'Invalid refresh token',
           }),
@@ -58,7 +61,7 @@ export function refreshRouter() {
       try {
         await logoutByRefreshToken(authRefreshTokenRepository, request.refreshToken);
         return c.json(
-          SimpleApiResponseSchema.parse({
+          makeSafeResponse(SimpleApiResponseSchema, {
             success: true,
           }),
           200

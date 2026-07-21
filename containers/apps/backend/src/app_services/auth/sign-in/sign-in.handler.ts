@@ -11,7 +11,7 @@ import { verifyUser } from './sign-in.verify-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { getOrCreateUserProfile } from '../../../features/user-profile/domain/user-profile.get-or-create.usecase';
 import { ValidationError, UnauthorizedError } from '../../../shared/errors/global.error';
-import { ZodError } from 'zod';
+import { makeSafeResponse } from '../../../shared/utils/validation';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -40,7 +40,7 @@ export function signInRouter() {
           verifiedUser.name
         );
         return c.json(
-          AuthSignInResponseSchema.parse({
+          makeSafeResponse(AuthSignInResponseSchema, {
             success: true,
             data: {
               accessToken: userTokens.accessToken,
@@ -53,30 +53,17 @@ export function signInRouter() {
         );
       } catch (err) {
         console.error('Error during sign-in:', err);
-        if (err instanceof ZodError) {
-          // Zodによるバリデーションエラー → 400 Bad Request
-          return c.json(
-            AuthSignInResponseSchema.parse({ success: false, message: 'Invalid request data' }),
-            400
-          );
-        }
         if (err instanceof ValidationError) {
           // バリデーションエラー → 400 Bad Request
           return c.json(
-            AuthSignInResponseSchema.parse({
-              success: false,
-              message: err.message,
-            }),
+            makeSafeResponse(AuthSignInResponseSchema, { success: false, message: err.message }),
             400
           );
         }
         if (err instanceof UnauthorizedError) {
           // 認証エラー → 401 Unauthorized
           return c.json(
-            AuthSignInResponseSchema.parse({
-              success: false,
-              message: err.message,
-            }),
+            makeSafeResponse(AuthSignInResponseSchema, { success: false, message: err.message }),
             401
           );
         }

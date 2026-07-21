@@ -7,6 +7,7 @@ import { AuthSignOutRequestSchema, AuthSignOutResponseSchema } from '@tracen/con
 import { signOutWithValidation } from '../sign-out/sign-out.usecase';
 import { ValidationError } from '../../../shared/errors/global.error';
 import { ZodError } from 'zod';
+import { makeSafeResponse } from '../../../shared/utils/validation';
 
 export function authSignOutRouter() {
   return new Hono<ProtectedEnv & AuthHandlerEnv>()
@@ -21,12 +22,12 @@ export function authSignOutRouter() {
           throw new ValidationError('JWT token is invalid: sub (userId) is missing');
         }
         await signOutWithValidation(authRefreshTokenRepository, request.refreshToken, userId);
-        return c.json(AuthSignOutResponseSchema.parse({ success: true }), 200);
+        return c.json(makeSafeResponse(AuthSignOutResponseSchema, { success: true }), 200);
       } catch (error) {
         console.error('Error during sign-out:', error);
         if (error instanceof ValidationError) {
           return c.json(
-            AuthSignOutResponseSchema.parse({
+            makeSafeResponse(AuthSignOutResponseSchema, {
               success: false,
               message: error.message,
             }),
@@ -35,7 +36,10 @@ export function authSignOutRouter() {
         }
         if (error instanceof ZodError) {
           return c.json(
-            AuthSignOutResponseSchema.parse({ success: false, message: 'Invalid request data' }),
+            makeSafeResponse(AuthSignOutResponseSchema, {
+              success: false,
+              message: 'Invalid request data',
+            }),
             400
           );
         }

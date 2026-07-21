@@ -4,6 +4,7 @@ import {
   refreshTokenDataSchema,
 } from '../../../features/auth/domain/auth.entity';
 import { type AuthRefreshTokenRepositorySpec } from '../../../features/auth/domain/auth.repository';
+import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export async function acceptRefreshRequest(
   repo: AuthRefreshTokenRepositorySpec,
@@ -17,7 +18,7 @@ export async function acceptRefreshRequest(
     await repo.deleteAllTokensOfFamily(existingTokenData.familyId); // トークンが無効（revokedなど）の場合は同一familyIdのトークンを全て削除
     return null; // トークンが無効（revokedなど）の場合もnullを返す
   }
-  return refreshTokenDataSchema.parse(existingTokenData);
+  return makeSafeUsecaseResult(refreshTokenDataSchema, existingTokenData);
 }
 
 export async function logoutByRefreshToken(
