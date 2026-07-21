@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
 import type { ApiResult } from '@/lib/api-error';
-import { getUserRepository } from '@/repositories/user-repository';
+import { getUserDirectoryRepository } from '@/repositories/user-directory-repository';
 import { getUserProfileRepository } from '@/repositories/user-profile-repository';
 import { getAuthSession } from './auth';
 
@@ -13,7 +13,7 @@ import { getAuthSession } from './auth';
  * 未ログイン、または本物のプロフィール取得に失敗した場合はモックをそのまま返す。
  */
 export async function getCurrentUser(): Promise<UserProfile> {
-  const mockUser = await getUserRepository().getCurrentUser();
+  const mockUser = await getUserDirectoryRepository().getCurrentUser();
 
   const session = await getAuthSession();
   if (!session) {
@@ -34,7 +34,7 @@ export async function getCurrentUser(): Promise<UserProfile> {
 }
 
 export async function findUserById(userId: string): Promise<UserProfile | null> {
-  return await getUserRepository().findById(userId);
+  return await getUserDirectoryRepository().findById(userId);
 }
 
 /** ログイン中の自分のプロフィールを更新する（accessToken/userId はセッションから取得済みのものを渡す） */
@@ -47,5 +47,5 @@ export async function updateMyProfile(
 }
 
 export async function listAllUsers(): Promise<UserProfile[]> {
-  return await getUserRepository().listAll();
+  return await getUserDirectoryRepository().listAll();
 }
