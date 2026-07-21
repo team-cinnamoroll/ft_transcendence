@@ -8,6 +8,8 @@ import { injectUserProfileDeps } from '../user-profile/user-profile.di';
 import { deleteUserById, getUserById } from './domain/users.usecase';
 import { getOrCreateUserProfile } from '../user-profile/domain/user-profile.get-or-create.usecase';
 import { NotFoundError, ValidationError } from '../../shared/errors/global.error';
+import { SimpleApiResponseSchema } from '@tracen/contracts';
+import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function usersRouter() {
   return new Hono()
@@ -17,7 +19,10 @@ export function usersRouter() {
       const userRepo = c.get('userRepo');
       const deleted = await deleteUserById(userRepo, id);
       if (!deleted) {
-        return c.json({ message: 'user not found' }, 404);
+        return c.json(
+          makeSafeResponse(SimpleApiResponseSchema, { success: false, message: 'user not found' }),
+          404
+        );
       }
       return c.body(null, 204);
     })
@@ -44,7 +49,7 @@ export function usersRouter() {
           user.name
         );
         return c.json(
-          UserMeResponseSchema.parse({
+          makeSafeResponse(UserMeResponseSchema, {
             success: true,
             data: {
               user,
@@ -56,7 +61,7 @@ export function usersRouter() {
       } catch (err) {
         if (err instanceof ValidationError) {
           return c.json(
-            UserMeResponseSchema.parse({
+            makeSafeResponse(UserMeResponseSchema, {
               success: false,
               message: err.message,
             }),
@@ -65,7 +70,7 @@ export function usersRouter() {
         }
         if (err instanceof NotFoundError) {
           return c.json(
-            UserMeResponseSchema.parse({
+            makeSafeResponse(UserMeResponseSchema, {
               success: false,
               message: err.message,
             }),

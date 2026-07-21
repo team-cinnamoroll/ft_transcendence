@@ -1,7 +1,8 @@
 import { type UserId, type User, UserSchema } from '@tracen/contracts';
-import { type UserEntity, UserEntitySchema } from './users.entity';
+import { type UserEntity } from './users.entity';
 import type { UserRepositorySpec } from './users.repository';
 import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
+import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export async function createUser(repo: UserRepositorySpec, newUser: UserEntity): Promise<User> {
   const existingUser = await repo.findById(newUser.id);
@@ -13,7 +14,7 @@ export async function createUser(repo: UserRepositorySpec, newUser: UserEntity):
     throw new EmailAlreadyExistsError();
   }
   const created = await repo.create(newUser);
-  return UserSchema.parse({
+  return makeSafeUsecaseResult(UserSchema, {
     id: created.id,
     email: created.email,
     name: created.name,
@@ -26,7 +27,7 @@ export async function getUserById(repo: UserRepositorySpec, id: UserId): Promise
   if (!user) {
     return null;
   }
-  return UserSchema.parse({
+  return makeSafeUsecaseResult(UserSchema, {
     id: user.id,
     email: user.email,
     name: user.name,
@@ -42,7 +43,7 @@ export async function getUserEntityByEmail(
   if (!user) {
     return null;
   }
-  return UserEntitySchema.parse(user);
+  return user;
 }
 
 export async function deleteUserById(repo: UserRepositorySpec, id: UserId): Promise<boolean> {
