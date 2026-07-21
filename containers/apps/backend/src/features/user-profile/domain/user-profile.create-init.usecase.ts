@@ -11,6 +11,7 @@ import { type FileQueryServiceSpec } from '../../../core-domain/file/file.query-
 import { type UserProfileEntity, UserProfileEntitySchema } from './user-profile.entity';
 import { ZodError } from 'zod';
 import { ValidationError } from '../../../shared/errors/global.error';
+import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export async function toUserProfile(
   profileEntity: UserProfileEntity,
@@ -20,7 +21,7 @@ export async function toUserProfile(
     const avatarUrlsMap = await fileQueryService.getFileUrlsByFileIds([profileEntity.avatarFileId]);
     const fileDto = avatarUrlsMap.get(profileEntity.avatarFileId) || undefined;
 
-    return UserProfileSchema.parse({
+    return makeSafeUsecaseResult(UserProfileSchema, {
       id: profileEntity.userId,
       name: profileEntity.name,
       avatarUrl: fileDto?.url,
@@ -28,7 +29,7 @@ export async function toUserProfile(
     });
   }
 
-  return UserProfileSchema.parse({
+  return makeSafeUsecaseResult(UserProfileSchema, {
     id: profileEntity.userId,
     name: profileEntity.name,
     avatarUrl: undefined,

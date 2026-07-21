@@ -8,6 +8,7 @@ import {
 } from '@tracen/contracts';
 import { type UserProfileHandlerEnv, injectUserProfileDeps } from './user-profile.di';
 import { upsertUserProfile } from './domain/user-profile.upsert.usecase';
+import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function userProfileRouter() {
   return new Hono<UserProfileHandlerEnv>()
@@ -22,7 +23,7 @@ export function userProfileRouter() {
         const jwtPayload = c.get('jwtPayload');
         if (!jwtPayload || !jwtPayload.sub) {
           return c.json(
-            SimpleApiResponseSchema.parse({
+            makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
               message: 'JWT token is invalid or missing',
             }),
@@ -31,7 +32,7 @@ export function userProfileRouter() {
         }
         if (jwtPayload.sub !== userId) {
           return c.json(
-            SimpleApiResponseSchema.parse({
+            makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
               message: 'User ID in the request does not match the authenticated user',
             }),
@@ -40,7 +41,7 @@ export function userProfileRouter() {
         }
         if (!userId) {
           return c.json(
-            SimpleApiResponseSchema.parse({
+            makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
               message: 'JWT token is invalid: sub (userId) is missing',
             }),
@@ -52,23 +53,13 @@ export function userProfileRouter() {
           const result = await upsertUserProfile(userProfileRepo, userId, parsedRequest);
 
           if (result.isExisted) {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: true,
-              }),
-              200
-            );
+            return c.json(makeSafeResponse(SimpleApiResponseSchema, { success: true }), 200);
           } else {
-            return c.json(
-              SimpleApiResponseSchema.parse({
-                success: true,
-              }),
-              201
-            );
+            return c.json(makeSafeResponse(SimpleApiResponseSchema, { success: true }), 201);
           }
-        } catch (error) {
-          console.error('User profile upsert failed:', error);
-          throw error; // グローバルエラーハンドラで処理
+        } catch (err) {
+          console.error('User profile upsert failed:', err);
+          throw err; // グローバルエラーハンドラで処理
         }
       }
     );
