@@ -10,6 +10,12 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  experimental: {
+    serverActions: {
+      // backendのFileSizeSchemaの上限(10MB)に合わせる。デフォルトは1MBのため画像アップロードで不足する
+      bodySizeLimit: '10mb',
+    },
+  },
   images: {
     remotePatterns: [
       {
