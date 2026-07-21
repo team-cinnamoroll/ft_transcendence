@@ -12,9 +12,9 @@
 
 ## フロントエンドのルール
 
-- **アプリ概要**: @docs/frontend-bff/MULTI_FACE.md
-- **フロントエンドのアーキテクチャ**: @docs/frontend-bff/FRONTEND_ARCHITECTURE.md
-- **i18n（国際化）ガイド**: @docs/frontend-bff/I18N.md
-- **Story Bookの使用ガイド**: @docs/frontend-bff/STORY_BOOK.md
+- **アプリ概要**: @containers/apps/frontend-bff/docs/app-overview/MULTI_FACE.md
+- **フロントエンドのアーキテクチャ**: @containers/apps/frontend-bff/docs/architecture/FRONTEND_ARCHITECTURE.md
+- **i18n（国際化）ガイド**: @containers/apps/frontend-bff/docs/tool-usage/I18N.md
+- **Story Bookの使用ガイド**: @containers/apps/frontend-bff/docs/tool-usage/STORY_BOOK.md
 
 ⚠️ これらのドキュメントは、プロジェクト全体の品質と一貫性を保つための重要なルールを定めています。実装前に必ず目を通し、理解してください。
