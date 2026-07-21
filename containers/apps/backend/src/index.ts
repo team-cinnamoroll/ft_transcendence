@@ -17,19 +17,26 @@ import { publicApiRouter } from './public.handler';
 import { protectedApiRouter } from './protected.handler';
 import { type GlobalErrorResponse, globalErrorHandler } from './global.error.handler';
 
-const config = parseEnv(process.env);
+let config: ReturnType<typeof parseEnv> | null = null;
 
-if (config.RUN_MIGRATIONS && config.NODE_ENV === 'production') {
-  await runMigrationsOnce(config.DATABASE_URL);
+try {
+  config = parseEnv(process.env);
+
+  if (config.RUN_MIGRATIONS && config.NODE_ENV === 'production') {
+    await runMigrationsOnce(config.DATABASE_URL);
+  }
+} catch (error) {
+  console.error('Error during migration:', error);
+  // process.exit(1);
 }
 
 const app = new Hono<AppEnv>();
 
 // 全局共通ミドルウェア
-app.use('*', injectConfig(config));
+app.use('*', injectConfig(config ? config : undefined));
 
 // 静的ファイル配信ミドルウェア
-const staticRoot = `${config.FILE_STORAGE_BASE_DIR || '/app/uploads'}/public-bucket/`;
+const staticRoot = `${config?.FILE_STORAGE_BASE_DIR || '/app/uploads'}/public-bucket/`;
 app.use(
   '/static/public-bucket/*',
   serveStatic({
@@ -68,10 +75,10 @@ const isDirectRun = process.argv[1]
   : false;
 
 if (isDirectRun) {
-  const port = config.PORT;
+  const port = config?.PORT || 8000;
 
-  const tlsCertPath = config.TLS_CERT_PATH;
-  const tlsKeyPath = config.TLS_KEY_PATH;
+  const tlsCertPath = config?.TLS_CERT_PATH;
+  const tlsKeyPath = config?.TLS_KEY_PATH;
 
   if (tlsCertPath && tlsKeyPath) {
     serve({
