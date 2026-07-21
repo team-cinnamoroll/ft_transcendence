@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { UserProfileUpsertRequestSchema } from '@tracen/contracts';
 import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import { updateUserProfileAction } from '@/server/actions/user-profile';
+import { uploadAvatarFileAction, deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { buildZodErrorMap } from '@/lib/zod-error-map';
 
 type Props = {
@@ -18,12 +21,22 @@ type ProfileFormFields = Pick<UserProfileUpsertRequest, 'name' | 'badge'>;
 
 const profileFormSchema = UserProfileUpsertRequestSchema.pick({ name: true, badge: true });
 
+// backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
+const MAX_AVATAR_FILE_SIZE = 10 * 1024 * 1024;
+
 const ProfileEditModal = ({ user, onClose }: Props) => {
   const t = useTranslations('profileEditModal');
   const tValidation = useTranslations('validation');
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [previewUrl, setPreviewUrl] = useState<string>(getAvatarUrl(user));
+  const [avatarFileId, setAvatarFileId] = useState<string | undefined>(undefined);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  // アップロード済みだが、まだ保存(PUT)には至っていないファイルのID。後始末の削除対象を追跡する
+  const uploadedFileIdRef = useRef<string | null>(null);
 
   const {
     register,
@@ -34,12 +47,70 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     defaultValues: { name: user.name, badge: user.badge },
   });
 
+  const discardPendingUpload = () => {
+    if (uploadedFileIdRef.current) {
+      void deleteUploadedFileAction(uploadedFileIdRef.current);
+      uploadedFileIdRef.current = null;
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
+
+  const handleClose = () => {
+    discardPendingUpload();
+    onClose();
+  };
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // 同じファイルを選び直しても onChange が発火するようにする
+    if (!file) return;
+
+    if (file.size > MAX_AVATAR_FILE_SIZE) {
+      setAvatarError(t('errorAvatarUploadFailed'));
+      return;
+    }
+
+    // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
+    discardPendingUpload();
+
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+    setPreviewUrl(objectUrl);
+    setAvatarError(null);
+    setAvatarFileId(undefined);
+    setIsUploadingAvatar(true);
+
+    const formData = new FormData();
+    formData.set('file', file);
+
+    void (async () => {
+      const result = await uploadAvatarFileAction(formData);
+      setIsUploadingAvatar(false);
+
+      if (!result.success) {
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setAvatarError(firstFieldError ?? t('errorAvatarUploadFailed'));
+        return;
+      }
+      if (!result.data.success) {
+        setAvatarError(result.data.message);
+        return;
+      }
+
+      uploadedFileIdRef.current = result.data.fileId;
+      setAvatarFileId(result.data.fileId);
+    })();
+  };
+
   const onValid = (data: ProfileFormFields) => {
-    if (isPending) return;
+    if (isPending || isUploadingAvatar) return;
 
     setError(null);
     startTransition(async () => {
-      const result = await updateUserProfileAction(data);
+      const result = await updateUserProfileAction({ ...data, avatarFileId });
 
       if (!result.success) {
         const firstFieldError = Object.values(result.errors)[0]?.[0];
@@ -51,6 +122,8 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
         return;
       }
 
+      // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
+      uploadedFileIdRef.current = null;
       onClose();
     });
   };
@@ -78,7 +151,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
           background: 'rgba(20,24,36,0.50)',
           backdropFilter: 'blur(4px)',
         }}
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -113,7 +186,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={t('close')}
             style={{
               width: 30,
@@ -202,21 +275,86 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <label
-              htmlFor="profile-avatar"
-              style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}
-            >
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
               {t('avatar')}
               <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
             </label>
-            <input
-              id="profile-avatar"
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder={t('avatarPlaceholder')}
-              style={inputStyle}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div
+                style={{
+                  position: 'relative',
+                  width: 52,
+                  height: 52,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  background: 'var(--mf-surface)',
+                }}
+              >
+                <Image
+                  src={previewUrl}
+                  alt={t('avatar')}
+                  width={52}
+                  height={52}
+                  style={{ objectFit: 'cover', display: 'block' }}
+                />
+                {isUploadingAvatar && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(20,24,36,0.45)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <svg
+                      className="mf-spin"
+                      width={20}
+                      height={20}
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 2a8 8 0 018 8" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              <label
+                htmlFor="profile-avatar-file"
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 10,
+                  border: '0.5px solid var(--mf-line)',
+                  background: 'var(--mf-surface)',
+                  color: 'var(--mf-brand)',
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: isUploadingAvatar ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {isUploadingAvatar ? t('uploading') : t('avatarSelectButton')}
+              </label>
+              <input
+                id="profile-avatar-file"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarFileChange}
+                disabled={isUploadingAvatar}
+                style={{ display: 'none' }}
+              />
+            </div>
+            {avatarError && (
+              <p role="alert" style={{ margin: 0, fontSize: 12, color: 'var(--mf-accent)' }}>
+                {avatarError}
+              </p>
+            )}
           </div>
 
           {error && (
@@ -228,7 +366,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
           <button
             type="button"
             onClick={handleSubmit(onValid)}
-            disabled={isPending}
+            disabled={isPending || isUploadingAvatar}
             style={{
               width: '100%',
               padding: '12px 0',
@@ -236,10 +374,12 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
               fontSize: 14,
               fontWeight: 700,
               border: 'none',
-              cursor: isPending ? 'not-allowed' : 'pointer',
-              background: isPending ? 'var(--mf-surface-tint)' : 'var(--mf-accent)',
-              color: isPending ? 'var(--mf-text-faint)' : '#fff',
-              boxShadow: isPending ? 'none' : '0 2px 10px rgba(212,146,42,0.25)',
+              cursor: isPending || isUploadingAvatar ? 'not-allowed' : 'pointer',
+              background:
+                isPending || isUploadingAvatar ? 'var(--mf-surface-tint)' : 'var(--mf-accent)',
+              color: isPending || isUploadingAvatar ? 'var(--mf-text-faint)' : '#fff',
+              boxShadow:
+                isPending || isUploadingAvatar ? 'none' : '0 2px 10px rgba(212,146,42,0.25)',
               transition: 'background 0.15s',
             }}
           >
