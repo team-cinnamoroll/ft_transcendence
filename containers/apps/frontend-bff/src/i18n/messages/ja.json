@@ -295,7 +295,9 @@
     "saving": "保存中…",
     "errorName": "名前を入力してください",
     "errorBadge": "バッジは絵文字1つにしてください",
-    "errorAvatar": "有効なURLを入力してください"
+    "errorAvatar": "有効なURLを入力してください",
+    "errorGeneric": "プロフィールの保存に失敗しました。時間をおいて再度お試しください。",
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。"
   },
   "faceDetailPage": {
     "backAriaLabel": "前のページに戻る"

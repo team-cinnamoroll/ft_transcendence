@@ -1,9 +1,10 @@
 import 'server-only';
 
-import type { UserProfile } from '@/types/user-profile';
+import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
 import type { UserMe } from '@/types/user';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
+import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
 
@@ -11,6 +12,12 @@ import { createSingletonProvider } from '@/repositories/provider';
 export type UserProfileRepositorySpec = {
   /** ログイン中の自分のプロフィールを取得（取得できない場合は null） */
   getMyProfile: (accessToken: string) => Promise<UserProfile | null>;
+  /** ログイン中の自分のプロフィールを更新（作成も兼ねる） */
+  updateMyProfile: (
+    accessToken: string,
+    userId: string,
+    input: UserProfileUpsertRequest
+  ) => Promise<ApiResult<void>>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -30,6 +37,19 @@ export function createUserProfileApiRepositoryImpl(): UserProfileRepositorySpec 
         return null;
       }
       return json.data.userProfile;
+    },
+
+    updateMyProfile: async (accessToken, userId, input) => {
+      const res = await createBackendClient(accessToken).api.v1['user-profile'][':userId'].$put({
+        param: { userId },
+        json: input,
+      });
+      if (!res.ok) {
+        // backend の生 message はログ用途のみ。画面表示には errorKind を使う（i18n非依存にするため）
+        console.error('UserProfileRepository.updateMyProfile: backend request failed', res.status);
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
+      }
+      return { success: true, data: undefined };
     },
   };
 }

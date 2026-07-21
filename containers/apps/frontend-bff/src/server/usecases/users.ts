@@ -1,6 +1,7 @@
 import 'server-only';
 
-import type { UserProfile } from '@/types/user-profile';
+import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
+import type { ApiResult } from '@/lib/api-error';
 import { getUserRepository } from '@/repositories/user-repository';
 import { getUserProfileRepository } from '@/repositories/user-profile-repository';
 import { getAuthSession } from './auth';
@@ -34,6 +35,15 @@ export async function getCurrentUser(): Promise<UserProfile> {
 
 export async function findUserById(userId: string): Promise<UserProfile | null> {
   return await getUserRepository().findById(userId);
+}
+
+/** ログイン中の自分のプロフィールを更新する（accessToken/userId はセッションから取得済みのものを渡す） */
+export async function updateMyProfile(
+  userId: string,
+  accessToken: string,
+  input: UserProfileUpsertRequest
+): Promise<ApiResult<void>> {
+  return await getUserProfileRepository().updateMyProfile(accessToken, userId, input);
 }
 
 export async function listAllUsers(): Promise<UserProfile[]> {

@@ -295,7 +295,9 @@
     "saving": "Saving…",
     "errorName": "Please enter a name",
     "errorBadge": "Badge must be a single emoji",
-    "errorAvatar": "Please enter a valid URL"
+    "errorAvatar": "Please enter a valid URL",
+    "errorGeneric": "Failed to save profile. Please try again later.",
+    "errorSessionExpired": "Your session has expired. Please sign in again."
   },
   "faceDetailPage": {
     "backAriaLabel": "Go back"
