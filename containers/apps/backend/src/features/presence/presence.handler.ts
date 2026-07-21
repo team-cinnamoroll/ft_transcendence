@@ -12,6 +12,7 @@ import {
   acceptOfflineRequest,
   getOnlineStatuses,
 } from './domain/presence.usecase';
+import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function presenceRouter() {
   return new Hono<PresenceHandlerEnv>()
@@ -22,7 +23,7 @@ export function presenceRouter() {
       const userId = jwtPayload.sub;
       if (!userId) {
         return c.json(
-          PresenceUpdateResponseSchema.parse({
+          makeSafeResponse(PresenceUpdateResponseSchema, {
             success: false,
             message: 'JWT token is invalid: sub (userId) is missing',
           }),
@@ -31,17 +32,17 @@ export function presenceRouter() {
       }
       try {
         await acceptHeartbeatRequest(presenceRepo, userId);
-      } catch (error) {
-        console.error('Error accepting heartbeat request:', error);
+      } catch (err) {
+        console.error('Error accepting heartbeat request:', err);
         return c.json(
-          PresenceUpdateResponseSchema.parse({
+          makeSafeResponse(PresenceUpdateResponseSchema, {
             success: false,
             message: 'Failed to process heartbeat request',
           }),
           500
         );
       }
-      return c.json(PresenceUpdateResponseSchema.parse({ success: true }));
+      return c.json(makeSafeResponse(PresenceUpdateResponseSchema, { success: true }), 200);
     })
     .post('/offline', async (c) => {
       const presenceRepo = c.get('presenceRepo');
@@ -49,7 +50,7 @@ export function presenceRouter() {
       const userId = jwtPayload.sub;
       if (!userId) {
         return c.json(
-          PresenceUpdateResponseSchema.parse({
+          makeSafeResponse(PresenceUpdateResponseSchema, {
             success: false,
             message: 'JWT token is invalid: sub (userId) is missing',
           }),
@@ -58,24 +59,24 @@ export function presenceRouter() {
       }
       try {
         await acceptOfflineRequest(presenceRepo, userId);
-      } catch (error) {
-        console.error('Error accepting offline request:', error);
+      } catch (err) {
+        console.error('Error accepting offline request:', err);
         return c.json(
-          PresenceUpdateResponseSchema.parse({
+          makeSafeResponse(PresenceUpdateResponseSchema, {
             success: false,
             message: 'Failed to process offline request',
           }),
           500
         );
       }
-      return c.json(PresenceUpdateResponseSchema.parse({ success: true }));
+      return c.json(makeSafeResponse(PresenceUpdateResponseSchema, { success: true }), 200);
     })
     .post('/status', zValidator('json', PresenceStatusRequestSchema), async (c) => {
       const presenceRepo = c.get('presenceRepo');
       const { userIds } = c.req.valid('json');
       if (!userIds || !Array.isArray(userIds)) {
         return c.json(
-          PresenceStatusResponseSchema.parse({
+          makeSafeResponse(PresenceStatusResponseSchema, {
             success: false,
             message: 'userIds must be an array',
           }),
@@ -85,12 +86,15 @@ export function presenceRouter() {
       try {
         const onlineStatuses = await getOnlineStatuses(presenceRepo, userIds);
         return c.json(
-          PresenceStatusResponseSchema.parse({ success: true, data: { onlineStatuses } })
+          makeSafeResponse(PresenceStatusResponseSchema, {
+            success: true,
+            data: { onlineStatuses },
+          })
         );
-      } catch (error) {
-        console.error('Error getting online statuses:', error);
+      } catch (err) {
+        console.error('Error getting online statuses:', err);
         return c.json(
-          PresenceStatusResponseSchema.parse({
+          makeSafeResponse(PresenceStatusResponseSchema, {
             success: false,
             message: 'Failed to get online statuses',
           }),
