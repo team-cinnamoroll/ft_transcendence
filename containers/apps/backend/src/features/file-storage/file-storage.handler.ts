@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../shared/utils/custom-z-validator';
 
 import { injectFileStorageDeps, FileStorageHandlerEnv } from './file-storage.di';
 import { saveFile } from './domain/usecases/file-storage.save-file.usecase';
@@ -22,16 +22,13 @@ import { makeSafeResponse } from '../../shared/utils/validation';
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
     .use('*', injectFileStorageDeps())
-    .post('/upload', zValidator('header', FileUploadRequestHeaderSchema), async (c) => {
+    .post('/upload', cZValidator('header', FileUploadRequestHeaderSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       const fileUrlGenerator = c.get('fileUrlGenerator');
       try {
         const jwtPayload = c.get('jwtPayload');
         const ownerId = jwtPayload.sub;
-        if (!ownerId) {
-          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
-        }
         const headers = c.req.valid('header');
         const fileSaveRequest = FileSaveRequestSchema.parse({
           ownerId,
@@ -58,21 +55,9 @@ export function fileStorageRouter() {
           200
         );
       } catch (err) {
-        console.error('File upload failed:', err);
+        console.error('Error during File upload:', err);
         if (err instanceof ZodError) {
-          return c.json(
-            makeSafeResponse(FileDeleteResponseSchema, {
-              success: false,
-              message: 'Invalid request data',
-            }),
-            400
-          );
-        }
-        if (err instanceof ValidationError) {
-          return c.json(
-            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
-            400
-          );
+          throw new ValidationError('Invalid request data');
         }
         if (err instanceof StorageQuotaExceededError) {
           return c.json(
@@ -96,15 +81,12 @@ export function fileStorageRouter() {
         throw err; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
-    .get('/download/:fileId', zValidator('param', FileRequestSchema), async (c) => {
+    .get('/download/:fileId', cZValidator('param', FileRequestSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       try {
         const jwtPayload = c.get('jwtPayload');
         const clientId = jwtPayload.sub;
-        if (!clientId) {
-          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
-        }
         const { fileId } = c.req.valid('param');
         const { stream, metadata } = await downloadPrivateFile(
           fileStorageRepo,
@@ -120,21 +102,9 @@ export function fileStorageRouter() {
         c.status(200);
         return c.body(stream);
       } catch (err) {
-        console.error('File download failed:', err);
+        console.error('Error during File download:', err);
         if (err instanceof ZodError) {
-          return c.json(
-            makeSafeResponse(SimpleApiResponseSchema, {
-              success: false,
-              message: 'Invalid request data',
-            }),
-            400
-          );
-        }
-        if (err instanceof ValidationError) {
-          return c.json(
-            makeSafeResponse(SimpleApiResponseSchema, { success: false, message: err.message }),
-            400
-          );
+          throw new ValidationError('Invalid request data');
         }
         if (err instanceof ForbiddenError) {
           return c.json(
@@ -151,7 +121,7 @@ export function fileStorageRouter() {
         throw err; // 未知のエラーは再スローしてグローバルエラーハンドラに任せる
       }
     })
-    .delete('/delete/:fileId', zValidator('param', FileRequestSchema), async (c) => {
+    .delete('/delete/:fileId', cZValidator('param', FileRequestSchema), async (c) => {
       const fileStorageRepo = c.get('fileStorageRepo');
       const fileMetadataRepo = c.get('fileMetadataRepo');
       try {
@@ -168,21 +138,9 @@ export function fileStorageRouter() {
         await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
         return c.json(makeSafeResponse(FileDeleteResponseSchema, { success: true }), 200);
       } catch (err) {
-        console.error('File deletion failed:', err);
+        console.error('Error during File deletion:', err);
         if (err instanceof ZodError) {
-          return c.json(
-            makeSafeResponse(FileDeleteResponseSchema, {
-              success: false,
-              message: 'Invalid request data',
-            }),
-            400
-          );
-        }
-        if (err instanceof ValidationError) {
-          return c.json(
-            makeSafeResponse(FileDeleteResponseSchema, { success: false, message: err.message }),
-            400
-          );
+          throw new ValidationError('Invalid request data');
         }
         if (err instanceof ForbiddenError) {
           return c.json(
