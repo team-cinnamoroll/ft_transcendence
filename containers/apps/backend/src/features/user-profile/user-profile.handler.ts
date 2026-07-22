@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../shared/utils/custom-z-validator';
 
 import {
   UserIdParamSchema,
@@ -8,6 +8,7 @@ import {
 } from '@tracen/contracts';
 import { type UserProfileHandlerEnv, injectUserProfileDeps } from './user-profile.di';
 import { upsertUserProfile } from './domain/user-profile.upsert.usecase';
+import { NotFoundError } from '../../shared/errors/global.error';
 import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function userProfileRouter() {
@@ -15,37 +16,19 @@ export function userProfileRouter() {
     .use('*', injectUserProfileDeps())
     .put(
       '/:userId',
-      zValidator('param', UserIdParamSchema),
-      zValidator('json', UserProfileUpsertRequestSchema),
+      cZValidator('param', UserIdParamSchema),
+      cZValidator('json', UserProfileUpsertRequestSchema),
       async (c) => {
         const userProfileRepo = c.get('userProfileRepo');
         const { id: userId } = c.req.valid('param');
         const jwtPayload = c.get('jwtPayload');
-        if (!jwtPayload || !jwtPayload.sub) {
-          return c.json(
-            makeSafeResponse(SimpleApiResponseSchema, {
-              success: false,
-              message: 'JWT token is invalid or missing',
-            }),
-            401
-          );
-        }
         if (jwtPayload.sub !== userId) {
           return c.json(
             makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
-              message: 'User ID in the request does not match the authenticated user',
+              message: 'Forbidden: You can only update your own profile',
             }),
             403
-          );
-        }
-        if (!userId) {
-          return c.json(
-            makeSafeResponse(SimpleApiResponseSchema, {
-              success: false,
-              message: 'JWT token is invalid: sub (userId) is missing',
-            }),
-            400
           );
         }
         const parsedRequest = c.req.valid('json');
@@ -58,7 +41,16 @@ export function userProfileRouter() {
             return c.json(makeSafeResponse(SimpleApiResponseSchema, { success: true }), 201);
           }
         } catch (err) {
-          console.error('User profile upsert failed:', err);
+          console.error('Error during User profile upsert:', err);
+          if (err instanceof NotFoundError) {
+            return c.json(
+              makeSafeResponse(SimpleApiResponseSchema, {
+                success: false,
+                message: err.message,
+              }),
+              404
+            );
+          }
           throw err; // グローバルエラーハンドラで処理
         }
       }
