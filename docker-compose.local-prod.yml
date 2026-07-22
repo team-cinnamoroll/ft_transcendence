@@ -91,6 +91,7 @@ services:
       dockerfile: containers/apps/frontend-bff/Dockerfile
       args:
         NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
+        APP_API_BASE_URL: ${APP_API_BASE_URL}
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${FRONTEND_PORT}

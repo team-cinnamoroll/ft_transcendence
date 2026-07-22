@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useTransition } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import { signOutAction } from '@/server/actions/auth';
 
 type Props = {
@@ -202,17 +204,17 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
               width: 48,
               height: 48,
               borderRadius: '50%',
-              background: 'var(--mf-brand)',
-              color: '#F8F6F1',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 18,
-              fontWeight: 700,
+              overflow: 'hidden',
               flexShrink: 0,
             }}
           >
-            {user.name.slice(0, 1)}
+            <Image
+              src={getAvatarUrl(user)}
+              alt={user.name}
+              width={48}
+              height={48}
+              style={{ objectFit: 'cover', display: 'block' }}
+            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--mf-brand)' }}>

@@ -27,8 +27,8 @@
   --mf-hover: rgba(30, 42, 74, 0.04);
 
   /* ── Typography ─────────────────────── */
-  --mf-font-sans: 'Noto Sans JP', 'Hiragino Sans', -apple-system, 'Helvetica Neue', system-ui,
-    sans-serif;
+  --mf-font-sans:
+    'Noto Sans JP', 'Hiragino Sans', -apple-system, 'Helvetica Neue', system-ui, sans-serif;
   --mf-font-serif: 'Shippori Mincho B1', 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
   --mf-font-serif-en: 'Cormorant Garamond', 'Shippori Mincho B1', serif;
 
@@ -92,4 +92,14 @@ body {
   50% {
     opacity: 0;
   }
+}
+
+/* ローディングスピナー回転アニメーション */
+@keyframes mf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mf-spin {
+  animation: mf-spin 0.8s linear infinite;
 }

@@ -11,3 +11,4 @@ const FileUploadResponseDataSchema = z
   .strict();
 
 export const FileUploadResponseSchema = createApiResponseSchema(FileUploadResponseDataSchema);
+export type FileUploadResponse = z.infer<typeof FileUploadResponseSchema>;
