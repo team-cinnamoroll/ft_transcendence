@@ -149,21 +149,56 @@ export async function runApiHealthCheck(
     log('STEP 2/5: backend POST /auth/sign-up (create test user)');
     // API: 公開鍵を取得する
     const publicKey = await repo.getJWKS();
-    if (!publicKey.ok) {
+    if (!publicKey.ok || publicKey.status !== 200) {
       return await failWithResponse('create-user', publicKey, 'failed to retrieve JWKS');
     }
     log(`OK (get-jwks): retrieved JWKS successfully ${JSON.stringify(await publicKey.json())}`);
 
-    // API: サインインする
+    // API: サインアップする
     const createRes = await repo.signUpUser(createUserInput);
     if (createRes.status === 409) {
       // Should be unlikely with randomized email, but keep message clear.
       return await failWithResponse('create-user', createRes, 'email already exists (conflict)');
     }
-    if (!createRes.ok) {
+    if (!createRes.ok || createRes.status !== 201) {
       return await failWithResponse('create-user', createRes, 'user creation returned non-2xx');
     }
 
+    const createErrorRes = await repo.signUpUser(createUserInput);
+    if (createErrorRes.status !== 409) {
+      return await failWithResponse(
+        'create-user',
+        createErrorRes,
+        'user creation did not return 409 on duplicate'
+      );
+    }
+    log('OK (create-user): duplicate user creation returned 409 as expected');
+
+    const createErrorRes2 = await repo.signUpUser({
+      email: 'testexample.com',
+      name: 'Test User',
+      password: 'pa1ddew222daa',
+    });
+    if (createErrorRes2.status !== 400) {
+      return await failWithResponse(
+        'create-user',
+        createErrorRes2,
+        'user creation did not return 400 on invalid input'
+      );
+    }
+    const createErrorRes3 = await repo.signUpUser({
+      email: 'test@example.com',
+      name: 'Test User',
+      password: 'pa',
+    });
+    if (createErrorRes3.status !== 400) {
+      return await failWithResponse(
+        'create-user',
+        createErrorRes3,
+        'user creation did not return 400 on invalid input'
+      );
+    }
+    log('OK (create-user): invalid user creation returned 400 as expected');
     const created = (await createRes.json()) as AuthSignUp;
     if (!created.success) {
       log(`FAIL (create-user): response JSON success=false, message=${created.message}`);
@@ -312,8 +347,8 @@ export async function runApiHealthCheck(
     log(`OK (create-user): JWT payload sub matches created user id`);
 
     // API: リフレッシュトークンを使用する
-    const refreshRes = await repo.refreshToken(createdRefreshToken);
-    if (!refreshRes.ok) {
+    const refreshRes = await repo.refreshToken(createdUserId, createdRefreshToken);
+    if (!refreshRes.ok || refreshRes.status !== 200) {
       return await failWithResponse(
         'refresh-token',
         refreshRes,
@@ -392,8 +427,8 @@ export async function runApiHealthCheck(
     );
 
     // API: 失効したリフレッシュトークンを使用する
-    const noRefreshRes = await repo.refreshToken(createdRefreshToken);
-    if (noRefreshRes.ok) {
+    const noRefreshRes = await repo.refreshToken(createdUserId, createdRefreshToken);
+    if (noRefreshRes.ok && noRefreshRes.status !== 401) {
       return await failWithResponse(
         'refresh-token',
         noRefreshRes,
@@ -403,11 +438,11 @@ export async function runApiHealthCheck(
     log('OK (refresh-token): revoked refresh token cannot be used');
 
     // API: 追放したリフレッシュトークンを使用する
-    const noRefreshRes2 = await repo.refreshToken(refreshJson.data.refreshToken);
-    if (noRefreshRes2.ok) {
+    const noRefreshRes2 = await repo.refreshToken(createdUserId, refreshJson.data.refreshToken);
+    if (noRefreshRes2.ok && noRefreshRes2.status !== 401) {
       return await failWithResponse(
         'refresh-token',
-        noRefreshRes,
+        noRefreshRes2,
         'refresh token endpoint returned 2xx for revoked token'
       );
     }
@@ -417,7 +452,7 @@ export async function runApiHealthCheck(
 
     // API: ユーザー情報の取得（存在確認）
     const getExistsRes = await repo.getMeUser(createdJwt);
-    if (!getExistsRes.ok) {
+    if (!getExistsRes.ok || getExistsRes.status !== 200) {
       return await failWithResponse('get-user-exists', getExistsRes, 'get user returned non-2xx');
     }
     const userMe = (await getExistsRes.json()) as UserMe;
@@ -457,13 +492,35 @@ export async function runApiHealthCheck(
     log('STEP 3.5/5: backend POST /auth/sign-in (sign in with created user)');
     // API: （既存ユーザーで）サインインする
     const signInRes = await repo.signInUser({ email, password });
-    if (!signInRes.ok) {
+    if (!signInRes.ok || signInRes.status !== 200) {
       return await failWithResponse(
         'sign-in-user',
         signInRes,
         'sign in with created user returned non-2xx'
       );
     }
+
+    const signInErrorRes = await repo.signInUser({ email, password: 'wrongpassword' });
+    if (signInErrorRes.status !== 401) {
+      return await failWithResponse(
+        'sign-in-user',
+        signInErrorRes,
+        'sign in with wrong password did not return 401'
+      );
+    }
+    log('OK (sign-in-user): sign in with wrong password returned 401 as expected');
+    const signInErrorRes2 = await repo.signInUser({
+      email: 'testexample.com',
+      password: 'wrongpassword',
+    });
+    if (signInErrorRes2.status !== 400) {
+      return await failWithResponse(
+        'sign-in-user',
+        signInErrorRes2,
+        'sign in with invalid email did not return 400'
+      );
+    }
+    log('OK (sign-in-user): sign in with invalid email returned 400 as expected');
     const signInJson = (await signInRes.json()) as AuthSignIn;
     log(`OK (sign-in-user): sign in with created user succeeded ${JSON.stringify(signInJson)}`);
     if (!signInJson.success) {
@@ -523,7 +580,27 @@ export async function runApiHealthCheck(
     }
     log(`OK (sign-in-user): sign in JWT payload sub matches created user id`);
 
-    log('STEP 4/5: backend DELETE /users/:id');
+    log('STEP 4/5: backend DELETE /auth/refresh (logout)');
+
+    // API: ログアウトする
+    const logoutRes = await repo.logout(createdUserId, signInRefreshToken);
+    if (!logoutRes.ok) {
+      return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');
+    }
+    log('OK (logout): 200');
+
+    // API: ログアウトしたリフレッシュトークンを使用する
+    const unexpectedLogoutRes = await repo.refreshToken(createdUserId, signInRefreshToken);
+    if (unexpectedLogoutRes.ok) {
+      return await failWithResponse(
+        'logout',
+        unexpectedLogoutRes,
+        'refresh token still valid after logout'
+      );
+    }
+    log('OK (logout): refresh token invalid after logout');
+
+    log('STEP 4.5/5: backend DELETE /users/:id');
 
     // API: ユーザーの削除
     const deleteRes = await repo.deleteUserById(createdUserId, createdJwt);
@@ -534,6 +611,15 @@ export async function runApiHealthCheck(
       return await failWithResponse('delete-user', deleteRes, 'expected 204 No Content on delete');
     }
     log('OK (delete-user): 204');
+    const deleteRes2 = await repo.deleteUserById(createdUserId, createdJwt);
+    if (deleteRes2.status !== 404) {
+      return await failWithResponse(
+        'delete-user',
+        deleteRes2,
+        'expected 404 Not Found on second delete'
+      );
+    }
+    log('OK (delete-user): 404 on second delete as expected');
 
     log('STEP 5/5: backend GET /users/:id (deleted check)');
 
@@ -547,26 +633,6 @@ export async function runApiHealthCheck(
       );
     }
     log('OK (get-user-deleted): 404');
-
-    log('STEP: backend DELETE /auth/refresh (logout)');
-
-    // API: ログアウトする
-    const logoutRes = await repo.logout(signInRefreshToken);
-    if (!logoutRes.ok) {
-      return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');
-    }
-    log('OK (logout): 200');
-
-    // API: ログアウトしたリフレッシュトークンを使用する
-    const unexpectedLogoutRes = await repo.refreshToken(signInRefreshToken);
-    if (unexpectedLogoutRes.ok) {
-      return await failWithResponse(
-        'logout',
-        unexpectedLogoutRes,
-        'refresh token still valid after logout'
-      );
-    }
-    log('OK (logout): refresh token invalid after logout');
 
     log('DONE: api health check success');
     return {

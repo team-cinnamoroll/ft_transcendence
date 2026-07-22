@@ -13,8 +13,8 @@ export type BackendHealthRepositorySpec = {
   signInUser: (input: AuthSignInRequest) => Promise<Response>;
   getMeUser: (token: string) => Promise<Response>;
   deleteUserById: (id: string, token: string) => Promise<Response>;
-  refreshToken: (refreshToken: string) => Promise<Response>;
-  logout: (refreshToken: string) => Promise<Response>;
+  refreshToken: (userId: string, refreshToken: string) => Promise<Response>;
+  logout: (userId: string, refreshToken: string) => Promise<Response>;
 };
 
 export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec {
@@ -46,11 +46,15 @@ export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec
     deleteUserById: async (id, token) => {
       return await createBackendClient(token).api.v1.users[':id'].$delete({ param: { id } });
     },
-    refreshToken: async (refreshToken) => {
-      return await createBackendClient().api.v1.auth.refresh.$post({ json: { refreshToken } });
+    refreshToken: async (userId, refreshToken) => {
+      return await createBackendClient().api.v1.auth.refresh.$post({
+        json: { userId, refreshToken },
+      });
     },
-    logout: async (refreshToken) => {
-      return await createBackendClient().api.v1.auth.refresh.$delete({ json: { refreshToken } });
+    logout: async (userId, refreshToken) => {
+      return await createBackendClient().api.v1.auth.refresh.$delete({
+        json: { userId, refreshToken },
+      });
     },
   };
 }
