@@ -24,6 +24,9 @@ const profileFormSchema = UserProfileUpsertRequestSchema.pick({ name: true, badg
 // backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
 const MAX_AVATAR_FILE_SIZE = 10 * 1024 * 1024;
 
+// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/pngのみに制限する
+const ALLOWED_AVATAR_FILE_TYPES = ['image/jpeg', 'image/png'];
+
 const ProfileEditModal = ({ user, onClose }: Props) => {
   const t = useTranslations('profileEditModal');
   const tValidation = useTranslations('validation');
@@ -67,6 +70,11 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     const file = e.target.files?.[0];
     e.target.value = ''; // 同じファイルを選び直しても onChange が発火するようにする
     if (!file) return;
+
+    if (!ALLOWED_AVATAR_FILE_TYPES.includes(file.type)) {
+      setAvatarError(t('errorAvatarInvalidType'));
+      return;
+    }
 
     if (file.size > MAX_AVATAR_FILE_SIZE) {
       setAvatarError(t('errorAvatarUploadFailed'));
@@ -344,7 +352,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
               <input
                 id="profile-avatar-file"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 onChange={handleAvatarFileChange}
                 disabled={isUploadingAvatar}
                 style={{ display: 'none' }}

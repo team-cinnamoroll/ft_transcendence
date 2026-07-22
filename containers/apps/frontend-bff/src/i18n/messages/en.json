@@ -298,6 +298,7 @@
     "errorBadge": "Badge must be a single emoji",
     "errorAvatar": "Please enter a valid URL",
     "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
+    "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
     "errorGeneric": "Failed to save profile. Please try again later.",
     "errorSessionExpired": "Your session has expired. Please sign in again."
   },
