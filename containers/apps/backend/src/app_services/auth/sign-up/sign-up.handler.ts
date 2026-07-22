@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
 import {
@@ -10,7 +10,7 @@ import { AuthSignUpRequestSchema, AuthSignUpResponseSchema } from '@tracen/contr
 import { registerUser } from './sign-up.register-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { createInitialUserProfile } from '../../../features/user-profile/domain/user-profile.create-init.usecase';
-import { ValidationError, ServiceUnavailableError } from '../../../shared/errors/global.error';
+import { ServiceUnavailableError } from '../../../shared/errors/global.error';
 import {
   EmailAlreadyExistsError,
   UserAlreadyExistsError,
@@ -20,7 +20,7 @@ import { makeSafeResponse } from '../../../shared/utils/validation';
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
     .use('*', injectFileQueryDeps())
-    .post('/', zValidator('json', AuthSignUpRequestSchema), async (c) => {
+    .post('/', cZValidator('json', AuthSignUpRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
       const userProfileRepo = c.get('userProfileRepo');
@@ -56,16 +56,7 @@ export function signUpRouter() {
           201
         );
       } catch (err) {
-        if (err instanceof ValidationError) {
-          // バリデーションエラー → 400 Bad Request
-          return c.json(
-            makeSafeResponse(AuthSignUpResponseSchema, {
-              success: false,
-              message: err.message,
-            }),
-            400
-          );
-        }
+        console.error('Error during sign-up:', err);
         // 重複エラー（例：email重複）→ 409 Conflict
         if (err instanceof EmailAlreadyExistsError || err instanceof UserAlreadyExistsError) {
           return c.json(
@@ -88,7 +79,6 @@ export function signUpRouter() {
         }
 
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
-        console.error('SignUp error:', err);
         throw err; // global error handler に任せる
       }
     });

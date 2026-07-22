@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
 import {
@@ -10,13 +10,13 @@ import { AuthSignInRequestSchema, AuthSignInResponseSchema } from '@tracen/contr
 import { verifyUser } from './sign-in.verify-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { getOrCreateUserProfile } from '../../../features/user-profile/domain/user-profile.get-or-create.usecase';
-import { ValidationError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
 import { makeSafeResponse } from '../../../shared/utils/validation';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
     .use('*', injectFileQueryDeps())
-    .post('/', zValidator('json', AuthSignInRequestSchema), async (c) => {
+    .post('/', cZValidator('json', AuthSignInRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
       const authPassWorker = c.get('authPassWorker');
@@ -53,18 +53,21 @@ export function signInRouter() {
         );
       } catch (err) {
         console.error('Error during sign-in:', err);
-        if (err instanceof ValidationError) {
-          // バリデーションエラー → 400 Bad Request
-          return c.json(
-            makeSafeResponse(AuthSignInResponseSchema, { success: false, message: err.message }),
-            400
-          );
-        }
         if (err instanceof UnauthorizedError) {
           // 認証エラー → 401 Unauthorized
           return c.json(
             makeSafeResponse(AuthSignInResponseSchema, { success: false, message: err.message }),
             401
+          );
+        }
+        // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(AuthSignInResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
           );
         }
         throw err; // その他のエラーはグローバルエラーハンドラで処理
