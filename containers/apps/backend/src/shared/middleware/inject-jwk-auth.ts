@@ -38,6 +38,16 @@ export const injectJwtAuthDeps = () => {
 
     // ② 自社宛てクレームのチェック
     const payload = c.get('jwtPayload');
+    if (!payload || !payload.sub) {
+      return c.json(
+        makeSafeResponse(SimpleApiResponseSchema, {
+          success: false,
+          message: 'Unauthorized: Invalid JWT',
+        }),
+        401
+      );
+    }
+
     const expectedIssuer = c.get('config').JWT_ISSUER;
 
     // audは設定していないため、issだけをチェックする
