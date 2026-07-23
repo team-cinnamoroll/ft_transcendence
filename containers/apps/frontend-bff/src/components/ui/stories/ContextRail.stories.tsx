@@ -7,7 +7,10 @@ import type { UserProfile } from '@/types/user-profile';
 const mockUser: UserProfile = {
   id: 'user-1',
   name: '山田 太郎',
-  avatarUrl: 'https://i.pravatar.cc/150?u=user-1',
+  avatar: {
+    id: 'avatar-1',
+    url: 'https://i.pravatar.cc/150?u=user-1',
+  },
   badge: '🌟',
 };
 
@@ -57,7 +60,11 @@ const mockUsers: UserProfile[] = [
   {
     id: 'user-2',
     name: '佐藤 花子',
-    avatarUrl: 'https://i.pravatar.cc/150?u=user-2',
+    avatar: {
+      id: 'avatar-2',
+      url: 'https://i.pravatar.cc/150?u=user-2',
+    },
+    badge: '💖',
   },
 ];
 
