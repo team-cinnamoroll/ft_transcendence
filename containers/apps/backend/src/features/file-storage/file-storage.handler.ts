@@ -136,7 +136,7 @@ export function fileStorageRouter() {
           clientId,
         });
         await deleteFile(fileStorageRepo, fileMetadataRepo, deleteRequest);
-        return c.json(makeSafeResponse(FileDeleteResponseSchema, { success: true }), 200);
+        return c.body(null, 204);
       } catch (err) {
         console.error('Error during File deletion:', err);
         if (err instanceof ZodError) {

@@ -237,14 +237,12 @@ run_delete_test() {
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json")
     DELETE_HTTP_STATUS=$(echo "$RES_DELETE" | tail -n 1)
-    DELETE_BODY=$(echo "$RES_DELETE" | sed '$d')
-    DELETE_SUCCESS=$(echo "$DELETE_BODY" | jq -r '.success')
 
-    if [ "$DELETE_HTTP_STATUS" -ne 200 ] || [ "$DELETE_SUCCESS" != "true" ]; then
+    if [ "$DELETE_HTTP_STATUS" -ne 204 ]; then
         echo "❌ First delete failed. HTTP Status: $DELETE_HTTP_STATUS Response: $DELETE_BODY"
         exit 1
     fi
-    echo "  -> 🎉 Delete Success (HTTP 200, success=true)."
+    echo "  -> 🎉 Delete Success (HTTP 204)."
 
     echo "Deleting file again (second attempt)..."
     RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/file-storage/delete/$U1_FILE_ID" \

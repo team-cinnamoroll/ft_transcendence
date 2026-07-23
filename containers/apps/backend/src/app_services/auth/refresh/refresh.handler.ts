@@ -2,11 +2,7 @@ import { Hono } from 'hono';
 import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
-import {
-  AuthRefreshRequestSchema,
-  AuthRefreshResponseSchema,
-  SimpleApiResponseSchema,
-} from '@tracen/contracts';
+import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
 import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
 import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { makeSafeResponse } from '../../../shared/utils/validation';
@@ -70,12 +66,8 @@ export function refreshRouter() {
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
       try {
         await logoutByRefreshToken(authRefreshTokenRepository, request);
-        return c.json(
-          makeSafeResponse(SimpleApiResponseSchema, {
-            success: true,
-          }),
-          200
-        );
+        return c.body(null, 204);
+        // セキュリティの観点から、ログアウト処理の結果は常に成功として返す（存在しないトークンでも204を返す。404は返さない）
       } catch (err) {
         console.error('Error during Refresh Logout execution:', err);
         // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
