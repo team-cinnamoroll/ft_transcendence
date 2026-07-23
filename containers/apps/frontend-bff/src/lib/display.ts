@@ -1,4 +1,12 @@
 import type { Face } from '@/types/face';
+import type { UserProfile } from '@/types/user-profile';
+
+const DEFAULT_AVATAR_URL = '/images/default-avatar.png';
+
+/** avatarUrl が未設定の場合にデフォルト画像へフォールバックする */
+export const getAvatarUrl = (user: Pick<UserProfile, 'avatar'>): string => {
+  return user.avatar?.url || DEFAULT_AVATAR_URL;
+};
 
 export const createLookupMap = <K extends PropertyKey, T>(
   items: T[],

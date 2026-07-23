@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { AuthSignUpRequest, AuthSignInRequest } from '@tracen/contracts';
+import type { AuthSignUpRequest, AuthSignInRequest } from '@/types/auth';
 
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
@@ -11,10 +11,10 @@ export type BackendHealthRepositorySpec = {
   getJWKS: () => Promise<Response>;
   signUpUser: (input: AuthSignUpRequest) => Promise<Response>;
   signInUser: (input: AuthSignInRequest) => Promise<Response>;
-  getUserById: (id: string, token: string) => Promise<Response>;
+  getMeUser: (token: string) => Promise<Response>;
   deleteUserById: (id: string, token: string) => Promise<Response>;
-  refreshToken: (refreshToken: string) => Promise<Response>;
-  logout: (refreshToken: string) => Promise<Response>;
+  refreshToken: (userId: string, refreshToken: string) => Promise<Response>;
+  logout: (userId: string, refreshToken: string) => Promise<Response>;
 };
 
 export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec {
@@ -39,18 +39,22 @@ export function createBackendHealthRepositoryImpl(): BackendHealthRepositorySpec
       return await createBackendClient().api.v1.auth['sign-in'].$post({ json: input });
     },
 
-    getUserById: async (id, token) => {
-      return await createBackendClient(token).api.v1.users[':id'].$get({ param: { id } });
+    getMeUser: async (token) => {
+      return await createBackendClient(token).api.v1.users.me.$get();
     },
 
     deleteUserById: async (id, token) => {
       return await createBackendClient(token).api.v1.users[':id'].$delete({ param: { id } });
     },
-    refreshToken: async (refreshToken) => {
-      return await createBackendClient().api.v1.auth.refresh.$post({ json: { refreshToken } });
+    refreshToken: async (userId, refreshToken) => {
+      return await createBackendClient().api.v1.auth.refresh.$post({
+        json: { userId, refreshToken },
+      });
     },
-    logout: async (refreshToken) => {
-      return await createBackendClient().api.v1.auth.refresh.$delete({ json: { refreshToken } });
+    logout: async (userId, refreshToken) => {
+      return await createBackendClient().api.v1.auth.refresh.$delete({
+        json: { userId, refreshToken },
+      });
     },
   };
 }

@@ -289,16 +289,21 @@
     "optional": "(facultatif)",
     "badgePlaceholder": "🌟",
     "badgeHint": "Un seul emoji",
-    "avatar": "URL de l'avatar",
-    "avatarPlaceholder": "https://example.com/avatar.png",
+    "avatar": "Photo de profil",
+    "avatarSelectButton": "Choisir une image",
+    "uploading": "Téléversement…",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "errorName": "Veuillez saisir un nom",
     "errorBadge": "Le badge doit être un seul emoji",
-    "errorAvatar": "Veuillez saisir une URL valide"
+    "errorAvatar": "Veuillez saisir une URL valide",
+    "errorAvatarUploadFailed": "Échec du téléversement de l'image. Veuillez réessayer.",
+    "errorAvatarInvalidType": "Veuillez sélectionner une image au format JPEG ou PNG.",
+    "errorGeneric": "Échec de l'enregistrement du profil. Veuillez réessayer plus tard.",
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "faceDetailPage": {
-    "backAriaLabel": "Retour à la liste des facettes"
+    "backAriaLabel": "Retour"
   },
   "relativeTime": {
     "justNow": "À l'instant",
@@ -320,6 +325,11 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Se déconnecter",
     "login": "Se connecter"
+  },
+  "legal": {
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "copyright": "© {year} MultiFace"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Menu du compte"
@@ -415,6 +425,7 @@
     "submit": "S'inscrire",
     "submitting": "Inscription…",
     "errorGeneric": "L'inscription a échoué. Veuillez réessayer plus tard.",
+    "errorEmailAlreadyExists": "Cette adresse e-mail est déjà utilisée.",
     "switchToSignInPrompt": "Vous avez déjà un compte ?",
     "switchToSignInLink": "Se connecter"
   },
@@ -427,6 +438,7 @@
     "submit": "Se connecter",
     "submitting": "Connexion…",
     "errorGeneric": "Connexion échouée. Veuillez vérifier votre e-mail et votre mot de passe.",
+    "errorUnexpected": "Une erreur est survenue. Veuillez réessayer plus tard.",
     "switchToSignUpPrompt": "Vous n'avez pas de compte ?",
     "switchToSignUpLink": "S'inscrire"
   }

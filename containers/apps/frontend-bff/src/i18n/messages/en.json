@@ -289,16 +289,21 @@
     "optional": "(optional)",
     "badgePlaceholder": "🌟",
     "badgeHint": "A single emoji",
-    "avatar": "Avatar URL",
-    "avatarPlaceholder": "https://example.com/avatar.png",
+    "avatar": "Avatar image",
+    "avatarSelectButton": "Choose image",
+    "uploading": "Uploading…",
     "save": "Save",
     "saving": "Saving…",
     "errorName": "Please enter a name",
     "errorBadge": "Badge must be a single emoji",
-    "errorAvatar": "Please enter a valid URL"
+    "errorAvatar": "Please enter a valid URL",
+    "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
+    "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
+    "errorGeneric": "Failed to save profile. Please try again later.",
+    "errorSessionExpired": "Your session has expired. Please sign in again."
   },
   "faceDetailPage": {
-    "backAriaLabel": "Back to faces list"
+    "backAriaLabel": "Go back"
   },
   "relativeTime": {
     "justNow": "Just now",
@@ -320,6 +325,11 @@
     "seedsUnit": "{count, plural, one {Seed} other {Seeds}}",
     "logout": "Log out",
     "login": "Log in"
+  },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© {year} MultiFace"
   },
   "appHeader": {
     "accountMenuAriaLabel": "Account menu"
@@ -415,6 +425,7 @@
     "submit": "Sign up",
     "submitting": "Signing up…",
     "errorGeneric": "Sign up failed. Please try again later.",
+    "errorEmailAlreadyExists": "This email address is already registered.",
     "switchToSignInPrompt": "Already have an account?",
     "switchToSignInLink": "Sign in"
   },
@@ -427,6 +438,7 @@
     "submit": "Sign in",
     "submitting": "Signing in…",
     "errorGeneric": "Sign in failed. Please check your email and password.",
+    "errorUnexpected": "Something went wrong. Please try again later.",
     "switchToSignUpPrompt": "Don't have an account?",
     "switchToSignUpLink": "Sign up"
   }

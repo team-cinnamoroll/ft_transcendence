@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SuccessResponseSchema } from '../../shared';
+import { SimpleApiResponseSchema } from '../../shared/response';
 
-export const FileDeleteResponseSchema = SuccessResponseSchema;
+export const FileDeleteResponseSchema = SimpleApiResponseSchema;
 export type FileDeleteResponse = z.infer<typeof FileDeleteResponseSchema>;

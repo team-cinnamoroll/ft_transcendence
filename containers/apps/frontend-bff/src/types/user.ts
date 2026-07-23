@@ -1,1 +1,1 @@
-export type { User } from '@tracen/contracts';
+export type { User, UserMeResponse as UserMe } from '@tracen/contracts';

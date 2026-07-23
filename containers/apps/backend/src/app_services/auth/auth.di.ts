@@ -16,6 +16,8 @@ import {
 } from '../../features/auth/infra/auth.worker.di';
 import type { AuthRefreshTokenRepositorySpec } from '../../features/auth/domain/auth.repository';
 import { getAuthRefreshTokenRepository } from '../../features/auth/infra/auth.repository.di';
+import { makeSafeResponse } from '../../shared/utils/validation';
+import { SimpleApiResponseSchema } from '@tracen/contracts';
 
 export type AuthHandlerEnv = AppEnv & {
   Variables: {
@@ -31,11 +33,26 @@ export function injectAuthDeps(): MiddlewareHandler<AuthHandlerEnv> {
   return async (c, next) => {
     const config = c.get('config');
     if (!config) {
-      return c.json({ message: 'Config is required' }, 500);
+      return c.json(
+        makeSafeResponse(SimpleApiResponseSchema, {
+          success: false,
+          message: 'Service Initialization error',
+        }),
+        500
+      );
     }
     const userRepo = getUserRepository(config.DATABASE_URL);
     const authPassWorker = getAuthPassWorker(config.PEPPER);
     const authAccessTokenWorker = getAuthAccessTokenWorker(config.JWT_PRIVATE_KEY_PEM);
+    if (!userRepo || !authPassWorker || !authAccessTokenWorker) {
+      return c.json(
+        makeSafeResponse(SimpleApiResponseSchema, {
+          success: false,
+          message: 'Failed to initialize dependencies',
+        }),
+        500
+      );
+    }
     c.set('userRepo', userRepo);
     c.set('authPassWorker', authPassWorker);
     c.set('authAccessTokenWorker', authAccessTokenWorker);

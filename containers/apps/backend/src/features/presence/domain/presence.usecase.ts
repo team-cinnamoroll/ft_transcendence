@@ -1,4 +1,4 @@
-import { UserId } from '@tracen/contracts';
+import { UserId, IsOnline } from '@tracen/contracts';
 import { PresenceRepositorySpec } from './presence.repository';
 
 export async function acceptHeartbeatRequest(
@@ -18,6 +18,6 @@ export async function acceptOfflineRequest(
 export async function getOnlineStatuses(
   repo: PresenceRepositorySpec,
   userIds: UserId[]
-): Promise<Record<UserId, boolean>> {
+): Promise<Record<UserId, IsOnline>> {
   return await repo.getOnlineStatuses(userIds);
 }

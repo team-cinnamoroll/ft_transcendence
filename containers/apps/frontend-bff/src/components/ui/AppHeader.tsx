@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import Wordmark from '@/components/ui/Wordmark';
 import AccountMenu from '@/components/ui/AccountMenu';
 
@@ -98,7 +99,7 @@ const AppHeader = ({
             }}
           >
             <Image
-              src={user.avatarUrl || '/images/default-avatar.png'}
+              src={getAvatarUrl(user)}
               alt={user.name}
               width={30}
               height={30}

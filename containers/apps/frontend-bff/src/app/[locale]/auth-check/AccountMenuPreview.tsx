@@ -7,7 +7,10 @@ import type { UserProfile } from '@/types/user-profile';
 const previewUser: UserProfile = {
   id: 'preview-user',
   name: 'プレビュー用ユーザー',
-  avatarUrl: 'https://i.pravatar.cc/150?u=auth-check-preview',
+  avatar: {
+    id: 'preview-avatar',
+    url: 'https://i.pravatar.cc/150?u=auth-check-preview',
+  },
   badge: '🔍',
 };
 

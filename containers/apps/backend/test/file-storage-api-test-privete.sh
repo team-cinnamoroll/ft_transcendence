@@ -197,7 +197,7 @@ run_upload_test() {
             exit 1
         fi
 
-        local current_file_id=$(echo "$RES_UPLOAD" | jq -r '.fileId')
+        local current_file_id=$(echo "$RES_UPLOAD" | jq -r '.data.fileId')
         declare U${i}_FILE_ID=$current_file_id
 
         echo "  -> 🎉 Upload Success! User $i Returned File ID: $current_file_id"
@@ -233,25 +233,21 @@ run_delete_test() {
     fi
 
     echo "Deleting file (first attempt)..."
-    RES_DELETE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+    RES_DELETE=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/file-storage/delete/$U1_FILE_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "{\"fileId\":\"$U1_FILE_ID\"}")
+        -H "Content-Type: application/json")
     DELETE_HTTP_STATUS=$(echo "$RES_DELETE" | tail -n 1)
-    DELETE_BODY=$(echo "$RES_DELETE" | sed '$d')
-    DELETE_SUCCESS=$(echo "$DELETE_BODY" | jq -r '.success')
 
-    if [ "$DELETE_HTTP_STATUS" -ne 200 ] || [ "$DELETE_SUCCESS" != "true" ]; then
+    if [ "$DELETE_HTTP_STATUS" -ne 204 ]; then
         echo "❌ First delete failed. HTTP Status: $DELETE_HTTP_STATUS Response: $DELETE_BODY"
         exit 1
     fi
-    echo "  -> 🎉 Delete Success (HTTP 200, success=true)."
+    echo "  -> 🎉 Delete Success (HTTP 204)."
 
     echo "Deleting file again (second attempt)..."
-    RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/delete" \
+    RES_DELETE_REPEAT=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/file-storage/delete/$U1_FILE_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "{\"fileId\":\"$U1_FILE_ID\"}")
+        -H "Content-Type: application/json")
     DELETE_REPEAT_HTTP_STATUS=$(echo "$RES_DELETE_REPEAT" | tail -n 1)
     DELETE_REPEAT_BODY=$(echo "$RES_DELETE_REPEAT" | sed '$d')
     DELETE_REPEAT_SUCCESS=$(echo "$DELETE_REPEAT_BODY" | jq -r '.success')
@@ -283,10 +279,9 @@ cleanup() {
         # 1. ユーザー削除・ログアウトの【前】に、アップロードしたファイルを削除
         if [ -n "$file_id" ] && [ -n "$token" ]; then
             echo "Deleting remaining file for User $i..."
-            curl -s -X POST "$BASE_URL/file-storage/delete" \
+            curl -s -X DELETE "$BASE_URL/file-storage/delete/$file_id" \
                 -H "Authorization: Bearer $token" \
-                -H "Content-Type: application/json" \
-                -d "{\"fileId\":\"$file_id\"}" > /dev/null
+                -H "Content-Type: application/json" > /dev/null
         fi
 
         # 2. ログアウト

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useTransition } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
+import { getAvatarUrl } from '@/lib/display';
 import { signOutAction } from '@/server/actions/auth';
 
 type Props = {
@@ -22,6 +24,7 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('accountMenu');
+  const tLegal = useTranslations('legal');
 
   const handleSignOut = () => {
     if (isPending) return;
@@ -104,6 +107,45 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
       title: t('help'),
       sub: null,
     },
+    {
+      icon: (
+        <svg
+          width={15}
+          height={15}
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="var(--mf-brand)"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 3h6l3 3v11a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" />
+          <path d="M12 3v3h3M7.5 10h5M7.5 13h5" />
+        </svg>
+      ),
+      title: tLegal('terms'),
+      sub: null,
+      href: '/terms',
+    },
+    {
+      icon: (
+        <svg
+          width={15}
+          height={15}
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="var(--mf-brand)"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10 2l6 3v5c0 3.5-2.5 6.5-6 8-3.5-1.5-6-4.5-6-8V5l6-3z" />
+        </svg>
+      ),
+      title: tLegal('privacy'),
+      sub: null,
+      href: '/privacy',
+    },
   ];
 
   return (
@@ -162,17 +204,17 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
               width: 48,
               height: 48,
               borderRadius: '50%',
-              background: 'var(--mf-brand)',
-              color: '#F8F6F1',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 18,
-              fontWeight: 700,
+              overflow: 'hidden',
               flexShrink: 0,
             }}
           >
-            {user.name.slice(0, 1)}
+            <Image
+              src={getAvatarUrl(user)}
+              alt={user.name}
+              width={48}
+              height={48}
+              style={{ objectFit: 'cover', display: 'block' }}
+            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--mf-brand)' }}>

@@ -1,25 +1,30 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
 import {
   injectFileQueryDeps,
   FileQueryHandlerEnv,
 } from '../../../features/file-storage/file.query-service.di';
-import { AuthSignUpRequestSchema, AuthSignUpResponseSchema } from '@tracen/contracts';
+import {
+  AuthSignUpRequestSchema,
+  AuthSignUpResponseSchema,
+  UserNicknameSchema,
+} from '@tracen/contracts';
 import { registerUser } from './sign-up.register-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { createInitialUserProfile } from '../../../features/user-profile/domain/user-profile.create-init.usecase';
-import { ValidationError } from '../../../shared/errors/global.error';
+import { ServiceUnavailableError } from '../../../shared/errors/global.error';
 import {
   EmailAlreadyExistsError,
   UserAlreadyExistsError,
 } from '../../../features/users/domain/users.error';
+import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
     .use('*', injectFileQueryDeps())
-    .post('/', zValidator('json', AuthSignUpRequestSchema), async (c) => {
+    .post('/', cZValidator('json', AuthSignUpRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const userRepo = c.get('userRepo');
       const userProfileRepo = c.get('userProfileRepo');
@@ -36,14 +41,15 @@ export function signUpRouter() {
           config,
           registeredUser.id
         );
+        const nickname = makeSafeUsecaseResult(UserNicknameSchema, registeredUser.name);
         const userProfile = await createInitialUserProfile(
           userProfileRepo,
           fileQueryService,
           registeredUser.id,
-          registeredUser.name
+          nickname
         );
         return c.json(
-          AuthSignUpResponseSchema.parse({
+          makeSafeResponse(AuthSignUpResponseSchema, {
             success: true,
             data: {
               accessToken: userTokens.accessToken,
@@ -55,28 +61,29 @@ export function signUpRouter() {
           201
         );
       } catch (err) {
-        // success: false の場合はドメインエラー（例：email重複）→ 409 Conflict
+        console.error('Error during sign-up:', err);
+        // 重複エラー（例：email重複）→ 409 Conflict
         if (err instanceof EmailAlreadyExistsError || err instanceof UserAlreadyExistsError) {
           return c.json(
-            AuthSignUpResponseSchema.parse({
+            makeSafeResponse(AuthSignUpResponseSchema, {
               success: false,
               message: err.message,
             }),
             409
           );
         }
-        if (err instanceof ValidationError) {
-          // バリデーションエラー → 400 Bad Request
+        // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
+        if (err instanceof ServiceUnavailableError) {
           return c.json(
-            AuthSignUpResponseSchema.parse({
+            makeSafeResponse(AuthSignUpResponseSchema, {
               success: false,
               message: err.message,
             }),
-            400
+            503
           );
         }
+
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
-        console.error('SignUp error:', err);
         throw err; // global error handler に任せる
       }
     });

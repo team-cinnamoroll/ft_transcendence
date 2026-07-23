@@ -167,7 +167,7 @@ src/
 
 - ファイル: `src/features/**/**.handler.ts`
 - 役割:
-  - `zValidator('json' | 'param', schema)` で入力検証
+  - `zValidator('json' | 'param', schema)` で入力検証（実装ではカスタムしたcZValidatorを使用する）
   - `c.req.valid(...)` で型付き入力を取得
   - usecase を呼ぶ
   - usecase 由来のドメインエラーを HTTP ステータスへ変換
@@ -178,7 +178,7 @@ src/
 export function usersRouter() {
   return new Hono<UsersHandlerEnv>()
     .use('*', injectUsersDeps())
-    .get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
+    .get('/:id', cZValidator('param', UserIdParamSchema), async (c) => {
       const { id } = c.req.valid('param');
       const userRepo = c.get('userRepo');
       const user = await getUserById(userRepo, id);
@@ -275,7 +275,7 @@ export function injectUsersDeps(): MiddlewareHandler<UsersHandlerEnv> {
   return async (c, next) => {
     const config = c.get('config');
     if (!config) {
-      return c.json({ message: 'Config is required' }, 500);
+      return c.json({ message: 'Service Initialization error' }, 500);
     }
     const userRepo = getUserRepository(config.DATABASE_URL);
     c.set('userRepo', userRepo);
@@ -342,7 +342,7 @@ backend の入力検証は「境界（handler）」で行います。
 ```ts
 return new Hono<UsersHandlerEnv>()
   .use('*', injectUsersDeps())
-  .get('/:id', zValidator('param', UserIdParamSchema), async (c) => {
+  .get('/:id', cZValidator('param', UserIdParamSchema), async (c) => {
     const { id } = c.req.valid('param');
     // id は contracts の schema で検証済み
   });
@@ -354,7 +354,7 @@ return new Hono<UsersHandlerEnv>()
 
 ### 8-1. schema
 
-- `src/shared/infra/db/schema.ts` に Drizzle schema を集約します。
+- 各feature の `src/features/<feature-name>/infra/db/schema.ts` に Drizzle schema を配置します。
 - `users.email` の unique 制約など、DB の整合性は DB 側で担保します。
 
 ### 8-2. client（接続）
@@ -463,8 +463,8 @@ export function usersRouter(): Hono<UsersHandlerEnv> {
 
 2. **DB schema と migration（必要な場合）**
 
-- `src/shared/infra/db/schema.ts` にテーブルを追加
-- `pnpm --filter @tracen/backend db:generate` で migration を生成
+- `src/features/<feature-name>/infra/db/schema.ts` にテーブルを追加
+- `pnpm --filter @tracen/backend db:generate` で migration を生成（リリース前だけ実行）
 - 起動時に migration を流すなら `RUN_MIGRATIONS=1` を利用
 
 3. **infra（Drizzle 実装）を追加**

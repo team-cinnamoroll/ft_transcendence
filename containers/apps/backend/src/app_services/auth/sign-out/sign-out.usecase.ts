@@ -1,5 +1,6 @@
-import { type UserId, type RefreshToken, type SuccessResponse } from '@tracen/contracts';
+import { type UserId, type RefreshToken } from '@tracen/contracts';
 import { type AuthRefreshTokenRepositorySpec } from '../../../features/auth/domain/auth.repository';
+import { UnauthorizedError } from '../../../shared/errors/global.error';
 
 async function signOutByRefreshToken(
   repo: AuthRefreshTokenRepositorySpec,
@@ -24,15 +25,15 @@ export async function signOutWithValidation(
   repo: AuthRefreshTokenRepositorySpec,
   refreshToken: RefreshToken | undefined,
   userId: UserId
-): Promise<SuccessResponse> {
+): Promise<void> {
   if (!refreshToken) {
     await signOutAllTokensOfUser(repo, userId);
-    return { success: true };
+    return;
   }
   const tokenData = await repo.findToken(refreshToken);
   if (tokenData && tokenData.userId === userId) {
     await signOutByRefreshToken(repo, refreshToken);
-    return { success: true };
+    return;
   }
-  return { success: false, message: 'Invalid refresh token or user ID mismatch' };
+  throw new UnauthorizedError('Invalid refresh token or user ID mismatch');
 }

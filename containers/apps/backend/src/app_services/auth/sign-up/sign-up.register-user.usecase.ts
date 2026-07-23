@@ -1,10 +1,20 @@
+import crypto from 'crypto';
 import { type AuthSignUpRequest, type User, UserSchema } from '@tracen/contracts';
 import type { UserRepositorySpec } from '../../../features/users/domain/users.repository';
 import { type AuthPassWorkerSpec } from '../../../features/auth/domain/auth.worker';
-import { type UserEntity, createUserEntity } from '../../../features/users/domain/users.entity';
+import { type UserEntity, UserEntitySchema } from '../../../features/users/domain/users.entity';
 import { createUser } from '../../../features/users/domain/users.usecase';
 import { ValidationError } from '../../../shared/errors/global.error';
 import { ZodError } from 'zod';
+import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
+
+export const createUserEntity = (data: Omit<UserEntity, 'id' | 'createdAt'>): UserEntity => {
+  return makeSafeUsecaseResult(UserEntitySchema, {
+    ...data,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  });
+};
 
 export async function registerUser(
   repo: UserRepositorySpec,
@@ -20,7 +30,7 @@ export async function registerUser(
     });
 
     const created = await createUser(repo, newUser);
-    return UserSchema.parse({
+    return makeSafeUsecaseResult(UserSchema, {
       id: created.id,
       email: created.email,
       name: created.name,

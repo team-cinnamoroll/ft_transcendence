@@ -1,1 +1,1 @@
-export type { UserProfile } from '@tracen/contracts';
+export type { UserProfile, UserProfileUpsertRequest } from '@tracen/contracts';

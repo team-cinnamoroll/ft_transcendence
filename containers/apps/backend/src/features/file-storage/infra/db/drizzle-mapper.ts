@@ -1,15 +1,16 @@
-import { BucketNameTypeSchema } from '../../domain/file-metadata.entity';
+import { BucketNameTypeSchema, FileMetadataSchema } from '../../domain/file-metadata.entity';
 import type { FileMetadata } from '../../domain/file-metadata.entity';
 import { type FileMetadataRow } from './schema';
+import { makeSafeInfraResult } from '../../../../shared/utils/validation';
 
 export function mapFileMetadata(row: FileMetadataRow): FileMetadata {
-  return {
+  return makeSafeInfraResult(FileMetadataSchema, {
     id: row.id,
     ownerId: row.ownerId,
-    bucket: BucketNameTypeSchema.parse(row.bucket),
+    bucket: makeSafeInfraResult(BucketNameTypeSchema, row.bucket),
     storageKey: row.storageKey,
     fileName: row.fileName,
     mimeType: row.mimeType,
     fileSize: row.fileSize,
-  };
+  });
 }

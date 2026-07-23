@@ -68,6 +68,7 @@ services:
       ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN}
       REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
       FILE_STORAGE_BASE_DIR: ${FILE_STORAGE_BASE_DIR}
+      JWT_ISSUER: ${JWT_ISSUER}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -90,6 +91,7 @@ services:
       dockerfile: containers/apps/frontend-bff/Dockerfile
       args:
         NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
+        APP_API_BASE_URL: ${APP_API_BASE_URL}
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${FRONTEND_PORT}

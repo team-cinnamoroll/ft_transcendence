@@ -113,7 +113,7 @@ run_tests() {
     curl -s -X POST "$BASE_URL/presence/status" \
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.onlineStatuses'
+        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.data.onlineStatuses'
 
     # --- 3. ユーザー1のオフラインリクエスト ---
     echo "[3/6] ユーザー1 のオフラインリクエスト"
@@ -127,7 +127,7 @@ run_tests() {
     curl -s -X POST "$BASE_URL/presence/status" \
         -H "Authorization: Bearer $U2_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.onlineStatuses'
+        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.data.onlineStatuses'
 
     # --- 5. ユーザー2, 3のオフラインリクエスト ---
     echo "[5/6] ユーザー2, 3 のオフラインリクエスト"
@@ -145,7 +145,7 @@ run_tests() {
     curl -s -X POST "$BASE_URL/presence/status" \
         -H "Authorization: Bearer $U3_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.onlineStatuses'
+        -d "{\"userIds\":[\"$U1_ID\", \"$U2_ID\", \"$U3_ID\"]}" | jq '.data.onlineStatuses'
 
     echo ""
 }

@@ -1,18 +1,16 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type AuthHandlerEnv } from '../auth.di';
-import {
-  AuthRefreshRequestSchema,
-  AuthRefreshResponseSchema,
-  SimpleApiResponseSchema,
-} from '@tracen/contracts';
+import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
 import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
 import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
+import { makeSafeResponse } from '../../../shared/utils/validation';
+import { ServiceUnavailableError } from '../../../shared/errors/global.error';
 
 export function refreshRouter() {
   return new Hono<AuthHandlerEnv>()
-    .post('/', zValidator('json', AuthRefreshRequestSchema), async (c) => {
+    .post('/', cZValidator('json', AuthRefreshRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const authAccessTokenWorker = c.get('authAccessTokenWorker');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
@@ -28,56 +26,61 @@ export function refreshRouter() {
             response.userId,
             response.familyId
           );
-          const validatedResponse = AuthRefreshResponseSchema.parse({
-            success: true,
-            data: {
-              accessToken: userTokens.accessToken,
-              refreshToken: userTokens.refreshToken,
-            },
-          });
-          return c.json(validatedResponse, 200);
+          return c.json(
+            makeSafeResponse(AuthRefreshResponseSchema, {
+              success: true,
+              data: {
+                accessToken: userTokens.accessToken,
+                refreshToken: userTokens.refreshToken,
+              },
+            }),
+            200
+          );
         }
         // success: false の場合はドメインエラー（例：リフレッシュトークンが無効）→ 401 Unauthorized
         return c.json(
-          AuthRefreshResponseSchema.parse({
+          makeSafeResponse(AuthRefreshResponseSchema, {
             success: false,
             message: 'Invalid refresh token',
           }),
           401
         );
       } catch (err) {
+        console.error('Error during Refresh execution:', err);
+        // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(AuthRefreshResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
+          );
+        }
         // 予期しないエラー（DB接続エラーなど）→ 500 Internal Server Error
-        console.error('Refresh error:', err);
-        return c.json(
-          AuthRefreshResponseSchema.parse({
-            success: false,
-            message: 'Internal server error',
-          }),
-          500
-        );
+        throw err; // グローバルエラーハンドラーに任せる
       }
     })
-    .delete('/', zValidator('json', AuthRefreshRequestSchema), async (c) => {
+    .delete('/', cZValidator('json', AuthRefreshRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
-
       try {
-        await logoutByRefreshToken(authRefreshTokenRepository, request.refreshToken);
-        return c.json(
-          SimpleApiResponseSchema.parse({
-            success: true,
-          }),
-          200
-        );
+        await logoutByRefreshToken(authRefreshTokenRepository, request);
+        return c.body(null, 204);
+        // セキュリティの観点から、ログアウト処理の結果は常に成功として返す（存在しないトークンでも204を返す。404は返さない）
       } catch (err) {
-        console.error('Logout error:', err);
-        return c.json(
-          SimpleApiResponseSchema.parse({
-            success: false,
-            message: 'Internal server error',
-          }),
-          500
-        );
+        console.error('Error during Refresh Logout execution:', err);
+        // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(AuthRefreshResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
       }
     });
 }

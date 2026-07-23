@@ -4,34 +4,43 @@ import {
   type UserId,
   type UserNickname,
   type UserProfile,
+  UserIdSchema,
   UserProfileSchema,
 } from '@tracen/contracts';
 import { type UserProfileRepositorySpec } from './user-profile.repository';
 import { type FileQueryServiceSpec } from '../../../core-domain/file/file.query-service';
 import { type UserProfileEntity, UserProfileEntitySchema } from './user-profile.entity';
 import { ZodError } from 'zod';
-import { ValidationError } from '../../../shared/errors/global.error';
+import { ValidationError, InternalValidationError } from '../../../shared/errors/global.error';
+import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export async function toUserProfile(
   profileEntity: UserProfileEntity,
   fileQueryService: FileQueryServiceSpec
 ): Promise<UserProfile> {
   if (profileEntity.avatarFileId) {
-    const avatarUrlsMap = await fileQueryService.getFileUrlsByFileIds([profileEntity.avatarFileId]);
-    const avatarUrl = avatarUrlsMap.get(profileEntity.avatarFileId) || undefined;
-
-    return UserProfileSchema.parse({
+    const avatarFileMap = await fileQueryService.getFileUrlsByFileIds([profileEntity.avatarFileId]);
+    const fileDto = avatarFileMap.get(profileEntity.avatarFileId) || null;
+    if (!fileDto) {
+      throw new InternalValidationError(
+        `Avatar file with ID ${profileEntity.avatarFileId} not found for user profile ${profileEntity.userId}`
+      );
+    }
+    return makeSafeUsecaseResult(UserProfileSchema, {
       id: profileEntity.userId,
       name: profileEntity.name,
-      avatarUrl,
+      avatar: {
+        id: fileDto.id,
+        url: fileDto.url,
+      },
       badge: profileEntity.badge,
     });
   }
 
-  return UserProfileSchema.parse({
+  return makeSafeUsecaseResult(UserProfileSchema, {
     id: profileEntity.userId,
     name: profileEntity.name,
-    avatarUrl: undefined,
+    avatar: null,
     badge: profileEntity.badge,
   });
 }
@@ -43,13 +52,13 @@ export async function createInitialUserProfile(
   userNickname: UserNickname
 ): Promise<UserProfile> {
   try {
-    const newProfileId = uuidv4();
-    const newProfileEntity = UserProfileEntitySchema.parse({
+    const newProfileId = makeSafeUsecaseResult(UserIdSchema, uuidv4());
+    const newProfileEntity = makeSafeUsecaseResult(UserProfileEntitySchema, {
       id: newProfileId,
       userId,
       name: userNickname,
-      avatarFileId: undefined,
-      badge: undefined,
+      avatarFileId: null,
+      badge: null,
     });
 
     await userProfileRepo.upsertUserProfile(newProfileEntity);

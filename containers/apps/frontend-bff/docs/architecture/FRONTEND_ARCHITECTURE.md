@@ -17,13 +17,17 @@
 
 ## 1. このドキュメントの目的
 
-現在のプロジェクトは **「モックデータで動く UI の再現」** を目標にしています。
-ただし将来的には [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) に記載された Hono バックエンドと統合する予定です。
+このプロジェクトは、[ARCHITECTURE.md](../../../../../docs/architecture/ARCHITECTURE.md) に記載された Hono バックエンドとの統合を、**機能ごとに段階的に**進めています。
 
-統合のときに「全部書き直し」になるのを防ぐために、**今のうちから「差し替えやすい設計」** で書いておくのがこのドキュメントの目的です。
+現時点で「モック → API 実装」への差し替えが完了している機能:
 
-> 補足: 一部はすでにモックではなく実際に backend へ接続する実装に差し替わっています。
-> `repositories/backend-health-repository.ts`（動作確認用）が先行例で、ログイン機能についても [AUTH.md](AUTH.md) / [CONNECTION_PLAN.md](CONNECTION_PLAN.md) の計画に沿って backend 接続を進めています。
+- 認証（サインアップ・サインイン・サインアウト）: `repositories/auth-repository.ts`（[AUTH.md](../auth/AUTH.md) 参照）
+- ユーザープロフィール（表示・編集）: `repositories/user-profile-repository.ts`（[USER_PROFILE.md](../user-profile/USER_PROFILE.md) 参照）
+- backend 疎通確認: `repositories/backend-health-repository.ts`
+
+一方、Face・Seed・Subscription・Notification などはまだモックのままです（[CONNECTION_PLAN.md](../CONNECTION_PLAN.md) 参照）。
+
+統合のたびに「全部書き直し」にならないよう、**差し替えやすい設計を維持し続けること**がこのドキュメントの目的です。
 
 ---
 
@@ -81,8 +85,8 @@
       ┌────────┴────────┐
       ▼                 ▼
 ┌───────────────┐   ┌───────────────────────────┐
-│ Mock 実装      │   │ API 実装（将来）            │
-│ src/mocks/     │   │ Hono RPC Client / fetch    │
+│ Mock 実装      │   │ API 実装                    │
+│ src/mocks/     │   │ Hono RPC Client（hc）        │
 └───────────────┘   └───────────────────────────┘
 
 （Client Component から server-only を直接 import できないため、下記の入口を使う）
@@ -111,29 +115,35 @@
 src/
 ├── app/
 │   ├── [locale]/                 # next-intl によるロケール別ルーティング（ja/en/fr）
-│   │   ├── layout.tsx            # 全体レイアウト（Server Component）
-│   │   ├── page.tsx              # ホーム（Server Component）
-│   │   ├── faces/
-│   │   ├── seeds/[seedId]/
-│   │   ├── subscriptions/
-│   │   ├── notifications/
-│   │   └── settings/
+│   │   ├── (app)/                # ログイン後の画面（layout.tsx がヘッダー・ナビ等を集約）
+│   │   │   ├── page.tsx          # ホーム（Server Component）
+│   │   │   ├── faces/
+│   │   │   ├── seeds/[seedId]/
+│   │   │   ├── subscriptions/
+│   │   │   ├── notifications/
+│   │   │   └── settings/         # プロフィール編集（ProfileEditModal）を含む
+│   │   ├── (auth)/                # 未ログイン時の画面
+│   │   │   ├── sign-in/
+│   │   │   └── sign-up/
+│   │   └── auth-check/            # 動作確認用の一時ページ（AUTH_CHECK.md 参照）
 │   └── api/                      # Route Handlers（BFF の HTTP 入口）
 │       ├── hello/route.ts
 │       ├── health/route.ts
 │       ├── viewer/route.ts
+│       ├── export/route.ts
 │       └── detail/
 │           ├── face/[faceId]/route.ts
 │           └── seed/[seedId]/route.ts
 │
 ├── components/                   # UI コンポーネント
 │   ├── ui/
+│   ├── auth/                     # SignInForm / SignUpForm
 │   ├── home/
 │   ├── face/
 │   ├── seed/
 │   ├── subscriptions/
 │   ├── notifications/
-│   └── settings/
+│   └── settings/                 # ProfileEditModal など
 │
 ├── server/                       # ★ server-only
 │   ├── usecases/                 # 画面向けの集約・整形ロジック（Repository を呼ぶ）
@@ -141,17 +151,23 @@ src/
 │
 ├── repositories/                 # ★ server-only: Spec/Impl/Provider
 │   ├── provider.ts               # Provider 共通ヘルパー
-│   ├── face-repository.ts
-│   ├── seed-repository.ts
-│   ├── user-repository.ts
-│   ├── subscription-repository.ts
-│   ├── notification-repository.ts
-│   └── backend-health-repository.ts  # モックではなく実際に backend へ接続する先行例
+│   ├── auth-repository.ts            # backendへ接続する実装のみ（モック無し。6-3 参照）
+│   ├── user-profile-repository.ts    # backendへ接続する実装のみ（モック無し。6-3 参照）
+│   ├── backend-health-repository.ts  # モックではなく実際に backend へ接続する先行例
+│   ├── face-repository.ts            # モック実装のみ（バックエンド未実装）
+│   ├── seed-repository.ts            # モック実装のみ（バックエンド未実装）
+│   ├── user-repository.ts            # モック実装のみ（自分以外も含むユーザー一覧・検索用）
+│   ├── subscription-repository.ts    # モック実装のみ（バックエンド未実装）
+│   └── notification-repository.ts    # モック実装のみ（バックエンド未実装）
 │
 ├── i18n/                         # next-intl 設定（routing.ts / messages/{ja,en,fr}.json）
 ├── mocks/                        # モックデータ（Repository が参照）
-├── types/                        # 型定義
+├── types/                        # 型定義（@tracen/contracts の型は必ずここ経由で再エクスポートする）
 ├── lib/                          # ユーティリティ・クライアント
+│   ├── backend-client.ts         # Hono RPC クライアント（hc<AppType>）の生成
+│   ├── api-error.ts              # ApiErrorKind / ApiResult<T>（6-4 参照）
+│   ├── session.ts                # Cookie によるセッション管理
+│   └── zod-error-map.ts          # Zod バリデーションエラーのi18n化
 └── proxy.ts                      # Next.js middleware（next-intl のロケール振り分け）
 ```
 
@@ -285,6 +301,48 @@ Provider の「キャッシュ付き singleton」を毎回同じ形で書ける�
 - `src/repositories/provider.ts`
   - `createSingletonProvider<T>(createImpl: () => T)`
 
+### 6-3. モックを作らない Repository（ログイン中の本人専用データ）
+
+`auth-repository.ts` / `user-profile-repository.ts` は、6-1 の Face の例と異なり **モック実装を持ちません**。
+
+```ts
+import 'server-only';
+
+import { createBackendClient } from '@/lib/backend-client';
+import { createSingletonProvider } from '@/repositories/provider';
+
+export type UserProfileRepositorySpec = {
+  getMyProfile: (accessToken: string) => Promise<UserProfile | null>;
+};
+
+// モックは作らず、最初から backend を呼ぶ実装のみを提供する
+export function createUserProfileApiRepositoryImpl(): UserProfileRepositorySpec {
+  return {
+    getMyProfile: async (accessToken) => {
+      const res = await createBackendClient(accessToken).api.v1.users.me.$get();
+      // ...
+    },
+  };
+}
+
+export const getUserProfileRepository = createSingletonProvider<UserProfileRepositorySpec>(() =>
+  createUserProfileApiRepositoryImpl()
+);
+```
+
+この判断をする基準は、「**ログイン中の本人にしか意味がないデータかどうか**」です。自分のプロフィールやトークンは、他のユーザーの分をモックで再現しても検証に使えないため、最初から実際の backend 接続のみを実装します。
+
+### 6-4. backend エラーのステータスコードベース判定（`ApiErrorKind` / `ApiResult<T>`）
+
+実際に backend へ接続する Repository（6-3 のようなもの）では、backend が返す **HTTP ステータスコードを見て、成功/失敗と失敗の種別を判定** します。backend の生の `message`（多くは日本語・英語が混在し、i18n対応していない）は画面には出さず、ログ用途にのみ使います。
+
+- `src/lib/api-error.ts`
+  - `ApiErrorKind`: `VALIDATION` / `UNAUTHORIZED` / `FORBIDDEN` / `NOT_FOUND` / `CONFLICT` / `SERVER_ERROR` / `UNKNOWN` という、HTTPステータスの意味（セマンティクス）を表す汎用の分類
+  - `classifyHttpStatus(status: number): ApiErrorKind`: ステータスコードをこの分類に変換する
+  - `ApiResult<T>`: `{ success: true; data: T } | { success: false; errorKind: ApiErrorKind }` という、Repository/Usecase 層で使う汎用の Result 型（`ActionResult<T>` と同じ発想）
+
+`ApiErrorKind` は「HTTPステータスの意味」の分類であり、「ビジネス上の意味」の分類ではありません。同じステータスコードでも機能によって出したい文言が違う場合、`ApiErrorKind` 自体は増やさず、Server Actions 層側で `errorKind` → i18n文言のマッピングを機能ごとに用意して吸収します（`src/server/actions/auth.ts` / `user-profile.ts` の `resolveXxxErrorMessage` 関数を参照）。
+
 ---
 
 ## 7. Usecase 層（server-only / 推奨の呼び出し口）
@@ -386,6 +444,8 @@ export async function createFaceAction(input) {
 - **Server Action は「関数として呼べるサーバー処理」**
 - 主に **作成/更新/削除** などの「更新系」に使う
 
+> 補足: フォーム入力を伴う更新系（サインイン・サインアップ・プロフィール編集など）は、`react-hook-form` + `zodResolver` でクライアント側の検証を行い、Server Action 側でも同じ contracts の Zod schema で再検証する構成にしています。実装例: `src/components/auth/SignInForm.tsx` → `src/server/actions/auth.ts`。
+
 ### 8-3. Client Component から読み取る: Route Handler + fetch
 
 Client Component は server-only を import できないため、必要に応じて `/api/*` を `fetch` します。
@@ -480,7 +540,7 @@ export function FaceDetail({ faceId }: { faceId: string }) {
 
 ---
 
-## 11. モックからバックエンド統合時の差し替え方（将来）
+## 11. モックからバックエンド統合時の差し替え方
 
 バックエンド統合時は Repository の **Impl を増やして Provider の選択を変える**のが基本です。
 
@@ -488,6 +548,8 @@ export function FaceDetail({ faceId }: { faceId: string }) {
 - 変更: `getXxxRepository()` 内で「どの Impl を使うか」を切り替える
 
 こうしておくと、Usecase や UI は **基本的に変更せず**に済みます。
+
+実際に `auth-repository.ts` / `user-profile-repository.ts` はこの形で統合済みです（ただし6-3の通り、これらはモックを経由せず最初からAPI実装のみを用意しました）。Face・Seed・Subscription・Notification は今後、既存のモック実装に `xxxApiRepositoryImpl` を追加し、Provider の向き先を切り替える形で統合していく想定です。
 
 ---
 
@@ -500,3 +562,5 @@ export function FaceDetail({ faceId }: { faceId: string }) {
 2. **契約は `xxSpec`、実装は `xxImpl`、モックでも async**
 
 3. **Provider に DI を閉じ込め、Usecase に集約し、入口は薄く保つ**
+
+4. **backend の生メッセージを画面に出さず、`ApiErrorKind`（ステータスコードの分類）を Server Actions 層で文言に変換する**（6-4 参照）

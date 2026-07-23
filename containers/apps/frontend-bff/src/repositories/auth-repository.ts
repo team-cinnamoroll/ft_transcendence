@@ -5,23 +5,26 @@ import type {
   AuthSignInRequest,
   AuthSignUp,
   AuthSignIn,
+  AuthSignUpResult,
+  AuthSignInResult,
   AuthRefresh,
 } from '@/types/auth';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
+import { classifyHttpStatus } from '@/lib/api-error';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
 
 /** AuthRepository が提供するメソッドの契約（Spec） */
 export type AuthRepositorySpec = {
   /** サインアップ（ユーザー作成 + トークン発行） */
-  signUp: (input: AuthSignUpRequest) => Promise<AuthSignUp>;
+  signUp: (input: AuthSignUpRequest) => Promise<AuthSignUpResult>;
   /** ログイン（認証 + トークン発行） */
-  signIn: (input: AuthSignInRequest) => Promise<AuthSignIn>;
+  signIn: (input: AuthSignInRequest) => Promise<AuthSignInResult>;
   /** リフレッシュトークンによるアクセストークンの再発行 */
-  refresh: (refreshToken: string) => Promise<AuthRefresh>;
+  refresh: (userId: string, refreshToken: string) => Promise<AuthRefresh>;
   /** ログアウト（リフレッシュトークンの失効） */
-  signOut: (refreshToken: string) => Promise<void>;
+  signOut: (token: string, refreshToken: string) => Promise<void>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -32,23 +35,37 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
   return {
     signUp: async (input) => {
       const res = await createBackendClient().api.v1.auth['sign-up'].$post({ json: input });
+      const json = (await res.json()) as AuthSignUp;
       if (!res.ok) {
-        console.error('AuthRepository.signUp: backend request failed', res.status);
+        // backend の生 message はログ用途のみ。画面表示には errorKind を使う（i18n非依存にするため）
+        console.error(
+          'AuthRepository.signUp: backend request failed',
+          res.status,
+          'message' in json ? json.message : undefined
+        );
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
       }
-      return (await res.json()) as AuthSignUp;
+      return json as AuthSignUpResult;
     },
 
     signIn: async (input) => {
       const res = await createBackendClient().api.v1.auth['sign-in'].$post({ json: input });
+      const json = (await res.json()) as AuthSignIn;
       if (!res.ok) {
-        console.error('AuthRepository.signIn: backend request failed', res.status);
+        // backend の生 message はログ用途のみ。画面表示には errorKind を使う（i18n非依存にするため）
+        console.error(
+          'AuthRepository.signIn: backend request failed',
+          res.status,
+          'message' in json ? json.message : undefined
+        );
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
       }
-      return (await res.json()) as AuthSignIn;
+      return json as AuthSignInResult;
     },
 
-    refresh: async (refreshToken) => {
+    refresh: async (userId, refreshToken) => {
       const res = await createBackendClient().api.v1.auth.refresh.$post({
-        json: { refreshToken },
+        json: { userId, refreshToken },
       });
       if (!res.ok) {
         console.error('AuthRepository.refresh: backend request failed', res.status);
@@ -56,7 +73,7 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
       return (await res.json()) as AuthRefresh;
     },
 
-    signOut: async (refreshToken) => {
+    signOut: async (token, refreshToken) => {
       // signOutだけ複数回リトライしている理由:
       // - signUp/signIn/refreshは「意味のある結果」を返す約束（例: Promise<AuthSignUp>）をしているため、
       //   通信が一時的に不調でも、リトライで誤魔化さずその場で失敗を呼び出し元に伝えるべき処理。
@@ -69,7 +86,7 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
       const maxAttempts = 3;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          const res = await createBackendClient().api.v1.auth.refresh.$delete({
+          const res = await createBackendClient(token).api.v1.auth['sign-out'].$post({
             json: { refreshToken },
           });
           if (res.ok) return;

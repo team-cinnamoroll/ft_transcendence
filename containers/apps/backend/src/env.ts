@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-// import * as path from 'path';
+import { makeSafeResponse } from './shared/utils/validation';
 
 const BooleanFromEnv = z.preprocess((val) => {
   if (typeof val === 'string') {
@@ -34,6 +34,7 @@ const EnvSchema = z
     TLS_KEY_PATH: z.string().min(1).optional(),
     DATABASE_URL: z.url(),
     PEPPER: z.string().min(1),
+    JWT_ISSUER: z.url().min(1),
     JWKS_PUBLIC: jwksCacheSchema,
     JWT_PRIVATE_KEY_PEM: z.string().min(1),
     RUN_MIGRATIONS: BooleanFromEnv,
@@ -125,6 +126,7 @@ try {
   }
 } catch (err) {
   console.error('❌ JWKSの生成中にエラーが発生しました:', err);
+  throw new Error('Failed to initialize JWKS cache', { cause: err });
 }
 
 let PRIVATE_KEY_PATH = '/jwt-certs/private.pem';
@@ -138,17 +140,18 @@ try {
   }
 } catch (err) {
   console.error('❌ 秘密鍵ファイルの読み込み中にエラーが発生しました:', err);
-  throw err; // 秘密鍵がないとサーバーは正常に動作しないため、ここで例外を投げて起動を停止します
+  throw new Error('Failed to read private key file', { cause: err });
 }
 
 export function parseEnv(raw: NodeJS.ProcessEnv): Config {
-  return EnvSchema.parse({
+  return makeSafeResponse(EnvSchema, {
     NODE_ENV: raw.NODE_ENV,
     PORT: raw.PORT,
     TLS_CERT_PATH: raw.TLS_CERT_PATH,
     TLS_KEY_PATH: raw.TLS_KEY_PATH,
     DATABASE_URL: raw.DATABASE_URL,
     PEPPER: raw.PEPPER,
+    JWT_ISSUER: raw.JWT_ISSUER,
     JWKS_PUBLIC: jwksCache,
     JWT_PRIVATE_KEY_PEM: privateKey,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,

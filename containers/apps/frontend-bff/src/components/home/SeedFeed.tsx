@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
@@ -24,6 +25,7 @@ const SeedFeed = ({
   onSeedMoreOptions,
 }: SeedFeedProps) => {
   const t = useTranslations('seedFeed');
+  const router = useRouter();
   const displaySeeds = selectedFaceId ? seeds.filter((s) => s.faceId === selectedFaceId) : seeds;
 
   const faceCache = createLookupMap(faces, (face) => face.id);
@@ -56,6 +58,7 @@ const SeedFeed = ({
             noBorder={index === displaySeeds.length - 1}
             currentUserId={currentUserId}
             onMoreOptions={onSeedMoreOptions}
+            onClick={() => router.push(`/seeds/${seed.id}`)}
           />
         );
       })}

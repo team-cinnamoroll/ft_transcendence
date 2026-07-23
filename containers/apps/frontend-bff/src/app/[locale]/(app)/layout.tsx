@@ -37,7 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           />
           <div className="flex flex-1 min-h-0 overflow-hidden">
             <main
-              className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0"
+              className="flex-1 min-w-0 overflow-y-auto pb-36 md:pb-0"
               style={{ borderRight: '0.5px solid var(--mf-line)' }}
             >
               {children}

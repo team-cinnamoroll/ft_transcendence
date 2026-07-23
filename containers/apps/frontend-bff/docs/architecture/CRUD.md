@@ -42,12 +42,15 @@
 
 ## User / UserProfile
 
-| CRUD       | Repository                         | Usecase                                | Server Action / API / Server Component 直呼び | UI                             |
-| ---------- | ---------------------------------- | -------------------------------------- | --------------------------------------------- | ------------------------------ |
-| **Create** | ❌                                 | ❌                                     | ❌                                            | ❌                             |
-| **Read**   | ✅ `getCurrentUser()` `findById()` | ✅ `getCurrentUser()` `findUserById()` | ✅ `/api/viewer`                              | ✅ `HomeProfile` `AccountMenu` |
-| **Update** | ❌                                 | ❌                                     | ❌                                            | ❌                             |
-| **Delete** | ❌                                 | ❌                                     | ❌                                            | ❌                             |
+| CRUD       | Repository                                                                                                | Usecase                                                                            | Server Action / API / Server Component 直呼び                             | UI                                                      |
+| ---------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **Create** | —                                                                                                         | —                                                                                  | —                                                                         | —                                                       |
+| **Read**   | ✅ `getMyProfile()`（本人・実backend, #287） `findById()` `listAll()`（他人・モック）                     | ✅ `getCurrentUser()`（#287） `findUserById()` `listAllUsers()`                    | ✅ `/api/viewer`                                                          | ✅ `HomeProfile` `AccountMenu` `SettingsClient`         |
+| **Update** | ✅ `updateMyProfile()`（#288） アバター: `uploadFile()` `deleteFile()`（`file-storage-repository`, #289） | ✅ `updateMyProfile()`（#288） アバター: `uploadMyFile()` `deleteMyFile()`（#289） | ✅ `updateUserProfileAction()`（#288） `uploadAvatarFileAction()`（#289） | ✅ `ProfileEditModal`（#288, #289）                     |
+| **Delete** | ❌                                                                                                        | ❌                                                                                 | ❌                                                                        | ❌（`SettingsClient` に実装待ちのプレースホルダーのみ） |
+
+- Create: サインアップ時にバックエンドが `UserProfile` レコードを自動生成する（`user-profile.get-or-create.usecase.ts` / `user-profile.create-init.usecase.ts`）ため、フロントエンドからの実装は不要
+- Delete: アカウント削除（パスワード再認証を伴う想定）は未実装。Issue #150 で対応予定。`SettingsClient.tsx` には実装箇所を示すプレースホルダーコメントのみ存在する
 
 ---
 
