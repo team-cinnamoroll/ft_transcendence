@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { UserIdSchema } from './user';
-import { FileUrlSchema } from '../../shared/file-metadata';
+import { FileSchema } from '../../shared/file-metadata';
 
 export const UserNicknameSchema = z.string().min(1).max(100);
 export type UserNickname = z.infer<typeof UserNicknameSchema>;
@@ -13,16 +13,15 @@ export const AvatarBadgeSchema = z
   .refine((val) => {
     // 見た目上の文字数が1文字であるかを判定
     return [...segmenter.segment(val)].length === 1;
-  })
-  .optional(); // バッジ絵文字
+  }); // バッジ絵文字
 
 // ユーザーデータのレスポンススキーマと型
 export const UserProfileSchema = z
   .object({
     id: UserIdSchema,
     name: UserNicknameSchema,
-    avatarUrl: FileUrlSchema.optional(),
-    badge: AvatarBadgeSchema.optional(),
+    avatar: FileSchema.nullable(),
+    badge: AvatarBadgeSchema.nullable(),
   })
   .strict();
 export type UserProfile = z.infer<typeof UserProfileSchema>;

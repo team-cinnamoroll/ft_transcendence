@@ -6,8 +6,8 @@ import { UserNicknameSchema, AvatarBadgeSchema } from './user-profile';
 export const UserProfileUpsertRequestSchema = z
   .object({
     name: UserNicknameSchema,
-    avatarFileId: FileMetadataIdSchema.optional(),
-    badge: AvatarBadgeSchema.optional(),
+    avatarFileId: FileMetadataIdSchema.nullable(),
+    badge: AvatarBadgeSchema.nullable(),
   })
   .strict();
 
