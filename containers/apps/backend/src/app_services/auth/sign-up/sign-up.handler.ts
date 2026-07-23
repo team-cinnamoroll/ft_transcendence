@@ -6,7 +6,11 @@ import {
   injectFileQueryDeps,
   FileQueryHandlerEnv,
 } from '../../../features/file-storage/file.query-service.di';
-import { AuthSignUpRequestSchema, AuthSignUpResponseSchema } from '@tracen/contracts';
+import {
+  AuthSignUpRequestSchema,
+  AuthSignUpResponseSchema,
+  UserNicknameSchema,
+} from '@tracen/contracts';
 import { registerUser } from './sign-up.register-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { createInitialUserProfile } from '../../../features/user-profile/domain/user-profile.create-init.usecase';
@@ -15,7 +19,7 @@ import {
   EmailAlreadyExistsError,
   UserAlreadyExistsError,
 } from '../../../features/users/domain/users.error';
-import { makeSafeResponse } from '../../../shared/utils/validation';
+import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -37,11 +41,12 @@ export function signUpRouter() {
           config,
           registeredUser.id
         );
+        const nickname = makeSafeUsecaseResult(UserNicknameSchema, registeredUser.name);
         const userProfile = await createInitialUserProfile(
           userProfileRepo,
           fileQueryService,
           registeredUser.id,
-          registeredUser.name
+          nickname
         );
         return c.json(
           makeSafeResponse(AuthSignUpResponseSchema, {

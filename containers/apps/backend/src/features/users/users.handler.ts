@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { customZValidator as cZValidator } from '../../shared/utils/custom-z-validator';
 
-import { UserIdParamSchema, UserMeResponseSchema } from '@tracen/contracts';
+import { UserIdParamSchema, UserMeResponseSchema, UserNicknameSchema } from '@tracen/contracts';
 import { injectUsersDeps } from './users.di';
 import { injectFileQueryDeps } from '../file-storage/file.query-service.di';
 import { injectUserProfileDeps } from '../user-profile/user-profile.di';
@@ -9,7 +9,7 @@ import { deleteUserById, getUserById } from './domain/users.usecase';
 import { getOrCreateUserProfile } from '../user-profile/domain/user-profile.get-or-create.usecase';
 import { NotFoundError } from '../../shared/errors/global.error';
 import { SimpleApiResponseSchema } from '@tracen/contracts';
-import { makeSafeResponse } from '../../shared/utils/validation';
+import { makeSafeResponse, makeSafeUsecaseResult } from '../../shared/utils/validation';
 
 export function usersRouter() {
   return new Hono()
@@ -47,11 +47,12 @@ export function usersRouter() {
         }
         const userProfileRepo = c.get('userProfileRepo');
         const fileQueryService = c.get('fileQueryService');
+        const nickname = makeSafeUsecaseResult(UserNicknameSchema, user.name);
         const { userProfile } = await getOrCreateUserProfile(
           userProfileRepo,
           fileQueryService,
           userId,
-          user.name
+          nickname
         );
         return c.json(
           makeSafeResponse(UserMeResponseSchema, {

@@ -6,12 +6,16 @@ import {
   injectFileQueryDeps,
   FileQueryHandlerEnv,
 } from '../../../features/file-storage/file.query-service.di';
-import { AuthSignInRequestSchema, AuthSignInResponseSchema } from '@tracen/contracts';
+import {
+  AuthSignInRequestSchema,
+  AuthSignInResponseSchema,
+  UserNicknameSchema,
+} from '@tracen/contracts';
 import { verifyUser } from './sign-in.verify-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { getOrCreateUserProfile } from '../../../features/user-profile/domain/user-profile.get-or-create.usecase';
 import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
-import { makeSafeResponse } from '../../../shared/utils/validation';
+import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -33,11 +37,12 @@ export function signInRouter() {
           config,
           verifiedUser.id
         );
+        const nickname = makeSafeUsecaseResult(UserNicknameSchema, verifiedUser.name);
         const { userProfile } = await getOrCreateUserProfile(
           userProfileRepo,
           fileQueryService,
           verifiedUser.id,
-          verifiedUser.name
+          nickname
         );
         return c.json(
           makeSafeResponse(AuthSignInResponseSchema, {

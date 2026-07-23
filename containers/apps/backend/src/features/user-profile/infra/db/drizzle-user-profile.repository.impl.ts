@@ -13,8 +13,8 @@ function mapUserProfile(row: UserProfileRow): UserProfileEntity {
     id: row.id,
     userId: row.userId,
     name: row.name,
-    badge: row.badge ?? undefined,
-    avatarFileId: row.avatarFileId ?? undefined,
+    badge: row.badge,
+    avatarFileId: row.avatarFileId,
   });
 }
 
@@ -26,8 +26,8 @@ class UserProfileDBRepositoryImpl implements UserProfileRepositorySpec {
       id: userProfile.id,
       userId: userProfile.userId,
       name: userProfile.name,
-      badge: userProfile.badge ?? null,
-      avatarFileId: userProfile.avatarFileId ?? null,
+      badge: userProfile.badge,
+      avatarFileId: userProfile.avatarFileId,
     };
 
     try {
