@@ -12,9 +12,6 @@ minimumReleaseAgeExclude:
   - axios@1.18.0
   - brace-expansion@1.1.16 || 2.1.2 || 5.0.7
   - js-yaml@4.3.0
-  - hono@4.12.27
-  - '@hono/node-server@2.0.5'
-  - sharp@0.35.0
 overrides:
   'vite@7.3.1': '7.3.2'
   postcss: '^8.5.10'
@@ -36,5 +33,3 @@ overrides:
   '@babel/core@<=7.29.0': '>=7.29.6'
   'react-docgen>@babel/core': '^7.29.6'
   'hono@<4.12.25': '>=4.12.25'
-  sharp: '>=0.35.0'
-  '@hono/node-server': '>=2.0.5'
