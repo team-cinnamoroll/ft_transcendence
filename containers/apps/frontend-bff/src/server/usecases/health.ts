@@ -271,7 +271,7 @@ export async function runApiHealthCheck(
         error: { message: 'create user response user.id and userProfile.id mismatch' },
       };
     }
-    const createdUserProfileAvatarUrl = created.data.userProfile.avatarUrl;
+    const createdUserProfileAvatarUrl = created.data.userProfile.avatar?.url;
     if (createdUserProfileAvatarUrl) {
       log(
         `FAIL (create-user): response JSON userProfile.avatarUrl should be undefined on creation (got=${createdUserProfileAvatarUrl})`
@@ -584,14 +584,14 @@ export async function runApiHealthCheck(
 
     // API: ログアウトする
     const logoutRes = await repo.logout(createdUserId, signInRefreshToken);
-    if (!logoutRes.ok) {
+    if (!logoutRes.ok || logoutRes.status !== 204) {
       return await failWithResponse('logout', logoutRes, 'logout returned non-2xx');
     }
-    log('OK (logout): 200');
+    log('OK (logout): 204');
 
     // API: ログアウトしたリフレッシュトークンを使用する
     const unexpectedLogoutRes = await repo.refreshToken(createdUserId, signInRefreshToken);
-    if (unexpectedLogoutRes.ok) {
+    if (unexpectedLogoutRes.ok && unexpectedLogoutRes.status !== 401) {
       return await failWithResponse(
         'logout',
         unexpectedLogoutRes,
