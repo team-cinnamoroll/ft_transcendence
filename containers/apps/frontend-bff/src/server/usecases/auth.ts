@@ -1,12 +1,17 @@
 import 'server-only';
 
-import type { AuthSignUpRequest, AuthSignInRequest, AuthSignUp, AuthSignIn } from '@/types/auth';
+import type {
+  AuthSignUpRequest,
+  AuthSignInRequest,
+  AuthSignUpResult,
+  AuthSignInResult,
+} from '@/types/auth';
 import { getAuthRepository } from '@/repositories/auth-repository';
 import { setSessionTokens, clearSessionTokens, getSessionTokens } from '@/lib/session';
 import { verifyToken } from '@/lib/backend-client';
 
 /** サインアップし、成功した場合は発行されたトークンでセッションを開始する */
-export async function signUpAndStartSession(input: AuthSignUpRequest): Promise<AuthSignUp> {
+export async function signUpAndStartSession(input: AuthSignUpRequest): Promise<AuthSignUpResult> {
   const result = await getAuthRepository().signUp(input);
   if (result.success && result.data.accessToken && result.data.refreshToken) {
     await setSessionTokens(result.data.accessToken, result.data.refreshToken);
@@ -15,7 +20,7 @@ export async function signUpAndStartSession(input: AuthSignUpRequest): Promise<A
 }
 
 /** ログインし、成功した場合は発行されたトークンでセッションを開始する */
-export async function signInAndStartSession(input: AuthSignInRequest): Promise<AuthSignIn> {
+export async function signInAndStartSession(input: AuthSignInRequest): Promise<AuthSignInResult> {
   const result = await getAuthRepository().signIn(input);
   if (result.success && result.data.accessToken && result.data.refreshToken) {
     await setSessionTokens(result.data.accessToken, result.data.refreshToken);

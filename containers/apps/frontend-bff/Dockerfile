@@ -6,6 +6,10 @@ RUN corepack enable
 ARG NEXT_PUBLIC_BFF_API_BASE_URL
 ENV NEXT_PUBLIC_BFF_API_BASE_URL=$NEXT_PUBLIC_BFF_API_BASE_URL
 
+# next.config.ts の rewrites() が next build 時に評価するため、ビルド時にも必要
+ARG APP_API_BASE_URL
+ENV APP_API_BASE_URL=$APP_API_BASE_URL
+
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY containers/apps/contracts/package.json containers/apps/contracts/package.json
 COPY containers/apps/backend/package.json containers/apps/backend/package.json
