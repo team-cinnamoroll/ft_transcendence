@@ -13,7 +13,7 @@
   "features": {
     "ghcr.io/devcontainers/features/node:2": {
       "version": "lts",
-      "pnpmVersion": "11.13.1"
+      "pnpmVersion": "11.16.0"
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
