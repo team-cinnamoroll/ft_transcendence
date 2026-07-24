@@ -24,3 +24,21 @@ export async function getOrCreateUserProfile(
 
   return { userProfile: newInitialProfile, isExisted: false };
 }
+
+export async function getUserProfiles(
+  userProfileRepo: UserProfileRepositorySpec,
+  fileQueryService: FileQueryServiceSpec,
+  userIds: UserId[]
+): Promise<UserProfile[]> {
+  const existingProfileEntities = await userProfileRepo.getUserProfiles(userIds);
+
+  if (existingProfileEntities.length === 0) {
+    return [];
+  }
+
+  const userProfiles = await Promise.all(
+    existingProfileEntities.map((entity) => toUserProfile(entity, fileQueryService))
+  );
+
+  return userProfiles;
+}
