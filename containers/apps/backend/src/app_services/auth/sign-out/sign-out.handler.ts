@@ -1,45 +1,46 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-validator';
 
 import { type ProtectedEnv } from '../../../shared/types/hono';
 import { type AuthHandlerEnv, injectAuthDeps } from '../auth.di';
 import { AuthSignOutRequestSchema, AuthSignOutResponseSchema } from '@tracen/contracts';
 import { signOutWithValidation } from '../sign-out/sign-out.usecase';
-import { ValidationError } from '../../../shared/errors/global.error';
-import { ZodError } from 'zod';
+import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
+import { makeSafeResponse } from '../../../shared/utils/validation';
 
 export function authSignOutRouter() {
   return new Hono<ProtectedEnv & AuthHandlerEnv>()
     .use('*', injectAuthDeps())
-    .post('/', zValidator('json', AuthSignOutRequestSchema), async (c) => {
+    .post('/', cZValidator('json', AuthSignOutRequestSchema), async (c) => {
       const request = c.req.valid('json');
       const authRefreshTokenRepository = c.get('authRefreshTokenRepository');
       try {
         const jwtPayload = c.get('jwtPayload');
         const userId = jwtPayload.sub;
-        if (!userId) {
-          throw new ValidationError('JWT token is invalid: sub (userId) is missing');
-        }
         await signOutWithValidation(authRefreshTokenRepository, request.refreshToken, userId);
-        return c.json(AuthSignOutResponseSchema.parse({ success: true }), 200);
-      } catch (error) {
-        console.error('Error during sign-out:', error);
-        if (error instanceof ValidationError) {
+        return c.json(makeSafeResponse(AuthSignOutResponseSchema, { success: true }), 200);
+      } catch (err) {
+        console.error('Error during sign-out:', err);
+        if (err instanceof UnauthorizedError) {
           return c.json(
-            AuthSignOutResponseSchema.parse({
+            makeSafeResponse(AuthSignOutResponseSchema, {
               success: false,
-              message: error.message,
+              message: err.message,
             }),
-            400
+            401
           );
         }
-        if (error instanceof ZodError) {
+        // サービス利用不可エラー（例：Redis接続エラー）→ 503 Service Unavailable
+        if (err instanceof ServiceUnavailableError) {
           return c.json(
-            AuthSignOutResponseSchema.parse({ success: false, message: 'Invalid request data' }),
-            400
+            makeSafeResponse(AuthSignOutResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
           );
         }
-        throw error; // グローバルエラーハンドラーに任せる
+        throw err; // グローバルエラーハンドラーに任せる
       }
     });
 }

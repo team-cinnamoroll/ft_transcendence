@@ -4,7 +4,10 @@ import AppHeader from '../AppHeader';
 const mockUser = {
   id: 'user-1',
   name: '山田 太郎',
-  avatarUrl: 'https://i.pravatar.cc/150?u=user-1',
+  avatar: {
+    id: 'avatar-1',
+    url: 'https://i.pravatar.cc/150?u=user-1',
+  },
   badge: '🌟',
 };
 

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
+import { customZValidator as cZValidator } from '../../shared/utils/custom-z-validator';
 
 import {
   PresenceStatusRequestSchema,
@@ -12,6 +12,8 @@ import {
   acceptOfflineRequest,
   getOnlineStatuses,
 } from './domain/presence.usecase';
+import { ValidationError, ServiceUnavailableError } from '../../shared/errors/global.error';
+import { makeSafeResponse } from '../../shared/utils/validation';
 
 export function presenceRouter() {
   return new Hono<PresenceHandlerEnv>()
@@ -20,82 +22,70 @@ export function presenceRouter() {
       const presenceRepo = c.get('presenceRepo');
       const jwtPayload = c.get('jwtPayload');
       const userId = jwtPayload.sub;
-      if (!userId) {
-        return c.json(
-          PresenceUpdateResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
       try {
         await acceptHeartbeatRequest(presenceRepo, userId);
-      } catch (error) {
-        console.error('Error accepting heartbeat request:', error);
-        return c.json(
-          PresenceUpdateResponseSchema.parse({
-            success: false,
-            message: 'Failed to process heartbeat request',
-          }),
-          500
-        );
+      } catch (err) {
+        console.error('Error during heartbeat request:', err);
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(PresenceUpdateResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
       }
-      return c.json(PresenceUpdateResponseSchema.parse({ success: true }));
+      return c.json(makeSafeResponse(PresenceUpdateResponseSchema, { success: true }), 200);
     })
     .post('/offline', async (c) => {
       const presenceRepo = c.get('presenceRepo');
       const jwtPayload = c.get('jwtPayload');
       const userId = jwtPayload.sub;
-      if (!userId) {
-        return c.json(
-          PresenceUpdateResponseSchema.parse({
-            success: false,
-            message: 'JWT token is invalid: sub (userId) is missing',
-          }),
-          400
-        );
-      }
       try {
         await acceptOfflineRequest(presenceRepo, userId);
-      } catch (error) {
-        console.error('Error accepting offline request:', error);
-        return c.json(
-          PresenceUpdateResponseSchema.parse({
-            success: false,
-            message: 'Failed to process offline request',
-          }),
-          500
-        );
+      } catch (err) {
+        console.error('Error during offline request:', err);
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(PresenceUpdateResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
       }
-      return c.json(PresenceUpdateResponseSchema.parse({ success: true }));
+      return c.json(makeSafeResponse(PresenceUpdateResponseSchema, { success: true }), 200);
     })
-    .post('/status', zValidator('json', PresenceStatusRequestSchema), async (c) => {
+    .post('/status', cZValidator('json', PresenceStatusRequestSchema), async (c) => {
       const presenceRepo = c.get('presenceRepo');
       const { userIds } = c.req.valid('json');
       if (!userIds || !Array.isArray(userIds)) {
-        return c.json(
-          PresenceStatusResponseSchema.parse({
-            success: false,
-            message: 'userIds must be an array',
-          }),
-          400
-        );
+        throw new ValidationError('userIds must be an array');
       }
       try {
         const onlineStatuses = await getOnlineStatuses(presenceRepo, userIds);
         return c.json(
-          PresenceStatusResponseSchema.parse({ success: true, data: { onlineStatuses } })
+          makeSafeResponse(PresenceStatusResponseSchema, {
+            success: true,
+            data: { onlineStatuses },
+          })
         );
-      } catch (error) {
-        console.error('Error getting online statuses:', error);
-        return c.json(
-          PresenceStatusResponseSchema.parse({
-            success: false,
-            message: 'Failed to get online statuses',
-          }),
-          500
-        );
+      } catch (err) {
+        console.error('Error during getting online statuses:', err);
+        if (err instanceof ServiceUnavailableError) {
+          return c.json(
+            makeSafeResponse(PresenceStatusResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            503
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
       }
     });
 }

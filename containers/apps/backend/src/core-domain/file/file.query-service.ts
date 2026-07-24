@@ -1,10 +1,5 @@
-import { type FileMetadataId, type FileUrl } from '@tracen/contracts';
-
-export interface FileUrlDto {
-  id: FileMetadataId;
-  url: FileUrl;
-}
+import { type File, type FileMetadataId } from '@tracen/contracts';
 
 export interface FileQueryServiceSpec {
-  getFileUrlsByFileIds(fileIds: FileMetadataId[]): Promise<Map<FileMetadataId, FileUrlDto>>;
+  getFileUrlsByFileIds(fileIds: FileMetadataId[]): Promise<Map<FileMetadataId, File>>;
 }

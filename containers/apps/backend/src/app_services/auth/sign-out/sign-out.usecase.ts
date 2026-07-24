@@ -1,6 +1,6 @@
 import { type UserId, type RefreshToken } from '@tracen/contracts';
 import { type AuthRefreshTokenRepositorySpec } from '../../../features/auth/domain/auth.repository';
-import { ValidationError } from '../../../shared/errors/global.error';
+import { UnauthorizedError } from '../../../shared/errors/global.error';
 
 async function signOutByRefreshToken(
   repo: AuthRefreshTokenRepositorySpec,
@@ -35,5 +35,5 @@ export async function signOutWithValidation(
     await signOutByRefreshToken(repo, refreshToken);
     return;
   }
-  throw new ValidationError('Invalid refresh token or user ID mismatch');
+  throw new UnauthorizedError('Invalid refresh token or user ID mismatch');
 }

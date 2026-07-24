@@ -28,7 +28,7 @@ export async function getCurrentUser(): Promise<UserProfile> {
   return {
     ...mockUser,
     name: realProfile.name,
-    avatarUrl: realProfile.avatarUrl,
+    avatar: realProfile.avatar || null,
     badge: realProfile.badge,
   };
 }

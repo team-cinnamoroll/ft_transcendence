@@ -1,10 +1,7 @@
 import { inArray } from 'drizzle-orm';
 
-import type { FileMetadataId, FileUrl } from '@tracen/contracts';
-import type {
-  FileQueryServiceSpec,
-  FileUrlDto,
-} from '../../../../core-domain/file/file.query-service';
+import type { File, FileMetadataId, FileUrl } from '@tracen/contracts';
+import type { FileQueryServiceSpec } from '../../../../core-domain/file/file.query-service';
 import { FileUrlGeneratorSpec } from '../../domain/file-url-generator';
 
 import type { TracenDb } from '../../../../shared/infra/db/client';
@@ -17,8 +14,8 @@ class DrizzleFileQueryServiceImpl implements FileQueryServiceSpec {
     private readonly fileUrlGenerator: FileUrlGeneratorSpec
   ) {}
 
-  async getFileUrlsByFileIds(fileIds: FileMetadataId[]): Promise<Map<FileMetadataId, FileUrlDto>> {
-    const resultMap = new Map<FileMetadataId, FileUrlDto>();
+  async getFileUrlsByFileIds(fileIds: FileMetadataId[]): Promise<Map<FileMetadataId, File>> {
+    const resultMap = new Map<FileMetadataId, File>();
 
     if (fileIds.length === 0) {
       return resultMap;
@@ -35,12 +32,12 @@ class DrizzleFileQueryServiceImpl implements FileQueryServiceSpec {
         fileMetadata.id
       );
 
-      const fileUrlDto: FileUrlDto = {
+      const fileDto: File = {
         id: fileMetadata.id,
         url: fileUrl,
       };
 
-      resultMap.set(fileMetadata.id, fileUrlDto);
+      resultMap.set(fileMetadata.id, fileDto);
     }
 
     return resultMap;

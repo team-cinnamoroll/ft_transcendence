@@ -5,10 +5,12 @@ import { type UserEntity, UserEntitySchema } from '../../domain/users.entity';
 import type { UserRepositorySpec } from '../../domain/users.repository';
 
 import type { TracenDb } from '../../../../shared/infra/db/client';
-import { users, type UserRow } from './schema';
+import { users, type UserRow, type NewUserRow } from './schema';
+import { ValidationError } from '../../../../shared/errors/global.error';
+import { makeSafeInfraResult } from '../../../../shared/utils/validation';
 
 function mapUser(row: UserRow): UserEntity {
-  return UserEntitySchema.parse({
+  return makeSafeInfraResult(UserEntitySchema, {
     id: row.id,
     email: row.email,
     name: row.name,
@@ -41,17 +43,43 @@ class UserDBRepositoryImpl implements UserRepositorySpec {
   }
 
   async create(data: UserEntity): Promise<UserEntity> {
-    const rows = await this.db
-      .insert(users)
-      .values({
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        passwordHash: data.password_hash,
-      })
-      .returning();
+    const newRow: NewUserRow = {
+      id: data.id,
+      email: data.email,
+      name: data.name,
+      passwordHash: data.password_hash,
+    };
+    try {
+      const rows = await this.db.insert(users).values(newRow).returning();
 
-    return mapUser(rows[0]);
+      return mapUser(rows[0]);
+    } catch (error: unknown) {
+      // drizzle-ormのエラーは、通常、Errorオブジェクトのcauseプロパティにデータベースエラーが格納される
+      // causeに格納されるpostgresqlのエラーコードを確認して、ユニーク制約違反や外部キー制約違反などのケースをハンドリングする
+      const dbError = error instanceof Error ? error.cause : undefined;
+      if (dbError && typeof dbError === 'object' && 'code' in dbError) {
+        const errObj = dbError as Record<string, unknown>;
+        // ユニーク制約違反
+        if (errObj.code === '23505') {
+          if (errObj.constraint_name === 'users_email_unique') {
+            throw new ValidationError(`Email "${data.email}" is already in use.`);
+          }
+          if (errObj.constraint_name === 'users_pkey') {
+            throw new ValidationError(`User with ID "${data.id}" already exists.`);
+          }
+        }
+        // UUIDなどのフォーマット異常 (22P02)
+        if (errObj.code === '22P02') {
+          throw new ValidationError(`Invalid data format provided for User.`); // ※ BadRequestError等推奨
+        }
+
+        // NOT NULL 制約違反 (23502) - 型やZodをすり抜けた場合
+        if (errObj.code === '23502') {
+          throw new ValidationError(`Missing required field: ${errObj.column_name}`); // どのカラムが空だったか拾えます
+        }
+      }
+      throw error; // 上記で処理されなかったエラーは再スロー
+    }
   }
 }
 

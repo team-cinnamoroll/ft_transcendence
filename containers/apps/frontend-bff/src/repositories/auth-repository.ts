@@ -22,9 +22,9 @@ export type AuthRepositorySpec = {
   /** ログイン（認証 + トークン発行） */
   signIn: (input: AuthSignInRequest) => Promise<AuthSignInResult>;
   /** リフレッシュトークンによるアクセストークンの再発行 */
-  refresh: (refreshToken: string) => Promise<AuthRefresh>;
+  refresh: (userId: string, refreshToken: string) => Promise<AuthRefresh>;
   /** ログアウト（リフレッシュトークンの失効） */
-  signOut: (refreshToken: string) => Promise<void>;
+  signOut: (token: string, refreshToken: string) => Promise<void>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -63,9 +63,9 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
       return json as AuthSignInResult;
     },
 
-    refresh: async (refreshToken) => {
+    refresh: async (userId, refreshToken) => {
       const res = await createBackendClient().api.v1.auth.refresh.$post({
-        json: { refreshToken },
+        json: { userId, refreshToken },
       });
       if (!res.ok) {
         console.error('AuthRepository.refresh: backend request failed', res.status);
@@ -73,7 +73,7 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
       return (await res.json()) as AuthRefresh;
     },
 
-    signOut: async (refreshToken) => {
+    signOut: async (token, refreshToken) => {
       // signOutだけ複数回リトライしている理由:
       // - signUp/signIn/refreshは「意味のある結果」を返す約束（例: Promise<AuthSignUp>）をしているため、
       //   通信が一時的に不調でも、リトライで誤魔化さずその場で失敗を呼び出し元に伝えるべき処理。
@@ -86,7 +86,7 @@ export function createAuthApiRepositoryImpl(): AuthRepositorySpec {
       const maxAttempts = 3;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          const res = await createBackendClient().api.v1.auth.refresh.$delete({
+          const res = await createBackendClient(token).api.v1.auth['sign-out'].$post({
             json: { refreshToken },
           });
           if (res.ok) return;

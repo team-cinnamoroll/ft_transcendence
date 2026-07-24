@@ -29,3 +29,36 @@ export class NotFoundError extends Error {
     this.name = 'NotFoundError';
   }
 }
+
+// 500 Internal Server Error
+export class InternalServerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InternalServerError';
+  }
+}
+
+export class InternalValidationError extends Error {
+  constructor(message: string, cause?: Error) {
+    super(message);
+    this.name = 'InternalValidationError';
+    if (cause) {
+      this.cause = cause;
+    }
+  }
+}
+
+// 503 Service Unavailable Error
+export class ServiceUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ServiceUnavailableError';
+  }
+}
+
+export class ServiceConnectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ServiceConnectionError';
+  }
+}

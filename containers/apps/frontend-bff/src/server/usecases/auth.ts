@@ -30,9 +30,9 @@ export async function signInAndStartSession(input: AuthSignInRequest): Promise<A
 
 /** ログアウトする。Cookieのリフレッシュトークンでバックエンドに失効を伝えた上で、ローカルのセッションを破棄する */
 export async function signOutAndClearSession(): Promise<void> {
-  const { refreshToken } = await getSessionTokens();
-  if (refreshToken) {
-    await getAuthRepository().signOut(refreshToken);
+  const { refreshToken, accessToken } = await getSessionTokens();
+  if (refreshToken && accessToken) {
+    await getAuthRepository().signOut(accessToken, refreshToken);
   }
   await clearSessionTokens();
 }

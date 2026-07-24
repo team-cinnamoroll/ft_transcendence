@@ -4,10 +4,12 @@ import postgres from 'postgres';
 
 import * as usersSchema from '../../../features/users/infra/db/schema';
 import * as fileStorageSchema from '../../../features/file-storage/infra/db/schema';
+import * as userProfileSchema from '../../../features/user-profile/infra/db/schema';
 
 export const appSchema = {
   ...usersSchema,
   ...fileStorageSchema,
+  ...userProfileSchema,
 };
 
 export type TracenDb = PostgresJsDatabase<typeof appSchema>;
