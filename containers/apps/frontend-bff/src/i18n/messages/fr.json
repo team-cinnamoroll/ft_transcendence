@@ -300,6 +300,7 @@
     "errorAvatarUploadFailed": "Échec du téléversement de l'image. Veuillez réessayer.",
     "errorAvatarInvalidType": "Veuillez sélectionner une image au format JPEG ou PNG.",
     "errorGeneric": "Échec de l'enregistrement du profil. Veuillez réessayer plus tard.",
+    "errorAvatarNotFound": "L'image sélectionnée est introuvable. Veuillez la sélectionner à nouveau.",
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "faceDetailPage": {

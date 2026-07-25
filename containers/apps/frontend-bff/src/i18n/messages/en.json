@@ -300,6 +300,7 @@
     "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
     "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
     "errorGeneric": "Failed to save profile. Please try again later.",
+    "errorAvatarNotFound": "The selected image could not be found. Please choose the image again.",
     "errorSessionExpired": "Your session has expired. Please sign in again."
   },
   "faceDetailPage": {
