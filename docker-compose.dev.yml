@@ -153,6 +153,20 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    profiles: ['analytics']
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - '8081:8080'
+    volumes:
+      - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./containers/infra/analytics/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
 volumes:
   workspace_node_modules:
   postgres_data:

@@ -1,0 +1,17 @@
+{
+  "index_patterns": ["events*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "type": { "type": "keyword" },
+        "userId": { "type": "keyword" },
+        "faceId": { "type": "keyword" }
+      }
+    }
+  }
+}

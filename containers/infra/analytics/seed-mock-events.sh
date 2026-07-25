@@ -3,24 +3,19 @@ set -euo pipefail
 
 ES_URL="${ES_URL:-http://localhost:9200}"
 KIBANA_URL="${KIBANA_URL:-http://localhost:5601/kibana}"
+LOGSTASH_URL="${LOGSTASH_URL:-http://localhost:8081}"
 EVENT_COUNT="${EVENT_COUNT:-2500}"
 INDEX="events"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KIBANA_OBJECTS="$SCRIPT_DIR/kibana-objects.ndjson"
+EVENTS_TEMPLATE="$SCRIPT_DIR/logstash/templates/events-template.json"
 TMP_NDJSON="$(mktemp)"
 trap 'rm -f "$TMP_NDJSON"' EXIT
 
 curl -s -X DELETE "$ES_URL/$INDEX" >/dev/null || true
-curl -s -X PUT "$ES_URL/$INDEX" -H 'Content-Type: application/json' -d '{
-  "mappings": {
-    "properties": {
-      "@timestamp": { "type": "date" },
-      "type":       { "type": "keyword" },
-      "userId":     { "type": "keyword" },
-      "faceId":     { "type": "keyword" }
-    }
-  }
-}' >/dev/null
+curl -s -X PUT "$ES_URL/_index_template/events" \
+  -H 'Content-Type: application/json' \
+  --data-binary "@$EVENTS_TEMPLATE" >/dev/null
 
 python3 - "$EVENT_COUNT" > "$TMP_NDJSON" <<'PY'
 import sys, json, random
@@ -49,13 +44,21 @@ for _ in range(n):
     doc = {"@timestamp": rand_ts(), "type": etype, "userId": random.choice(users)}
     if etype == "activity_created":
         doc["faceId"] = random.choice(faces)
-    print(json.dumps({"index": {"_index": "events"}}))
     print(json.dumps(doc))
 PY
 
-curl -s -H 'Content-Type: application/x-ndjson' -X POST "$ES_URL/_bulk" --data-binary "@$TMP_NDJSON" >/dev/null
-curl -s -X POST "$ES_URL/$INDEX/_refresh" >/dev/null
-echo "ES count: $(curl -s "$ES_URL/$INDEX/_count" | python3 -c "import sys,json;print(json.load(sys.stdin)['count'])")"
+curl -s -H 'Content-Type: application/x-ndjson' -X POST "$LOGSTASH_URL" --data-binary "@$TMP_NDJSON" >/dev/null
+
+echo -n "waiting for Logstash -> ES ingestion"
+count=0
+for _ in $(seq 1 60); do
+  count=$(curl -s "$ES_URL/$INDEX/_count" | python3 -c "import sys,json;print(json.load(sys.stdin).get('count',0))" 2>/dev/null || echo 0)
+  if [ "$count" -ge "$EVENT_COUNT" ]; then break; fi
+  echo -n "."
+  sleep 1
+done
+echo ""
+echo "ES count: $count"
 
 if [ -f "$KIBANA_OBJECTS" ]; then
   curl -s -X POST "$KIBANA_URL/api/saved_objects/_import?overwrite=true" \
