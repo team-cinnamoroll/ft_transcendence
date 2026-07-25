@@ -153,6 +153,30 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  # ── モニタリング基盤 (Prometheus + Grafana) ─────────────────────────────
+  # Monitoring (Prometheus + Grafana) — メトリクス監視基盤。通常は起動しない。
+  # profile 'monitoring' 指定時のみ起動する。
+  #   docker compose -f docker-compose.dev.yml --profile monitoring up -d prometheus grafana
+  # Grafana UI: http://localhost:3000 / Prometheus: http://localhost:9090
+  prometheus:
+    image: prom/prometheus:v3.13.1
+    profiles: ['monitoring']
+    volumes:
+      - ./containers/infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - '9090:9090'
+
+  grafana:
+    image: grafana/grafana:13.1.1
+    profiles: ['monitoring']
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - '3001:3000'
+    depends_on:
+      - prometheus
+
 volumes:
   workspace_node_modules:
   postgres_data:
@@ -160,3 +184,5 @@ volumes:
   redis_data:
   file_storage_data:
   elasticsearch_data:
+  prometheus_data:
+  grafana_data:
