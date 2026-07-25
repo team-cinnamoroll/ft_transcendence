@@ -34,7 +34,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
   const [isPending, startTransition] = useTransition();
 
   const [previewUrl, setPreviewUrl] = useState<string>(getAvatarUrl(user));
-  const [avatarFileId, setAvatarFileId] = useState<string | undefined>(undefined);
+  const [avatarFileId, setAvatarFileId] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -88,7 +88,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
     setAvatarError(null);
-    setAvatarFileId(undefined);
+    setAvatarFileId(null);
     setIsUploadingAvatar(true);
 
     const formData = new FormData();
@@ -263,7 +263,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
             <input
               id="profile-badge"
               type="text"
-              {...register('badge', { setValueAs: (v: string) => (v === '' ? undefined : v) })}
+              {...register('badge', { setValueAs: (v: string) => (v === '' ? null : v) })}
               placeholder={t('badgePlaceholder')}
               style={inputStyle}
               aria-invalid={!!errors.badge}
