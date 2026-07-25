@@ -33,8 +33,11 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // モーダルを開いた時点で設定されていたアバターのファイルID（差し替え検知・後始末の削除対象の判定に使う）
+  const originalAvatarFileId = user.avatar?.id ?? null;
+
   const [previewUrl, setPreviewUrl] = useState<string>(getAvatarUrl(user));
-  const [avatarFileId, setAvatarFileId] = useState<string | null>(null);
+  const [avatarFileId, setAvatarFileId] = useState<string | null>(originalAvatarFileId);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -88,7 +91,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
     setAvatarError(null);
-    setAvatarFileId(null);
+    // avatarFileIdはここでは変更しない（アップロードが失敗した場合に、既存のアバターを消してしまわないため）
     setIsUploadingAvatar(true);
 
     const formData = new FormData();
@@ -132,6 +135,12 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
 
       // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
       uploadedFileIdRef.current = null;
+
+      // アバターを差し替えた場合、置き換えられた古いファイルを後始末として削除する（ベストエフォート）
+      if (originalAvatarFileId && avatarFileId !== originalAvatarFileId) {
+        void deleteUploadedFileAction(originalAvatarFileId);
+      }
+
       onClose();
     });
   };
