@@ -30,7 +30,7 @@ export type UserProfile = z.infer<typeof UserProfileSchema>;
 export const UserProfileMapSchema = z.record(UserIdSchema, UserProfileSchema.nullable());
 export type UserProfileMap = z.infer<typeof UserProfileMapSchema>;
 
-// GET /user-profile/profiles?ids=... のレスポンス
+// GET /user-profile/profiles?ids=udid01,udid02,udid03,... のレスポンス
 export const UserProfilesResponseSchema = createApiResponseSchema(
   z.object({
     profiles: UserProfileMapSchema, // ユーザーIDをキーとしたマップ
