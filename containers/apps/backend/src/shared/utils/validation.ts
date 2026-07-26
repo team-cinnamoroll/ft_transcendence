@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { InternalValidationError } from '../../shared/errors/global.error';
 
 function createMakeSafeResult(errorMessage: string) {
-  return <T>(schema: z.ZodType<T>, data: T): T => {
+  return <S extends z.ZodTypeAny>(schema: S, data: z.input<S>): z.output<S> => {
     const result = schema.safeParse(data);
 
     if (!result.success) {
