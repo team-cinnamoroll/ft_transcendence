@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { UserIdSchema } from '@tracen/contracts';
+import { UserIdSchema } from './user';
 
-export const UserProfileBulkQuerySchema = z.object({
+export const UserProfileBulkRequestSchema = z.object({
   ids: z
     .string()
     .transform((val, ctx) => {
@@ -29,4 +29,4 @@ export const UserProfileBulkQuerySchema = z.object({
     ),
 });
 
-export type UserProfileBulkQuery = z.infer<typeof UserProfileBulkQuerySchema>;
+export type UserProfileBulkRequest = z.infer<typeof UserProfileBulkRequestSchema>;

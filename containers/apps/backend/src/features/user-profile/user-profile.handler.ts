@@ -6,9 +6,9 @@ import {
   UserProfileUpsertRequestSchema,
   SimpleApiResponseSchema,
   UserProfilesResponseSchema,
+  UserProfileBulkRequestSchema,
   type UserProfileMap,
 } from '@tracen/contracts';
-import { UserProfileBulkQuerySchema } from './domain/user-profile.bulk.query';
 import { injectUsersDeps } from '../users/users.di';
 import { type UserProfileHandlerEnv, injectUserProfileDeps } from './user-profile.di';
 import { injectFileQueryDeps } from '../file-storage/file.query-service.di';
@@ -64,7 +64,7 @@ export function userProfileRouter() {
     )
     .use('*', injectFileQueryDeps())
     .use('*', injectUsersDeps())
-    .get('/profiles', cZValidator('query', UserProfileBulkQuerySchema), async (c) => {
+    .get('/profiles', cZValidator('query', UserProfileBulkRequestSchema), async (c) => {
       const userProfileRepo = c.get('userProfileRepo');
       const fileQueryService = c.get('fileQueryService');
       try {
