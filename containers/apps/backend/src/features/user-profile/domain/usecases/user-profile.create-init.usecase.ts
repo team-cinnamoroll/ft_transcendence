@@ -7,12 +7,12 @@ import {
   UserIdSchema,
   UserProfileSchema,
 } from '@tracen/contracts';
-import { type UserProfileRepositorySpec } from './user-profile.repository';
-import { type FileQueryServiceSpec } from '../../../core-domain/file/file.query-service';
-import { type UserProfileEntity, UserProfileEntitySchema } from './user-profile.entity';
+import { type UserProfileRepositorySpec } from '../user-profile.repository';
+import { type FileQueryServiceSpec } from '../../../../core-domain/file/file.query-service';
+import { type UserProfileEntity, UserProfileEntitySchema } from '../user-profile.entity';
 import { ZodError } from 'zod';
-import { ValidationError, InternalValidationError } from '../../../shared/errors/global.error';
-import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
+import { ValidationError, InternalValidationError } from '../../../../shared/errors/global.error';
+import { makeSafeUsecaseResult } from '../../../../shared/utils/validation';
 
 export async function toUserProfile(
   profileEntity: UserProfileEntity,

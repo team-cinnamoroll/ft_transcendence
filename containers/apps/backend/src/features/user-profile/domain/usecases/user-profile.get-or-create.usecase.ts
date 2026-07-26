@@ -1,7 +1,11 @@
 import { type UserId, type UserNickname, type UserProfile } from '@tracen/contracts';
-import { type UserProfileRepositorySpec } from './user-profile.repository';
-import { type FileQueryServiceSpec } from '../../../core-domain/file/file.query-service';
-import { createInitialUserProfile, toUserProfile } from './user-profile.create-init.usecase';
+import { type UserProfileRepositorySpec } from '../user-profile.repository';
+import { type FileQueryServiceSpec } from '../../../../core-domain/file/file.query-service';
+import {
+  createInitialUserProfile,
+  toUserProfile,
+  toUserProfiles,
+} from '../usecases/user-profile.create-init.usecase';
 
 export async function getOrCreateUserProfile(
   userProfileRepo: UserProfileRepositorySpec,
@@ -36,9 +40,7 @@ export async function getUserProfiles(
     return [];
   }
 
-  const userProfiles = await Promise.all(
-    existingProfileEntities.map((entity) => toUserProfile(entity, fileQueryService))
-  );
+  const userProfiles = await toUserProfiles(existingProfileEntities, fileQueryService);
 
   return userProfiles;
 }

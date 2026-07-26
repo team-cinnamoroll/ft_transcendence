@@ -15,7 +15,7 @@ import {
 } from '@tracen/contracts';
 import { type UserProfileEntity } from '../../../user-profile/domain/user-profile.entity';
 import { getOnlineStatuses } from '../../../presence/domain/presence.usecase';
-import { toUserProfiles } from '../../../user-profile/domain/user-profile.create-init.usecase';
+import { toUserProfiles } from '../../../user-profile/domain/usecases/user-profile.create-init.usecase';
 import { makeSafeUsecaseResult } from '../../../../shared/utils/validation';
 
 // 承認済みフレンド一覧の取得ユースケース

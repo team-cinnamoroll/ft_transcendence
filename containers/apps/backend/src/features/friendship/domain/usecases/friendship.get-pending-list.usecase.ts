@@ -12,7 +12,7 @@ import {
   FriendshipPendingListRequestSchema,
   UnconfirmedFriendProfileSchema,
 } from '@tracen/contracts';
-import { toUserProfiles } from '../../../user-profile/domain/user-profile.create-init.usecase';
+import { toUserProfiles } from '../../../user-profile/domain/usecases/user-profile.create-init.usecase';
 import { makeSafeUsecaseResult } from '../../../../shared/utils/validation';
 
 // フレンド申請一覧の取得（受信／送信）ユースケース
