@@ -97,15 +97,14 @@ run_tests() {
     AUTH_TOKEN="${USER_TOKENS[0]}"
 
     # --- テスト1: 100件の正常リクエスト ---
-    echo "[1/3] 100件のリクエスト (全て存在するID)"
-    # 配列から先頭100件を取り出し、カンマ区切りで結合
+    echo "[1/4] 100件のリクエスト (全て存在するID)"
     IDS_100=$(IFS=, ; echo "${USER_IDS[*]:0:100}")
 
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/user-profile/profiles?ids=$IDS_100" \
         -H "Authorization: Bearer $AUTH_TOKEN")
 
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    PROFILE_COUNT=$(jq -r '[.data.profiles[]] | length' "$TEMP_RES")
+    PROFILE_COUNT=$(jq -r '[.data.profileMap | to_entries[]] | length' "$TEMP_RES")
 
     echo "  -> HTTP Status: $HTTP_STATUS (Expected: 200)"
     echo "  -> Success: $SUCCESS (Expected: true)"
@@ -120,7 +119,7 @@ run_tests() {
     echo ""
 
     # --- テスト2: 101件のリクエスト (上限エラー) ---
-    echo "[2/3] 101件のリクエスト (最大取得件数超過エラーの確認)"
+    echo "[2/4] 101件のリクエスト (最大取得件数超過エラーの確認)"
     IDS_101=$(IFS=, ; echo "${USER_IDS[*]:0:101}")
 
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/user-profile/profiles?ids=$IDS_101" \
@@ -140,14 +139,12 @@ run_tests() {
     echo ""
 
     # --- テスト3: 50件正常 + 50件存在しないUUID ---
-    echo "[3/3] 100件のリクエスト (50件は存在するID, 50件は存在しないID)"
+    echo "[3/4] 100件のリクエスト (50件は存在するID, 50件は存在しないID)"
 
     COMBINED_IDS=()
-    # 存在するIDを50件追加
     for i in {0..49}; do
         COMBINED_IDS+=("${USER_IDS[$i]}")
     done
-    # 存在しないUUIDを50件追加
     for i in {1..50}; do
         COMBINED_IDS+=("$(generate_uuid)")
     done
@@ -159,9 +156,8 @@ run_tests() {
 
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
 
-    # 存在するデータ(nullではない)の数と、存在しないデータ(null)の数をカウント
-    VALID_COUNT=$(jq -r '[.data.profiles[]] | map(select(. != null)) | length' "$TEMP_RES")
-    NULL_COUNT=$(jq -r '[.data.profiles[]] | map(select(. == null)) | length' "$TEMP_RES")
+    VALID_COUNT=$(jq -r '[.data.profileMap | to_entries[] | select(.value != null)] | length' "$TEMP_RES")
+    NULL_COUNT=$(jq -r '[.data.profileMap | to_entries[] | select(.value == null)] | length' "$TEMP_RES")
 
     echo "  -> HTTP Status: $HTTP_STATUS (Expected: 200)"
     echo "  -> Success: $SUCCESS (Expected: true)"
@@ -172,6 +168,96 @@ run_tests() {
         echo "  => [PASS] テスト3 成功"
     else
         echo "  => [FAIL] テスト3 失敗"
+        cat "$TEMP_RES"
+    fi
+    echo ""
+
+    # --- テスト4: Relationshipステータスの網羅的確認 ---
+    echo "[4/4] Relationshipステータスの網羅的確認"
+
+    # 対象ユーザーの割り当て
+    U1_ID="${USER_IDS[0]}" ; U1_TOKEN="${USER_TOKENS[0]}" # リクエスト主 (SELF)
+    U2_ID="${USER_IDS[1]}" ; U2_TOKEN="${USER_TOKENS[1]}" # リクエスト主へフレンド申請 (PENDING_INCOMING)
+    U3_ID="${USER_IDS[2]}" ; U3_TOKEN="${USER_TOKENS[2]}" # リクエスト主からフレンド申請 (PENDING_OUTGOING)
+    U4_ID="${USER_IDS[3]}" ; U4_TOKEN="${USER_TOKENS[3]}" # リクエスト主とフレンド (FRIEND)
+    U5_ID="${USER_IDS[4]}" ; U5_TOKEN="${USER_TOKENS[4]}" # リクエスト主からの申請をブロック (BLOCKED_BY)
+    U6_ID="${USER_IDS[5]}" ; U6_TOKEN="${USER_TOKENS[5]}" # リクエスト主へ申請しブロックされた (BLOCKED)
+    U7_ID="${USER_IDS[6]}"                                # 何もしていない (NONE)
+
+    # 1. PENDING_INCOMING: U2 -> U1 に申請
+    RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/friendships/requests" \
+        -H "Authorization: Bearer $U2_TOKEN" -H "Content-Type: application/json" -d "{\"addresseeId\": \"$U1_ID\"}")
+    if [ "$(echo "$RES" | tail -n1)" -ne 201 ]; then echo "Failed U2->U1 request."; exit 1; fi
+
+    # 2. PENDING_OUTGOING: U1 -> U3 に申請
+    RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/friendships/requests" \
+        -H "Authorization: Bearer $U1_TOKEN" -H "Content-Type: application/json" -d "{\"addresseeId\": \"$U3_ID\"}")
+    if [ "$(echo "$RES" | tail -n1)" -ne 201 ]; then echo "Failed U1->U3 request."; exit 1; fi
+
+    # 3. FRIEND: U1 -> U4 に申請 ＆ U4 が承認
+    RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/friendships/requests" \
+        -H "Authorization: Bearer $U1_TOKEN" -H "Content-Type: application/json" -d "{\"addresseeId\": \"$U4_ID\"}")
+    F_ID=$(echo "$RES" | sed '$d' | jq -r '.data.friendship.id')
+    RES=$(curl -s -w "\n%{http_code}" -X PATCH "$BASE_URL/friendships/requests/$F_ID/accept" \
+        -H "Authorization: Bearer $U4_TOKEN")
+    if [ "$(echo "$RES" | tail -n1)" -ne 200 ]; then echo "Failed U4 accept."; exit 1; fi
+
+    # 4. BLOCKED_BY: U1 -> U5 に申請 ＆ U5 が拒否
+    RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/friendships/requests" \
+        -H "Authorization: Bearer $U1_TOKEN" -H "Content-Type: application/json" -d "{\"addresseeId\": \"$U5_ID\"}")
+    F_ID=$(echo "$RES" | sed '$d' | jq -r '.data.friendship.id')
+    RES=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/friendships/requests/$F_ID" \
+        -H "Authorization: Bearer $U5_TOKEN")
+    if [ "$(echo "$RES" | tail -n1)" -ne 200 ]; then echo "Failed U5 reject."; exit 1; fi
+
+    # 5. BLOCKED: U6 -> U1 に申請 ＆ U1 が拒否
+    RES=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/friendships/requests" \
+        -H "Authorization: Bearer $U6_TOKEN" -H "Content-Type: application/json" -d "{\"addresseeId\": \"$U1_ID\"}")
+    F_ID=$(echo "$RES" | sed '$d' | jq -r '.data.friendship.id')
+    RES=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/friendships/requests/$F_ID" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    if [ "$(echo "$RES" | tail -n1)" -ne 200 ]; then echo "Failed U1 reject."; exit 1; fi
+
+    echo "  -> 事前準備 (フレンド関係の構築) 完了"
+
+    # バルククエリー実行
+    IDS_REL="${U1_ID},${U2_ID},${U3_ID},${U4_ID},${U5_ID},${U6_ID},${U7_ID}"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/user-profile/profiles?ids=$IDS_REL" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+
+    echo "  -> HTTP Status: $HTTP_STATUS (Expected: 200)"
+    echo "  -> Success: $SUCCESS (Expected: true)"
+
+    # 各ユーザーのステータスを取得
+    S_U1=$(jq -r ".data.profileMap[\"$U1_ID\"].relationship.status" "$TEMP_RES")
+    S_U2=$(jq -r ".data.profileMap[\"$U2_ID\"].relationship.status" "$TEMP_RES")
+    S_U3=$(jq -r ".data.profileMap[\"$U3_ID\"].relationship.status" "$TEMP_RES")
+    S_U4=$(jq -r ".data.profileMap[\"$U4_ID\"].relationship.status" "$TEMP_RES")
+    S_U5=$(jq -r ".data.profileMap[\"$U5_ID\"].relationship.status" "$TEMP_RES")
+    S_U6=$(jq -r ".data.profileMap[\"$U6_ID\"].relationship.status" "$TEMP_RES")
+    S_U7=$(jq -r ".data.profileMap[\"$U7_ID\"].relationship.status" "$TEMP_RES")
+
+    echo "  -> User1 (Self)       : $S_U1 (Expected: SELF)"
+    echo "  -> User2 (Incoming)   : $S_U2 (Expected: PENDING_INCOMING)"
+    echo "  -> User3 (Outgoing)   : $S_U3 (Expected: PENDING_OUTGOING)"
+    echo "  -> User4 (Friend)     : $S_U4 (Expected: FRIEND)"
+    echo "  -> User5 (Blocked By) : $S_U5 (Expected: BLOCKED_BY)"
+    echo "  -> User6 (Blocked)    : $S_U6 (Expected: BLOCKED)"
+    echo "  -> User7 (None)       : $S_U7 (Expected: NONE)"
+
+    # アサーション
+    if [ "$HTTP_STATUS" -eq 200 ] && [ "$SUCCESS" = "true" ] && \
+       [ "$S_U1" = "SELF" ] && \
+       [ "$S_U2" = "PENDING_INCOMING" ] && \
+       [ "$S_U3" = "PENDING_OUTGOING" ] && \
+       [ "$S_U4" = "FRIEND" ] && \
+       [ "$S_U5" = "BLOCKED_BY" ] && \
+       [ "$S_U6" = "BLOCKED" ] && \
+       [ "$S_U7" = "NONE" ]; then
+        echo "  => [PASS] テスト4 成功"
+    else
+        echo "  => [FAIL] テスト4 失敗"
         cat "$TEMP_RES"
     fi
     echo ""
