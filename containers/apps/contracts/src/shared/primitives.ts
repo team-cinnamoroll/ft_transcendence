@@ -21,3 +21,7 @@ export type FilePath = z.infer<typeof FilePathSchema>;
 // オンライン状態
 export const IsOnlineSchema = z.boolean();
 export type IsOnline = z.infer<typeof IsOnlineSchema>;
+
+// リスト取得のリクエストにおける件数制限のスキーマと型
+export const ListRequestLimitSchema = z.coerce.number().int().min(1).max(100).default(20); // 1~100件の範囲で指定、デフォルトは20件
+export type ListRequestLimit = z.infer<typeof ListRequestLimitSchema>;

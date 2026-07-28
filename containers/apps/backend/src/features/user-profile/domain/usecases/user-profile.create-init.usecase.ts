@@ -7,12 +7,12 @@ import {
   UserIdSchema,
   UserProfileSchema,
 } from '@tracen/contracts';
-import { type UserProfileRepositorySpec } from './user-profile.repository';
-import { type FileQueryServiceSpec } from '../../../core-domain/file/file.query-service';
-import { type UserProfileEntity, UserProfileEntitySchema } from './user-profile.entity';
+import { type UserProfileRepositorySpec } from '../user-profile.repository';
+import { type FileQueryServiceSpec } from '../../../../core-domain/file/file.query-service';
+import { type UserProfileEntity, UserProfileEntitySchema } from '../user-profile.entity';
 import { ZodError } from 'zod';
-import { ValidationError, InternalValidationError } from '../../../shared/errors/global.error';
-import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
+import { ValidationError, InternalValidationError } from '../../../../shared/errors/global.error';
+import { makeSafeUsecaseResult } from '../../../../shared/utils/validation';
 
 export async function toUserProfile(
   profileEntity: UserProfileEntity,
@@ -42,6 +42,44 @@ export async function toUserProfile(
     name: profileEntity.name,
     avatar: null,
     badge: profileEntity.badge,
+  });
+}
+
+export async function toUserProfiles(
+  profileEntities: UserProfileEntity[],
+  fileQueryService: FileQueryServiceSpec
+): Promise<UserProfile[]> {
+  const avatarFileIds = profileEntities
+    .filter((entity) => entity.avatarFileId !== null)
+    .map((entity) => entity.avatarFileId as string);
+
+  const avatarFileMap = await fileQueryService.getFileUrlsByFileIds(avatarFileIds);
+
+  return profileEntities.map((entity) => {
+    if (entity.avatarFileId) {
+      const fileDto = avatarFileMap.get(entity.avatarFileId);
+      if (!fileDto) {
+        throw new InternalValidationError(
+          `Avatar file with ID ${entity.avatarFileId} not found for user profile ${entity.userId}`
+        );
+      }
+      return makeSafeUsecaseResult(UserProfileSchema, {
+        id: entity.userId,
+        name: entity.name,
+        avatar: {
+          id: fileDto.id,
+          url: fileDto.url,
+        },
+        badge: entity.badge,
+      });
+    }
+
+    return makeSafeUsecaseResult(UserProfileSchema, {
+      id: entity.userId,
+      name: entity.name,
+      avatar: null,
+      badge: entity.badge,
+    });
   });
 }
 

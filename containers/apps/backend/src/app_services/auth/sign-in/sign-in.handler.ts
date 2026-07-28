@@ -13,7 +13,7 @@ import {
 } from '@tracen/contracts';
 import { verifyUser } from './sign-in.verify-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
-import { getOrCreateUserProfile } from '../../../features/user-profile/domain/user-profile.get-or-create.usecase';
+import { getOrCreateUserProfile } from '../../../features/user-profile/domain/usecases/user-profile.get-or-create.usecase';
 import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
 import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
