@@ -55,25 +55,19 @@ export function emitAnalyticsEvent(event: AnalyticsEvent): void {
 
 > HTTP 送信のような失敗ハンドリングは不要。**標準出力に出すだけ**なので、送信失敗もブロッキングも無い（Filebeat 方式の利点）。
 
-### ③ ノイズと区別できるようにする（重要）
-backend の stdout には分析イベント以外（アクセスログ、エラー等）も大量に流れます。
-Filebeat はそれも全部拾うため、**分析イベントだけを選別する必要**があります。上のスキーマ（`type` が既知の4種のいずれか）を満たす JSON 行だけを分析イベントとして扱い、それ以外は収集側の Logstash で捨てます（下記）。
+### ③ ノイズ選別は対応不要（収集側で実装済み）
+backend の stdout には分析イベント以外（アクセスログ、エラー等）も流れますが、**選別は収集側（Logstash）で対応済み**です。backend は上のスキーマで分析イベントを出すことだけ意識すればよく、他のログは自由に出して構いません（マーカー等の追加対応は不要）。
 
-## 収集側（インフラ担当）がやること
-backend 連携のタイミングで、`logstash/pipeline/events.conf` に**選別フィルタを1つ追加**します。
-JSON パースに失敗した行（普通のログ文字列）や、`type` が既知の値でない行を捨てる:
+## 収集側（インフラ担当）: 対応済み
+分析イベント以外のログを捨てる選別フィルタは `logstash/pipeline/events.conf` に**実装済み**です。
+`type` が既知の4種でない行（普通のログ文字列＝JSON パース失敗を含む）はすべて drop されます:
 ```
-filter {
-  json { source => "message" }
-  if "_jsonparsefailure" in [tags] or [type] not in ["login", "logout", "signup", "activity_created"] {
-    drop {}
-  }
-  date { match => ["@timestamp", "ISO8601"] }
-  mutate { remove_field => [...] }
+if [type] not in ["login", "logout", "signup", "activity_created"] {
+  drop {}
 }
 ```
-これで backend の非分析ログは events index に入りません。
-（mock 検証時は mock-producer が分析イベントのみを出すため、この選別はまだ入れていません。）
+node の `console.log` で「分析JSON + 普通のログ（ERROR / nodemon 等）」を混在させて流す実証を行い、
+**分析JSON のみが events に入り、普通のログは drop される**ことを確認済みです。
 
 ## 動作確認（backend 連携後）
 ```bash
@@ -96,7 +90,7 @@ open http://localhost:8080/kibana/app/dashboards#/view/events-overview
 - [ ] backend コンテナに `analytics_source: 'true'` ラベルを付けた
 - [ ] 4種のイベント発生箇所で `emitAnalyticsEvent(...)` を呼んだ
 - [ ] `docker logs <backend> ` に1行 JSON のイベントが出ている
-- [ ] （インフラ）Logstash に選別フィルタを追加した
+- [x] （インフラ）選別フィルタは実装済み（backend 側の追加対応は不要）
 - [ ] アプリ操作で ES 件数が増え、中身が実ユーザーIDで、Kibana に反映される
 
 ## よくある詰まり

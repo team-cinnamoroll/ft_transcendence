@@ -55,7 +55,7 @@ curl -s http://localhost:9200/events/_count
 | --- | --- |
 | `mock-producer/produce.py` | mock イベントを1行 JSON で stdout に出す（`BACKFILL_COUNT` / `LIVE_INTERVAL` で調整） |
 | `filebeat/filebeat.yml` | `analytics_source=true` のコンテナログを autodiscover し Logstash へ送る |
-| `logstash/pipeline/events.conf` | beats input → JSON パース → date filter → メタ除去 → ES output |
+| `logstash/pipeline/events.conf` | beats input → JSON パース → 非分析ログを drop → date filter → メタ除去 → ES output |
 | `logstash/config/logstash.yml` | Logstash 本体設定（monitoring 無効・pipeline 自動リロード） |
 | `logstash/templates/events-template.json` | `events*` の index template（`dynamic:false`）。Logstash が ES に登録する |
 | `kibana-objects.ndjson` | データビュー（`events*` / runtime field `hour_of_day`）＋ 可視化3種 ＋ ダッシュボード |
