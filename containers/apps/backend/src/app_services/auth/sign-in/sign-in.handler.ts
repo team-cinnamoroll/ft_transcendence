@@ -16,6 +16,7 @@ import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
 import { getOrCreateUserProfile } from '../../../features/user-profile/domain/usecases/user-profile.get-or-create.usecase';
 import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
 import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
+import { yieldAuthEvent } from '../../../shared/utils/analytics';
 
 export function signInRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -44,6 +45,7 @@ export function signInRouter() {
           verifiedUser.id,
           nickname
         );
+        yieldAuthEvent('login', verifiedUser.id);
         return c.json(
           makeSafeResponse(AuthSignInResponseSchema, {
             success: true,
