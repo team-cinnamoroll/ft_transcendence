@@ -23,13 +23,13 @@
     "make-env:force": "bash scripts/make-env-contexts.sh force"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "eslint": "^9.39.4",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
     "gitleaks-secret-scanner": "^2.1.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3",
-    "typescript-eslint": "^8.59.2"
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.65.0"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,mjs,cjs}": [
