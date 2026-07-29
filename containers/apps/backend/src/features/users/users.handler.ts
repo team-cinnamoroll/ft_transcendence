@@ -6,7 +6,7 @@ import { injectUsersDeps } from './users.di';
 import { injectFileQueryDeps } from '../file-storage/file.query-service.di';
 import { injectUserProfileDeps } from '../user-profile/user-profile.di';
 import { deleteUserById, getUserById } from './domain/users.usecase';
-import { getOrCreateUserProfile } from '../user-profile/domain/user-profile.get-or-create.usecase';
+import { getOrCreateUserProfile } from '../user-profile/domain/usecases/user-profile.get-or-create.usecase';
 import { NotFoundError } from '../../shared/errors/global.error';
 import { SimpleApiResponseSchema } from '@tracen/contracts';
 import { makeSafeResponse, makeSafeUsecaseResult } from '../../shared/utils/validation';

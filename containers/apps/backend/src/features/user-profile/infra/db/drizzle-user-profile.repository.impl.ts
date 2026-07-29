@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { inArray, eq } from 'drizzle-orm';
 
 import { UserId } from '@tracen/contracts';
 import { UserProfileEntity, UserProfileEntitySchema } from '../../domain/user-profile.entity';
@@ -86,6 +86,19 @@ class UserProfileDBRepositoryImpl implements UserProfileRepositorySpec {
 
     if (rows.length === 0) return null;
     return mapUserProfile(rows[0]);
+  }
+
+  async getUserProfiles(userIds: UserId[]): Promise<UserProfileEntity[]> {
+    if (userIds.length === 0) return [];
+
+    const rows = await this.db
+      .select()
+      .from(userProfiles)
+      .where(inArray(userProfiles.userId, userIds));
+
+    const userProfilesMap = new Map(rows.map((row) => [row.userId, mapUserProfile(row)]));
+
+    return userIds.map((id) => userProfilesMap.get(id)).filter((v): v is UserProfileEntity => !!v);
   }
 }
 

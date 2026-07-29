@@ -13,7 +13,7 @@ import {
 } from '@tracen/contracts';
 import { registerUser } from './sign-up.register-user.usecase';
 import { makeNewUserTokens } from '../../../features/auth/domain/auth.usecase';
-import { createInitialUserProfile } from '../../../features/user-profile/domain/user-profile.create-init.usecase';
+import { createInitialUserProfile } from '../../../features/user-profile/domain/usecases/user-profile.create-init.usecase';
 import { ServiceUnavailableError } from '../../../shared/errors/global.error';
 import {
   EmailAlreadyExistsError,
