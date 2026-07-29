@@ -306,6 +306,11 @@
   "faceDetailPage": {
     "backAriaLabel": "前のページに戻る"
   },
+  "profilePage": {
+    "facesHeading": "フェイス（{count}）",
+    "noFaces": "フェイスがありません",
+    "private": "非公開"
+  },
   "relativeTime": {
     "justNow": "たった今",
     "minutesAgo": "{n}分前",
@@ -317,6 +322,8 @@
     "post": "投稿"
   },
   "accountMenu": {
+    "viewProfile": "プロフィール",
+    "viewProfileSub": "自分のプロフィールを見る",
     "settings": "アカウント設定",
     "settingsSub": "プロフィール · パスワード",
     "otherSettings": "その他詳細設定",

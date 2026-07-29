@@ -61,6 +61,26 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
           strokeLinecap="round"
           strokeLinejoin="round"
         >
+          <circle cx={10} cy={7} r={3.2} />
+          <path d="M4 16.5c0-3 2.7-5 6-5s6 2 6 5" />
+        </svg>
+      ),
+      title: t('viewProfile'),
+      sub: t('viewProfileSub'),
+      href: `/profile/${user.id}`,
+    },
+    {
+      icon: (
+        <svg
+          width={15}
+          height={15}
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="var(--mf-brand)"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M3 17l1-3.5L13 4.5l3.5 3.5L7.5 17H3z" />
           <path d="M12 5.5l3.5 3.5" />
         </svg>

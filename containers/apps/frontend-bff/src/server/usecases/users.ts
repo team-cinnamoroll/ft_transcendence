@@ -33,8 +33,34 @@ export async function getCurrentUser(): Promise<UserProfile> {
   };
 }
 
+/**
+ * 指定したユーザーのプロフィールを取得する。
+ * id はモックのまま（Face/Seedのモック紐付け用）維持しつつ、
+ * ログイン中は name/avatarUrl/badge を本物のプロフィールで上書きする。
+ * 未ログイン、または本物のプロフィール取得に失敗した場合はモックをそのまま返す。
+ */
 export async function findUserById(userId: string): Promise<UserProfile | null> {
-  return await getUserDirectoryRepository().findById(userId);
+  const mockUser = await getUserDirectoryRepository().findById(userId);
+  if (!mockUser) {
+    return null;
+  }
+
+  const session = await getAuthSession();
+  if (!session) {
+    return mockUser;
+  }
+
+  const realProfile = await getUserProfileRepository().getProfileById(session.accessToken, userId);
+  if (!realProfile) {
+    return mockUser;
+  }
+
+  return {
+    ...mockUser,
+    name: realProfile.name,
+    avatar: realProfile.avatar || null,
+    badge: realProfile.badge,
+  };
 }
 
 /** ログイン中の自分のプロフィールを更新する（accessToken/userId はセッションから取得済みのものを渡す） */

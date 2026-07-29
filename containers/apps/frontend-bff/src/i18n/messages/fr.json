@@ -306,6 +306,11 @@
   "faceDetailPage": {
     "backAriaLabel": "Retour"
   },
+  "profilePage": {
+    "facesHeading": "Facettes ({count})",
+    "noFaces": "Aucune facette pour le moment",
+    "private": "Privé"
+  },
   "relativeTime": {
     "justNow": "À l'instant",
     "minutesAgo": "il y a {n} min",
@@ -317,6 +322,8 @@
     "post": "Publier"
   },
   "accountMenu": {
+    "viewProfile": "Profil",
+    "viewProfileSub": "Voir votre profil",
     "settings": "Paramètres du compte",
     "settingsSub": "Profil · Mot de passe",
     "otherSettings": "Autres paramètres",
