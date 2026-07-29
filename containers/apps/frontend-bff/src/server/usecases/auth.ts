@@ -7,6 +7,7 @@ import type {
   AuthSignInResult,
 } from '@/types/auth';
 import { getAuthRepository } from '@/repositories/auth-repository';
+import { getPresenceRepository } from '@/repositories/presence-repository';
 import { setSessionTokens, clearSessionTokens, getSessionTokens } from '@/lib/session';
 import { verifyToken } from '@/lib/backend-client';
 
@@ -33,6 +34,10 @@ export async function signOutAndClearSession(): Promise<void> {
   const { refreshToken, accessToken } = await getSessionTokens();
   if (refreshToken && accessToken) {
     await getAuthRepository().signOut(accessToken, refreshToken);
+  }
+  if (accessToken) {
+    // オフラインであることを明示的に伝える（他は90秒のTTL失効に任せる方針の唯一の例外）
+    await getPresenceRepository().setOffline(accessToken);
   }
   await clearSessionTokens();
 }
