@@ -9,7 +9,8 @@
       "dynamic": false,
       "properties": {
         "@timestamp": { "type": "date" },
-        "type": { "type": "keyword" },
+        "category": { "type": "keyword" },
+        "action": { "type": "keyword" },
         "userId": { "type": "keyword" },
         "faceId": { "type": "keyword" }
       }

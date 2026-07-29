@@ -65,9 +65,9 @@ curl -s http://localhost:9200/events/_count
 ## スキーマ
 Filebeat が拾うイベントの形（mock も将来の backend もこの形で stdout に出す）:
 ```json
-{ "@timestamp": "<ISO8601>", "type": "login|logout|signup|activity_created", "userId": "<id>", "faceId": "<id>" }
+{ "@timestamp": "<ISO8601>", "category": "auth|face|seed", "action": "login|logout|signup|created", "userId": "<id>", "faceId": "<id>" }
 ```
-`faceId` は `activity_created` のみ。mapping は `logstash/templates/events-template.json` が単一の所有元で、`dynamic:false` のため定義外フィールドは保存されても index されない。
+`category` は大分類・`action` は種別。`faceId` は `face`/`seed` の `created` のみ。mapping は `logstash/templates/events-template.json` が単一の所有元で、`dynamic:false` のため定義外フィールドは保存されても index されない。
 
 ## 本番化（TODO）
 - mock-producer を止め、**backend コンテナを収集対象にする**（[BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)）。

@@ -27,16 +27,18 @@ backend ─stdout─▶ Docker コンテナログ ─▶ Filebeat ─▶ Logstas
 ### ② 分析イベントを1行 JSON で stdout に出す
 イベント発生時に、このスキーマの JSON を `console.log` するだけ:
 ```json
-{ "@timestamp": "<ISO8601>", "type": "login|logout|signup|activity_created", "userId": "<id>", "faceId": "<id>" }
+{ "@timestamp": "<ISO8601>", "category": "auth", "action": "login", "userId": "<id>", "faceId": "<id>" }
 ```
-- `faceId` は `activity_created` のときだけ付ける
+- `category` は大分類（`auth` | `face` | `seed`）、`action` は種別（`login` | `logout` | `signup` | `created`）
+- `faceId` は `face`/`seed` の `created` のときだけ付ける
 - この形は ES の mapping と一致済み。**形を変えると載らない**ので厳守
 
 実装イメージ（共通ヘルパー1個 + 各所で呼ぶ）:
 ```typescript
 // analytics.ts
 type AnalyticsEvent = {
-  type: "login" | "logout" | "signup" | "activity_created";
+  category: "auth" | "face" | "seed";
+  action: "login" | "logout" | "signup" | "created";
   userId: string;
   faceId?: string;
 };
@@ -45,13 +47,14 @@ export function emitAnalyticsEvent(event: AnalyticsEvent): void {
   console.log(JSON.stringify({ "@timestamp": new Date().toISOString(), ...event }));
 }
 ```
-呼び出し（4箇所）:
-| type | 発生箇所 | 例 |
-| --- | --- | --- |
-| `login` | サインイン成功 | `emitAnalyticsEvent({ type: "login", userId: user.id })` |
-| `logout` | サインアウト | `emitAnalyticsEvent({ type: "logout", userId: user.id })` |
-| `signup` | サインアップ成功 | `emitAnalyticsEvent({ type: "signup", userId: user.id })` |
-| `activity_created` | 投稿(face)作成成功 | `emitAnalyticsEvent({ type: "activity_created", userId: user.id, faceId: face.id })` |
+呼び出し（例）:
+| category | action | 発生箇所 | 例 |
+| --- | --- | --- | --- |
+| `auth` | `login` | サインイン成功 | `emitAnalyticsEvent({ category: "auth", action: "login", userId: user.id })` |
+| `auth` | `logout` | サインアウト | `emitAnalyticsEvent({ category: "auth", action: "logout", userId: user.id })` |
+| `auth` | `signup` | サインアップ成功 | `emitAnalyticsEvent({ category: "auth", action: "signup", userId: user.id })` |
+| `face` | `created` | 投稿(face)作成成功 | `emitAnalyticsEvent({ category: "face", action: "created", userId: user.id, faceId: face.id })` |
+| `seed` | `created` | seed 作成時 | `emitAnalyticsEvent({ category: "seed", action: "created", userId: user.id, faceId: face.id })` |
 
 > HTTP 送信のような失敗ハンドリングは不要。**標準出力に出すだけ**なので、送信失敗もブロッキングも無い（Filebeat 方式の利点）。
 
@@ -60,9 +63,9 @@ backend の stdout には分析イベント以外（アクセスログ、エラ�
 
 ## 収集側（インフラ担当）: 対応済み
 分析イベント以外のログを捨てる選別フィルタは `logstash/pipeline/events.conf` に**実装済み**です。
-`type` が既知の4種でない行（普通のログ文字列＝JSON パース失敗を含む）はすべて drop されます:
+`category` が既知の値でない行（普通のログ文字列＝JSON パース失敗を含む）はすべて drop されます:
 ```
-if [type] not in ["login", "logout", "signup", "activity_created"] {
+if [category] not in ["auth", "face", "seed"] {
   drop {}
 }
 ```

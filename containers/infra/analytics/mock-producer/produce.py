@@ -8,8 +8,13 @@ random.seed(42)
 
 users = [f"user-{i:02d}" for i in range(1, 13)]
 faces = [f"face-{i:02d}" for i in range(1, 25)]
-types = ["activity_created", "login", "logout", "signup"]
-type_weights = [55, 25, 18, 2]
+event_kinds = [
+    ("auth", "login"),
+    ("auth", "logout"),
+    ("auth", "signup"),
+    ("face", "created"),
+]
+kind_weights = [25, 18, 2, 55]
 hour_weights = [1, 1, 1, 1, 1, 2, 3, 5, 6, 6, 5, 7, 8, 6, 5, 5, 6, 8, 10, 11, 9, 6, 3, 2]
 hours = list(range(24))
 
@@ -18,9 +23,9 @@ LIVE_INTERVAL = float(os.environ.get("LIVE_INTERVAL", "5"))
 
 
 def make_event(ts):
-    etype = random.choices(types, weights=type_weights, k=1)[0]
-    doc = {"@timestamp": ts, "type": etype, "userId": random.choice(users)}
-    if etype == "activity_created":
+    category, action = random.choices(event_kinds, weights=kind_weights, k=1)[0]
+    doc = {"@timestamp": ts, "category": category, "action": action, "userId": random.choice(users)}
+    if category == "face":
         doc["faceId"] = random.choice(faces)
     return doc
 
