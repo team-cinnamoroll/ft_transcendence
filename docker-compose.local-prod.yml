@@ -53,6 +53,8 @@ services:
 
   backend:
     image: registry.tracen.local:5000/tracen-backend:${TRACEN_IMAGE_TAG:-local}
+    labels:
+      analytics_source: 'true'
     build:
       context: .
       dockerfile: containers/apps/backend/Dockerfile
