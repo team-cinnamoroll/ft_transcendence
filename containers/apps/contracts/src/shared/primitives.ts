@@ -25,3 +25,17 @@ export type IsOnline = z.infer<typeof IsOnlineSchema>;
 // リスト取得のリクエストにおける件数制限のスキーマと型
 export const ListRequestLimitSchema = z.coerce.number().int().min(1).max(100).default(20); // 1~100件の範囲で指定、デフォルトは20件
 export type ListRequestLimit = z.infer<typeof ListRequestLimitSchema>;
+
+// 絵文字のスキーマと型
+// 見た目上の文字数（書記素クラスター）を分割するためのセグメンター
+const segmenter = new Intl.Segmenter('ja', { granularity: 'grapheme' });
+export const EmojiSchema = z
+  .emoji() // 絵文字判定（メッセージは errorMap で i18n）
+  .refine((val) => {
+    // 見た目上の文字数が1文字であるかを判定
+    return [...segmenter.segment(val)].length === 1;
+  }); // バッジ絵文字
+
+// 公開範囲を表す列挙型のスキーマと型
+export const VisibilityStatusSchema = z.enum(['public', 'private']);
+export type VisibilityStatus = z.infer<typeof VisibilityStatusSchema>;
