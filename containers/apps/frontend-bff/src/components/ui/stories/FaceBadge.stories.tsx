@@ -6,7 +6,9 @@ const mockFace = {
   userId: 'user-1',
   name: '読書',
   emoji: '📚',
-  isPrivate: false,
+  visibility: 'public' as const,
+  description: '読書に関する記録',
+  image: null,
 };
 
 const mockFaceWithImage = {
@@ -14,8 +16,9 @@ const mockFaceWithImage = {
   userId: 'user-1',
   name: '旅行',
   emoji: '✈️',
-  imageUrl: 'https://picsum.photos/seed/face/100',
-  isPrivate: false,
+  image: { id: 'image1', url: 'https://picsum.photos/seed/face/100' },
+  visibility: 'public' as const,
+  description: '旅行に関する記録',
 };
 
 const meta: Meta<typeof FaceBadge> = {

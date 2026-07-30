@@ -18,7 +18,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
   const [name, setName] = useState(face.name);
   const [emoji, setEmoji] = useState(face.emoji ?? '');
   const [description, setDescription] = useState(face.description ?? '');
-  const [isPrivate, setIsPrivate] = useState(face.isPrivate);
+  const [visibility, setVisibility] = useState(face.visibility);
   const [isPending, startTransition] = useTransition();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
   const t = useTranslations('editFaceModal');
@@ -31,9 +31,9 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
     startTransition(async () => {
       const result = await updateFaceAction(face.id, {
         name: name.trim(),
-        emoji: emoji.trim() || undefined,
-        description: description.trim() || undefined,
-        isPrivate,
+        emoji: emoji.trim() || null,
+        description: description.trim() || null,
+        visibility,
       });
       if (!result.success) {
         setFieldErrors(result.errors);
@@ -228,15 +228,15 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             <button
               type="button"
               role="switch"
-              aria-checked={isPrivate}
-              onClick={() => setIsPrivate((prev) => !prev)}
+              aria-checked={visibility === 'private'}
+              onClick={() => setVisibility((prev) => (prev === 'private' ? 'public' : 'private'))}
               style={{
                 position: 'relative',
                 width: 44,
                 height: 24,
                 flexShrink: 0,
                 borderRadius: 999,
-                background: isPrivate ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+                background: visibility === 'private' ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'background 0.2s',
@@ -246,7 +246,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
                 style={{
                   position: 'absolute',
                   top: 2,
-                  left: isPrivate ? 22 : 2,
+                  left: visibility === 'private' ? 22 : 2,
                   width: 20,
                   height: 20,
                   borderRadius: '50%',

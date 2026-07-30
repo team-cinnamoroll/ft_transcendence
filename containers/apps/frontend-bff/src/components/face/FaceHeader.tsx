@@ -60,11 +60,11 @@ const FaceHeader = ({
 
   return (
     <div>
-      {face.imageUrl ? (
+      {face.image?.url ? (
         /* カバー画像あり */
         <div style={{ position: 'relative', aspectRatio: '16/9', width: '100%' }}>
           <Image
-            src={face.imageUrl}
+            src={face.image.url}
             alt={face.name}
             fill
             className="object-cover"
@@ -98,7 +98,7 @@ const FaceHeader = ({
               <h1 style={{ fontSize: 22, fontWeight: 700, color: '#fff', margin: 0 }}>
                 {getFaceTitle(face)}
               </h1>
-              {face.isPrivate && (
+              {face.visibility === 'private' && (
                 <span
                   style={{
                     padding: '2px 8px',
@@ -164,7 +164,7 @@ const FaceHeader = ({
             >
               {getFaceTitle(face)}
             </h1>
-            {face.isPrivate && (
+            {face.visibility === 'private' && (
               <span
                 style={{
                   padding: '2px 8px',

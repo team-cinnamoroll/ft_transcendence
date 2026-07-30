@@ -30,11 +30,13 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
     listByFaceIds: async (faceIds) =>
       sortByCreatedAtDesc(seeds.filter((s) => faceIds.includes(s.faceId))),
     create: async (userId, input) => {
+      const createdAt = new Date().toISOString();
       const newSeed: Seed = {
         id: `seed-mock-${Date.now()}`,
         userId,
         ...input,
-        createdAt: new Date().toISOString(),
+        createdAt: createdAt,
+        updatedAt: createdAt,
       };
       seeds.push(newSeed);
       return newSeed;
@@ -42,10 +44,12 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
     update: async (seedId, userId, input) => {
       const existing = seeds.find((s) => s.id === seedId && s.userId === userId);
       if (!existing) throw new Error('Seed not found');
+      const updatedAt = new Date().toISOString();
       const updated: Seed = {
         ...existing,
         body: input.body,
-        ...(input.imageUrls !== undefined ? { imageUrls: input.imageUrls } : {}),
+        updatedAt: updatedAt,
+        ...(input.images.length > 0 ? { images: input.images } : {}),
       };
       return updated;
     },

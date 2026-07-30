@@ -46,7 +46,7 @@ const FaceNavItem = ({ face, activeFaceId, seedCount, onClick }: Props) => {
         >
           {face.name}
         </span>
-        {face.isPrivate && (
+        {face.visibility === 'private' && (
           <svg
             width={11}
             height={11}
