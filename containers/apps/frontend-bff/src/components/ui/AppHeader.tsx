@@ -11,6 +11,7 @@ import AccountMenu from '@/components/ui/AccountMenu';
 
 type Props = {
   user: UserProfile;
+  realUserId?: string;
   faceCount?: number;
   seedCount?: number;
   unreadCount?: number;
@@ -19,6 +20,7 @@ type Props = {
 
 const AppHeader = ({
   user,
+  realUserId,
   faceCount = 0,
   seedCount = 0,
   unreadCount = 0,
@@ -111,6 +113,7 @@ const AppHeader = ({
 
       <AccountMenu
         user={user}
+        realUserId={realUserId}
         faceCount={faceCount}
         seedCount={seedCount}
         isOpen={menuOpen}

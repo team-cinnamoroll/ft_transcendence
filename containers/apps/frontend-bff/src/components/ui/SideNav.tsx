@@ -103,13 +103,22 @@ const NAV_ITEMS: NavItem[] = [
 type Props = {
   faces: Face[];
   user: UserProfile;
+  realUserId?: string;
   seeds: Seed[];
   faceCount: number;
   seedCount: number;
   isAuthenticated: boolean;
 };
 
-const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: Props) => {
+const SideNav = ({
+  faces,
+  user,
+  realUserId,
+  seeds,
+  faceCount,
+  seedCount,
+  isAuthenticated,
+}: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
@@ -355,6 +364,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
 
       <AccountMenu
         user={user}
+        realUserId={realUserId}
         faceCount={faceCount}
         seedCount={seedCount}
         isOpen={menuOpen}

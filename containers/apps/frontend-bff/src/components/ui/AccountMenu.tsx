@@ -11,6 +11,7 @@ import { signOutAction } from '@/server/actions/auth';
 
 type Props = {
   user: UserProfile;
+  realUserId?: string;
   faceCount: number;
   seedCount: number;
   isOpen: boolean;
@@ -19,7 +20,15 @@ type Props = {
   anchorRef?: React.RefObject<HTMLElement | null>;
 };
 
-const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onClose }: Props) => {
+const AccountMenu = ({
+  user,
+  realUserId,
+  faceCount,
+  seedCount,
+  isOpen,
+  isAuthenticated,
+  onClose,
+}: Props) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -67,7 +76,7 @@ const AccountMenu = ({ user, faceCount, seedCount, isOpen, isAuthenticated, onCl
       ),
       title: t('viewProfile'),
       sub: t('viewProfileSub'),
-      href: `/profile/${user.id}`,
+      href: `/profile/${realUserId ?? user.id}`,
     },
     {
       icon: (

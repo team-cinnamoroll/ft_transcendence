@@ -25,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <SideNav
             faces={myFaces}
             user={currentUser}
+            realUserId={session?.userId}
             seeds={mySeeds}
             faceCount={myFaces.length}
             seedCount={mySeeds.length}
@@ -33,6 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
             <AppHeader
               user={currentUser}
+              realUserId={session?.userId}
               faceCount={myFaces.length}
               seedCount={mySeeds.length}
               isAuthenticated={isAuthenticated}
