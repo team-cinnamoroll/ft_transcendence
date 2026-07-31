@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { type Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
+import { createLookupMap } from '@/lib/display';
 import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 import type { SortOrder } from './FaceHeader';
@@ -21,12 +22,14 @@ type FaceSeedFeedProps = {
 const FaceSeedFeed = ({
   face,
   seeds,
+  users = [],
   sortOrder = 'newest',
   currentUserId,
   onSeedMoreOptions,
 }: FaceSeedFeedProps) => {
   const t = useTranslations('faceSeedFeed');
   const router = useRouter();
+  const userMap = useMemo(() => createLookupMap(users, (user) => user.id), [users]);
 
   const sorted = useMemo(() => {
     if (sortOrder === 'oldest') return [...seeds].reverse();
@@ -56,6 +59,7 @@ const FaceSeedFeed = ({
           key={seed.id}
           seed={seed}
           face={face}
+          author={userMap.get(seed.userId)}
           noBorder={index === sorted.length - 1}
           currentUserId={currentUserId}
           onMoreOptions={onSeedMoreOptions}

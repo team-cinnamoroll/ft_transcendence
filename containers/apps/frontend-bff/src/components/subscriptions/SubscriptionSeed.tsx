@@ -313,6 +313,7 @@ const SubscriptionSeed = ({
   subscribedSeeds,
   allSeeds,
   faces,
+  users,
   currentUserId,
 }: Props) => {
   const router = useRouter();
@@ -366,6 +367,7 @@ const SubscriptionSeed = ({
     [subscribedFaces]
   );
   const allFaceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
+  const userMap = useMemo(() => createLookupMap(users, (user) => user.id), [users]);
 
   const handleSubscribeToggle = (face: Face) => {
     const isSubscribed = localSubscribedFaceIds.includes(face.id);
@@ -694,6 +696,7 @@ const SubscriptionSeed = ({
                           key={seed.id}
                           seed={seed}
                           face={face}
+                          author={userMap.get(seed.userId)}
                           currentUserId={currentUserId}
                           onMoreOptions={openSeedActionMenu}
                           onClick={() => router.push(`/seeds/${seed.id}`)}
@@ -774,6 +777,7 @@ const SubscriptionSeed = ({
                           key={seed.id}
                           seed={seed}
                           face={face}
+                          author={userMap.get(seed.userId)}
                           onClick={() => router.push(`/seeds/${seed.id}`)}
                         />
                       );
@@ -990,6 +994,7 @@ const SubscriptionSeed = ({
                       key={act.id}
                       seed={act}
                       face={face}
+                      author={userMap.get(act.userId)}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
                       onClick={() => router.push(`/seeds/${act.id}`)}

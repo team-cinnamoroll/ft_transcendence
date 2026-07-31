@@ -18,6 +18,7 @@ type SeedFeedProps = {
 };
 
 const SeedFeed = ({
+  currentUser,
   faces,
   seeds,
   selectedFaceId,
@@ -55,6 +56,7 @@ const SeedFeed = ({
             key={seed.id}
             seed={seed}
             face={face}
+            author={currentUser}
             noBorder={index === displaySeeds.length - 1}
             currentUserId={currentUserId}
             onMoreOptions={onSeedMoreOptions}

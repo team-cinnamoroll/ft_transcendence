@@ -222,6 +222,7 @@ const HomeClient = ({
 
       <div style={{ padding: '0 28px' }}>
         <SeedFeed
+          currentUser={currentUser}
           faces={faces}
           seeds={seeds}
           selectedFaceId={selectedFaceId}
