@@ -3,6 +3,8 @@ export type {
   UserProfileUpsertRequest,
   Relationship,
   RelationshipStatus,
+  UserProfilesResponse,
+  UserProfileWithRelationship,
 } from '@tracen/contracts';
 import type { UserProfile, Relationship } from '@tracen/contracts';
 

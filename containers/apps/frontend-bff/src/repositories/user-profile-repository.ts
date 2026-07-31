@@ -1,8 +1,12 @@
 import 'server-only';
 
-import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
+import type {
+  UserProfile,
+  UserProfileUpsertRequest,
+  UserProfilesResponse,
+  UserProfileWithRelationship,
+} from '@/types/user-profile';
 import type { UserMe } from '@/types/user';
-import type { UserProfilesResponse, UserProfileWithRelationship } from '@tracen/contracts';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
