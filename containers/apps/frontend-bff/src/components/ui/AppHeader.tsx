@@ -45,7 +45,7 @@ const AppHeader = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link
-            href="/notifications"
+            href="/friends"
             style={{
               position: 'relative',
               width: 36,
@@ -54,20 +54,22 @@ const AppHeader = ({
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            aria-label={tNav('notifications')}
+            aria-label={tNav('friends')}
           >
             <svg
               width={20}
               height={20}
-              viewBox="0 0 20 20"
+              viewBox="0 0 22 22"
               fill="none"
               stroke="var(--mf-brand)"
               strokeWidth={1.6}
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M4.5 14.5h11l-1.3-1.7c-.5-.7-.8-1.5-.8-2.3V7.8a3.4 3.4 0 00-6.8 0v2.7c0 .8-.3 1.6-.8 2.3l-1.3 1.7z" />
-              <path d="M8.5 16.5a1.5 1.5 0 003 0" />
+              <circle cx={8} cy={8} r={3} />
+              <path d="M3 18c0-3 2.2-5 5-5s5 2 5 5" />
+              <circle cx={15.5} cy={7} r={2.3} />
+              <path d="M14.3 12.3c2.3.3 3.9 2.1 3.9 4.4" />
             </svg>
             {unreadCount > 0 && (
               <span
