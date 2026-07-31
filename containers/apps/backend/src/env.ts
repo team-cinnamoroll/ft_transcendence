@@ -145,19 +145,19 @@ try {
 
 export function parseEnv(raw: NodeJS.ProcessEnv): Config {
   return makeSafeResponse(EnvSchema, {
-    NODE_ENV: raw.NODE_ENV,
+    NODE_ENV: raw.NODE_ENV as 'development' | 'test' | 'production',
     PORT: raw.PORT,
     TLS_CERT_PATH: raw.TLS_CERT_PATH,
     TLS_KEY_PATH: raw.TLS_KEY_PATH,
-    DATABASE_URL: raw.DATABASE_URL,
-    PEPPER: raw.PEPPER,
-    JWT_ISSUER: raw.JWT_ISSUER,
+    DATABASE_URL: raw.DATABASE_URL!,
+    PEPPER: raw.PEPPER!,
+    JWT_ISSUER: raw.JWT_ISSUER!,
     JWKS_PUBLIC: jwksCache,
-    JWT_PRIVATE_KEY_PEM: privateKey,
+    JWT_PRIVATE_KEY_PEM: privateKey!,
     RUN_MIGRATIONS: raw.RUN_MIGRATIONS,
-    REDIS_URL: raw.REDIS_URL,
+    REDIS_URL: raw.REDIS_URL!,
     ACCESS_TOKEN_EXPIRES_IN: raw.ACCESS_TOKEN_EXPIRES_IN,
-    REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN,
+    REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN!,
     FILE_STORAGE_BASE_DIR: raw.FILE_STORAGE_BASE_DIR,
   });
 }

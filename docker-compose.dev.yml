@@ -153,6 +153,40 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    profiles: ['analytics']
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    volumes:
+      - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./containers/infra/analytics/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./containers/infra/analytics/logstash/templates:/usr/share/logstash/templates:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.3
+    profiles: ['analytics']
+    user: root
+    command: ['filebeat', '-e', '--strict.perms=false']
+    volumes:
+      - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - logstash
+
+  mock-producer:
+    image: python:3.12-alpine
+    profiles: ['analytics']
+    labels:
+      analytics_source: 'true'
+    command: ['python', '/app/produce.py']
+    volumes:
+      - ./containers/infra/analytics/mock-producer/produce.py:/app/produce.py:ro
+
   # ── モニタリング基盤 (Prometheus + Grafana) ─────────────────────────────
   # Monitoring (Prometheus + Grafana) — メトリクス監視基盤。通常は起動しない。
   # profile 'monitoring' 指定時のみ起動する。

@@ -30,6 +30,14 @@ export class NotFoundError extends Error {
   }
 }
 
+// 409 Conflict Error
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
+
 // 500 Internal Server Error
 export class InternalServerError extends Error {
   constructor(message: string) {

@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { UserId, UserProfileUpsertRequest } from '@tracen/contracts';
-import { UserProfileRepositorySpec } from './user-profile.repository';
+import { UserProfileRepositorySpec } from '../user-profile.repository';
 import {
   UserProfileEntity,
   UserProfileEntitySchema,
   UserProfileIdSchema,
-} from './user-profile.entity';
-import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
-import { ValidationError } from '../../../shared/errors/global.error';
+} from '../user-profile.entity';
+import { makeSafeUsecaseResult } from '../../../../shared/utils/validation';
+import { ValidationError } from '../../../../shared/errors/global.error';
 import { ZodError } from 'zod';
 
 export async function upsertUserProfile(
