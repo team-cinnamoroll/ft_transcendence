@@ -31,7 +31,7 @@ export type FriendshipRepositorySpec = {
   /** 保留中の申請一覧（受信／送信）をカーソル取得 */
   listPendingRequests: (
     accessToken: string,
-    params: { type: FriendshipPendingListType; cursor?: string | null }
+    params: { type: FriendshipPendingListType; cursor?: string | null; limit?: number }
   ) => Promise<ApiResult<PendingListPage>>;
 };
 
@@ -104,9 +104,13 @@ export function createFriendshipApiRepositoryImpl(): FriendshipRepositorySpec {
       return { success: true, data: json.data };
     },
 
-    listPendingRequests: async (accessToken, { type, cursor }) => {
+    listPendingRequests: async (accessToken, { type, cursor, limit }) => {
       const res = await createBackendClient(accessToken).api.v1.friendships.requests.$get({
-        query: cursor ? { type, cursor } : { type },
+        query: {
+          type,
+          ...(cursor ? { cursor } : {}),
+          ...(limit !== undefined ? { limit: String(limit) } : {}),
+        },
       });
       if (!res.ok) {
         console.error(

@@ -16,6 +16,7 @@ import {
   endFriendship,
   getMyFriends,
   getMyPendingRequests,
+  hasPendingIncomingFriendRequest,
 } from '@/server/usecases/friendship';
 import type { ActionResult } from './result';
 
@@ -111,4 +112,13 @@ export async function loadMorePendingRequestsAction(
   cursor: string | null
 ): Promise<ApiResult<PendingListPage>> {
   return getMyPendingRequests(type, cursor);
+}
+
+/**
+ * 自分宛ての未処理フレンド申請が1件以上あるかどうかを確認する（通知バッジ用）。
+ * ハートビートと同じく結果を画面に反映するだけの確認なので、失敗時は「無し」として扱う。
+ */
+export async function checkPendingFriendRequestsAction(): Promise<boolean> {
+  const result = await hasPendingIncomingFriendRequest();
+  return result.success ? result.data : false;
 }

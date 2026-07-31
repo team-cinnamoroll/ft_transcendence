@@ -51,9 +51,19 @@ export async function getMyFriends(cursor?: string | null): Promise<ApiResult<Fr
 /** 保留中のフレンド申請一覧（受信／送信）を取得する */
 export async function getMyPendingRequests(
   type: FriendshipPendingListType,
-  cursor?: string | null
+  cursor?: string | null,
+  limit?: number
 ): Promise<ApiResult<PendingListPage>> {
   return withAccessToken((accessToken) =>
-    getFriendshipRepository().listPendingRequests(accessToken, { type, cursor })
+    getFriendshipRepository().listPendingRequests(accessToken, { type, cursor, limit })
   );
+}
+
+/** 自分宛ての未処理フレンド申請が1件以上あるかどうかを確認する（通知バッジ用） */
+export async function hasPendingIncomingFriendRequest(): Promise<ApiResult<boolean>> {
+  const result = await getMyPendingRequests('incoming', undefined, 1);
+  if (!result.success) {
+    return result;
+  }
+  return { success: true, data: result.data.pendingRequests.length > 0 };
 }

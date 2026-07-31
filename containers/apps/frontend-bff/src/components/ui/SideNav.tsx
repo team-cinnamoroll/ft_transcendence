@@ -14,6 +14,7 @@ import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getAvatarUrl } from '@/lib/display';
+import { useHasPendingFriendRequest } from '@/lib/heartbeat-provider';
 
 type NavItem = {
   href: string;
@@ -130,6 +131,7 @@ const SideNav = ({
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
+  const hasPendingFriendRequest = useHasPendingFriendRequest();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -181,12 +183,27 @@ const SideNav = ({
               >
                 <span
                   style={{
+                    position: 'relative',
                     color: isActive ? 'var(--mf-brand)' : 'var(--mf-text-sub)',
                     display: 'flex',
                     alignItems: 'center',
                   }}
                 >
                   {item.icon(isActive)}
+                  {item.href === '/friends' && hasPendingFriendRequest && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: -1,
+                        right: -1,
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        background: 'var(--mf-accent)',
+                        boxShadow: '0 0 0 2px var(--mf-bg-light)',
+                      }}
+                    />
+                  )}
                 </span>
                 <div
                   style={{

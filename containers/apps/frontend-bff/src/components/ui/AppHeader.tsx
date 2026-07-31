@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { UserProfile } from '@/types/user-profile';
 import { getAvatarUrl } from '@/lib/display';
+import { useHasPendingFriendRequest } from '@/lib/heartbeat-provider';
 import Wordmark from '@/components/ui/Wordmark';
 import AccountMenu from '@/components/ui/AccountMenu';
 
@@ -14,21 +15,14 @@ type Props = {
   realUserId?: string;
   faceCount?: number;
   seedCount?: number;
-  unreadCount?: number;
   isAuthenticated: boolean;
 };
 
-const AppHeader = ({
-  user,
-  realUserId,
-  faceCount = 0,
-  seedCount = 0,
-  unreadCount = 0,
-  isAuthenticated,
-}: Props) => {
+const AppHeader = ({ user, realUserId, faceCount = 0, seedCount = 0, isAuthenticated }: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('appHeader');
   const tNav = useTranslations('nav');
+  const hasPendingFriendRequest = useHasPendingFriendRequest();
 
   return (
     <>
@@ -71,7 +65,7 @@ const AppHeader = ({
               <circle cx={15.5} cy={7} r={2.3} />
               <path d="M14.3 12.3c2.3.3 3.9 2.1 3.9 4.4" />
             </svg>
-            {unreadCount > 0 && (
+            {hasPendingFriendRequest && (
               <span
                 style={{
                   position: 'absolute',
