@@ -19,7 +19,7 @@
     "redis-exporter",
     "nginx-exporter"
   ],
-  "forwardPorts": [3000, 8000, 8080, 5432, 4983, 6379, 9090, 3001, 9093],
+  "forwardPorts": [3000, 8000, 8080, 5432, 4983, 6379, 9200, 5601, 9090, 3001, 9093],
   "mounts": [
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached"
   ],

@@ -20,7 +20,10 @@
     "format": "pnpm -r format",
     "format:check": "prettier --check .",
     "make-env": "bash scripts/make-env-contexts.sh",
-    "make-env:force": "bash scripts/make-env-contexts.sh force"
+    "make-env:force": "bash scripts/make-env-contexts.sh force",
+    "elk:up": "docker compose -f ${TRACEN_LOCAL_CI_HOST_WORKSPACE:-}/docker-compose.dev.yml -p ft_transcendence --profile analytics up -d elasticsearch kibana logstash filebeat",
+    "elk:stop": "docker compose -f ${TRACEN_LOCAL_CI_HOST_WORKSPACE:-}/docker-compose.dev.yml -p ft_transcendence --profile analytics stop elasticsearch kibana logstash filebeat",
+    "elk:rm": "docker compose -f ${TRACEN_LOCAL_CI_HOST_WORKSPACE:-}/docker-compose.dev.yml -p ft_transcendence --profile analytics rm -s -f elasticsearch kibana logstash filebeat"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

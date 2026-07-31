@@ -55,6 +55,8 @@ services:
 
   backend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
+    labels:
+      analytics_source: 'true'
     env_file:
       - .env.dev
     environment:
@@ -124,11 +126,9 @@ services:
   # Kibana UI: http://localhost:5601 / Elasticsearch: http://localhost:9200
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    env_file:
+      - .env.dev
     profiles: ['analytics']
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - '9200:9200'
     volumes:
@@ -141,12 +141,9 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.3
+    env_file:
+      - .env.dev
     profiles: ['analytics']
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - SERVER_BASEPATH=/kibana
-      - SERVER_REWRITEBASEPATH=true
-      - SERVER_PUBLICBASEURL=http://localhost:8080/kibana
     ports:
       - '5601:5601'
     depends_on:
@@ -156,8 +153,8 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.3
     profiles: ['analytics']
-    environment:
-      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    env_file:
+      - .env.dev
     volumes:
       - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./containers/infra/analytics/logstash/pipeline:/usr/share/logstash/pipeline:ro
