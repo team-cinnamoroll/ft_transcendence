@@ -1,0 +1,91 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
+import type { ApiErrorKind } from '@/lib/api-error';
+import type { SimpleApi } from '@/types/api';
+import {
+  sendFriendRequest,
+  acceptFriendRequest,
+  rejectFriendRequest,
+  endFriendship,
+} from '@/server/usecases/friendship';
+import type { ActionResult } from './result';
+
+/**
+ * フレンド操作失敗時の errorKind を、i18n対応した表示文言に変換する。
+ *
+ * 実際に返しうる errorKind:
+ * - UNAUTHORIZED(401): JWTが無効・欠落している（セッション切れ）
+ * - FORBIDDEN(403)/NOT_FOUND(404)/CONFLICT(409): 状態が既に変わっている等
+ *
+ * ユーザーが次に取るべき行動が変わるのは UNAUTHORIZED（再ログインが必要）のみ。
+ * それ以外は「もう一度試す」以外に取れる行動が無いため、共通の errorGeneric にまとめる。
+ */
+async function resolveFriendshipErrorMessage(errorKind: ApiErrorKind): Promise<string> {
+  const t = await getTranslations('profilePage');
+  if (errorKind === 'UNAUTHORIZED') {
+    return t('errorSessionExpired');
+  }
+  return t('errorGeneric');
+}
+
+function revalidateProfilePaths(targetUserId: string) {
+  revalidatePath(`/profile/${targetUserId}`);
+}
+
+export async function sendFriendRequestAction(
+  addresseeId: string
+): Promise<ActionResult<SimpleApi>> {
+  const result = await sendFriendRequest(addresseeId);
+  if (!result.success) {
+    return {
+      success: true,
+      data: { success: false, message: await resolveFriendshipErrorMessage(result.errorKind) },
+    };
+  }
+  revalidateProfilePaths(addresseeId);
+  return { success: true, data: { success: true } };
+}
+
+export async function acceptFriendRequestAction(
+  requestId: string,
+  targetUserId: string
+): Promise<ActionResult<SimpleApi>> {
+  const result = await acceptFriendRequest(requestId);
+  if (!result.success) {
+    return {
+      success: true,
+      data: { success: false, message: await resolveFriendshipErrorMessage(result.errorKind) },
+    };
+  }
+  revalidateProfilePaths(targetUserId);
+  return { success: true, data: { success: true } };
+}
+
+export async function rejectFriendRequestAction(
+  requestId: string,
+  targetUserId: string
+): Promise<ActionResult<SimpleApi>> {
+  const result = await rejectFriendRequest(requestId);
+  if (!result.success) {
+    return {
+      success: true,
+      data: { success: false, message: await resolveFriendshipErrorMessage(result.errorKind) },
+    };
+  }
+  revalidateProfilePaths(targetUserId);
+  return { success: true, data: { success: true } };
+}
+
+export async function removeFriendAction(targetUserId: string): Promise<ActionResult<SimpleApi>> {
+  const result = await endFriendship(targetUserId);
+  if (!result.success) {
+    return {
+      success: true,
+      data: { success: false, message: await resolveFriendshipErrorMessage(result.errorKind) },
+    };
+  }
+  revalidateProfilePaths(targetUserId);
+  return { success: true, data: { success: true } };
+}

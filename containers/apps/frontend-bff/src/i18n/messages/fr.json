@@ -309,7 +309,19 @@
   "profilePage": {
     "facesHeading": "Facettes ({count})",
     "noFaces": "Aucune facette pour le moment",
-    "private": "Privé"
+    "private": "Privé",
+    "sendRequest": "Ajouter en ami",
+    "pendingRequest": "Demande envoyée",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "removeFriend": "Retirer cet ami",
+    "removeFriendConfirmTitle": "Retirer cet ami ?",
+    "removeFriendConfirmMessage": "Vous ne serez plus ami avec {name}. Cette action est irréversible.",
+    "removeFriendConfirmButton": "Retirer",
+    "removeFriendCancel": "Annuler",
+    "removing": "Traitement…",
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer plus tard."
   },
   "relativeTime": {
     "justNow": "À l'instant",

@@ -1,16 +1,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
-import type { UserProfile } from '@/types/user-profile';
+import type { ProfileWithRelationship } from '@/types/user-profile';
 import type { Face } from '@/types/face';
 import { getAvatarUrl, getFaceTitle, getFaceColor } from '@/lib/display';
+import FriendActionButton from './FriendActionButton';
 
 type Props = {
-  profile: UserProfile;
+  profile: ProfileWithRelationship;
   faces: Face[];
+  isOwner: boolean;
 };
 
-const ProfileView = async ({ profile, faces }: Props) => {
+const ProfileView = async ({ profile, faces, isOwner }: Props) => {
   const t = await getTranslations('profilePage');
 
   return (
@@ -41,6 +43,14 @@ const ProfileView = async ({ profile, faces }: Props) => {
             {profile.badge}
           </div>
         )}
+        <div style={{ marginTop: 16 }}>
+          <FriendActionButton
+            targetUserId={profile.id}
+            targetUserName={profile.name}
+            relationship={profile.relationship}
+            isOwner={isOwner}
+          />
+        </div>
       </div>
 
       <div style={{ padding: '20px 20px 4px' }}>

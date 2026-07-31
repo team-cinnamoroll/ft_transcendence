@@ -309,7 +309,19 @@
   "profilePage": {
     "facesHeading": "フェイス（{count}）",
     "noFaces": "フェイスがありません",
-    "private": "非公開"
+    "private": "非公開",
+    "sendRequest": "フレンド申請する",
+    "pendingRequest": "申請中",
+    "accept": "承認する",
+    "reject": "拒否する",
+    "removeFriend": "フレンド解消",
+    "removeFriendConfirmTitle": "フレンドを解消しますか？",
+    "removeFriendConfirmMessage": "{name}さんとのフレンド関係を解消します。この操作は取り消せません。",
+    "removeFriendConfirmButton": "解消する",
+    "removeFriendCancel": "キャンセル",
+    "removing": "処理中…",
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorGeneric": "操作に失敗しました。時間をおいて再度お試しください。"
   },
   "relativeTime": {
     "justNow": "たった今",

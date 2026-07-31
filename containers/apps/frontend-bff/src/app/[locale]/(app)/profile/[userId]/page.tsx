@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import FaceBackButton from '@/components/face/FaceBackButton';
 import ProfileView from '@/components/profile/ProfileView';
-import { findUserById } from '@/server/usecases/users';
+import { findUserById, getCurrentUser } from '@/server/usecases/users';
 import { listFacesByUserId } from '@/server/usecases/faces';
 
 type Props = {
@@ -10,12 +10,14 @@ type Props = {
 
 const ProfilePage = async ({ params }: Props) => {
   const { userId } = await params;
-  const profile = await findUserById(userId);
+  const [profile, currentUser] = await Promise.all([findUserById(userId), getCurrentUser()]);
 
   if (!profile) {
     notFound();
   }
 
+  const isOwner = profile.id === currentUser.id;
+  const displayProfile = isOwner ? { ...currentUser, relationship: null } : profile;
   const faces = await listFacesByUserId(userId);
 
   return (
@@ -37,7 +39,7 @@ const ProfilePage = async ({ params }: Props) => {
       </header>
 
       <main>
-        <ProfileView profile={profile} faces={faces} />
+        <ProfileView profile={displayProfile} faces={faces} isOwner={isOwner} />
       </main>
     </div>
   );

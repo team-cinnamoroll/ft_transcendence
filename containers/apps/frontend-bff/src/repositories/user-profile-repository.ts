@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
 import type { UserMe } from '@/types/user';
-import type { UserProfilesResponse } from '@tracen/contracts';
+import type { UserProfilesResponse, UserProfileWithRelationship } from '@tracen/contracts';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
@@ -13,8 +13,11 @@ import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
 export type UserProfileRepositorySpec = {
   /** ログイン中の自分のプロフィールを取得（取得できない場合は null） */
   getMyProfile: (accessToken: string) => Promise<UserProfile | null>;
-  /** 指定したユーザー（自分・他人問わず）のプロフィールを1件取得（取得できない場合は null） */
-  getProfileById: (accessToken: string, userId: string) => Promise<UserProfile | null>;
+  /** 指定したユーザー（自分・他人問わず）のプロフィールを、関係(relationship)込みで1件取得（取得できない場合は null） */
+  getProfileById: (
+    accessToken: string,
+    userId: string
+  ) => Promise<UserProfileWithRelationship | null>;
   /** ログイン中の自分のプロフィールを更新（作成も兼ねる） */
   updateMyProfile: (
     accessToken: string,

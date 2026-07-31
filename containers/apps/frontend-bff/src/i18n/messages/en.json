@@ -309,7 +309,19 @@
   "profilePage": {
     "facesHeading": "Faces ({count})",
     "noFaces": "No faces yet",
-    "private": "Private"
+    "private": "Private",
+    "sendRequest": "Add friend",
+    "pendingRequest": "Requested",
+    "accept": "Accept",
+    "reject": "Decline",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "removing": "Processing…",
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorGeneric": "Something went wrong. Please try again later."
   },
   "relativeTime": {
     "justNow": "Just now",
