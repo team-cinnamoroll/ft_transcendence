@@ -7,6 +7,7 @@ import { AuthSignOutRequestSchema, AuthSignOutResponseSchema } from '@tracen/con
 import { signOutWithValidation } from '../sign-out/sign-out.usecase';
 import { UnauthorizedError, ServiceUnavailableError } from '../../../shared/errors/global.error';
 import { makeSafeResponse } from '../../../shared/utils/validation';
+import { yieldAuthEvent } from '../../../shared/utils/analytics';
 
 export function authSignOutRouter() {
   return new Hono<ProtectedEnv & AuthHandlerEnv>()
@@ -18,6 +19,7 @@ export function authSignOutRouter() {
         const jwtPayload = c.get('jwtPayload');
         const userId = jwtPayload.sub;
         await signOutWithValidation(authRefreshTokenRepository, request.refreshToken, userId);
+        yieldAuthEvent('logout', userId);
         return c.json(makeSafeResponse(AuthSignOutResponseSchema, { success: true }), 200);
       } catch (err) {
         console.error('Error during sign-out:', err);

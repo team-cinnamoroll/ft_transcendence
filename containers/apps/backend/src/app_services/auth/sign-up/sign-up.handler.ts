@@ -20,6 +20,7 @@ import {
   UserAlreadyExistsError,
 } from '../../../features/users/domain/users.error';
 import { makeSafeResponse, makeSafeUsecaseResult } from '../../../shared/utils/validation';
+import { yieldAuthEvent } from '../../../shared/utils/analytics';
 
 export function signUpRouter() {
   return new Hono<AuthHandlerEnv & FileQueryHandlerEnv>()
@@ -48,6 +49,7 @@ export function signUpRouter() {
           registeredUser.id,
           nickname
         );
+        yieldAuthEvent('signup', registeredUser.id);
         return c.json(
           makeSafeResponse(AuthSignUpResponseSchema, {
             success: true,
