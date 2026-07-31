@@ -50,3 +50,6 @@ containers/infra/local-prod/certs/
 # dev
 dev-sql/
 redis-xplorer.redis
+
+# alarmmanager secret
+containers/infra/monitoring/alertmanager/secret/webhook_url

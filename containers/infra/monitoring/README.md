@@ -1,4 +1,4 @@
-# モニタリング基盤 (Prometheus + Grafana)
+# モニタリング基盤 (Prometheus + Grafana + Alertmanager)
 
 各サービスのメトリクスを exporter で収集し、Prometheus に蓄積、Grafana で可視化する基盤。
 
@@ -6,11 +6,16 @@
 
 ```
 [各サービス] --(専用exporter)--> /metrics --(scrape)--> [Prometheus] --(query)--> [Grafana]
+                                                             │
+                                                    (アラート発火)
+                                                             ▼
+                                                     [Alertmanager] --(通知)--> Discord
 ```
 
 - **exporter**: 各サービスの状態を Prometheus が読める `/metrics` 形式に変換する。サービス本体は無改修で、隣にコンテナを1つ立てるだけ（nginx のみ後述の `stub_status` 設定が必要）。
-- **Prometheus**: exporter を定期 scrape して時系列データとして蓄積・保持する。
+- **Prometheus**: exporter を定期 scrape して時系列データとして蓄積・保持する。アラートルールを評価し、発火を Alertmanager へ送る。
 - **Grafana**: Prometheus に問い合わせてダッシュボードで可視化する（表示専用。履歴は持たない）。
+- **Alertmanager**: Prometheus から受けた発火を集約・整理し、通知先（Discord）へ送る。
 
 ## ディレクトリ構成
 
@@ -18,7 +23,14 @@
 containers/infra/monitoring/
 ├── README.md
 ├── prometheus/
-│   └── prometheus.yml                         # scrape 対象の定義
+│   ├── prometheus.yml                         # scrape 対象・alerting・rule_files の定義
+│   └── alert.rules.yml                        # アラートルール本体
+├── alertmanager/
+│   ├── config.yml                             # 通知のルーティングと receiver(Discord)
+│   └── secret/
+│       ├── .gitkeep                           # ディレクトリを常に存在させる
+│       ├── webhook_url.example                # 記入見本 (追跡)
+│       └── webhook_url                        # Discord webhook URL (gitignore・各自作成)
 └── grafana/
     ├── provisioning/
     │   ├── datasources/datasource.yml         # Prometheus を datasource として自動登録
@@ -39,17 +51,19 @@ Grafana は起動時に `provisioning/` を読み、datasource とダッシュ�
 docker compose -f docker-compose.dev.yml --profile monitoring up -d
 ```
 
-| UI         | URL                   | 備考                                  |
-| ---------- | --------------------- | ------------------------------------- |
-| Grafana    | http://localhost:3001 | 初期ログイン admin / admin            |
-| Prometheus | http://localhost:9090 | `/targets` で scrape 状態を確認できる |
+| UI           | URL                   | 備考                                                            |
+| ------------ | --------------------- | --------------------------------------------------------------- |
+| Grafana      | http://localhost:3001 | 初期ログイン admin / admin                                      |
+| Prometheus   | http://localhost:9090 | `/targets` で scrape 状態、`/alerts` でアラート状態を確認できる |
+| Alertmanager | http://localhost:9093 | 発火中アラートの一覧を確認できる                                |
 
 ## コンポーネント
 
 | サービス          | イメージ                                      | 監視対象 / 役割                                                         |
 | ----------------- | --------------------------------------------- | ----------------------------------------------------------------------- |
-| prometheus        | prom/prometheus                               | メトリクス収集・蓄積                                                    |
+| prometheus        | prom/prometheus                               | メトリクス収集・蓄積・アラート評価                                      |
 | grafana           | grafana/grafana                               | 可視化                                                                  |
+| alertmanager      | prom/alertmanager                             | アラートの集約・通知 (Discord)                                          |
 | node-exporter     | prom/node-exporter                            | ホスト(Docker Desktop では Linux VM)の CPU/メモリ/ディスク/ネットワーク |
 | cadvisor          | gcr.io/cadvisor/cadvisor                      | コンテナ単位のリソース使用量                                            |
 | postgres-exporter | quay.io/prometheuscommunity/postgres-exporter | PostgreSQL の接続数/クエリ/DB サイズ等                                  |
@@ -107,11 +121,55 @@ PY
 
 生成した JSON は git 管理するため、他メンバーはこのコマンドを実行する必要はない（`git pull` + 起動のみ）。
 
+## アラート
+
+Prometheus がルールを評価して発火し、Alertmanager 経由で Discord に通知する。
+
+### 構成要素
+
+- **`prometheus/alert.rules.yml`**: アラートルール本体（採点対象の中心）。現状は以下の3つ。
+  - `TargetDown`: 監視対象(exporter含む)が1分以上 scrape 失敗 (`up == 0`)
+  - `HostHighMemory`: ホストのメモリ使用率が5分間 85% 超
+  - `HostHighCPU`: ホストの CPU 使用率が5分間 85% 超
+- **`prometheus/prometheus.yml`**: `alerting:`(宛先 `alertmanager:9093`) と `rule_files:`(上記ファイル) を定義。
+- **`alertmanager/config.yml`**: 発火を `alertname` でまとめ、`discord` receiver へ送る。
+
+### 通知先 (Discord webhook) の設定
+
+webhook URL は秘密情報のため git に載せない。`webhook_url_file` 方式で、ファイルから読む。
+
+- **通知を使う人**: 見本をコピーして URL を記入する。
+  ```bash
+  cp containers/infra/monitoring/alertmanager/secret/webhook_url.example \
+     containers/infra/monitoring/alertmanager/secret/webhook_url
+  # webhook_url に Discord webhook URL を1行で記入
+  ```
+- **使わない人**: 何もしなくてよい。`webhook_url` が空でも Alertmanager は正常起動し、
+  アラート通知が行われないだけで他は通常どおり動く。
+- `secret/webhook_url` は `.gitignore` 済み。`secret/` ディレクトリ自体は `.gitkeep` で常に存在させ、
+  ファイルを直接マウントしないことで「ファイル未作成時に Docker がディレクトリを作って壊す」問題を回避している。
+
+### 発火テスト
+
+exporter を1つ止めると `up == 0` になり、1分後に `TargetDown` が発火する。
+
+```bash
+docker compose -f docker-compose.dev.yml --profile monitoring stop redis-exporter
+# http://localhost:9090/alerts で Pending -> Firing を確認
+docker compose -f docker-compose.dev.yml --profile monitoring start redis-exporter
+```
+
+`send_resolved: true` のため、復旧時には解決通知も送られる。
+
 ## 設定変更時の反映
 
-- **prometheus.yml を変更したとき**: Prometheus は起動時のみ設定を読むため、再起動が必要。
+- **prometheus.yml / alert.rules.yml を変更したとき**: Prometheus は起動時のみ設定を読むため、再起動が必要。
   ```bash
   docker compose -f docker-compose.dev.yml --profile monitoring restart prometheus
+  ```
+- **alertmanager/config.yml や secret/webhook_url を変更したとき**: Alertmanager を再起動する。
+  ```bash
+  docker compose -f docker-compose.dev.yml --profile monitoring restart alertmanager
   ```
 - **datasource/provider/ダッシュボード JSON を変更したとき**: Grafana を再起動する。
   ```bash

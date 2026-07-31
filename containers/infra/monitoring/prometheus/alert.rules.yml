@@ -1,0 +1,32 @@
+groups:
+  - name: basic-alerts
+    rules:
+      # 監視対象(exporter含む)が1分以上ダウン
+      - alert: TargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: '{{ $labels.job }} ({{ $labels.instance }}) がダウンしています'
+          description: '1分以上 scrape に失敗しています。'
+
+      # ホストのメモリ使用率が5分間 85% 超
+      - alert: HostHighMemory
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'メモリ使用率が高い ({{ $value | printf "%.0f" }}%)'
+          description: '5分間 85% を超えています。'
+
+      # ホストのCPU使用率が5分間 85% 超
+      - alert: HostHighCPU
+        expr: (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'CPU使用率が高い ({{ $value | printf "%.0f" }}%)'
+          description: '5分間 85% を超えています。'

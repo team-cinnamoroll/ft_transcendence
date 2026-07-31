@@ -161,8 +161,12 @@ services:
   prometheus:
     image: prom/prometheus:v3.13.1
     profiles: ['monitoring']
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
     volumes:
       - ./containers/infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./containers/infra/monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
       - prometheus_data:/prometheus
     ports:
       - '9090:9090'
@@ -178,6 +182,17 @@ services:
       - '3001:3000'
     depends_on:
       - prometheus
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.0
+    profiles: ['monitoring']
+    volumes:
+      - ./containers/infra/monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml:ro
+      - ./containers/infra/monitoring/alertmanager/secret:/etc/alertmanager/secret:ro
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    ports:
+      - '9093:9093'
 
   # ── Exporters ─────────────────────────────
   # 各サービスのメトリクスを Prometheus が読める /metrics 形式で公開する。
@@ -239,3 +254,4 @@ volumes:
   elasticsearch_data:
   prometheus_data:
   grafana_data:
+  alertmanager_secret:
