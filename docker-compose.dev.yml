@@ -205,6 +205,10 @@ services:
 
   grafana:
     image: grafana/grafana:13.1.1
+    env_file:
+      - .env.dev
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
       - ./containers/infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro

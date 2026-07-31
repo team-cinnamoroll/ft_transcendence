@@ -55,7 +55,7 @@ docker compose -f docker-compose.dev.yml up -d
 
 | UI           | URL                   | 備考                                                            |
 | ------------ | --------------------- | --------------------------------------------------------------- |
-| Grafana      | http://localhost:3001 | 初期ログイン admin / admin                                      |
+| Grafana      | http://localhost:3001 | ログイン: admin / `.env.dev` の `GF_SECURITY_ADMIN_PASSWORD`    |
 | Prometheus   | http://localhost:9090 | `/targets` で scrape 状態、`/alerts` でアラート状態を確認できる |
 | Alertmanager | http://localhost:9093 | 発火中アラートの一覧を確認できる                                |
 
@@ -186,3 +186,7 @@ docker compose -f docker-compose.dev.yml start redis-exporter
   設定変更後は nginx の再起動も必要。
 - **node-exporter の見え方**: Docker Desktop (mac) では監視対象がホスト実機ではなく内部の Linux VM になる。
   本番 Linux 上では実機のリソースを監視する。
+- **Grafana のアクセス制御**: 管理者パスワードを `.env.dev` の `GF_SECURITY_ADMIN_PASSWORD` で設定し、
+  デフォルト(admin/admin)を避けている。値は git に載せない。サインアップは `GF_USERS_ALLOW_SIGN_UP=false` で無効。
+  この設定は新規ボリューム作成時に適用されるため、既存の `grafana_data` に反映するにはボリュームを作り直す
+  （`docker compose -f docker-compose.dev.yml rm -sf grafana && docker volume rm ft_transcendence_grafana_data`）。
