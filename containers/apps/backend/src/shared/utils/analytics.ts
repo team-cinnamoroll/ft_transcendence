@@ -8,7 +8,6 @@ import {
   AuthActionSchema,
   PostActionSchema,
 } from '../../core-domain/analytics/analytics-event';
-import { makeSafeInfraResult } from './validation';
 
 const AuthEventSchema = z.object({
   category: z.literal('auth'),
@@ -42,30 +41,43 @@ const logger = pino({
 });
 
 export const yieldAuthEvent = (eventAction: AuthAction, userId: UserId) => {
-  const event = makeSafeInfraResult(AnalyticsEventSchema, {
+  const result = AuthEventSchema.safeParse({
     category: 'auth',
     action: eventAction,
     userId,
   });
-  logger.info(event);
+
+  if (!result.success) {
+    logger.warn({ err: result.error }, 'failed to build analytics event');
+    return;
+  }
+  logger.info(result.data);
 };
 
 export const yieldFaceEvent = (eventAction: PostAction, userId: UserId, faceId: FaceId) => {
-  const event = makeSafeInfraResult(AnalyticsEventSchema, {
+  const result = FaceEventSchema.safeParse({
     category: 'face',
     action: eventAction,
     userId,
     faceId,
   });
-  logger.info(event);
+  if (!result.success) {
+    logger.warn({ err: result.error }, 'failed to build analytics event');
+    return;
+  }
+  logger.info(result.data);
 };
 
 export const yieldSeedEvent = (eventAction: PostAction, userId: UserId, faceId: FaceId) => {
-  const event = makeSafeInfraResult(AnalyticsEventSchema, {
+  const result = SeedEventSchema.safeParse({
     category: 'seed',
     action: eventAction,
     userId,
     faceId,
   });
-  logger.info(event);
+  if (!result.success) {
+    logger.warn({ err: result.error }, 'failed to build analytics event');
+    return;
+  }
+  logger.info(result.data);
 };
