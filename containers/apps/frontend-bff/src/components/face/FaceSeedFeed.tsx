@@ -14,6 +14,7 @@ type FaceSeedFeedProps = {
   face: Face;
   seeds: Seed[];
   users?: UserProfile[];
+  linkableCurrentUser?: UserProfile;
   sortOrder?: SortOrder;
   currentUserId?: string;
   onSeedMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
@@ -23,6 +24,7 @@ const FaceSeedFeed = ({
   face,
   seeds,
   users = [],
+  linkableCurrentUser,
   sortOrder = 'newest',
   currentUserId,
   onSeedMoreOptions,
@@ -59,7 +61,11 @@ const FaceSeedFeed = ({
           key={seed.id}
           seed={seed}
           face={face}
-          author={userMap.get(seed.userId)}
+          author={
+            seed.userId === currentUserId && linkableCurrentUser
+              ? linkableCurrentUser
+              : userMap.get(seed.userId)
+          }
           noBorder={index === sorted.length - 1}
           currentUserId={currentUserId}
           onMoreOptions={onSeedMoreOptions}

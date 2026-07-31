@@ -3,7 +3,7 @@ import FaceDetailClient from '@/components/face/FaceDetailClient';
 import FaceBackButton from '@/components/face/FaceBackButton';
 import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
-import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
+import { getCurrentUser, findUserById, listAllUsers } from '@/server/usecases/users';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import type { Face } from '@/types/face';
 
@@ -27,6 +27,7 @@ const FaceDetailPage = async ({ params }: Props) => {
     listAllUsers(),
     getSubscribedFaceIds(),
   ]);
+  const linkableCurrentUser = (await findUserById(currentUser.id)) ?? currentUser;
 
   const isOwner = face.userId === currentUser.id;
   const isSubscribed = subscribedFaceIds.includes(face.id);
@@ -67,6 +68,7 @@ const FaceDetailPage = async ({ params }: Props) => {
           face={face}
           isOwner={isOwner}
           currentUserId={currentUser.id}
+          linkableCurrentUser={linkableCurrentUser}
           seeds={seeds}
           users={users}
           isSubscribed={isSubscribed}

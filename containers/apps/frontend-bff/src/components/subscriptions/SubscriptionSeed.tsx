@@ -306,6 +306,7 @@ type Props = {
   faces: Face[];
   users: UserProfile[];
   currentUserId?: string;
+  linkableCurrentUser?: UserProfile;
 };
 
 const SubscriptionSeed = ({
@@ -315,6 +316,7 @@ const SubscriptionSeed = ({
   faces,
   users,
   currentUserId,
+  linkableCurrentUser,
 }: Props) => {
   const router = useRouter();
   const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null);
@@ -368,6 +370,13 @@ const SubscriptionSeed = ({
   );
   const allFaceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
   const userMap = useMemo(() => createLookupMap(users, (user) => user.id), [users]);
+
+  // 自分自身のSeedの場合は、本物のログインIDを持つ linkableCurrentUser をそのまま使う
+  // （userMap はモックIDで検索するため、自分の投稿でもここだけ特別扱いする）
+  const resolveAuthor = (authorUserId: string) =>
+    authorUserId === currentUserId && linkableCurrentUser
+      ? linkableCurrentUser
+      : userMap.get(authorUserId);
 
   const handleSubscribeToggle = (face: Face) => {
     const isSubscribed = localSubscribedFaceIds.includes(face.id);
@@ -696,7 +705,7 @@ const SubscriptionSeed = ({
                           key={seed.id}
                           seed={seed}
                           face={face}
-                          author={userMap.get(seed.userId)}
+                          author={resolveAuthor(seed.userId)}
                           currentUserId={currentUserId}
                           onMoreOptions={openSeedActionMenu}
                           onClick={() => router.push(`/seeds/${seed.id}`)}
@@ -777,7 +786,7 @@ const SubscriptionSeed = ({
                           key={seed.id}
                           seed={seed}
                           face={face}
-                          author={userMap.get(seed.userId)}
+                          author={resolveAuthor(seed.userId)}
                           onClick={() => router.push(`/seeds/${seed.id}`)}
                         />
                       );
@@ -994,7 +1003,7 @@ const SubscriptionSeed = ({
                       key={act.id}
                       seed={act}
                       face={face}
-                      author={userMap.get(act.userId)}
+                      author={resolveAuthor(act.userId)}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
                       onClick={() => router.push(`/seeds/${act.id}`)}
