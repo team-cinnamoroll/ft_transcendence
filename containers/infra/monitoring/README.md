@@ -47,8 +47,10 @@ Grafana は起動時に `provisioning/` を読み、datasource とダッシュ�
 
 ## 起動方法
 
+監視サービスは dev の通常起動に含まれる（profile 指定は不要。devcontainer 起動時にも自動で立ち上がる）。
+
 ```bash
-docker compose -f docker-compose.dev.yml --profile monitoring up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 | UI           | URL                   | 備考                                                            |
@@ -154,9 +156,9 @@ webhook URL は秘密情報のため git に載せない。`webhook_url_file` �
 exporter を1つ止めると `up == 0` になり、1分後に `TargetDown` が発火する。
 
 ```bash
-docker compose -f docker-compose.dev.yml --profile monitoring stop redis-exporter
+docker compose -f docker-compose.dev.yml stop redis-exporter
 # http://localhost:9090/alerts で Pending -> Firing を確認
-docker compose -f docker-compose.dev.yml --profile monitoring start redis-exporter
+docker compose -f docker-compose.dev.yml start redis-exporter
 ```
 
 `send_resolved: true` のため、復旧時には解決通知も送られる。
@@ -165,15 +167,15 @@ docker compose -f docker-compose.dev.yml --profile monitoring start redis-export
 
 - **prometheus.yml / alert.rules.yml を変更したとき**: Prometheus は起動時のみ設定を読むため、再起動が必要。
   ```bash
-  docker compose -f docker-compose.dev.yml --profile monitoring restart prometheus
+  docker compose -f docker-compose.dev.yml restart prometheus
   ```
 - **alertmanager/config.yml や secret/webhook_url を変更したとき**: Alertmanager を再起動する。
   ```bash
-  docker compose -f docker-compose.dev.yml --profile monitoring restart alertmanager
+  docker compose -f docker-compose.dev.yml restart alertmanager
   ```
 - **datasource/provider/ダッシュボード JSON を変更したとき**: Grafana を再起動する。
   ```bash
-  docker compose -f docker-compose.dev.yml --profile monitoring up -d grafana
+  docker compose -f docker-compose.dev.yml up -d grafana
   ```
 
 ## 補足・注意点

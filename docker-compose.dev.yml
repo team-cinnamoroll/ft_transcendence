@@ -187,14 +187,12 @@ services:
     volumes:
       - ./containers/infra/analytics/mock-producer/produce.py:/app/produce.py:ro
 
-  # ── モニタリング基盤 (Prometheus + Grafana) ─────────────────────────────
-  # Monitoring (Prometheus + Grafana) — メトリクス監視基盤。通常は起動しない。
-  # profile 'monitoring' 指定時のみ起動する。
-  #   docker compose -f docker-compose.dev.yml --profile monitoring up -d prometheus grafana
-  # Grafana UI: http://localhost:3000 / Prometheus: http://localhost:9090
+  # ── モニタリング基盤 (Prometheus + Grafana + Alertmanager) ─────────────────────────────
+  # メトリクス監視基盤。dev では通常の `up` に含めて起動する(profile 指定は不要)。
+  #   docker compose -f docker-compose.dev.yml up -d
+  # Grafana UI: http://localhost:3001 / Prometheus: http://localhost:9090 / Alertmanager: http://localhost:9093
   prometheus:
     image: prom/prometheus:v3.13.1
-    profiles: ['monitoring']
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=15d'
@@ -207,7 +205,6 @@ services:
 
   grafana:
     image: grafana/grafana:13.1.1
-    profiles: ['monitoring']
     volumes:
       - grafana_data:/var/lib/grafana
       - ./containers/infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -219,7 +216,6 @@ services:
 
   alertmanager:
     image: prom/alertmanager:v0.28.0
-    profiles: ['monitoring']
     volumes:
       - ./containers/infra/monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml:ro
       - ./containers/infra/monitoring/alertmanager/secret:/etc/alertmanager/secret:ro
@@ -233,7 +229,6 @@ services:
   # ホストの CPU/メモリ/ディスク/ネットワーク
   node-exporter:
     image: prom/node-exporter:v1.8.2
-    profiles: ['monitoring']
     command:
       - '--path.rootfs=/host'
     pid: host
@@ -243,7 +238,6 @@ services:
   # コンテナ単位のリソース使用量(どのコンテナが CPU/メモリを食っているか)
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
-    profiles: ['monitoring']
     privileged: true
     volumes:
       - /:/rootfs:ro
@@ -254,7 +248,6 @@ services:
   # PostgreSQL のコネクション数/クエリ/DB サイズ等
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
-    profiles: ['monitoring']
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-tracen}:${POSTGRES_PASSWORD:-tracen}@db:5432/${POSTGRES_DB:-tracen}?sslmode=disable
     depends_on:
@@ -263,7 +256,6 @@ services:
   # Redis のメモリ使用量/接続数/ヒット率等
   redis-exporter:
     image: oliver006/redis_exporter:v1.62.0
-    profiles: ['monitoring']
     environment:
       - REDIS_ADDR=redis://redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-tracen_secret}
@@ -273,7 +265,6 @@ services:
   # Nginx のアクティブ接続数/リクエスト数
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:1.3.0
-    profiles: ['monitoring']
     command:
       - '--nginx.scrape-uri=http://nginx:80/stub_status'
     depends_on:
