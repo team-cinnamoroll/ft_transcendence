@@ -1,5 +1,12 @@
 import 'server-only';
 
+import type {
+  FriendshipPendingListType,
+  FriendshipListResponse,
+  FriendshipPendingListResponse,
+  FriendListPage,
+  PendingListPage,
+} from '@/types/friendship';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
@@ -16,6 +23,16 @@ export type FriendshipRepositorySpec = {
   reject: (accessToken: string, requestId: string) => Promise<ApiResult<void>>;
   /** フレンド関係を解消する */
   end: (accessToken: string, targetUserId: string) => Promise<ApiResult<void>>;
+  /** 承認済みのフレンド一覧をカーソル取得（オンライン状態込み） */
+  listFriends: (
+    accessToken: string,
+    params: { cursor?: string | null }
+  ) => Promise<ApiResult<FriendListPage>>;
+  /** 保留中の申請一覧（受信／送信）をカーソル取得 */
+  listPendingRequests: (
+    accessToken: string,
+    params: { type: FriendshipPendingListType; cursor?: string | null }
+  ) => Promise<ApiResult<PendingListPage>>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -70,6 +87,39 @@ export function createFriendshipApiRepositoryImpl(): FriendshipRepositorySpec {
         return { success: false, errorKind: classifyHttpStatus(res.status) };
       }
       return { success: true, data: undefined };
+    },
+
+    listFriends: async (accessToken, { cursor }) => {
+      const res = await createBackendClient(accessToken).api.v1.friendships.$get({
+        query: cursor ? { cursor } : {},
+      });
+      if (!res.ok) {
+        console.error('FriendshipRepository.listFriends: backend request failed', res.status);
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
+      }
+      const json = (await res.json()) as FriendshipListResponse;
+      if (!json.success) {
+        return { success: false, errorKind: 'UNKNOWN' };
+      }
+      return { success: true, data: json.data };
+    },
+
+    listPendingRequests: async (accessToken, { type, cursor }) => {
+      const res = await createBackendClient(accessToken).api.v1.friendships.requests.$get({
+        query: cursor ? { type, cursor } : { type },
+      });
+      if (!res.ok) {
+        console.error(
+          'FriendshipRepository.listPendingRequests: backend request failed',
+          res.status
+        );
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
+      }
+      const json = (await res.json()) as FriendshipPendingListResponse;
+      if (!json.success) {
+        return { success: false, errorKind: 'UNKNOWN' };
+      }
+      return { success: true, data: json.data };
     },
   };
 }

@@ -2,13 +2,20 @@
 
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
-import type { ApiErrorKind } from '@/lib/api-error';
+import type {
+  FriendshipPendingListType,
+  FriendListPage,
+  PendingListPage,
+} from '@/types/friendship';
+import type { ApiErrorKind, ApiResult } from '@/lib/api-error';
 import type { SimpleApi } from '@/types/api';
 import {
   sendFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
   endFriendship,
+  getMyFriends,
+  getMyPendingRequests,
 } from '@/server/usecases/friendship';
 import type { ActionResult } from './result';
 
@@ -32,6 +39,7 @@ async function resolveFriendshipErrorMessage(errorKind: ApiErrorKind): Promise<s
 
 function revalidateProfilePaths(targetUserId: string) {
   revalidatePath(`/profile/${targetUserId}`);
+  revalidatePath('/friends');
 }
 
 export async function sendFriendRequestAction(
@@ -88,4 +96,19 @@ export async function removeFriendAction(targetUserId: string): Promise<ActionRe
   }
   revalidateProfilePaths(targetUserId);
   return { success: true, data: { success: true } };
+}
+
+/** フレンド一覧の続きを取得する（「もっと見る」用） */
+export async function loadMoreFriendsAction(
+  cursor: string | null
+): Promise<ApiResult<FriendListPage>> {
+  return getMyFriends(cursor);
+}
+
+/** 保留中の申請一覧の続きを取得する（「もっと見る」用） */
+export async function loadMorePendingRequestsAction(
+  type: FriendshipPendingListType,
+  cursor: string | null
+): Promise<ApiResult<PendingListPage>> {
+  return getMyPendingRequests(type, cursor);
 }

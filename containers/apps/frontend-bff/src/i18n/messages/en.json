@@ -306,6 +306,29 @@
   "faceDetailPage": {
     "backAriaLabel": "Go back"
   },
+  "friendsPage": {
+    "title": "Friends",
+    "tabFriend": "Friends",
+    "tabOutgoing": "Sent",
+    "tabIncoming": "Requests",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "noFriends": "No friends yet",
+    "noOutgoing": "No pending sent requests",
+    "noIncoming": "No incoming requests",
+    "online": "Online",
+    "offline": "Offline",
+    "accept": "Accept",
+    "reject": "Decline",
+    "cancelRequest": "Cancel",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "processing": "Processing…",
+    "errorGeneric": "Something went wrong. Please try again later."
+  },
   "profilePage": {
     "facesHeading": "Faces ({count})",
     "noFaces": "No faces yet",

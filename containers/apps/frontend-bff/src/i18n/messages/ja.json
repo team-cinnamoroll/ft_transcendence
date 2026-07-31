@@ -306,6 +306,29 @@
   "faceDetailPage": {
     "backAriaLabel": "前のページに戻る"
   },
+  "friendsPage": {
+    "title": "フレンド",
+    "tabFriend": "フレンド",
+    "tabOutgoing": "申請中",
+    "tabIncoming": "承認待ち",
+    "loadMore": "もっと見る",
+    "loading": "読み込み中…",
+    "noFriends": "フレンドがいません",
+    "noOutgoing": "送信中の申請はありません",
+    "noIncoming": "届いている申請はありません",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "accept": "承認する",
+    "reject": "拒否する",
+    "cancelRequest": "取り消し",
+    "removeFriend": "フレンド解消",
+    "removeFriendConfirmTitle": "フレンドを解消しますか？",
+    "removeFriendConfirmMessage": "{name}さんとのフレンド関係を解消します。この操作は取り消せません。",
+    "removeFriendConfirmButton": "解消する",
+    "removeFriendCancel": "キャンセル",
+    "processing": "処理中…",
+    "errorGeneric": "操作に失敗しました。時間をおいて再度お試しください。"
+  },
   "profilePage": {
     "facesHeading": "フェイス（{count}）",
     "noFaces": "フェイスがありません",

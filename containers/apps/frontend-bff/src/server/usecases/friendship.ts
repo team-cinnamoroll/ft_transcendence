@@ -1,12 +1,17 @@
 import 'server-only';
 
+import type {
+  FriendshipPendingListType,
+  FriendListPage,
+  PendingListPage,
+} from '@/types/friendship';
 import { getFriendshipRepository } from '@/repositories/friendship-repository';
 import { getSessionTokens } from '@/lib/session';
 import type { ApiResult } from '@/lib/api-error';
 
-async function withAccessToken(
-  run: (accessToken: string) => Promise<ApiResult<void>>
-): Promise<ApiResult<void>> {
+async function withAccessToken<T>(
+  run: (accessToken: string) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
   const { accessToken } = await getSessionTokens();
   if (!accessToken) {
     return { success: false, errorKind: 'UNAUTHORIZED' };
@@ -34,4 +39,21 @@ export async function rejectFriendRequest(requestId: string): Promise<ApiResult<
 /** フレンド関係を解消する */
 export async function endFriendship(targetUserId: string): Promise<ApiResult<void>> {
   return withAccessToken((accessToken) => getFriendshipRepository().end(accessToken, targetUserId));
+}
+
+/** 承認済みのフレンド一覧を取得する（オンライン状態込み） */
+export async function getMyFriends(cursor?: string | null): Promise<ApiResult<FriendListPage>> {
+  return withAccessToken((accessToken) =>
+    getFriendshipRepository().listFriends(accessToken, { cursor })
+  );
+}
+
+/** 保留中のフレンド申請一覧（受信／送信）を取得する */
+export async function getMyPendingRequests(
+  type: FriendshipPendingListType,
+  cursor?: string | null
+): Promise<ApiResult<PendingListPage>> {
+  return withAccessToken((accessToken) =>
+    getFriendshipRepository().listPendingRequests(accessToken, { type, cursor })
+  );
 }
