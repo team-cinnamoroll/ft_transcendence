@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -14,6 +14,8 @@ import {
   loadMoreFriendsAction,
   loadMorePendingRequestsAction,
 } from '@/server/actions/friendship';
+import { refreshOnlineStatusesAction } from '@/server/actions/presence';
+import { HEARTBEAT_INTERVAL_MS } from '@/lib/heartbeat-provider';
 
 type Tab = 'friend' | 'outgoing' | 'incoming';
 
@@ -148,6 +150,30 @@ const FriendsPageClient = ({
   const [incomingCursor, setIncomingCursor] = useState(incomingNextCursor);
 
   const sortedFriends = [...friends].sort((a, b) => Number(b.isOnline) - Number(a.isOnline));
+
+  // 表示中フレンドの userId 一覧を setInterval のクロージャから最新の状態で参照するための ref
+  const friendsRef = useRef(friends);
+  friendsRef.current = friends;
+
+  useEffect(() => {
+    const tick = () => {
+      const userIds = friendsRef.current.map((friend) => friend.friendProfile.id);
+      if (userIds.length === 0) return;
+
+      void refreshOnlineStatusesAction(userIds).then((onlineStatuses) => {
+        if (!onlineStatuses) return;
+        setFriends((prev) =>
+          prev.map((friend) => ({
+            ...friend,
+            isOnline: onlineStatuses[friend.friendProfile.id] ?? friend.isOnline,
+          }))
+        );
+      });
+    };
+
+    const id = setInterval(tick, HEARTBEAT_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
 
   const handleLoadMoreFriends = () => {
     startTransition(async () => {

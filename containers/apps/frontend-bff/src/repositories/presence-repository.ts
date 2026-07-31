@@ -1,7 +1,9 @@
 import 'server-only';
 
+import type { PresenceStatusData, PresenceStatusResponse } from '@/types/presence';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
+import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
 
@@ -17,6 +19,11 @@ export type PresenceRepositorySpec = {
    * 結果は呼び出し元に伝えない（失敗してもTTL失効によって最終的にオフライン扱いになるため）。
    */
   setOffline: (accessToken: string) => Promise<void>;
+  /** 指定したユーザーIDそれぞれのオンライン状態をまとめて取得する */
+  getOnlineStatuses: (
+    accessToken: string,
+    userIds: string[]
+  ) => Promise<ApiResult<PresenceStatusData>>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -47,6 +54,21 @@ export function createPresenceApiRepositoryImpl(): PresenceRepositorySpec {
       } catch (err) {
         console.error('PresenceRepository.setOffline: request threw', err);
       }
+    },
+
+    getOnlineStatuses: async (accessToken, userIds) => {
+      const res = await createBackendClient(accessToken).api.v1.presence.status.$post({
+        json: { userIds },
+      });
+      if (!res.ok) {
+        console.error('PresenceRepository.getOnlineStatuses: backend request failed', res.status);
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
+      }
+      const json = (await res.json()) as PresenceStatusResponse;
+      if (!json.success) {
+        return { success: false, errorKind: 'UNKNOWN' };
+      }
+      return { success: true, data: json.data };
     },
   };
 }

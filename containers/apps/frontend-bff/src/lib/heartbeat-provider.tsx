@@ -5,7 +5,7 @@ import { heartbeatAction } from '@/server/actions/presence';
 import { checkPendingFriendRequestsAction } from '@/server/actions/friendship';
 
 // バックエンドのオンライン判定TTL（90秒）より十分短い間隔にする
-const HEARTBEAT_INTERVAL_MS = 30_000;
+export const HEARTBEAT_INTERVAL_MS = 30_000;
 
 const FriendRequestBadgeContext = createContext(false);
 
