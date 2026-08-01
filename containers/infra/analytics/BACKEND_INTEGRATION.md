@@ -93,6 +93,14 @@ if [category] not in ["auth", "face", "seed"] {
 node の `console.log` で「分析JSON + 普通のログ（ERROR / nodemon 等）」を混在させて流す実証を行い、
 **分析JSON のみが events に入り、普通のログは drop される**ことを確認済みです。
 
+### pino のデフォルトフィールドも除去済み
+
+pino が付与する `level` / `pid` / `hostname` / `msg` も Logstash の `remove_field` で除去済みで、events には契約スキーマの5フィールドのみが入ります。backend 側で `pino({ base: null })` にする対応は不要です（任意）。
+
+### index の mapping（`category` を keyword）は provision が保証
+
+`provision-kibana.sh` が events index を index template（`category`/`action` を keyword）で作成します。既存の index が dynamic mapping（`category` が text）だった場合は**作り直して修復**します。そのため **Kibana 側で `category` → `category.keyword` に手動変更する必要はありません**。実データを流す前に一度 `provision-kibana.sh` を実行してください。
+
 ## 動作確認（backend 連携後）
 
 ```bash
