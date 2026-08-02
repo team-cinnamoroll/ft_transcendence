@@ -17,8 +17,8 @@ const FaceBadge = ({ face, size = 36, radius = 10 }: FaceBadgeProps) => {
         width: size,
         height: size,
         borderRadius: radius,
-        background: face.imageUrl ? undefined : color,
-        backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
+        background: face.image?.url ? undefined : color,
+        backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         color: '#fff',
@@ -31,7 +31,7 @@ const FaceBadge = ({ face, size = 36, radius = 10 }: FaceBadgeProps) => {
         flexShrink: 0,
       }}
     >
-      {!face.imageUrl && kanji}
+      {!face.image?.url && kanji}
     </div>
   );
 };

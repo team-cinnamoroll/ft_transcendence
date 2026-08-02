@@ -30,11 +30,20 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
     listByFaceIds: async (faceIds) =>
       sortByCreatedAtDesc(seeds.filter((s) => faceIds.includes(s.faceId))),
     create: async (userId, input) => {
+      const createdAt = new Date().toISOString();
       const newSeed: Seed = {
         id: `seed-mock-${Date.now()}`,
         userId,
         ...input,
-        createdAt: new Date().toISOString(),
+        images:
+          input.imageIds.length > 0
+            ? input.imageIds.map((imageId) => ({
+                id: imageId,
+                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
+              }))
+            : [],
+        createdAt: createdAt,
+        updatedAt: createdAt,
       };
       seeds.push(newSeed);
       return newSeed;
@@ -42,12 +51,22 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
     update: async (seedId, userId, input) => {
       const existing = seeds.find((s) => s.id === seedId && s.userId === userId);
       if (!existing) throw new Error('Seed not found');
+      const updatedAt = new Date().toISOString();
       const updated: Seed = {
         ...existing,
         body: input.body,
-        ...(input.imageUrls !== undefined ? { imageUrls: input.imageUrls } : {}),
+        updatedAt: updatedAt,
+        images:
+          input.imageIds.length > 0
+            ? input.imageIds.map((imageId) => ({
+                id: imageId,
+                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
+              }))
+            : [],
       };
-      return updated;
+
+      Object.assign(existing, updated);
+      return existing;
     },
     delete: async (seedId, userId) => {
       const index = seeds.findIndex((s) => s.id === seedId && s.userId === userId);

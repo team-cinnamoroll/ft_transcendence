@@ -5,21 +5,16 @@
  */
 import type { Face } from '../../src/types/face';
 
-type CreateFaceInput = {
-  name: string;
-  emoji?: string;
-  description?: string;
-  isPrivate: boolean;
-};
+type CreateFaceInput = Omit<Face, 'id' | 'userId' | 'image'>;
 
 export async function createFaceAction(input: CreateFaceInput): Promise<Face> {
   return {
     id: `face-mock-${Date.now()}`,
     userId: 'user-1',
     name: input.name,
-    emoji: input.emoji,
-    description: input.description,
-    isPrivate: input.isPrivate,
-    imageUrl: undefined,
+    emoji: input.emoji ?? null,
+    description: input.description ?? null,
+    visibility: input.visibility,
+    image: null,
   };
 }

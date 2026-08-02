@@ -59,9 +59,9 @@ const SeedPage = async ({ params }: Props) => {
           face={data.face}
           author={data.author}
           isOwner={data.isOwner}
-          outgoingLinks={data.outgoingLinks}
-          incomingLinks={data.incomingLinks}
           users={data.users}
+          outgoingLinks={[]}
+          incomingLinks={[]}
         />
       </main>
     </div>

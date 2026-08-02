@@ -47,8 +47,10 @@ const NotifItem = ({
         id: faceId,
         name: faceName ?? '',
         userId: '',
-        isPrivate: false,
-        imageUrl: faceImageUrl ?? undefined,
+        visibility: 'public' as const,
+        emoji: null,
+        description: null,
+        image: faceImageUrl ? { id: 'mock', url: faceImageUrl } : null,
       }
     : null;
 
@@ -294,7 +296,7 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
                     notification={notification}
                     faceName={linkedFace ? getFaceTitle(linkedFace) : undefined}
                     faceId={linkedFace?.id}
-                    faceImageUrl={linkedFace?.imageUrl}
+                    faceImageUrl={linkedFace?.image?.url}
                     preview={seed?.body ?? t('linkedPreview')}
                     typeLinkLabel={t('typeLinkLabel')}
                     typeUpdateLabel={t('typeUpdateLabel')}
@@ -309,7 +311,7 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
                   notification={notification}
                   faceName={face ? getFaceTitle(face) : undefined}
                   faceId={face?.id}
-                  faceImageUrl={face?.imageUrl}
+                  faceImageUrl={face?.image?.url}
                   preview={
                     face
                       ? t('updatedPreview', { faceName: getFaceTitle(face) })

@@ -21,8 +21,6 @@ export type SeedDetailData = {
   face: Face;
   author: UserProfile | null;
   isOwner: boolean;
-  outgoingLinks: SeedLink[];
-  incomingLinks: SeedLink[];
   users: UserProfile[];
 };
 
@@ -71,36 +69,13 @@ export async function getSeedDetailData(seedId: string): Promise<SeedDetailData 
   const face = await findFaceById(seed.faceId);
   if (!face) return null;
 
-  const [currentUser, author, allSeeds, users] = await Promise.all([
+  const [currentUser, author, users] = await Promise.all([
     getCurrentUser(),
     findUserById(seed.userId),
-    getSeedRepository().listAll(),
     listAllUsers(),
   ]);
 
   const isOwner = seed.userId === currentUser.id;
 
-  const outgoingLinks: SeedLink[] = (
-    await Promise.all(
-      (seed.linkedSeedIds ?? []).map(async (id) => {
-        const linked = await getSeedRepository().findById(id);
-        if (!linked) return null;
-        const linkedFace = await findFaceById(linked.faceId);
-        return linkedFace ? { seed: linked, face: linkedFace } : null;
-      })
-    )
-  ).filter((x): x is SeedLink => x !== null);
-
-  const incomingLinks: SeedLink[] = (
-    await Promise.all(
-      allSeeds
-        .filter((s) => s.id !== seed.id && (s.linkedSeedIds ?? []).includes(seed.id))
-        .map(async (s) => {
-          const linkedFace = await findFaceById(s.faceId);
-          return linkedFace ? { seed: s, face: linkedFace } : null;
-        })
-    )
-  ).filter((x): x is SeedLink => x !== null);
-
-  return { seed, face, author, isOwner, outgoingLinks, incomingLinks, users };
+  return { seed, face, author, isOwner, users };
 }

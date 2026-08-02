@@ -92,7 +92,7 @@ type Props = {
 
 const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLinks }: Props) => {
   const t = useTranslations('seedDetail');
-  const isPrivate = face.isPrivate;
+  const visibility = face.visibility === 'private' ? t('private') : t('public');
 
   return (
     <div style={{ padding: '14px 18px 80px' }}>
@@ -202,7 +202,7 @@ const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLi
             strokeWidth={1.5}
             strokeLinecap="round"
           >
-            {isPrivate ? (
+            {face.visibility === 'private' ? (
               <>
                 <rect x={4} y={7} width={8} height={7} rx={1.5} />
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
@@ -215,7 +215,7 @@ const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLi
               </>
             )}
           </svg>
-          {isPrivate ? t('private') : t('public')}
+          {visibility}
         </div>
       </div>
 
@@ -235,11 +235,11 @@ const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLi
       </div>
 
       {/* 画像グリッド */}
-      {seed.imageUrls && seed.imageUrls.length > 0 && (
+      {seed.images.length > 0 && (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${Math.min(seed.imageUrls.length, 2)}, 1fr)`,
+            gridTemplateColumns: `repeat(${Math.min(seed.images.length, 2)}, 1fr)`,
             gap: 3,
             borderRadius: 14,
             overflow: 'hidden',
@@ -248,16 +248,16 @@ const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLi
             maxWidth: '50%',
           }}
         >
-          {seed.imageUrls.slice(0, 4).map((url, i) => (
+          {seed.images.slice(0, 4).map((image, i) => (
             <div
               key={i}
               style={{
                 position: 'relative',
-                aspectRatio: seed.imageUrls!.length === 1 ? '16/10' : '1/1',
+                aspectRatio: seed.images.length === 1 ? '16/10' : '1/1',
               }}
             >
               <Image
-                src={url}
+                src={image.url}
                 alt={t('imageAlt', { n: i + 1 })}
                 fill
                 className="object-cover"
