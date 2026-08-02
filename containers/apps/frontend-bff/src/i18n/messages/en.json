@@ -342,6 +342,8 @@
     "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
     "removeFriendConfirmButton": "Remove",
     "removeFriendCancel": "Cancel",
+    "unblock": "Unblock",
+    "blockedByMessage": "You can't send a friend request to this user",
     "removing": "Processing…",
     "errorSessionExpired": "Your session has expired. Please sign in again.",
     "errorGeneric": "Something went wrong. Please try again later."

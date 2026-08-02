@@ -146,6 +146,37 @@ const FriendActionButton = ({ targetUserId, targetUserName, relationship, isOwne
     );
   }
 
+  if (relationship.status === 'BLOCKED' && relationship.friendshipId) {
+    const friendshipId = relationship.friendshipId;
+    return (
+      <div>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => runAction(() => rejectFriendRequestAction(friendshipId, targetUserId))}
+          style={{
+            ...buttonBaseStyle,
+            background: 'var(--mf-surface)',
+            color: 'var(--mf-text)',
+            border: '0.5px solid var(--mf-line)',
+            opacity: isPending ? 0.7 : 1,
+          }}
+        >
+          {isPending ? t('removing') : t('unblock')}
+        </button>
+        {errorMessage && (
+          <p style={{ fontSize: 12, color: 'var(--mf-danger, #e53e3e)', marginTop: 6 }}>
+            {errorMessage}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (relationship.status === 'BLOCKED_BY') {
+    return <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('blockedByMessage')}</p>;
+  }
+
   if (relationship.status === 'FRIEND') {
     return (
       <div>
