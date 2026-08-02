@@ -65,7 +65,8 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
             : [],
       };
 
-      return updated;
+      Object.assign(existing, updated);
+      return existing;
     },
     delete: async (seedId, userId) => {
       const index = seeds.findIndex((s) => s.id === seedId && s.userId === userId);
