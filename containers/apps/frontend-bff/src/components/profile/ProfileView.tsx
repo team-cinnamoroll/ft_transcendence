@@ -99,8 +99,8 @@ const ProfileView = async ({ profile, faces, isOwner }: Props) => {
                     style={{
                       height: 96,
                       flexShrink: 0,
-                      background: face.imageUrl ? undefined : color,
-                      backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
+                      background: face.image?.url ? undefined : color,
+                      backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       padding: 8,
@@ -109,7 +109,7 @@ const ProfileView = async ({ profile, faces, isOwner }: Props) => {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    {face.isPrivate && (
+                    {face.visibility === 'private' && (
                       <div
                         style={{
                           padding: '3px 7px',
