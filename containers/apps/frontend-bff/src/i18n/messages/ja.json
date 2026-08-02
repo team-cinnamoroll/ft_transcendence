@@ -7,7 +7,7 @@
     "home": "ホーム",
     "faces": "振り返り",
     "subscriptions": "収集",
-    "notifications": "通知",
+    "friends": "フレンド",
     "search": "検索",
     "faceDetail": "フェイス詳細"
   },
@@ -300,10 +300,53 @@
     "errorAvatarUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
     "errorAvatarInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "errorGeneric": "プロフィールの保存に失敗しました。時間をおいて再度お試しください。",
+    "errorAvatarNotFound": "選択した画像が見つかりませんでした。もう一度画像を選び直してください。",
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。"
   },
   "faceDetailPage": {
     "backAriaLabel": "前のページに戻る"
+  },
+  "friendsPage": {
+    "title": "フレンド",
+    "tabFriend": "フレンド",
+    "tabOutgoing": "申請中",
+    "tabIncoming": "承認待ち",
+    "loadMore": "もっと見る",
+    "loading": "読み込み中…",
+    "noFriends": "フレンドがいません",
+    "noOutgoing": "送信中の申請はありません",
+    "noIncoming": "届いている申請はありません",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "accept": "承認する",
+    "reject": "拒否する",
+    "cancelRequest": "取り消し",
+    "removeFriend": "フレンド解消",
+    "removeFriendConfirmTitle": "フレンドを解消しますか？",
+    "removeFriendConfirmMessage": "{name}さんとのフレンド関係を解消します。この操作は取り消せません。",
+    "removeFriendConfirmButton": "解消する",
+    "removeFriendCancel": "キャンセル",
+    "processing": "処理中…",
+    "errorGeneric": "操作に失敗しました。時間をおいて再度お試しください。"
+  },
+  "profilePage": {
+    "facesHeading": "フェイス（{count}）",
+    "noFaces": "フェイスがありません",
+    "private": "非公開",
+    "sendRequest": "フレンド申請する",
+    "pendingRequest": "申請中",
+    "accept": "承認する",
+    "reject": "拒否する",
+    "removeFriend": "フレンド解消",
+    "removeFriendConfirmTitle": "フレンドを解消しますか？",
+    "removeFriendConfirmMessage": "{name}さんとのフレンド関係を解消します。この操作は取り消せません。",
+    "removeFriendConfirmButton": "解消する",
+    "removeFriendCancel": "キャンセル",
+    "unblock": "ブロックを解除する",
+    "blockedByMessage": "フレンド申請できません",
+    "removing": "処理中…",
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorGeneric": "操作に失敗しました。時間をおいて再度お試しください。"
   },
   "relativeTime": {
     "justNow": "たった今",
@@ -316,6 +359,8 @@
     "post": "投稿"
   },
   "accountMenu": {
+    "viewProfile": "プロフィール",
+    "viewProfileSub": "自分のプロフィールを見る",
     "settings": "アカウント設定",
     "settingsSub": "プロフィール · パスワード",
     "otherSettings": "その他詳細設定",

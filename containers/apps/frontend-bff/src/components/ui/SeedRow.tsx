@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
-import { getFaceTitle } from '@/lib/display';
+import type { UserProfile } from '@/types/user-profile';
+import { getFaceTitle, getAvatarUrl } from '@/lib/display';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import FaceBadge from '@/components/ui/FaceBadge';
 
 type SeedRowProps = {
   seed: Seed;
   face: Face;
+  author?: UserProfile;
   handle?: string;
   onClick?: () => void;
   replyChain?: boolean;
@@ -26,6 +29,7 @@ const COLLAPSE_THRESHOLD = 200;
 const SeedRow = ({
   seed,
   face,
+  author,
   handle,
   onClick,
   replyChain = false,
@@ -72,7 +76,13 @@ const SeedRow = ({
           flexShrink: 0,
         }}
       >
-        <FaceBadge face={face} size={36} radius={10} />
+        <Link
+          href={`/faces/${face.id}`}
+          onClick={(e) => e.stopPropagation()}
+          style={{ display: 'block' }}
+        >
+          <FaceBadge face={face} size={36} radius={10} />
+        </Link>
         {replyChain && (
           <div
             style={{
@@ -96,7 +106,10 @@ const SeedRow = ({
             overflow: 'hidden',
           }}
         >
-          <span
+          <Link
+            href={`/faces/${face.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:underline"
             style={{
               fontFamily: 'var(--mf-font-sans)',
               fontSize: 13.5,
@@ -108,7 +121,7 @@ const SeedRow = ({
             }}
           >
             {getFaceTitle(face)}
-          </span>
+          </Link>
           {handle && (
             <span style={{ fontSize: 12, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
               @{handle}
@@ -118,35 +131,90 @@ const SeedRow = ({
           <span style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', flexShrink: 0 }}>
             {formatRelative(seed.createdAt)}
           </span>
-          {onMoreOptions && currentUserId === seed.userId && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMoreOptions(e, seed);
-              }}
-              aria-label={t('moreOptions')}
-              style={{
-                marginLeft: 'auto',
-                flexShrink: 0,
-                width: 24,
-                height: 24,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--mf-text-muted)',
-              }}
-            >
-              <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
-                <circle cx={1.5} cy={1.5} r={1.5} />
-                <circle cx={1.5} cy={6.5} r={1.5} />
-                <circle cx={1.5} cy={11.5} r={1.5} />
-              </svg>
-            </button>
+          {(author || (onMoreOptions && currentUserId === seed.userId)) && (
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+              {author && (
+                <Link
+                  href={`/profile/${author.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="group"
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    textDecoration: 'none',
+                    minWidth: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Image
+                      src={getAvatarUrl(author)}
+                      alt={author.name}
+                      width={28}
+                      height={28}
+                      style={{
+                        objectFit: 'cover',
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="hidden md:inline group-hover:underline"
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: 'var(--mf-text-muted)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: 80,
+                    }}
+                  >
+                    {author.name}
+                  </span>
+                </Link>
+              )}
+              {onMoreOptions && currentUserId === seed.userId && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoreOptions(e, seed);
+                  }}
+                  aria-label={t('moreOptions')}
+                  style={{
+                    flexShrink: 0,
+                    width: 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--mf-text-muted)',
+                  }}
+                >
+                  <svg width={3} height={13} viewBox="0 0 3 13" fill="currentColor">
+                    <circle cx={1.5} cy={1.5} r={1.5} />
+                    <circle cx={1.5} cy={6.5} r={1.5} />
+                    <circle cx={1.5} cy={11.5} r={1.5} />
+                  </svg>
+                </button>
+              )}
+            </div>
           )}
         </div>
 

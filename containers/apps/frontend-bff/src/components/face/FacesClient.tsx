@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
+import type { UserProfile } from '@/types/user-profile';
 import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
 import CreateFaceModal from './CreateFaceModal';
 import EditFaceModal from './EditFaceModal';
@@ -19,6 +20,7 @@ type Props = {
   initialFaces: Face[];
   seeds: Seed[];
   currentUserId?: string;
+  currentUser?: UserProfile;
 };
 
 type SortType = 'lastAt' | 'total' | 'name';
@@ -28,7 +30,7 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 const REFERENCE_MONTH = '2026-04';
 
-const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props) => {
+const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, currentUser }: Props) => {
   const router = useRouter();
   const [faces, setFaces] = useState<Face[]>(initialFaces);
   const [seeds, setSeeds] = useState(initialSeeds);
@@ -446,6 +448,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       key={act.id}
                       seed={act}
                       face={face}
+                      author={currentUser}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
                       onClick={() => router.push(`/seeds/${act.id}`)}

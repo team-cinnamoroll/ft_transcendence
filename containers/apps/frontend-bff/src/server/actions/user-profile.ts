@@ -19,9 +19,11 @@ import type { ActionResult } from './result';
  * - VALIDATION(400): userIdが空（通常発生しない防御的チェック）
  * - UNAUTHORIZED(401): JWTが無効・欠落している（セッション切れ）
  * - FORBIDDEN(403): URLのuserIdとJWTのsubが不一致（フロントの実装が正しい限り発生しない）
+ * - NOT_FOUND(404): avatarFileIdが指すファイルが存在しない（アップロード済みファイルが期限切れ・削除済みの場合）
  * - SERVER_ERROR(500)/UNKNOWN: 予期しないエラー
  *
- * ユーザーが次に取るべき行動が変わるのは UNAUTHORIZED のみ（再ログインが必要）。
+ * ユーザーが次に取るべき行動が変わるのは UNAUTHORIZED（再ログインが必要）と
+ * NOT_FOUND（同じavatarFileIdを再送しても直らないため、画像を選び直す必要がある）のみ。
  * それ以外は「もう一度試す」以外に取れる行動が無いため、共通の errorGeneric にまとめる。
  */
 function resolveUpdateProfileErrorMessage(
@@ -30,6 +32,9 @@ function resolveUpdateProfileErrorMessage(
 ): string {
   if (errorKind === 'UNAUTHORIZED') {
     return t('errorSessionExpired');
+  }
+  if (errorKind === 'NOT_FOUND') {
+    return t('errorAvatarNotFound');
   }
   return t('errorGeneric');
 }

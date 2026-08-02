@@ -7,7 +7,7 @@
     "home": "Home",
     "faces": "Reflection",
     "subscriptions": "Collection",
-    "notifications": "Notifications",
+    "friends": "Friends",
     "search": "Search",
     "faceDetail": "Face Detail"
   },
@@ -300,10 +300,53 @@
     "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
     "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
     "errorGeneric": "Failed to save profile. Please try again later.",
+    "errorAvatarNotFound": "The selected image could not be found. Please choose the image again.",
     "errorSessionExpired": "Your session has expired. Please sign in again."
   },
   "faceDetailPage": {
     "backAriaLabel": "Go back"
+  },
+  "friendsPage": {
+    "title": "Friends",
+    "tabFriend": "Friends",
+    "tabOutgoing": "Sent",
+    "tabIncoming": "Requests",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "noFriends": "No friends yet",
+    "noOutgoing": "No pending sent requests",
+    "noIncoming": "No incoming requests",
+    "online": "Online",
+    "offline": "Offline",
+    "accept": "Accept",
+    "reject": "Decline",
+    "cancelRequest": "Cancel",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "processing": "Processing…",
+    "errorGeneric": "Something went wrong. Please try again later."
+  },
+  "profilePage": {
+    "facesHeading": "Faces ({count})",
+    "noFaces": "No faces yet",
+    "private": "Private",
+    "sendRequest": "Add friend",
+    "pendingRequest": "Requested",
+    "accept": "Accept",
+    "reject": "Decline",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "unblock": "Unblock",
+    "blockedByMessage": "You can't send a friend request to this user",
+    "removing": "Processing…",
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorGeneric": "Something went wrong. Please try again later."
   },
   "relativeTime": {
     "justNow": "Just now",
@@ -316,6 +359,8 @@
     "post": "Post"
   },
   "accountMenu": {
+    "viewProfile": "Profile",
+    "viewProfileSub": "View your profile",
     "settings": "Account Settings",
     "settingsSub": "Profile · Password",
     "otherSettings": "Other Settings",

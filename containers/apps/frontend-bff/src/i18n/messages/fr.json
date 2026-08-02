@@ -7,7 +7,7 @@
     "home": "Accueil",
     "faces": "Réflexion",
     "subscriptions": "Collection",
-    "notifications": "Notifications",
+    "friends": "Amis",
     "search": "Recherche",
     "faceDetail": "Détail de la facette"
   },
@@ -300,10 +300,53 @@
     "errorAvatarUploadFailed": "Échec du téléversement de l'image. Veuillez réessayer.",
     "errorAvatarInvalidType": "Veuillez sélectionner une image au format JPEG ou PNG.",
     "errorGeneric": "Échec de l'enregistrement du profil. Veuillez réessayer plus tard.",
+    "errorAvatarNotFound": "L'image sélectionnée est introuvable. Veuillez la sélectionner à nouveau.",
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour"
+  },
+  "friendsPage": {
+    "title": "Amis",
+    "tabFriend": "Amis",
+    "tabOutgoing": "Envoyées",
+    "tabIncoming": "Reçues",
+    "loadMore": "Voir plus",
+    "loading": "Chargement…",
+    "noFriends": "Aucun ami pour le moment",
+    "noOutgoing": "Aucune demande envoyée en attente",
+    "noIncoming": "Aucune demande reçue",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "cancelRequest": "Annuler",
+    "removeFriend": "Retirer cet ami",
+    "removeFriendConfirmTitle": "Retirer cet ami ?",
+    "removeFriendConfirmMessage": "Vous ne serez plus ami avec {name}. Cette action est irréversible.",
+    "removeFriendConfirmButton": "Retirer",
+    "removeFriendCancel": "Annuler",
+    "processing": "Traitement…",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer plus tard."
+  },
+  "profilePage": {
+    "facesHeading": "Facettes ({count})",
+    "noFaces": "Aucune facette pour le moment",
+    "private": "Privé",
+    "sendRequest": "Ajouter en ami",
+    "pendingRequest": "Demande envoyée",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "removeFriend": "Retirer cet ami",
+    "removeFriendConfirmTitle": "Retirer cet ami ?",
+    "removeFriendConfirmMessage": "Vous ne serez plus ami avec {name}. Cette action est irréversible.",
+    "removeFriendConfirmButton": "Retirer",
+    "removeFriendCancel": "Annuler",
+    "unblock": "Débloquer",
+    "blockedByMessage": "Vous ne pouvez pas envoyer de demande d'ami à cet utilisateur",
+    "removing": "Traitement…",
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer plus tard."
   },
   "relativeTime": {
     "justNow": "À l'instant",
@@ -316,6 +359,8 @@
     "post": "Publier"
   },
   "accountMenu": {
+    "viewProfile": "Profil",
+    "viewProfileSub": "Voir votre profil",
     "settings": "Paramètres du compte",
     "settingsSub": "Profil · Mot de passe",
     "otherSettings": "Autres paramètres",

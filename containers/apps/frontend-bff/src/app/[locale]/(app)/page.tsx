@@ -7,7 +7,7 @@ import { getFormatter } from 'next-intl/server';
 const REFERENCE_DATE = new Date('2026-03-31');
 
 export default async function Home() {
-  const { currentUser, myFaces } = await getViewerContext();
+  const { currentUser, linkableCurrentUser, myFaces } = await getViewerContext();
   const seeds = await listSeedsByUserId(currentUser.id);
   const format = await getFormatter();
 
@@ -36,6 +36,7 @@ export default async function Home() {
         {/* 中部〜下部: フェイスフィルタ + シードフィード（Client Component） */}
         <HomeClient
           currentUser={currentUser}
+          linkableCurrentUser={linkableCurrentUser}
           faces={myFaces}
           seeds={seeds}
           onThisDay={onThisDay}
