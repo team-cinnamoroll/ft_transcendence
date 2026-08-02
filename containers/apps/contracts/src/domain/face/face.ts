@@ -3,15 +3,14 @@ import { z } from 'zod';
 import { UserIdSchema } from '../user';
 import { FileSchema } from '../../shared/file-metadata';
 import { EmojiSchema, VisibilityStatusSchema, UuidSchema } from '../../shared/primitives';
-import { createApiResponseSchema } from '../../shared/response';
 
 export const FaceIdSchema = UuidSchema;
 export type FaceId = z.infer<typeof FaceIdSchema>;
 
-export const FaceNameSchema = z.string().min(1);
+export const FaceNameSchema = z.string().min(1).max(50);
 export type FaceName = z.infer<typeof FaceNameSchema>;
 
-export const FaceDescriptionSchema = z.string();
+export const FaceDescriptionSchema = z.string().max(255);
 export type FaceDescription = z.infer<typeof FaceDescriptionSchema>;
 
 export const FaceEmojiSchema = EmojiSchema;
@@ -29,7 +28,3 @@ export const FaceSchema = z
   })
   .strict();
 export type Face = z.infer<typeof FaceSchema>;
-
-// API レスポンス用のスキーマ
-export const FaceResponseSchema = createApiResponseSchema(FaceSchema);
-export type FaceResponse = z.infer<typeof FaceResponseSchema>;

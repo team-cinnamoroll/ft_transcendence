@@ -39,3 +39,11 @@ export const EmojiSchema = z
 // 公開範囲を表す列挙型のスキーマと型
 export const VisibilityStatusSchema = z.enum(['public', 'private']);
 export type VisibilityStatus = z.infer<typeof VisibilityStatusSchema>;
+
+// ソート順を表す列挙型のスキーマと型
+export const SortOrderTypeSchema = z.enum(['asc', 'desc']);
+export type SortOrderType = z.infer<typeof SortOrderTypeSchema>;
+
+// 全文検索のクエリ文字列のスキーマと型
+export const SearchQuerySchema = z.string().min(1).max(255);
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;

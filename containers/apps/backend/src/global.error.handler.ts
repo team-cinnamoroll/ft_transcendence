@@ -2,15 +2,39 @@ import { ErrorHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
 
-import { ValidationError, InternalValidationError } from './shared/errors/global.error';
+import {
+  ValidationError,
+  InternalValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+} from './shared/errors/global.error';
 import { SimpleApiResponseSchema, type FailureResult } from '@tracen/contracts';
 import { type AppEnv } from './shared/types/hono';
 
 export const globalErrorHandler: ErrorHandler<AppEnv> = (err, c) => {
-  // Honoが出す例外処理 (HTTPException)
+  // Honoが出す例外処理 (HTTPException) — JSON形式で返す
   if (err instanceof HTTPException) {
     console.error(`from Hono[HTTPException]: ${err.stack || err.message}`);
-    return err.getResponse();
+    return c.json(
+      SimpleApiResponseSchema.parse({ success: false, message: err.message }),
+      err.status
+    );
+  }
+
+  if (err instanceof NotFoundError) {
+    console.error(`from NotFoundError: ${err.stack || err.message}`);
+    return c.json(SimpleApiResponseSchema.parse({ success: false, message: err.message }), 404);
+  }
+
+  if (err instanceof UnauthorizedError) {
+    console.error(`from UnauthorizedError: ${err.stack || err.message}`);
+    return c.json(SimpleApiResponseSchema.parse({ success: false, message: err.message }), 403);
+  }
+
+  if (err instanceof ForbiddenError) {
+    console.error(`from ForbiddenError: ${err.stack || err.message}`);
+    return c.json(SimpleApiResponseSchema.parse({ success: false, message: err.message }), 403);
   }
 
   if (err instanceof ValidationError) {
