@@ -689,7 +689,7 @@ const face41Seeds: Seed[] = [
     body: 'ベイクドチーズケーキ。クリームチーズ300gをたっぷり使ったら濃厚すぎて最高だった。底のビスケット土台はバターで固めるとしっかりした食感になる。',
     images: [{ id: 'cheesecake', url: 'https://picsum.photos/seed/cheesecake/600/400' }],
     createdAt: '2026-02-15T20:00:00+09:00',
-    updatedAt: '2026-02-15T20:00:00+09:0<PASSWORD>',
+    updatedAt: '2026-02-15T20:00:00+09:00',
   },
   {
     id: SEED_IDS.s4105,
