@@ -1,2 +1,3 @@
 export * from './face';
-export * from './face.request';
+export * from './face.requests';
+export * from './face.responses';

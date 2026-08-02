@@ -6,7 +6,9 @@ const mockFace = {
   userId: 'user-1',
   name: '読書',
   emoji: '📚',
-  isPrivate: false,
+  visibility: 'public' as const,
+  description: '読書に関する記録',
+  image: null,
 };
 
 const mockSeed = {
@@ -14,7 +16,9 @@ const mockSeed = {
   faceId: 'face-1',
   userId: 'user-1',
   body: '今日は「カラマーゾフの兄弟」を読み始めた。序盤からすでに濃密な人物描写に引き込まれる。',
+  images: [],
   createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+  updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
 };
 
 const mockSeedLong = {
@@ -22,7 +26,9 @@ const mockSeedLong = {
   faceId: 'face-1',
   userId: 'user-1',
   body: 'a'.repeat(300),
+  images: [],
   createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+  updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
 };
 
 const mockSeedWithLinks = {

@@ -30,7 +30,7 @@ const FaceSeedFeed = ({
 
   const sorted = useMemo(() => {
     if (sortOrder === 'oldest') return [...seeds].reverse();
-    if (sortOrder === 'images') return seeds.filter((s) => (s.imageUrls?.length ?? 0) > 0);
+    if (sortOrder === 'images') return seeds.filter((s) => (s.images.length ?? 0) > 0);
     return seeds;
   }, [seeds, sortOrder]);
 

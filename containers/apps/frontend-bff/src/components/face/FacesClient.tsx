@@ -283,8 +283,8 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                         style={{
                           height: 130,
                           flexShrink: 0,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
+                          background: face.image?.url ? undefined : color,
+                          backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           padding: 10,
@@ -293,7 +293,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           justifyContent: 'flex-end',
                         }}
                       >
-                        {face.isPrivate && (
+                        {face.visibility === 'private' && (
                           <div
                             style={{
                               display: 'flex',
@@ -667,8 +667,8 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       <div
                         style={{
                           height: 130,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
+                          background: face.image?.url ? undefined : color,
+                          backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           padding: 10,
@@ -678,7 +678,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           flexShrink: 0,
                         }}
                       >
-                        {face.isPrivate && (
+                        {face.visibility === 'private' && (
                           <div
                             style={{
                               display: 'flex',
@@ -859,16 +859,16 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           height: 44,
                           borderRadius: 12,
                           flexShrink: 0,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
+                          background: face.image?.url ? undefined : color,
+                          backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
-                          display: face.imageUrl ? 'block' : 'flex',
+                          display: face.image?.url ? 'block' : 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        {!face.imageUrl && (
+                        {!face.image?.url && (
                           <span
                             style={{
                               fontFamily: 'var(--mf-font-serif)',
