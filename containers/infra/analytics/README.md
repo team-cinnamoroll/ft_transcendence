@@ -39,15 +39,16 @@ docker compose -f docker-compose.dev.yml -p ft_transcendence --profile analytics
 起動すると mock-producer が過去14日分（既定 2500件）を出力し、その後もライブでイベントを出し続ける。
 Filebeat がそれを収集して ES に取り込むため、**seed の手動実行は不要**。
 
-## ダッシュボードの投入
+## プロビジョニング（index + ダッシュボード）
 
-Kibana のデータビュー/可視化/ダッシュボードを import する（Kibana が available になってから一度だけ）:
+ES の index template と events index を作成し、Kibana のデータビュー/可視化/ダッシュボードを import する（起動後に一度だけ）:
 
 ```bash
 bash containers/infra/analytics/provision-kibana.sh
 ```
 
-環境変数で調整可能: `KIBANA_URL`（既定 `http://localhost:5601/kibana`）。
+events index を正しい mapping（`category`/`action` を keyword）で確定させるため、**backend の実データを流す前に実行する**。既存の events index が dynamic mapping（`category` が text）だった場合は作り直して修復する。
+環境変数で調整可能: `ES_URL`（既定 `http://localhost:9200`）/ `KIBANA_URL`（既定 `http://localhost:5601/kibana`）。
 
 ## 確認手順
 
@@ -69,8 +70,8 @@ curl -s http://localhost:9200/events/_count
 | `logstash/pipeline/events.conf`           | beats input → JSON パース → 非分析ログを drop → date filter → メタ除去 → ES output    |
 | `logstash/config/logstash.yml`            | Logstash 本体設定（monitoring 無効・pipeline 自動リロード）                           |
 | `logstash/templates/events-template.json` | `events*` の index template（`dynamic:false`）。Logstash が ES に登録する             |
-| `kibana-objects.ndjson`                   | データビュー（`events*` / runtime field `hour_of_day`）＋ 可視化3種 ＋ ダッシュボード |
-| `provision-kibana.sh`                     | `kibana-objects.ndjson` を Kibana に import する                                      |
+| `kibana-objects.ndjson`                   | データビュー（`events*` / runtime field `hour_of_day`）＋ 可視化4種 ＋ ダッシュボード |
+| `provision-kibana.sh`                     | index template + events index を作成（dynamic なら修復）し、`kibana-objects.ndjson` を Kibana に import する |
 | `BACKEND_INTEGRATION.md`                  | backend の実イベントを可視化に載せる手順（送信側がやること）                          |
 
 ## スキーマ
