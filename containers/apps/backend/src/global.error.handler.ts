@@ -29,7 +29,7 @@ export const globalErrorHandler: ErrorHandler<AppEnv> = (err, c) => {
 
   if (err instanceof UnauthorizedError) {
     console.error(`from UnauthorizedError: ${err.stack || err.message}`);
-    return c.json(SimpleApiResponseSchema.parse({ success: false, message: err.message }), 403);
+    return c.json(SimpleApiResponseSchema.parse({ success: false, message: err.message }), 401);
   }
 
   if (err instanceof ForbiddenError) {
