@@ -26,7 +26,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "mock:add-seed": "cd test/mocking && tsx seed-mock-data.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.11",
