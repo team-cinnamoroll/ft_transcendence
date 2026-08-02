@@ -224,3 +224,5 @@ volumes:
   postgres_data:
   redis_data:
   file_storage_data:
+  prometheus_data:
+  grafana_data:
