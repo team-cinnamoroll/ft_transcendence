@@ -20,6 +20,7 @@ import {
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { makeSafeResponse } from '../../../shared/utils/validation';
+import { yieldSeedEvent } from '../../../shared/utils/analytics';
 
 export function seedRouter() {
   return new Hono<SeedHandlerEnv>()
@@ -39,6 +40,7 @@ export function seedRouter() {
           requesterId,
           requestBody
         );
+        yieldSeedEvent('created', requesterId, newSeed.id);
         return c.json(
           makeSafeResponse(SeedCreateResponseSchema, {
             success: true,

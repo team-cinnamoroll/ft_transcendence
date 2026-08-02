@@ -20,6 +20,7 @@ import {
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { makeSafeResponse } from '../../../shared/utils/validation';
+import { yieldFaceEvent } from '../../../shared/utils/analytics';
 
 export function faceRouter() {
   return new Hono<FaceHandlerEnv>()
@@ -32,6 +33,8 @@ export function faceRouter() {
       const requestBody = c.req.valid('json');
       try {
         const newFace = await createFace(faceRepo, fileQueryService, requesterId, requestBody);
+
+        yieldFaceEvent('created', requesterId, newFace.id);
         return c.json(
           makeSafeResponse(FaceCreateResponseSchema, {
             success: true,
