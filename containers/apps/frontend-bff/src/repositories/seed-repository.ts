@@ -35,6 +35,13 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
         id: `seed-mock-${Date.now()}`,
         userId,
         ...input,
+        images:
+          input.imageIds.length > 0
+            ? input.imageIds.map((imageId) => ({
+                id: imageId,
+                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
+              }))
+            : [],
         createdAt: createdAt,
         updatedAt: createdAt,
       };
@@ -49,8 +56,15 @@ export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
         ...existing,
         body: input.body,
         updatedAt: updatedAt,
-        ...(input.images.length > 0 ? { images: input.images } : {}),
+        images:
+          input.imageIds.length > 0
+            ? input.imageIds.map((imageId) => ({
+                id: imageId,
+                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
+              }))
+            : [],
       };
+
       return updated;
     },
     delete: async (seedId, userId) => {

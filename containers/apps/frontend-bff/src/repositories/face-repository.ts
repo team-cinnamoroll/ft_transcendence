@@ -47,6 +47,9 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
         id: `face-mock-${Date.now()}`,
         userId,
         ...input,
+        image: input.imageId
+          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
+          : null, // ダミーの画像URL
       };
       return newFace;
     },
@@ -59,6 +62,9 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
         userId,
         ...(existing ?? {}),
         ...input,
+        image: input.imageId
+          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
+          : null, // ダミーの画像URL
       };
       return updated;
     },
