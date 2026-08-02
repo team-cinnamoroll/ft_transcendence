@@ -146,7 +146,7 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
             strokeWidth={1.5}
             strokeLinecap="round"
           >
-            {visibility === 'private' ? (
+            {face.visibility === 'private' ? (
               <>
                 <rect x={4} y={7} width={8} height={7} rx={1.5} />
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
