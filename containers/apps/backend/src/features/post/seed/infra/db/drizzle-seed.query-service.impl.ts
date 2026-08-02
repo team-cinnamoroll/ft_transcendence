@@ -1,10 +1,13 @@
-import { and, asc, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
 import type { SeedQueryServiceSpec } from '../../domain/seed.query-service';
 import type { TracenDb } from '../../../../../shared/infra/db/client';
 import { SeedEntitySchema, type SeedEntityList } from '../../domain/seed.entity';
 import { seeds, seedImages } from '../db/schema';
 import { makeSafeInfraResult } from '../../../../../shared/utils/validation';
 import type { QuerySeedRequest } from '@tracen/contracts';
+
+type SeedRowRaw = typeof seeds.$inferSelect;
+type SeedImageRowRaw = typeof seedImages.$inferSelect;
 
 class DrizzleSeedQueryServiceImpl implements SeedQueryServiceSpec {
   constructor(private readonly db: TracenDb) {}
@@ -84,33 +87,44 @@ class DrizzleSeedQueryServiceImpl implements SeedQueryServiceSpec {
         ? [desc(seeds.createdAt), asc(seeds.id)]
         : [asc(seeds.createdAt), asc(seeds.id)];
 
-    // seeds と seedImages を一緒に取得
-    const seedRows = await this.db.query.seeds.findMany({
-      where: whereClause,
-      with: {
-        seedImages: {
-          orderBy: asc(seedImages.displayOrder),
-        },
-      },
-      orderBy: orderByClauses,
-      limit: limit + 1, // hasNext 判定のため +1 件取得
-    });
+    // seeds を SQL API で取得（db.query.* は使わない）
+    const seedRows: SeedRowRaw[] = await this.db
+      .select()
+      .from(seeds)
+      .where(whereClause)
+      .orderBy(...orderByClauses)
+      .limit(limit + 1); // hasNext 判定のため +1 件取得
 
     const hasNext = seedRows.length > limit;
     const items = hasNext ? seedRows.slice(0, limit) : seedRows;
     const nextCursor = hasNext ? items[items.length - 1].id : null;
 
-    const seedEntities = items.map((row) =>
-      makeSafeInfraResult(SeedEntitySchema, {
+    // 対象 seed の画像をバルク取得
+    const seedIds = items.map((r) => r.id);
+    const imgRows: SeedImageRowRaw[] =
+      seedIds.length > 0
+        ? await this.db.select().from(seedImages).where(inArray(seedImages.seedId, seedIds))
+        : [];
+
+    // seedId ごとに画像をグループ化
+    const imgMap = new Map<string, SeedImageRowRaw[]>();
+    for (const img of imgRows) {
+      if (!imgMap.has(img.seedId)) imgMap.set(img.seedId, []);
+      imgMap.get(img.seedId)!.push(img);
+    }
+
+    const seedEntities = items.map((row) => {
+      const imgs = (imgMap.get(row.id) ?? []).sort((a, b) => a.displayOrder - b.displayOrder);
+      return makeSafeInfraResult(SeedEntitySchema, {
         id: row.id,
         faceId: row.faceId,
         userId: row.userId,
         body: row.body,
-        imageIds: row.seedImages.map((img) => img.imageId),
+        imageIds: imgs.map((img) => img.imageId),
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString(),
-      })
-    );
+      });
+    });
 
     return {
       seedEntities,
