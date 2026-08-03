@@ -470,7 +470,7 @@ erDiagram
 
 スキーマは Drizzle ORM の TypeScript 定義を正とし、`drizzle-kit` で生成した SQL マイグレーション（`containers/apps/backend/drizzle/`）で適用します。`RUN_MIGRATIONS=true` の場合、バックエンド起動時に自動適用されます。
 
-# Feature List
+# Features List
 
 ## 認証・アカウント
 
