@@ -12,8 +12,8 @@ import { getAuthSession } from './auth';
 
 /**
  * ログイン中ユーザーを取得する。
- * id はモックのまま（Face/Seedのモック紐付け用）維持しつつ、
- * ログイン中は name/avatarUrl/badge を本物のプロフィールで上書きする。
+ * ログイン中は id/name/avatarUrl/badge をすべて本物のプロフィールで上書きする
+ * （Face/Seedが本物のバックエンドAPIに接続済みのため、id もモックのまま維持する必要がなくなった）。
  * 未ログイン、または本物のプロフィール取得に失敗した場合はモックをそのまま返す。
  */
 export async function getCurrentUser(): Promise<UserProfile> {
@@ -31,6 +31,7 @@ export async function getCurrentUser(): Promise<UserProfile> {
 
   return {
     ...mockUser,
+    id: session.userId,
     name: realProfile.name,
     avatar: realProfile.avatar || null,
     badge: realProfile.badge,
@@ -40,23 +41,17 @@ export async function getCurrentUser(): Promise<UserProfile> {
 /**
  * 指定したユーザーのプロフィールを、閲覧者から見た関係(relationship)込みで取得する。
  *
- * id はモックのまま（Face/Seedのモック紐付け用）維持しつつ、
  * ログイン中は name/avatarUrl/badge を本物のプロフィールで上書きする。
  * モックの一覧に存在しない id でも、バックエンドに実在するユーザーであれば取得できる
  * （Seed経由などモックの id しか知らない経路と、実在ユーザーを直接指す経路の両方に対応するため）。
  * どちらの取得も失敗した場合のみ null を返す。
  */
 export async function findUserById(userId: string): Promise<ProfileWithRelationship | null> {
-  // 自分自身のモックIDを指している場合は、getCurrentUserと同じ本物データの上書きを行い、
-  // プロフィールへのリンク用に id も本物のログインIDへ差し替える。
-  // （そうしないと、Seed経由などモックIDのまま辿り着いた自分のプロフィールが
-  // 本物のログインセッションと一致せず、他人として扱われてモックデータのままになってしまう）
+  // 自分自身を指している場合は、getCurrentUserと同じ本物データの上書きを行う。
   const displayUser = await getCurrentUser();
   if (userId === displayUser.id) {
-    const session = await getAuthSession();
     return {
       ...displayUser,
-      id: session?.userId ?? displayUser.id,
       relationship: null,
     };
   }
@@ -97,19 +92,21 @@ export async function updateMyProfile(
 
 /**
  * 全ユーザー一覧を取得する。
- * 自分自身に該当する項目だけは、getCurrentUser と同じように本物の name/avatar/badge で上書きする。
+ * 自分自身に該当する項目だけは、getCurrentUser と同じように本物の name/avatar/badge/id で上書きする。
  *
- * 注意: id はモックのまま維持する。呼び出し元は多くの場合この一覧を
- * 「id をキーにした検索」（例: seed.userId で投稿者を探す）に使っており、
- * ここで id を本物のIDに差し替えてしまうと、モックIDでの検索がヒットしなくなってしまう。
- * プロフィールへのリンクに本物のIDが必要な場合は、呼び出し元で `findUserById` や
- * `linkableCurrentUser`（`getViewerContext` 参照）を使うこと。
+ * 注意: 一覧のうち自分以外の項目は id がモックのままである
+ * （Face/Seedのモックデータとの紐付け用一覧として残っているため）。
+ * 「id をキーにした検索」（例: seed.userId で投稿者を探す）にこの一覧を使う場合、
+ * 相手が実在ユーザーであれば本物の id と一致しない点に注意すること。
+ * 自分自身を検出するために、mockUsers 側とは別に `getUserDirectoryRepository().getCurrentUser()`
+ * （モックIDのまま）を取得し、モックID同士で比較している。
  */
 export async function listAllUsers(): Promise<UserProfile[]> {
-  const [mockUsers, displayUser] = await Promise.all([
+  const [mockUsers, mockCurrentUser, displayUser] = await Promise.all([
     getUserDirectoryRepository().listAll(),
+    getUserDirectoryRepository().getCurrentUser(),
     getCurrentUser(),
   ]);
 
-  return mockUsers.map((u) => (u.id === displayUser.id ? displayUser : u));
+  return mockUsers.map((u) => (u.id === mockCurrentUser.id ? displayUser : u));
 }
