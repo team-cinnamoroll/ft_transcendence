@@ -2,14 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
+import { CreateSeedRequestSchema } from '@tracen/contracts';
 import type { Face } from '@/types/face';
-import type { Seed } from '@/types/seed';
+import type { Seed, CreateSeedRequest } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
 import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds';
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
+import { useZodForm } from '@/lib/use-zod-form';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -28,8 +30,6 @@ type AttachedImage = {
   isUploading: boolean;
   error: string | null;
 };
-
-type FieldErrors = Record<string, string[]>;
 
 type Props = {
   isOpen: boolean;
@@ -50,7 +50,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const imagesRef = useRef<AttachedImage[]>([]);
 
   useEffect(() => {
@@ -90,8 +90,22 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const initialSelectedFaceId = useMemo(() => {
     return defaultFaceId ?? myFaces[0]?.id ?? '';
   }, [defaultFaceId, myFaces]);
-  const [selectedFaceId, setSelectedFaceId] = useState<string>(initialSelectedFaceId);
-  const [text, setText] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isValid },
+  } = useZodForm(CreateSeedRequestSchema, {
+    mode: 'onChange',
+    defaultValues: { faceId: initialSelectedFaceId, body: '', imageIds: [] },
+  });
+  const selectedFaceId = watch('faceId');
+  const text = watch('body');
+  const bodyField = register('body');
+
   const [images, setImages] = useState<AttachedImage[]>([]);
   const [showFacePicker, setShowFacePicker] = useState(false);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
@@ -102,12 +116,19 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
     imagesRef.current = images;
   }, [images]);
 
+  useEffect(() => {
+    setValue(
+      'imageIds',
+      images.flatMap((img) => (img.fileId ? [img.fileId] : []))
+    );
+  }, [images, setValue]);
+
   const selectedFace = myFaces.find((f) => f.id === selectedFaceId);
 
   useEffect(() => {
     if (!isOpen) return;
-    setSelectedFaceId(initialSelectedFaceId);
-  }, [initialSelectedFaceId, isOpen]);
+    setValue('faceId', initialSelectedFaceId);
+  }, [initialSelectedFaceId, isOpen, setValue]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -119,14 +140,13 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
         }
       });
       setImages([]);
-      setText('');
-      setSelectedFaceId(initialSelectedFaceId);
+      reset({ faceId: initialSelectedFaceId, body: '', imageIds: [] });
       setShowFacePicker(false);
-      setFieldErrors(null);
+      setError(null);
     } else {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
-  }, [initialSelectedFaceId, isOpen]);
+  }, [initialSelectedFaceId, isOpen, reset]);
 
   useEffect(() => {
     return () => {
@@ -140,16 +160,16 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   }, []);
 
   const isUploadingImages = images.some((img) => img.isUploading);
-  const imageError = images.find((img) => img.error)?.error ?? null;
+  const imageUploadError = images.find((img) => img.error)?.error ?? null;
 
-  const handleSubmit = () => {
-    if (!canPost || !selectedFaceId || isUploadingImages) return;
-    setFieldErrors(null);
+  const onValid = (data: CreateSeedRequest) => {
+    if (isUploadingImages) return;
+    setError(null);
     startTransition(async () => {
-      const imageIds = images.flatMap((img) => (img.fileId ? [img.fileId] : []));
-      const result = await createSeedAction({ faceId: selectedFaceId, body: text, imageIds });
+      const result = await createSeedAction(data);
       if (!result.success) {
-        setFieldErrors(result.errors);
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setError(firstFieldError ?? t('errorGeneric'));
         return;
       }
       // 投稿成功後にモーダルを閉じた際、未保存アップロードとして誤って削除されないよう先にクリアする
@@ -228,8 +248,6 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   };
 
   if (!isOpen) return null;
-
-  const canPost = text.trim().length > 0;
 
   return (
     <div
@@ -345,24 +363,24 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
           {/* 投稿ボタン */}
           <button
             type="button"
-            disabled={!canPost || isPending || isUploadingImages}
-            onClick={handleSubmit}
+            disabled={!isValid || isPending || isUploadingImages}
+            onClick={handleSubmit(onValid)}
             style={{
               padding: '8px 18px',
               borderRadius: 999,
               background:
-                canPost && !isPending && !isUploadingImages
+                isValid && !isPending && !isUploadingImages
                   ? 'var(--mf-accent)'
                   : 'var(--mf-surface-tint)',
-              color: canPost && !isPending && !isUploadingImages ? '#fff' : 'var(--mf-text-faint)',
+              color: isValid && !isPending && !isUploadingImages ? '#fff' : 'var(--mf-text-faint)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: 0.3,
               border: 'none',
-              cursor: canPost && !isPending && !isUploadingImages ? 'pointer' : 'not-allowed',
+              cursor: isValid && !isPending && !isUploadingImages ? 'pointer' : 'not-allowed',
               whiteSpace: 'nowrap',
               boxShadow:
-                canPost && !isPending && !isUploadingImages
+                isValid && !isPending && !isUploadingImages
                   ? '0 2px 10px rgba(212,146,42,0.25)'
                   : 'none',
               transition: 'background 0.15s, box-shadow 0.15s',
@@ -441,7 +459,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
                 key={face.id}
                 type="button"
                 onClick={() => {
-                  setSelectedFaceId(face.id);
+                  setValue('faceId', face.id, { shouldValidate: true });
                   setShowFacePicker(false);
                 }}
                 style={{
@@ -483,9 +501,11 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
       {/* 書き込みキャンバス */}
       <div style={{ flex: 1, padding: '4px 22px', overflowY: 'auto' }}>
         <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          {...bodyField}
+          ref={(el) => {
+            bodyField.ref(el);
+            textareaRef.current = el;
+          }}
           maxLength={MAX_LENGTH}
           placeholder={t('textareaPlaceholder')}
           style={{
@@ -505,19 +525,24 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
         />
 
         {/* バリデーションエラー */}
-        {fieldErrors?.body && (
+        {errors.body && (
           <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
-            {fieldErrors.body[0]}
+            {errors.body.message}
           </p>
         )}
-        {fieldErrors?.faceId && (
+        {errors.faceId && (
           <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
-            {fieldErrors.faceId[0]}
+            {errors.faceId.message}
           </p>
         )}
-        {imageError && (
+        {error && (
           <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
-            {imageError}
+            {error}
+          </p>
+        )}
+        {imageUploadError && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {imageUploadError}
           </p>
         )}
 

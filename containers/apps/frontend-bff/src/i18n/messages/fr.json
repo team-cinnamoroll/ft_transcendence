@@ -41,7 +41,8 @@
     "uploadingImageAlt": "Image en cours d'envoi {n}",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Publier",
-    "submitting": "Publication…"
+    "submitting": "Publication…",
+    "errorGeneric": "Échec de la publication. Veuillez réessayer plus tard."
   },
   "seedImageUpload": {
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -66,7 +67,8 @@
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Créer",
-    "submitting": "Création…"
+    "submitting": "Création…",
+    "errorGeneric": "Échec de la création de la facette. Veuillez réessayer plus tard."
   },
   "editFaceModal": {
     "title": "Modifier la facette",
@@ -87,7 +89,8 @@
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Enregistrer",
-    "submitting": "Enregistrement…"
+    "submitting": "Enregistrement…",
+    "errorGeneric": "Échec de l'enregistrement de la facette. Veuillez réessayer plus tard."
   },
   "faceImageUpload": {
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -403,7 +406,8 @@
     "required": "*",
     "bodyPlaceholder": "Écrivez quelque chose…",
     "submit": "Enregistrer",
-    "submitting": "Enregistrement…"
+    "submitting": "Enregistrement…",
+    "errorGeneric": "Échec de l'enregistrement de la graine. Veuillez réessayer plus tard."
   },
   "seedActions": {
     "editSeed": "Modifier",

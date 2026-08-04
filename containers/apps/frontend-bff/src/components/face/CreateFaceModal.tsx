@@ -2,12 +2,12 @@
 
 import { useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import type { Face } from '@/types/face';
+import { CreateFaceRequestSchema } from '@tracen/contracts';
+import type { CreateFaceRequest, Face } from '@/types/face';
 import { createFaceAction, uploadFaceImageAction } from '@/server/actions/faces';
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useTranslations } from 'next-intl';
-
-type FieldErrors = Record<string, string[]>;
+import { useZodForm } from '@/lib/use-zod-form';
 
 type Props = {
   isOpen: boolean;
@@ -22,23 +22,35 @@ const MAX_FACE_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_FACE_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
-  const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('');
-  const [description, setDescription] = useState('');
-  const [isPrivate, setIsPrivate] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('createFaceModal');
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isValid },
+  } = useZodForm(CreateFaceRequestSchema, {
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      emoji: null,
+      description: null,
+      imageId: null,
+      visibility: 'public',
+    },
+  });
+  const visibility = watch('visibility');
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageId, setImageId] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   // アップロード済みだが、まだ保存(POST)には至っていないファイルのID。後始末の削除対象を追跡する
   const uploadedFileIdRef = useRef<string | null>(null);
-
-  const isValid = name.trim().length > 0;
 
   const discardPendingUpload = () => {
     if (uploadedFileIdRef.current) {
@@ -91,26 +103,21 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
       }
 
       uploadedFileIdRef.current = result.data.fileId;
-      setImageId(result.data.fileId);
+      setValue('imageId', result.data.fileId, { shouldValidate: true });
     })();
   };
 
-  const handleSubmit = () => {
-    if (!isValid || isPending || isUploadingImage) return;
+  const onValid = (data: CreateFaceRequest) => {
+    if (isPending || isUploadingImage) return;
 
+    setError(null);
     startTransition(async () => {
-      const result = await createFaceAction({
-        name: name.trim(),
-        emoji: emoji.trim() || null,
-        description: description.trim() || null,
-        imageId,
-        visibility: isPrivate ? 'private' : 'public',
-      });
+      const result = await createFaceAction(data);
       if (!result.success) {
-        setFieldErrors(result.errors);
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setError(firstFieldError ?? t('errorGeneric'));
         return;
       }
-      setFieldErrors(null);
       // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
       uploadedFileIdRef.current = null;
       onCreate(result.data);
@@ -120,14 +127,10 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
 
   const handleClose = () => {
     discardPendingUpload();
-    setName('');
-    setEmoji('');
-    setDescription('');
-    setIsPrivate(false);
+    reset();
     setPreviewUrl(null);
-    setImageId(null);
     setImageError(null);
-    setFieldErrors(null);
+    setError(null);
     onClose();
   };
 
@@ -236,16 +239,21 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             <input
               id="face-name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
               placeholder={t('nameExample')}
               style={inputStyle}
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'face-name-error' : undefined}
             />
-            {fieldErrors?.name?.map((msg) => (
-              <span key={msg} style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}>
-                {msg}
+            {errors.name && (
+              <span
+                id="face-name-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.name.message}
               </span>
-            ))}
+            )}
           </div>
 
           {/* 絵文字（任意） */}
@@ -260,11 +268,23 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             <input
               id="face-emoji"
               type="text"
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
+              {...register('emoji', {
+                setValueAs: (v: string | null) => (v == null || v.trim() === '' ? null : v.trim()),
+              })}
               placeholder={t('emojiExample')}
               style={inputStyle}
+              aria-invalid={!!errors.emoji}
+              aria-describedby={errors.emoji ? 'face-emoji-error' : undefined}
             />
+            {errors.emoji && (
+              <span
+                id="face-emoji-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.emoji.message}
+              </span>
+            )}
           </div>
 
           {/* 説明文（任意） */}
@@ -278,12 +298,24 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             </label>
             <textarea
               id="face-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register('description', {
+                setValueAs: (v: string | null) => (v == null || v.trim() === '' ? null : v.trim()),
+              })}
               placeholder={t('descriptionPlaceholder')}
               rows={3}
               style={{ ...inputStyle, resize: 'none' }}
+              aria-invalid={!!errors.description}
+              aria-describedby={errors.description ? 'face-description-error' : undefined}
             />
+            {errors.description && (
+              <span
+                id="face-description-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.description.message}
+              </span>
+            )}
           </div>
 
           {/* 画像（任意） */}
@@ -397,15 +429,17 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             <button
               type="button"
               role="switch"
-              aria-checked={isPrivate}
-              onClick={() => setIsPrivate((prev) => !prev)}
+              aria-checked={visibility === 'private'}
+              onClick={() =>
+                setValue('visibility', visibility === 'private' ? 'public' : 'private')
+              }
               style={{
                 position: 'relative',
                 width: 44,
                 height: 24,
                 flexShrink: 0,
                 borderRadius: 999,
-                background: isPrivate ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+                background: visibility === 'private' ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'background 0.2s',
@@ -415,7 +449,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
                 style={{
                   position: 'absolute',
                   top: 2,
-                  left: isPrivate ? 22 : 2,
+                  left: visibility === 'private' ? 22 : 2,
                   width: 20,
                   height: 20,
                   borderRadius: '50%',
@@ -427,10 +461,16 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             </button>
           </div>
 
+          {error && (
+            <p role="alert" style={{ margin: 0, fontSize: 12, color: 'var(--mf-danger, #e53e3e)' }}>
+              {error}
+            </p>
+          )}
+
           {/* 作成ボタン */}
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={handleSubmit(onValid)}
             disabled={!isValid || isPending || isUploadingImage}
             style={{
               width: '100%',

@@ -41,7 +41,8 @@
     "uploadingImageAlt": "Uploading image {n}",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Post",
-    "submitting": "Posting..."
+    "submitting": "Posting...",
+    "errorGeneric": "Failed to post. Please try again later."
   },
   "seedImageUpload": {
     "errorSessionExpired": "Your session has expired. Please sign in again.",
@@ -66,7 +67,8 @@
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Create",
-    "submitting": "Creating..."
+    "submitting": "Creating...",
+    "errorGeneric": "Failed to create the face. Please try again later."
   },
   "editFaceModal": {
     "title": "Edit Face",
@@ -87,7 +89,8 @@
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Save",
-    "submitting": "Saving..."
+    "submitting": "Saving...",
+    "errorGeneric": "Failed to save the face. Please try again later."
   },
   "faceImageUpload": {
     "errorSessionExpired": "Your session has expired. Please sign in again.",
@@ -403,7 +406,8 @@
     "required": "*",
     "bodyPlaceholder": "Write something…",
     "submit": "Save",
-    "submitting": "Saving…"
+    "submitting": "Saving…",
+    "errorGeneric": "Failed to save the seed. Please try again later."
   },
   "seedActions": {
     "editSeed": "Edit",

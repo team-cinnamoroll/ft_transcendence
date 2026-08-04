@@ -41,7 +41,8 @@
     "uploadingImageAlt": "アップロード中の画像{n}",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "投稿",
-    "submitting": "投稿中..."
+    "submitting": "投稿中...",
+    "errorGeneric": "投稿に失敗しました。時間をおいて再度お試しください。"
   },
   "seedImageUpload": {
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
@@ -66,7 +67,8 @@
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "作成する",
-    "submitting": "作成中..."
+    "submitting": "作成中...",
+    "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。"
   },
   "editFaceModal": {
     "title": "フェイスを編集",
@@ -87,7 +89,8 @@
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "保存する",
-    "submitting": "保存中..."
+    "submitting": "保存中...",
+    "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。"
   },
   "faceImageUpload": {
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
@@ -403,7 +406,8 @@
     "required": "*",
     "bodyPlaceholder": "内容を入力してください",
     "submit": "保存する",
-    "submitting": "保存中..."
+    "submitting": "保存中...",
+    "errorGeneric": "シードの保存に失敗しました。時間をおいて再度お試しください。"
   },
   "seedActions": {
     "editSeed": "編集",

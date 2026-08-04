@@ -2,12 +2,12 @@
 
 import { useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import type { Face } from '@/types/face';
+import { UpdateFaceRequestSchema } from '@tracen/contracts';
+import type { Face, UpdateFaceRequest } from '@/types/face';
 import { updateFaceAction, uploadFaceImageAction } from '@/server/actions/faces';
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useTranslations } from 'next-intl';
-
-type FieldErrors = Record<string, string[]>;
+import { useZodForm } from '@/lib/use-zod-form';
 
 type Props = {
   isOpen: boolean;
@@ -23,26 +23,37 @@ const MAX_FACE_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_FACE_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
-  const [name, setName] = useState(face.name);
-  const [emoji, setEmoji] = useState(face.emoji ?? '');
-  const [description, setDescription] = useState(face.description ?? '');
-  const [visibility, setVisibility] = useState(face.visibility);
   const [isPending, startTransition] = useTransition();
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('editFaceModal');
 
   // モーダルを開いた時点で設定されていた画像のファイルID（差し替え検知・後始末の削除対象の判定に使う）
   const originalImageId = face.image?.id ?? null;
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isValid },
+  } = useZodForm(UpdateFaceRequestSchema, {
+    mode: 'onChange',
+    defaultValues: {
+      name: face.name,
+      emoji: face.emoji,
+      description: face.description,
+      imageId: originalImageId,
+      visibility: face.visibility,
+    },
+  });
+  const visibility = watch('visibility');
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(face.image?.url ?? null);
-  const [imageId, setImageId] = useState<string | null>(originalImageId);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   // アップロード済みだが、まだ保存(PUT)には至っていないファイルのID。後始末の削除対象を追跡する
   const uploadedFileIdRef = useRef<string | null>(null);
-
-  const isValid = name.trim().length > 0;
 
   const discardPendingUpload = () => {
     if (uploadedFileIdRef.current) {
@@ -96,32 +107,27 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
       }
 
       uploadedFileIdRef.current = result.data.fileId;
-      setImageId(result.data.fileId);
+      setValue('imageId', result.data.fileId, { shouldValidate: true });
     })();
   };
 
-  const handleSubmit = () => {
-    if (!isValid || isPending || isUploadingImage) return;
+  const onValid = (data: UpdateFaceRequest) => {
+    if (isPending || isUploadingImage) return;
 
+    setError(null);
     startTransition(async () => {
-      const result = await updateFaceAction(face.id, {
-        name: name.trim(),
-        emoji: emoji.trim() || null,
-        description: description.trim() || null,
-        imageId,
-        visibility,
-      });
+      const result = await updateFaceAction(face.id, data);
       if (!result.success) {
-        setFieldErrors(result.errors);
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setError(firstFieldError ?? t('errorGeneric'));
         return;
       }
-      setFieldErrors(null);
 
       // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
       uploadedFileIdRef.current = null;
 
       // 差し替えた場合、置き換えられた古いファイルを後始末として削除する（ベストエフォート）
-      if (originalImageId && imageId !== originalImageId) {
+      if (originalImageId && data.imageId !== originalImageId) {
         void deleteUploadedFileAction(originalImageId);
       }
 
@@ -130,7 +136,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
       // 保存直後の一覧表示が壊れないよう、ここではアップロード時のプレビューURLで補完する。
       onUpdate({
         ...result.data,
-        image: imageId ? { id: imageId, url: previewUrl ?? '' } : null,
+        image: data.imageId ? { id: data.imageId, url: previewUrl ?? '' } : null,
       });
       onClose();
     });
@@ -138,7 +144,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
 
   const handleClose = () => {
     discardPendingUpload();
-    setFieldErrors(null);
+    setError(null);
     onClose();
   };
 
@@ -247,16 +253,21 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             <input
               id="edit-face-name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
               placeholder={t('nameExample')}
               style={inputStyle}
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'edit-face-name-error' : undefined}
             />
-            {fieldErrors?.name?.map((msg) => (
-              <span key={msg} style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}>
-                {msg}
+            {errors.name && (
+              <span
+                id="edit-face-name-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.name.message}
               </span>
-            ))}
+            )}
           </div>
 
           {/* 絵文字（任意） */}
@@ -271,11 +282,23 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             <input
               id="edit-face-emoji"
               type="text"
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
+              {...register('emoji', {
+                setValueAs: (v: string | null) => (v == null || v.trim() === '' ? null : v.trim()),
+              })}
               placeholder={t('emojiExample')}
               style={inputStyle}
+              aria-invalid={!!errors.emoji}
+              aria-describedby={errors.emoji ? 'edit-face-emoji-error' : undefined}
             />
+            {errors.emoji && (
+              <span
+                id="edit-face-emoji-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.emoji.message}
+              </span>
+            )}
           </div>
 
           {/* 説明文（任意） */}
@@ -289,12 +312,24 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             </label>
             <textarea
               id="edit-face-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register('description', {
+                setValueAs: (v: string | null) => (v == null || v.trim() === '' ? null : v.trim()),
+              })}
               placeholder={t('descriptionPlaceholder')}
               rows={3}
               style={{ ...inputStyle, resize: 'none' }}
+              aria-invalid={!!errors.description}
+              aria-describedby={errors.description ? 'edit-face-description-error' : undefined}
             />
+            {errors.description && (
+              <span
+                id="edit-face-description-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.description.message}
+              </span>
+            )}
           </div>
 
           {/* 画像（任意） */}
@@ -409,7 +444,9 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
               type="button"
               role="switch"
               aria-checked={visibility === 'private'}
-              onClick={() => setVisibility((prev) => (prev === 'private' ? 'public' : 'private'))}
+              onClick={() =>
+                setValue('visibility', visibility === 'private' ? 'public' : 'private')
+              }
               style={{
                 position: 'relative',
                 width: 44,
@@ -438,10 +475,16 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             </button>
           </div>
 
+          {error && (
+            <p role="alert" style={{ margin: 0, fontSize: 12, color: 'var(--mf-danger, #e53e3e)' }}>
+              {error}
+            </p>
+          )}
+
           {/* 保存ボタン */}
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={handleSubmit(onValid)}
             disabled={!isValid || isPending || isUploadingImage}
             style={{
               width: '100%',
