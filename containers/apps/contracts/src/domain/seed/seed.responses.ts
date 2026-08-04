@@ -19,5 +19,10 @@ export const SeedListSchema = z.object({
 });
 export type SeedList = z.infer<typeof SeedListSchema>;
 
+// GET(List)
 export const SeedListResponseSchema = createApiResponseSchema(z.object({ seeds: SeedListSchema }));
 export type SeedListResponse = z.infer<typeof SeedListResponseSchema>;
+
+// GET(Single)
+export const SeedSingleIdResponseSchema = createApiResponseSchema(z.object({ seed: SeedSchema }));
+export type SeedSingleIdResponse = z.infer<typeof SeedSingleIdResponseSchema>;

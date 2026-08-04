@@ -8,6 +8,7 @@ import { createSeed } from './domain/usecases/seed.create.usecase';
 import { updateSeed } from './domain/usecases/seed.update.usecase';
 import { deleteSeed } from './domain/usecases/seed.delete.usecase';
 import { fetchSeedsByQuery } from './domain/usecases/seed.fetch-seeds.usecase';
+import { fetchSeedById } from './domain/usecases/seed.fetch-seed.usecase';
 import { NotFoundError, UnauthorizedError } from '../../../shared/errors/global.error';
 import {
   CreateSeedRequestSchema,
@@ -17,6 +18,7 @@ import {
   SeedCreateResponseSchema,
   SeedUpdateResponseSchema,
   SeedListResponseSchema,
+  SeedSingleIdResponseSchema,
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { makeSafeResponse } from '../../../shared/utils/validation';
@@ -148,6 +150,33 @@ export function seedRouter() {
               message: 'Unauthorized to delete this seed',
             }),
             403
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
+      }
+    })
+    .get('/:seedId', cZValidator('param', SpecifySeedRequestSchema), async (c) => {
+      const seedRepo = c.get('seedRepo');
+      const fileQueryService = c.get('fileQueryService');
+      const { seedId } = c.req.valid('param');
+      try {
+        const seed = await fetchSeedById(seedRepo, fileQueryService, seedId);
+        return c.json(
+          makeSafeResponse(SeedSingleIdResponseSchema, {
+            success: true,
+            data: { seed },
+          }),
+          200
+        );
+      } catch (err) {
+        console.error('Error fetching seed by ID:', err);
+        if (err instanceof NotFoundError) {
+          return c.json(
+            makeSafeResponse(SeedSingleIdResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            404
           );
         }
         throw err; // グローバルエラーハンドラーに任せる

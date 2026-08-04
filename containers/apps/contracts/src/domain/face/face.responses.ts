@@ -27,7 +27,12 @@ export const FaceSummaryListSchema = z.object({
 });
 export type FaceSummaryList = z.infer<typeof FaceSummaryListSchema>;
 
+// GET (List)
 export const FaceListResponseSchema = createApiResponseSchema(
   z.object({ faces: FaceSummaryListSchema })
 );
 export type FaceListResponse = z.infer<typeof FaceListResponseSchema>;
+
+// GET (Single ID)
+export const FaceSingleIdResponseSchema = createApiResponseSchema(FaceSummarySchema);
+export type FaceSingleIdResponse = z.infer<typeof FaceSingleIdResponseSchema>;
