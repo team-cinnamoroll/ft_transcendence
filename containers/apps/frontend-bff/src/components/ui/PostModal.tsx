@@ -647,21 +647,21 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
             aria-label={t('addPhotoAriaLabel')}
             style={{
               position: 'relative',
-              width: 34,
-              height: 34,
+              width: 40,
+              height: 40,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '50%',
-              background: 'none',
+              background: images.length >= MAX_IMAGES ? 'none' : 'var(--mf-surface-tint)',
               border: 'none',
               cursor: images.length >= MAX_IMAGES ? 'not-allowed' : 'pointer',
               color: images.length >= MAX_IMAGES ? 'var(--mf-text-faint)' : 'var(--mf-brand)',
             }}
           >
             <svg
-              width={20}
-              height={20}
+              width={22}
+              height={22}
               viewBox="0 0 20 20"
               fill="none"
               stroke="currentColor"
@@ -697,56 +697,21 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
               </span>
             )}
           </button>
-
-          {/* リンクボタン */}
-          <button
-            type="button"
-            aria-label={t('addLink')}
-            style={{
-              width: 34,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--mf-brand)',
-            }}
-          >
-            <svg
-              width={18}
-              height={18}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6.5 9.5a3.54 3.54 0 005 0l2-2a3.54 3.54 0 00-5-5l-1 1" />
-              <path d="M9.5 6.5a3.54 3.54 0 00-5 0l-2 2a3.54 3.54 0 005 5l1-1" />
-            </svg>
-          </button>
         </div>
 
-        {/* 文字数カウント + 下書き */}
+        {/* 文字数カウント */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            fontSize: 11.5,
-            color: 'var(--mf-text-muted)',
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: 'var(--mf-text-sub)',
             whiteSpace: 'nowrap',
           }}
         >
           <span>{t('charCount', { n: text.length })}</span>
-          <div
-            style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-line-soft)' }}
-          />
-          <span>{t('draftSaved')}</span>
         </div>
       </div>
     </div>
