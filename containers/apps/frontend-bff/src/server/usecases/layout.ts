@@ -7,7 +7,6 @@ import { getCurrentUser, listAllUsers } from './users';
 import { listFacesByUserId, findFaceById } from './faces';
 import { listSeedsByUserId, listSeedsByFaceId } from './seeds';
 import { getSubscribedFaceIds } from './subscriptions';
-import { getAuthSession } from './auth';
 
 export type LayoutData = {
   currentUser: UserProfile;
@@ -20,13 +19,9 @@ export type LayoutData = {
 
 export async function getLayoutData(): Promise<LayoutData> {
   const currentUser = await getCurrentUser();
-  const session = await getAuthSession();
 
   const [myFaces, mySeeds, subscribedFaceIds, allUsers] = await Promise.all([
-    // Faceは本物のバックエンドAPIに接続済みのため、モックID(currentUser.id)ではなく
-    // 本物のログインID(session.userId)で取得する必要がある(#314で発覚した不整合への暫定対応、#318で解消予定)
-    listFacesByUserId(session?.userId ?? currentUser.id),
-    // SeedはまだモックデータのままなのでcurrentUser.id(モックID)を使い続ける
+    listFacesByUserId(currentUser.id),
     listSeedsByUserId(currentUser.id),
     getSubscribedFaceIds(),
     listAllUsers(),

@@ -123,8 +123,6 @@ export async function getSeedDetailData(seedId: string): Promise<SeedDetailData 
 
   const [author, users] = await Promise.all([findUserById(seed.userId), listAllUsers()]);
 
-  // Seedは本物のバックエンドAPIに接続済みのため、モックID(currentUser.id)ではなく
-  // 本物のログインID(session.userId)で所有者判定する必要がある(#314で発覚した不整合と同種、#318で解消予定)
   const isOwner = seed.userId === session.userId;
 
   return { seed, face, author, isOwner, users };

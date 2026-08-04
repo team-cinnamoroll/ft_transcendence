@@ -5,7 +5,6 @@ import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
 import { getCurrentUser, findUserById, listAllUsers } from '@/server/usecases/users';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
-import { getAuthSession } from '@/server/usecases/auth';
 import type { Face } from '@/types/face';
 
 type Props = {
@@ -22,18 +21,15 @@ const FaceDetailPage = async ({ params }: Props) => {
 
   const face = maybeFace as Face;
 
-  const [currentUser, seeds, users, subscribedFaceIds, session] = await Promise.all([
+  const [currentUser, seeds, users, subscribedFaceIds] = await Promise.all([
     getCurrentUser(),
     listSeedsByFaceId(faceId),
     listAllUsers(),
     getSubscribedFaceIds(),
-    getAuthSession(),
   ]);
   const linkableCurrentUser = (await findUserById(currentUser.id)) ?? currentUser;
 
-  // Faceは本物のバックエンドAPIに接続済みのため、モックID(currentUser.id)ではなく
-  // 本物のログインID(session.userId)で所有者判定する必要がある(#314で発覚した不整合、#318で解消予定)
-  const isOwner = face.userId === session?.userId;
+  const isOwner = face.userId === currentUser.id;
   const isSubscribed = subscribedFaceIds.includes(face.id);
 
   return (
@@ -71,7 +67,7 @@ const FaceDetailPage = async ({ params }: Props) => {
         <FaceDetailClient
           face={face}
           isOwner={isOwner}
-          currentUserId={session?.userId ?? currentUser.id}
+          currentUserId={currentUser.id}
           linkableCurrentUser={linkableCurrentUser}
           seeds={seeds}
           users={users}

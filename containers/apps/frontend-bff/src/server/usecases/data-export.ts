@@ -9,7 +9,6 @@ import { listFacesByUserId } from './faces';
 import { listSeedsByUserId } from './seeds';
 import { getSubscribedFaceIds } from './subscriptions';
 import { listNotifications } from './notifications';
-import { getAuthSession } from './auth';
 
 /**
  * GDPR エクスポートで返すユーザーデータ一式。
@@ -34,13 +33,9 @@ export type UserDataExport = {
  */
 export async function exportCurrentUserData(): Promise<UserDataExport> {
   const currentUser = await getCurrentUser();
-  const session = await getAuthSession();
 
   const [faces, seeds, subscribedFaceIds, notifications] = await Promise.all([
-    // Faceは本物のバックエンドAPIに接続済みのため、モックID(currentUser.id)ではなく
-    // 本物のログインID(session.userId)で取得する必要がある(#314で発覚した不整合への暫定対応、#318で解消予定)
-    listFacesByUserId(session?.userId ?? currentUser.id),
-    // SeedはまだモックデータのままなのでcurrentUser.id(モックID)を使い続ける
+    listFacesByUserId(currentUser.id),
     listSeedsByUserId(currentUser.id),
     getSubscribedFaceIds(),
     listNotifications(),

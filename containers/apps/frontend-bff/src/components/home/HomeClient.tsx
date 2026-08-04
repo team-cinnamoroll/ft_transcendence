@@ -18,8 +18,6 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 type Props = {
   currentUser: UserProfile;
-  /** Face/Seedは本物のバックエンドAPIに接続済みのため、所有者判定には本物のログインIDを使う必要がある */
-  realUserId?: string;
   linkableCurrentUser: UserProfile;
   faces: Face[];
   seeds: Seed[];
@@ -31,7 +29,6 @@ type Props = {
 
 const HomeClient = ({
   currentUser,
-  realUserId,
   linkableCurrentUser,
   faces,
   seeds: initialSeeds,
@@ -231,7 +228,7 @@ const HomeClient = ({
           faces={faces}
           seeds={seeds}
           selectedFaceId={selectedFaceId}
-          currentUserId={realUserId ?? currentUser.id}
+          currentUserId={currentUser.id}
           onSeedMoreOptions={openSeedActionMenu}
         />
       </div>
