@@ -130,6 +130,95 @@ services:
         aliases:
           - tracen.local
 
+  # ── 可視化基盤 (ELK, security 有効, analytics profile) ─────────────
+  # ES/Logstash は外部公開せず、Kibana のみ Nginx 経由(/kibana, 要ログイン)で公開する。
+  #   docker compose -f docker-compose.local-prod.yml --profile analytics up -d
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -s http://localhost:9200 >/dev/null || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    networks:
+      local-prod:
+        aliases:
+          - elasticsearch
+
+  es-setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    entrypoint: ['bash', '-c']
+    command:
+      - |
+        until curl -s -u "elastic:$${ELASTIC_PASSWORD}" http://elasticsearch:9200 >/dev/null; do sleep 2; done
+        curl -s -X POST -u "elastic:$${ELASTIC_PASSWORD}" \
+          http://elasticsearch:9200/_security/user/kibana_system/_password \
+          -H 'Content-Type: application/json' \
+          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      local-prod:
+        aliases:
+          - es-setup
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
+    networks:
+      local-prod:
+        aliases:
+          - kibana
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./containers/infra/analytics/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./containers/infra/analytics/logstash/templates:/usr/share/logstash/templates:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      local-prod:
+        aliases:
+          - logstash
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.3
+    profiles: ['analytics']
+    user: root
+    command: ['filebeat', '-e', '--strict.perms=false']
+    volumes:
+      - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - logstash
+    networks:
+      local-prod:
+        aliases:
+          - filebeat
+
 networks:
   local-prod:
 
@@ -138,3 +227,4 @@ volumes:
   postgres_data:
   redis_data:
   file_storage_data:
+  elasticsearch_data:

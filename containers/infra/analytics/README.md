@@ -90,10 +90,20 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
 
 `category` は大分類・`action` は種別。`faceId` は `face`/`seed` の `created` のみ。mapping は `logstash/templates/events-template.json` が単一の所有元で、`dynamic:false` のため定義外フィールドは保存されても index されない。
 
-## 本番化（TODO）
+## 本番 (local-prod)
 
-- mock-producer を止め、**backend コンテナを収集対象にする**（[BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)）。
-- `docker-compose.local-prod.yml` に ELK を追加する際は、**environment を最小限**にし、**security を有効化**、**Kibana は admin 限定アクセス**（Nginx 側で制限）にする。
+`docker-compose.local-prod.yml` に ELK を **security 有効**で追加済み。dev と同じ Logstash pipeline / Filebeat / ダッシュボードを、認証付きで使う。
+
+- **起動**:
+  ```bash
+  docker compose -f docker-compose.local-prod.yml --profile analytics up -d \
+    elasticsearch kibana logstash filebeat
+  ```
+- **環境変数**: `.env.local-prod`（`ELASTIC_PASSWORD` 等）。`pnpm make-env:force` で `.env.local-prod.example` から生成。**本番前にパスワードを変更する**。
+- **security**: `xpack.security.enabled=true`。Kibana / Logstash は `elastic` ユーザーで ES に接続（`.env.local-prod` の認証情報を注入）。
+- **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://tracen.local/kibana`（**ログイン必須** = admin 限定）。
+- **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が拾う。mock-producer は含めない。
+- **provision**: index template は Logstash が自動登録する。ダッシュボード投入は ES/Kibana にアクセスできる環境から `provision-kibana.sh` を実行（ES は非公開のため、Kibana import は `KIBANA_URL=https://tracen.local/kibana` を指定）。
 
 ## 注意
 
