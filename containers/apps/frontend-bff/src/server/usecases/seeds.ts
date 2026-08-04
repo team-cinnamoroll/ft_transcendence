@@ -11,6 +11,7 @@ import {
 import { findFaceById } from './faces';
 import { getCurrentUser, findUserById, listAllUsers } from './users';
 import { getSessionTokens } from '@/lib/session';
+import { getAuthSession } from './auth';
 
 export type SeedLink = {
   seed: Seed;
@@ -110,23 +111,21 @@ export async function deleteSeedForCurrentUser(seedId: string): Promise<void> {
 }
 
 export async function getSeedDetailData(seedId: string): Promise<SeedDetailData | null> {
-  const { accessToken } = await getSessionTokens();
-  if (!accessToken) {
+  const session = await getAuthSession();
+  if (!session) {
     return null;
   }
-  const seed = await getSeedRepository().findById(accessToken, seedId);
+  const seed = await getSeedRepository().findById(session.accessToken, seedId);
   if (!seed) return null;
 
   const face = await findFaceById(seed.faceId);
   if (!face) return null;
 
-  const [currentUser, author, users] = await Promise.all([
-    getCurrentUser(),
-    findUserById(seed.userId),
-    listAllUsers(),
-  ]);
+  const [author, users] = await Promise.all([findUserById(seed.userId), listAllUsers()]);
 
-  const isOwner = seed.userId === currentUser.id;
+  // Seedは本物のバックエンドAPIに接続済みのため、モックID(currentUser.id)ではなく
+  // 本物のログインID(session.userId)で所有者判定する必要がある(#314で発覚した不整合と同種、#318で解消予定)
+  const isOwner = seed.userId === session.userId;
 
   return { seed, face, author, isOwner, users };
 }

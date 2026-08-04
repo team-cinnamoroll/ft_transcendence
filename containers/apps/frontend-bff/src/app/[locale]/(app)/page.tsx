@@ -2,13 +2,14 @@ import HomeProfile from '@/components/home/HomeProfile';
 import HomeClient from '@/components/home/HomeClient';
 import { listSeedsByUserId } from '@/server/usecases/seeds';
 import { getViewerContext } from '@/server/usecases/viewer';
+import { getAuthSession } from '@/server/usecases/auth';
 import { getFormatter } from 'next-intl/server';
 
 const REFERENCE_DATE = new Date('2026-03-31');
 
 export default async function Home() {
   const { currentUser, linkableCurrentUser, myFaces } = await getViewerContext();
-  const seeds = await listSeedsByUserId(currentUser.id);
+  const [seeds, session] = await Promise.all([listSeedsByUserId(currentUser.id), getAuthSession()]);
   const format = await getFormatter();
 
   // On This Day: 同じ月日の過去シードを探す
@@ -36,6 +37,7 @@ export default async function Home() {
         {/* 中部〜下部: フェイスフィルタ + シードフィード（Client Component） */}
         <HomeClient
           currentUser={currentUser}
+          realUserId={session?.userId}
           linkableCurrentUser={linkableCurrentUser}
           faces={myFaces}
           seeds={seeds}
