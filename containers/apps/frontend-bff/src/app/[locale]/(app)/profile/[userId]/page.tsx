@@ -30,9 +30,9 @@ const ProfilePage = async ({ params }: Props) => {
   // 本物のバックエンドとは一致せず、モックデータにフォールバックしてしまう。
   // getCurrentUser は /users/me（JWTから自動で「自分」を判定するAPI）を使うため、この問題が起きない。
   const displayProfile = isOwner ? { ...currentUser, relationship: null } : profile;
-  // FaceのモックデータはモックのユーザーIDで紐付いているため、
-  // 自分自身の場合はURLの(本物の)userIdではなく、currentUser.id(モックID)で取得する。
-  const faces = await listFacesByUserId(isOwner ? currentUser.id : userId);
+  // Faceは本物のバックエンドAPIに接続済みのため、URLのuserId(本物のID)をそのまま使えばよい。
+  // isOwnerの場合はsession.userId === userIdが保証されているため、分岐は不要。
+  const faces = await listFacesByUserId(userId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
