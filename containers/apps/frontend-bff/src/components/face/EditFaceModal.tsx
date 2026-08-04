@@ -33,6 +33,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
         name: name.trim(),
         emoji: emoji.trim() || null,
         description: description.trim() || null,
+        imageId: face.image?.id ?? null,
         visibility,
       });
       if (!result.success) {

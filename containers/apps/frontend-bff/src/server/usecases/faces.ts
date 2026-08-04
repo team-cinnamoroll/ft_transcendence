@@ -6,22 +6,39 @@ import {
   type UpdateFaceInput,
   getFaceRepository,
 } from '@/repositories/face-repository';
+import { getSessionTokens } from '@/lib/session';
 import { getCurrentUser } from './users';
 
 export async function listFacesByUserId(userId: string): Promise<Face[]> {
-  return await getFaceRepository().listByUserId(userId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return await getFaceRepository().listByUserId(accessToken, userId);
 }
 
 export async function listAllFaces(): Promise<Face[]> {
-  return await getFaceRepository().listAll();
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return await getFaceRepository().listAll(accessToken);
 }
 
 export async function findFaceById(faceId: string): Promise<Face | null> {
-  return await getFaceRepository().findById(faceId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return null;
+  }
+  return await getFaceRepository().findById(accessToken, faceId);
 }
 
 export async function createFace(userId: string, input: CreateFaceInput): Promise<Face> {
-  return await getFaceRepository().create(userId, input);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    throw new Error('createFace: not authenticated');
+  }
+  return await getFaceRepository().create(accessToken, userId, input);
 }
 
 export async function createFaceForCurrentUser(input: CreateFaceInput): Promise<Face> {
@@ -34,7 +51,11 @@ export async function updateFace(
   userId: string,
   input: UpdateFaceInput
 ): Promise<Face> {
-  return await getFaceRepository().update(faceId, userId, input);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    throw new Error('updateFace: not authenticated');
+  }
+  return await getFaceRepository().update(accessToken, faceId, userId, input);
 }
 
 export async function updateFaceForCurrentUser(
@@ -46,7 +67,11 @@ export async function updateFaceForCurrentUser(
 }
 
 export async function deleteFace(faceId: string, userId: string): Promise<void> {
-  return await getFaceRepository().delete(faceId, userId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    throw new Error('deleteFace: not authenticated');
+  }
+  return await getFaceRepository().delete(accessToken, faceId, userId);
 }
 
 export async function deleteFaceForCurrentUser(faceId: string): Promise<void> {

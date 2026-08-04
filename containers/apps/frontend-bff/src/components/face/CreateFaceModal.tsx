@@ -30,9 +30,10 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
     startTransition(async () => {
       const result = await createFaceAction({
         name: name.trim(),
-        emoji: emoji.trim() || undefined,
-        description: description.trim() || undefined,
-        isPrivate,
+        emoji: emoji.trim() || null,
+        description: description.trim() || null,
+        imageId: null,
+        visibility: isPrivate ? 'private' : 'public',
       });
       if (!result.success) {
         setFieldErrors(result.errors);
