@@ -9,7 +9,7 @@ import {
   getSeedRepository,
 } from '@/repositories/seed-repository';
 import { findFaceById } from './faces';
-import { getCurrentUser, findUserById, listAllUsers } from './users';
+import { getCurrentUser, findUserById } from './users';
 import { getSessionTokens } from '@/lib/session';
 import { getAuthSession } from './auth';
 
@@ -23,7 +23,6 @@ export type SeedDetailData = {
   face: Face;
   author: UserProfile | null;
   isOwner: boolean;
-  users: UserProfile[];
 };
 
 async function requireAccessToken(): Promise<string> {
@@ -121,9 +120,9 @@ export async function getSeedDetailData(seedId: string): Promise<SeedDetailData 
   const face = await findFaceById(seed.faceId);
   if (!face) return null;
 
-  const [author, users] = await Promise.all([findUserById(seed.userId), listAllUsers()]);
+  const author = await findUserById(seed.userId);
 
   const isOwner = seed.userId === session.userId;
 
-  return { seed, face, author, isOwner, users };
+  return { seed, face, author, isOwner };
 }

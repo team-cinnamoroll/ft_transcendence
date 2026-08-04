@@ -12,8 +12,6 @@ export type UserDirectoryRepositorySpec = {
   getCurrentUser: () => Promise<UserProfile>;
   /** ID でユーザーを1件取得（存在しない場合は null） */
   findById: (userId: string) => Promise<UserProfile | null>;
-  /** 全ユーザー一覧を取得 */
-  listAll: () => Promise<UserProfile[]>;
 };
 
 // ─── モック実装 ────────────────────────────────────────────────
@@ -26,10 +24,6 @@ export function createUserDirectoryMockRepositoryImpl(): UserDirectoryRepository
 
     findById: async (userId) => {
       return users.find((user) => user.id === userId) ?? null;
-    },
-
-    listAll: async () => {
-      return users;
     },
   };
 }

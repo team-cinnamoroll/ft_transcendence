@@ -84,7 +84,8 @@ export async function findUserById(userId: string): Promise<ProfileWithRelations
 /**
  * 複数の userId をまとめて解決する。
  * Seed投稿者一覧・Face所有者一覧など、表示対象の userId 集合から必要なユーザーだけを
- * 組み立てたい場合に使う（`listAllUsers()` はモックIDベースのため、本物のIDと一致しない）。
+ * 組み立てたい場合に使う。findUserById を userId ごとに並列実行するため、
+ * モックの一覧をそのまま使う場合と異なり、本物のIDでも正しく解決できる。
  * 見つからなかった userId は結果から除外する。
  */
 export async function findUsersByIds(userIds: string[]): Promise<UserProfile[]> {
@@ -100,25 +101,4 @@ export async function updateMyProfile(
   input: UserProfileUpsertRequest
 ): Promise<ApiResult<void>> {
   return await getUserProfileRepository().updateMyProfile(accessToken, userId, input);
-}
-
-/**
- * 全ユーザー一覧を取得する。
- * 自分自身に該当する項目だけは、getCurrentUser と同じように本物の name/avatar/badge/id で上書きする。
- *
- * 注意: 一覧のうち自分以外の項目は id がモックのままである
- * （Face/Seedのモックデータとの紐付け用一覧として残っているため）。
- * 「id をキーにした検索」（例: seed.userId で投稿者を探す）にこの一覧を使う場合、
- * 相手が実在ユーザーであれば本物の id と一致しない点に注意すること。
- * 自分自身を検出するために、mockUsers 側とは別に `getUserDirectoryRepository().getCurrentUser()`
- * （モックIDのまま）を取得し、モックID同士で比較している。
- */
-export async function listAllUsers(): Promise<UserProfile[]> {
-  const [mockUsers, mockCurrentUser, displayUser] = await Promise.all([
-    getUserDirectoryRepository().listAll(),
-    getUserDirectoryRepository().getCurrentUser(),
-    getCurrentUser(),
-  ]);
-
-  return mockUsers.map((u) => (u.id === mockCurrentUser.id ? displayUser : u));
 }
