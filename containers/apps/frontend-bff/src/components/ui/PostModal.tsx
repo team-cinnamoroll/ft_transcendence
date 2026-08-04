@@ -123,7 +123,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
     if (!canPost || !selectedFaceId) return;
     setFieldErrors(null);
     startTransition(async () => {
-      const result = await createSeedAction({ faceId: selectedFaceId, body: text });
+      const result = await createSeedAction({ faceId: selectedFaceId, body: text, imageIds: [] });
       if (!result.success) {
         setFieldErrors(result.errors);
         return;

@@ -26,7 +26,10 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
     if (!isValid || isPending) return;
 
     startTransition(async () => {
-      const result = await updateSeedAction(seed.id, { body: body.trim() });
+      const result = await updateSeedAction(seed.id, {
+        body: body.trim(),
+        imageIds: seed.images.map((image) => image.id),
+      });
       if (!result.success) {
         setFieldErrors(result.errors);
         return;
