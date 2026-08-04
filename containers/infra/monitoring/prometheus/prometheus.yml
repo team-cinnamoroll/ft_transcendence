@@ -24,6 +24,12 @@ scrape_configs:
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
+    metric_relabel_configs:
+      - source_labels: [name]
+        regex: '(.*-(backend|frontend|db|redis|nginx)-.*)?'
+        action: keep
+      - regex: 'container_label_.*'
+        action: labeldrop
 
   - job_name: 'postgres'
     static_configs:
