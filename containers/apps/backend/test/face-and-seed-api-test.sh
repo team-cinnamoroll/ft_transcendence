@@ -247,7 +247,16 @@ run_face_tests() {
         -H "Content-Type: application/json" \
         -d "{\"name\":\"Updated Face\",\"emoji\":\"🚀\",\"description\":\"Updated Desc\",\"imageId\":\"$IMAGE1_ID\",\"visibility\":\"public\"}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-6: 自分の Face 更新 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_FACE_ID=$(jq -r '.data.face.id' "$TEMP_RES")
+    UPDATED_NAME=$(jq -r '.data.face.name' "$TEMP_RES")
+    UPDATED_EMOJI=$(jq -r '.data.face.emoji' "$TEMP_RES")
+    UPDATED_DESC=$(jq -r '.data.face.description' "$TEMP_RES")
+    UPDATED_IMAGE_ID=$(jq -r '.data.face.image.id' "$TEMP_RES")
+    UPDATED_VIS=$(jq -r '.data.face.visibility' "$TEMP_RES")
+    assert "F-6: 自分の Face 更新 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_FACE_ID" = "$FACE1_ID" ] && [ "$UPDATED_NAME" = "Updated Face" ] && [ "$UPDATED_EMOJI" = "🚀" ] && [ "$UPDATED_DESC" = "Updated Desc" ] && [ "$UPDATED_IMAGE_ID" = "$IMAGE1_ID" ] && [ "$UPDATED_VIS" = "public" ] && echo true || echo false)" \
+        "更新内容が正しく反映されているか"
+
 
     # [7] 自分の Face を更新（画像を削除 → imageId: null）
     echo "[F-7] 自分の Face を更新（画像削除 imageId=null）"
@@ -256,7 +265,15 @@ run_face_tests() {
         -H "Content-Type: application/json" \
         -d "{\"name\":\"Updated Face No Image\",\"emoji\":null,\"description\":null,\"imageId\":null,\"visibility\":\"public\"}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-7: 自分の Face 更新（画像削除）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_FACE_ID=$(jq -r '.data.face.id' "$TEMP_RES")
+    UPDATED_IMAGE_ID=$(jq -r '.data.face.image' "$TEMP_RES")
+    UPDATED_NAME=$(jq -r '.data.face.name' "$TEMP_RES")
+    UPDATED_EMOJI=$(jq -r '.data.face.emoji' "$TEMP_RES")
+    UPDATED_DESC=$(jq -r '.data.face.description' "$TEMP_RES")
+    UPDATED_VIS=$(jq -r '.data.face.visibility' "$TEMP_RES")
+    assert "F-7: 自分の Face 更新（画像削除）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_FACE_ID" = "$FACE1_ID" ] && [ "$UPDATED_IMAGE_ID" = "null" ] && [ "$UPDATED_NAME" = "Updated Face No Image" ] && [ "$UPDATED_EMOJI" = "null" ] && [ "$UPDATED_DESC" = "null" ] && [ "$UPDATED_VIS" = "public" ] && echo true || echo false)" \
+        "更新内容が正しく反映されているか（画像削除）"
 
     # [8] 他人の Face を更新 → 403
     echo "[F-8] User1 が User2 の Face を更新 → 403"
@@ -528,7 +545,11 @@ run_seed_tests() {
         -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated seed without images\",\"imageIds\":[]}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-8: Seed 更新（画像なし）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_BODY=$(jq -r '.data.seed.body' "$TEMP_RES")
+    UPDATED_IMG_COUNT=$(jq -r '.data.seed.images | length' "$TEMP_RES")
+    assert "S-8: Seed 更新（画像なし）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_BODY" = "Updated seed without images" ] && [ "$UPDATED_IMG_COUNT" -eq 0 ] && echo true || echo false)" \
+        "body が更新され画像数が0か"
 
     # [9] 自分の Seed を画像1枚で更新
     echo "[S-9] 自分の Seed を更新（画像1枚）"
@@ -537,7 +558,12 @@ run_seed_tests() {
         -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated seed with 1 image\",\"imageIds\":[\"$IMAGE2_ID\"]}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-9: Seed 更新（画像1枚）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_BODY=$(jq -r '.data.seed.body' "$TEMP_RES")
+    UPDATED_IMG_COUNT=$(jq -r '.data.seed.images | length' "$TEMP_RES")
+    UPDATED_IMG_ID=$(jq -r '.data.seed.images[0].id' "$TEMP_RES")
+    assert "S-9: Seed 更新（画像1枚）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_BODY" = "Updated seed with 1 image" ] && [ "$UPDATED_IMG_COUNT" -eq 1 ] && [ "$UPDATED_IMG_ID" = "$IMAGE2_ID" ] && echo true || echo false)" \
+        "body が更新され画像数が1かつ正しい画像IDか"
 
     # [10] User2 が User1 の Seed を更新 → 403
     echo "[S-10] User2 が User1 の Seed を更新 → 403"

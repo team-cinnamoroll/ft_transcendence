@@ -7,7 +7,7 @@ export const SeedCreateResponseSchema = createApiResponseSchema(z.object({ seed:
 export type SeedCreateResponse = z.infer<typeof SeedCreateResponseSchema>;
 
 // UPDATE
-export const SeedUpdateResponseSchema = createApiResponseSchema();
+export const SeedUpdateResponseSchema = createApiResponseSchema(z.object({ seed: SeedSchema }));
 export type SeedUpdateResponse = z.infer<typeof SeedUpdateResponseSchema>;
 
 // DELETE は204 No Contentを返すので、レスポンスボディはなし

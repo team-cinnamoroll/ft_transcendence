@@ -1,15 +1,18 @@
 import { FaceRepositorySpec } from '../face.repository';
-import type { UserId, UpdateFaceRequest } from '@tracen/contracts';
+import { FileQueryServiceSpec } from '../../../../../core-domain/file/file.query-service';
+import type { UserId, UpdateFaceRequest, Face } from '@tracen/contracts';
 import { FaceEntitySchema } from '../face.entity';
+import { toFace } from './face.mapper';
 import { makeSafeUsecaseResult } from '../../../../../shared/utils/validation';
 import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
 
 export async function updateFace(
   repo: FaceRepositorySpec,
+  fileQueryService: FileQueryServiceSpec,
   requesterId: UserId,
   faceId: string,
   request: UpdateFaceRequest
-): Promise<void> {
+): Promise<Face> {
   try {
     const existingFace = await repo.getFaceById(faceId);
     if (!existingFace) {
@@ -29,8 +32,8 @@ export async function updateFace(
       visibility: request.visibility,
     });
 
-    await repo.updateFace(modifiedFace);
-    return;
+    const updatedFace = await repo.updateFace(modifiedFace);
+    return toFace(updatedFace, fileQueryService);
   } catch (error) {
     console.error('Error updating face in repository:', error);
     throw error;

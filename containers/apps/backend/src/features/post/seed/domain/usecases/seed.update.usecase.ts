@@ -1,17 +1,20 @@
 import { SeedRepositorySpec } from '../seed.repository';
 import { FaceRepositorySpec } from '../../../face/domain/face.repository';
-import type { UserId, UpdateSeedRequest } from '@tracen/contracts';
+import { FileQueryServiceSpec } from '../../../../../core-domain/file/file.query-service';
+import type { UserId, UpdateSeedRequest, Seed } from '@tracen/contracts';
 import { SeedEntitySchema } from '../seed.entity';
+import { toSeed } from './seed.mapper';
 import { makeSafeUsecaseResult } from '../../../../../shared/utils/validation';
 import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
 
 export async function updateSeed(
   repo: SeedRepositorySpec,
   faceRepo: FaceRepositorySpec,
+  fileQueryService: FileQueryServiceSpec,
   requesterId: UserId,
   seedId: string,
   request: UpdateSeedRequest
-): Promise<void> {
+): Promise<Seed> {
   try {
     const existingSeed = await repo.getSeedById(seedId);
     if (!existingSeed) {
@@ -43,8 +46,8 @@ export async function updateSeed(
       updatedAt: new Date().toISOString(),
     });
 
-    await repo.updateSeed(modifiedSeed);
-    return;
+    const updatedSeed = await repo.updateSeed(modifiedSeed);
+    return toSeed(updatedSeed, fileQueryService);
   } catch (error) {
     console.error('Error updating seed in repository:', error);
     throw error;

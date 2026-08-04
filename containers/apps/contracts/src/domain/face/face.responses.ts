@@ -8,7 +8,7 @@ export const FaceCreateResponseSchema = createApiResponseSchema(z.object({ face:
 export type FaceCreateResponse = z.infer<typeof FaceCreateResponseSchema>;
 
 // UPDATE
-export const FaceUpdateResponseSchema = createApiResponseSchema();
+export const FaceUpdateResponseSchema = createApiResponseSchema(z.object({ face: FaceSchema }));
 export type FaceUpdateResponse = z.infer<typeof FaceUpdateResponseSchema>;
 
 // DELETE は204 No Contentを返すので、レスポンスボディはなし

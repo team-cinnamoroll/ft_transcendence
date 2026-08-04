@@ -78,14 +78,23 @@ export function seedRouter() {
       async (c) => {
         const seedRepo = c.get('seedRepo');
         const faceRepo = c.get('faceRepo');
+        const fileQueryService = c.get('fileQueryService');
         const requesterId = c.get('requesterId');
         const { seedId } = c.req.valid('param');
         const requestBody = c.req.valid('json');
         try {
-          await updateSeed(seedRepo, faceRepo, requesterId, seedId, requestBody);
+          const updatedSeed = await updateSeed(
+            seedRepo,
+            faceRepo,
+            fileQueryService,
+            requesterId,
+            seedId,
+            requestBody
+          );
           return c.json(
             makeSafeResponse(SeedUpdateResponseSchema, {
               success: true,
+              data: { seed: updatedSeed },
             }),
             200
           );

@@ -53,14 +53,22 @@ export function faceRouter() {
       cZValidator('json', UpdateFaceRequestSchema),
       async (c) => {
         const faceRepo = c.get('faceRepo');
+        const fileQueryService = c.get('fileQueryService');
         const requesterId = c.get('requesterId');
         const { faceId } = c.req.valid('param');
         const requestBody = c.req.valid('json');
         try {
-          await updateFace(faceRepo, requesterId, faceId, requestBody);
+          const updatedFace = await updateFace(
+            faceRepo,
+            fileQueryService,
+            requesterId,
+            faceId,
+            requestBody
+          );
           return c.json(
             makeSafeResponse(FaceUpdateResponseSchema, {
               success: true,
+              data: { face: updatedFace },
             }),
             200
           );
