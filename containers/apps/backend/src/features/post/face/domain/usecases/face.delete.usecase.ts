@@ -1,6 +1,6 @@
 import { FaceRepositorySpec } from '../face.repository';
 import type { UserId } from '@tracen/contracts';
-import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../../../shared/errors/global.error';
 
 export async function deleteFace(
   repo: FaceRepositorySpec,
@@ -13,7 +13,7 @@ export async function deleteFace(
       throw new NotFoundError(`Face with ID ${faceId} not found`);
     }
     if (existingFace.userId !== requesterId) {
-      throw new UnauthorizedError('Unauthorized to delete this face');
+      throw new ForbiddenError(`Face with ID ${faceId} does not belong to the current user`);
     }
 
     await repo.deleteFaceById(faceId);

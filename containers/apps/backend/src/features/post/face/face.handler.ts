@@ -8,7 +8,8 @@ import { createFace } from './domain/usecases/face.create.usecase';
 import { updateFace } from './domain/usecases/face.update.usecase';
 import { deleteFace } from './domain/usecases/face.delete.usecase';
 import { fetchSummaryFacesByQuery } from './domain/usecases/face.fetch-summary-faces.usecase';
-import { NotFoundError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { fetchSingleSummaryFace } from './domain/usecases/face.fetch-single-summary-face.usecase';
+import { NotFoundError, ForbiddenError } from '../../../shared/errors/global.error';
 import {
   CreateFaceRequestSchema,
   UpdateFaceRequestSchema,
@@ -17,6 +18,7 @@ import {
   FaceCreateResponseSchema,
   FaceUpdateResponseSchema,
   FaceListResponseSchema,
+  FaceSingleIdResponseSchema,
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { makeSafeResponse } from '../../../shared/utils/validation';
@@ -53,14 +55,22 @@ export function faceRouter() {
       cZValidator('json', UpdateFaceRequestSchema),
       async (c) => {
         const faceRepo = c.get('faceRepo');
+        const fileQueryService = c.get('fileQueryService');
         const requesterId = c.get('requesterId');
         const { faceId } = c.req.valid('param');
         const requestBody = c.req.valid('json');
         try {
-          await updateFace(faceRepo, requesterId, faceId, requestBody);
+          const updatedFace = await updateFace(
+            faceRepo,
+            fileQueryService,
+            requesterId,
+            faceId,
+            requestBody
+          );
           return c.json(
             makeSafeResponse(FaceUpdateResponseSchema, {
               success: true,
+              data: { face: updatedFace },
             }),
             200
           );
@@ -75,7 +85,7 @@ export function faceRouter() {
               404
             );
           }
-          if (err instanceof UnauthorizedError) {
+          if (err instanceof ForbiddenError) {
             return c.json(
               makeSafeResponse(FaceUpdateResponseSchema, {
                 success: false,
@@ -106,7 +116,7 @@ export function faceRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
@@ -119,6 +129,37 @@ export function faceRouter() {
       }
     })
     .use('*', injectFaceQueryDeps())
+    .get('/:faceId', cZValidator('param', SpecifyFaceRequestSchema), async (c) => {
+      const faceQueryService = c.get('faceQueryService');
+      const fileQueryService = c.get('fileQueryService');
+      const { faceId } = c.req.valid('param');
+      try {
+        const faceSummary = await fetchSingleSummaryFace(
+          faceQueryService,
+          fileQueryService,
+          faceId
+        );
+        return c.json(
+          makeSafeResponse(FaceSingleIdResponseSchema, {
+            success: true,
+            data: { ...faceSummary },
+          }),
+          200
+        );
+      } catch (err) {
+        console.error('Error fetching face by ID:', err);
+        if (err instanceof NotFoundError) {
+          return c.json(
+            makeSafeResponse(FaceSingleIdResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            404
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
+      }
+    })
     .get('/', cZValidator('query', QueryFaceRequestSchema), async (c) => {
       const faceQueryService = c.get('faceQueryService');
       const fileQueryService = c.get('fileQueryService');
