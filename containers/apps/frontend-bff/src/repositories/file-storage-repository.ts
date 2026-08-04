@@ -23,10 +23,13 @@ export function createFileStorageApiRepositoryImpl(): FileStorageRepositorySpec 
   return {
     uploadFile: async (accessToken, file) => {
       // POST /file-storage/upload はJSONではなく、ヘッダー+バイナリbodyという特殊な形式
+      // HTTPヘッダーの値はASCII(ByteString)である必要があるため、日本語等を含むファイル名は
+      // encodeURIComponentしてから設定する(fileNameはDB保存用メタデータでしかなく、
+      // フロントエンドからは参照されていないためデコードは不要)
       const res = await createBackendClient(accessToken).api.v1['file-storage'].upload.$post(
         {
           header: {
-            'x-file-name': file.name,
+            'x-file-name': encodeURIComponent(file.name),
             'x-file-type': file.type,
             'content-length': String(file.size),
             'x-visibility': 'public',
