@@ -81,6 +81,18 @@ export async function findUserById(userId: string): Promise<ProfileWithRelations
   return { ...(mockUser as UserProfile), relationship: null };
 }
 
+/**
+ * 複数の userId をまとめて解決する。
+ * Seed投稿者一覧・Face所有者一覧など、表示対象の userId 集合から必要なユーザーだけを
+ * 組み立てたい場合に使う（`listAllUsers()` はモックIDベースのため、本物のIDと一致しない）。
+ * 見つからなかった userId は結果から除外する。
+ */
+export async function findUsersByIds(userIds: string[]): Promise<UserProfile[]> {
+  const uniqueIds = [...new Set(userIds)];
+  const results = await Promise.all(uniqueIds.map((id) => findUserById(id)));
+  return results.filter((u): u is ProfileWithRelationship => u !== null);
+}
+
 /** ログイン中の自分のプロフィールを更新する（accessToken/userId はセッションから取得済みのものを渡す） */
 export async function updateMyProfile(
   userId: string,
