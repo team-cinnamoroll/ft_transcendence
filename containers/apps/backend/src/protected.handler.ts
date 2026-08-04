@@ -6,6 +6,8 @@ import { authSignOutRouter } from './app_services/auth/sign-out/sign-out.handler
 import { fileStorageRouter } from './features/file-storage/file-storage.handler';
 import { userProfileRouter } from './features/user-profile/user-profile.handler';
 import { friendshipRouter } from './features/friendship/friendship.handler';
+import { faceRouter } from './features/post/face/face.handler';
+import { seedRouter } from './features/post/seed/seed.handler';
 
 export function protectedApiRouter() {
   return new Hono<ProtectedEnv>()
@@ -14,5 +16,7 @@ export function protectedApiRouter() {
     .route('/auth/sign-out', authSignOutRouter())
     .route('/file-storage', fileStorageRouter())
     .route('/user-profile', userProfileRouter())
-    .route('/friendships', friendshipRouter());
+    .route('/friendships', friendshipRouter())
+    .route('/faces', faceRouter())
+    .route('/seeds', seedRouter());
 }

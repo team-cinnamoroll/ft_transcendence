@@ -19,6 +19,7 @@ type Props = {
   face: Face;
   isOwner: boolean;
   currentUserId: string;
+  linkableCurrentUser: UserProfile;
   seeds: Seed[];
   users: UserProfile[];
   isSubscribed?: boolean;
@@ -28,6 +29,7 @@ const FaceDetailClient = ({
   face,
   isOwner,
   currentUserId,
+  linkableCurrentUser,
   seeds: initialSeeds,
   users,
   isSubscribed = false,
@@ -86,6 +88,7 @@ const FaceDetailClient = ({
           face={face}
           seeds={seeds}
           users={users}
+          linkableCurrentUser={linkableCurrentUser}
           sortOrder={sortOrder}
           currentUserId={currentUserId}
           onSeedMoreOptions={openSeedActionMenu}

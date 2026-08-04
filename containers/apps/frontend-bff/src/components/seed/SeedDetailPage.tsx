@@ -7,7 +7,7 @@ import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import type { SeedLink } from '@/server/usecases/seeds';
-import { getFaceTitle, getFaceColor } from '@/lib/display';
+import { getFaceTitle, getFaceColor, getAvatarUrl } from '@/lib/display';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import FaceBadge from '@/components/ui/FaceBadge';
 
@@ -90,15 +90,17 @@ type Props = {
   users: UserProfile[];
 };
 
-const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: Props) => {
+const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLinks }: Props) => {
   const t = useTranslations('seedDetail');
-  const isPrivate = face.isPrivate;
+  const visibility = face.visibility === 'private' ? t('private') : t('public');
 
   return (
     <div style={{ padding: '14px 18px 80px' }}>
       {/* 著者行 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
-        <FaceBadge face={face} size={40} radius={11} />
+        <Link href={`/faces/${face.id}`} style={{ display: 'block', flexShrink: 0 }}>
+          <FaceBadge face={face} size={40} radius={11} />
+        </Link>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -108,9 +110,17 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
               whiteSpace: 'nowrap',
             }}
           >
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--mf-brand)' }}>
+            <Link
+              href={`/faces/${face.id}`}
+              className="hover:underline"
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: 'var(--mf-brand)',
+              }}
+            >
               {getFaceTitle(face)}
-            </span>
+            </Link>
           </div>
           <div
             style={{
@@ -123,6 +133,52 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
             {seed.createdAt.slice(0, 10).replace(/-/g, '.')} · {seed.createdAt.slice(11, 16)}
           </div>
         </div>
+        {author && (
+          <Link
+            href={`/profile/${author.id}`}
+            className="group"
+            style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              textDecoration: 'none',
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                flexShrink: 0,
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                overflow: 'hidden',
+              }}
+            >
+              <Image
+                src={getAvatarUrl(author)}
+                alt={author.name}
+                width={32}
+                height={32}
+                style={{ objectFit: 'cover', display: 'block', width: '100%', height: '100%' }}
+              />
+            </div>
+            <span
+              className="hidden md:inline group-hover:underline"
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: 'var(--mf-text-sub)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: 100,
+              }}
+            >
+              {author.name}
+            </span>
+          </Link>
+        )}
         <div
           style={{
             display: 'inline-flex',
@@ -146,7 +202,7 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
             strokeWidth={1.5}
             strokeLinecap="round"
           >
-            {isPrivate ? (
+            {face.visibility === 'private' ? (
               <>
                 <rect x={4} y={7} width={8} height={7} rx={1.5} />
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
@@ -159,7 +215,7 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
               </>
             )}
           </svg>
-          {isPrivate ? t('private') : t('public')}
+          {visibility}
         </div>
       </div>
 
@@ -179,11 +235,11 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
       </div>
 
       {/* 画像グリッド */}
-      {seed.imageUrls && seed.imageUrls.length > 0 && (
+      {seed.images.length > 0 && (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${Math.min(seed.imageUrls.length, 2)}, 1fr)`,
+            gridTemplateColumns: `repeat(${Math.min(seed.images.length, 2)}, 1fr)`,
             gap: 3,
             borderRadius: 14,
             overflow: 'hidden',
@@ -192,16 +248,16 @@ const SeedDetailPage = ({ seed, face, isOwner, outgoingLinks, incomingLinks }: P
             maxWidth: '50%',
           }}
         >
-          {seed.imageUrls.slice(0, 4).map((url, i) => (
+          {seed.images.slice(0, 4).map((image, i) => (
             <div
               key={i}
               style={{
                 position: 'relative',
-                aspectRatio: seed.imageUrls!.length === 1 ? '16/10' : '1/1',
+                aspectRatio: seed.images.length === 1 ? '16/10' : '1/1',
               }}
             >
               <Image
-                src={url}
+                src={image.url}
                 alt={t('imageAlt', { n: i + 1 })}
                 fill
                 className="object-cover"

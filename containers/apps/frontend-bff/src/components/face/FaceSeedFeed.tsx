@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { type Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
+import { createLookupMap } from '@/lib/display';
 import SeedRow from '@/components/ui/SeedRow';
 import { useTranslations } from 'next-intl';
 import type { SortOrder } from './FaceHeader';
@@ -13,6 +14,7 @@ type FaceSeedFeedProps = {
   face: Face;
   seeds: Seed[];
   users?: UserProfile[];
+  linkableCurrentUser?: UserProfile;
   sortOrder?: SortOrder;
   currentUserId?: string;
   onSeedMoreOptions?: (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => void;
@@ -21,16 +23,19 @@ type FaceSeedFeedProps = {
 const FaceSeedFeed = ({
   face,
   seeds,
+  users = [],
+  linkableCurrentUser,
   sortOrder = 'newest',
   currentUserId,
   onSeedMoreOptions,
 }: FaceSeedFeedProps) => {
   const t = useTranslations('faceSeedFeed');
   const router = useRouter();
+  const userMap = useMemo(() => createLookupMap(users, (user) => user.id), [users]);
 
   const sorted = useMemo(() => {
     if (sortOrder === 'oldest') return [...seeds].reverse();
-    if (sortOrder === 'images') return seeds.filter((s) => (s.imageUrls?.length ?? 0) > 0);
+    if (sortOrder === 'images') return seeds.filter((s) => (s.images.length ?? 0) > 0);
     return seeds;
   }, [seeds, sortOrder]);
 
@@ -56,6 +61,11 @@ const FaceSeedFeed = ({
           key={seed.id}
           seed={seed}
           face={face}
+          author={
+            seed.userId === currentUserId && linkableCurrentUser
+              ? linkableCurrentUser
+              : userMap.get(seed.userId)
+          }
           noBorder={index === sorted.length - 1}
           currentUserId={currentUserId}
           onMoreOptions={onSeedMoreOptions}

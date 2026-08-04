@@ -15,8 +15,24 @@ const mockUser: UserProfile = {
 };
 
 const mockFaces: Face[] = [
-  { id: 'face-1', userId: 'user-1', name: '読書', emoji: '📚', isPrivate: false },
-  { id: 'face-2', userId: 'user-1', name: '映画', emoji: '🎬', isPrivate: false },
+  {
+    id: 'face-1',
+    userId: 'user-1',
+    name: '読書',
+    emoji: '📚',
+    visibility: 'public',
+    description: '読書記録',
+    image: null,
+  },
+  {
+    id: 'face-2',
+    userId: 'user-1',
+    name: '映画',
+    emoji: '🎬',
+    visibility: 'public',
+    description: '映画記録',
+    image: null,
+  },
 ];
 
 const now = new Date();
@@ -26,14 +42,18 @@ const mockSeeds: Seed[] = [
     faceId: 'face-1',
     userId: 'user-1',
     body: '今日は「カラマーゾフの兄弟」を読んだ。',
+    images: [],
     createdAt: new Date(now.getFullYear(), now.getMonth(), 5).toISOString(),
+    updatedAt: new Date(now.getFullYear(), now.getMonth(), 5).toISOString(),
   },
   {
     id: 'act-2',
     faceId: 'face-2',
     userId: 'user-1',
     body: '「パラサイト」を観た。',
+    images: [],
     createdAt: new Date(now.getFullYear(), now.getMonth(), 3).toISOString(),
+    updatedAt: new Date(now.getFullYear(), now.getMonth(), 3).toISOString(),
   },
 ];
 
@@ -42,7 +62,9 @@ const mockSubscribedFace: Face = {
   userId: 'user-2',
   name: '珈琲',
   emoji: '☕',
-  isPrivate: false,
+  visibility: 'public',
+  description: 'コーヒーに関する記録',
+  image: null,
 };
 
 const mockLatestSeedByFaceId: Record<string, Seed> = {
@@ -51,7 +73,9 @@ const mockLatestSeedByFaceId: Record<string, Seed> = {
     faceId: 'face-sub-1',
     userId: 'user-2',
     body: '今朝の一杯',
+    images: [],
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
 };
 

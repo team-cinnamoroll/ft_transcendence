@@ -14,6 +14,7 @@ import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import { getAvatarUrl } from '@/lib/display';
+import { useHasPendingFriendRequest } from '@/lib/heartbeat-provider';
 
 type NavItem = {
   href: string;
@@ -73,19 +74,27 @@ const CompassIcon = ({ active }: { active: boolean }) => (
   </svg>
 );
 
-const BellIcon = ({ active }: { active: boolean }) => (
+const FriendsIcon = ({ active }: { active: boolean }) => (
   <svg
     width={22}
     height={22}
-    viewBox="0 0 20 20"
+    viewBox="0 0 22 22"
     fill="none"
     stroke="currentColor"
-    strokeWidth={active ? 2 : 1.6}
+    strokeWidth={1.6}
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M4.5 14.5h11l-1.3-1.7c-.5-.7-.8-1.5-.8-2.3V7.8a3.4 3.4 0 00-6.8 0v2.7c0 .8-.3 1.6-.8 2.3l-1.3 1.7z" />
-    <path d="M8.5 16.5a1.5 1.5 0 003 0" />
+    <circle
+      cx={8}
+      cy={8}
+      r={3}
+      fill={active ? 'currentColor' : 'none'}
+      fillOpacity={active ? 0.18 : 0}
+    />
+    <path d="M3 18c0-3 2.2-5 5-5s5 2 5 5" />
+    <circle cx={15.5} cy={7} r={2.3} />
+    <path d="M14.3 12.3c2.3.3 3.9 2.1 3.9 4.4" />
   </svg>
 );
 
@@ -97,22 +106,32 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: 'nav.subscriptions',
     icon: (a) => <CompassIcon active={a} />,
   },
-  { href: '/notifications', labelKey: 'nav.notifications', icon: (a) => <BellIcon active={a} /> },
+  { href: '/friends', labelKey: 'nav.friends', icon: (a) => <FriendsIcon active={a} /> },
 ];
 
 type Props = {
   faces: Face[];
   user: UserProfile;
+  realUserId?: string;
   seeds: Seed[];
   faceCount: number;
   seedCount: number;
   isAuthenticated: boolean;
 };
 
-const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: Props) => {
+const SideNav = ({
+  faces,
+  user,
+  realUserId,
+  seeds,
+  faceCount,
+  seedCount,
+  isAuthenticated,
+}: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
+  const hasPendingFriendRequest = useHasPendingFriendRequest();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -164,12 +183,27 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
               >
                 <span
                   style={{
+                    position: 'relative',
                     color: isActive ? 'var(--mf-brand)' : 'var(--mf-text-sub)',
                     display: 'flex',
                     alignItems: 'center',
                   }}
                 >
                   {item.icon(isActive)}
+                  {item.href === '/friends' && hasPendingFriendRequest && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: -1,
+                        right: -1,
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        background: 'var(--mf-accent)',
+                        boxShadow: '0 0 0 2px var(--mf-bg-light)',
+                      }}
+                    />
+                  )}
                 </span>
                 <div
                   style={{
@@ -355,6 +389,7 @@ const SideNav = ({ faces, user, seeds, faceCount, seedCount, isAuthenticated }: 
 
       <AccountMenu
         user={user}
+        realUserId={realUserId}
         faceCount={faceCount}
         seedCount={seedCount}
         isOpen={menuOpen}
