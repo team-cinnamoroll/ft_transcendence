@@ -40,8 +40,14 @@
     "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
+    "uploadingImageAlt": "Uploading image {n}",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Post",
     "submitting": "Posting..."
+  },
+  "seedImageUpload": {
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "createFaceModal": {
     "title": "Create New Face",

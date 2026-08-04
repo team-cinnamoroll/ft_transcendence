@@ -40,8 +40,14 @@
     "draftSaved": "Brouillon sauvegardé",
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
+    "uploadingImageAlt": "Image en cours d'envoi {n}",
+    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Publier",
     "submitting": "Publication…"
+  },
+  "seedImageUpload": {
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "errorUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer."
   },
   "createFaceModal": {
     "title": "Créer une nouvelle facette",

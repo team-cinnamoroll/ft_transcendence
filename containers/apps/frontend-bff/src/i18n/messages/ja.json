@@ -40,8 +40,14 @@
     "draftSaved": "下書き保存済",
     "attachedImageAlt": "添付画像{n}",
     "removeImageAriaLabel": "画像{n}を削除",
+    "uploadingImageAlt": "アップロード中の画像{n}",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "投稿",
     "submitting": "投稿中..."
+  },
+  "seedImageUpload": {
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。"
   },
   "createFaceModal": {
     "title": "新規フェイスを作成",

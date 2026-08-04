@@ -8,14 +8,25 @@ import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
-import { createSeedAction } from '@/server/actions/seeds';
+import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds';
+import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
 
+// backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
+const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
+
+// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/pngのみに制限する
+const ALLOWED_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
+
 type AttachedImage = {
   file: File;
   objectUrl: string;
+  /** アップロード成功後にセットされる。file-storageへのfileId */
+  fileId: string | null;
+  isUploading: boolean;
+  error: string | null;
 };
 
 type FieldErrors = Record<string, string[]>;
@@ -100,10 +111,14 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
 
   useEffect(() => {
     if (!isOpen) {
-      setImages((prev) => {
-        prev.forEach((img) => URL.revokeObjectURL(img.objectUrl));
-        return [];
+      // 保存されずに閉じられた場合、アップロード済みファイルは後始末として削除する（ベストエフォート）
+      imagesRef.current.forEach((img) => {
+        URL.revokeObjectURL(img.objectUrl);
+        if (img.fileId) {
+          void deleteUploadedFileAction(img.fileId);
+        }
       });
+      setImages([]);
       setText('');
       setSelectedFaceId(initialSelectedFaceId);
       setShowFacePicker(false);
@@ -115,19 +130,31 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
 
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.objectUrl));
+      imagesRef.current.forEach((img) => {
+        URL.revokeObjectURL(img.objectUrl);
+        if (img.fileId) {
+          void deleteUploadedFileAction(img.fileId);
+        }
+      });
     };
   }, []);
 
+  const isUploadingImages = images.some((img) => img.isUploading);
+  const imageError = images.find((img) => img.error)?.error ?? null;
+
   const handleSubmit = () => {
-    if (!canPost || !selectedFaceId) return;
+    if (!canPost || !selectedFaceId || isUploadingImages) return;
     setFieldErrors(null);
     startTransition(async () => {
-      const result = await createSeedAction({ faceId: selectedFaceId, body: text, imageIds: [] });
+      const imageIds = images.flatMap((img) => (img.fileId ? [img.fileId] : []));
+      const result = await createSeedAction({ faceId: selectedFaceId, body: text, imageIds });
       if (!result.success) {
         setFieldErrors(result.errors);
         return;
       }
+      // 投稿成功後にモーダルを閉じた際、未保存アップロードとして誤って削除されないよう先にクリアする
+      images.forEach((img) => URL.revokeObjectURL(img.objectUrl));
+      setImages([]);
       onCreate?.(result.data);
       onClose();
     });
@@ -135,20 +162,69 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
     const remaining = MAX_IMAGES - images.length;
     const toAdd = files.slice(0, remaining);
-    setImages((prev) => [
-      ...prev,
-      ...toAdd.map((file) => ({ file, objectUrl: URL.createObjectURL(file) })),
-    ]);
-    e.target.value = '';
+
+    const newImages: AttachedImage[] = toAdd.map((file) => ({
+      file,
+      objectUrl: URL.createObjectURL(file),
+      fileId: null,
+      isUploading: true,
+      error: null,
+    }));
+    setImages((prev) => [...prev, ...newImages]);
+
+    newImages.forEach((img) => {
+      if (
+        !ALLOWED_IMAGE_FILE_TYPES.includes(img.file.type) ||
+        img.file.size > MAX_IMAGE_FILE_SIZE
+      ) {
+        setImages((prev) =>
+          prev.map((i) =>
+            i.objectUrl === img.objectUrl
+              ? { ...i, isUploading: false, error: t('errorImageInvalidType') }
+              : i
+          )
+        );
+        return;
+      }
+
+      const formData = new FormData();
+      formData.set('file', img.file);
+
+      void (async () => {
+        const result = await uploadSeedImageAction(formData);
+        setImages((prev) =>
+          prev.map((i) => {
+            if (i.objectUrl !== img.objectUrl) return i;
+            if (!result.success) {
+              const firstFieldError = Object.values(result.errors)[0]?.[0];
+              return {
+                ...i,
+                isUploading: false,
+                error: firstFieldError ?? t('errorImageInvalidType'),
+              };
+            }
+            if (!result.data.success) {
+              return { ...i, isUploading: false, error: result.data.message };
+            }
+            return { ...i, isUploading: false, fileId: result.data.fileId };
+          })
+        );
+      })();
+    });
   };
 
   const handleRemoveImage = (index: number) => {
-    setImages((prev) => {
-      URL.revokeObjectURL(prev[index].objectUrl);
-      return prev.filter((_, i) => i !== index);
-    });
+    const target = images[index];
+    if (target) {
+      URL.revokeObjectURL(target.objectUrl);
+      if (target.fileId) {
+        void deleteUploadedFileAction(target.fileId);
+      }
+    }
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   if (!isOpen) return null;
@@ -269,20 +345,26 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
           {/* 投稿ボタン */}
           <button
             type="button"
-            disabled={!canPost || isPending}
+            disabled={!canPost || isPending || isUploadingImages}
             onClick={handleSubmit}
             style={{
               padding: '8px 18px',
               borderRadius: 999,
-              background: canPost && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
-              color: canPost && !isPending ? '#fff' : 'var(--mf-text-faint)',
+              background:
+                canPost && !isPending && !isUploadingImages
+                  ? 'var(--mf-accent)'
+                  : 'var(--mf-surface-tint)',
+              color: canPost && !isPending && !isUploadingImages ? '#fff' : 'var(--mf-text-faint)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: 0.3,
               border: 'none',
-              cursor: canPost && !isPending ? 'pointer' : 'not-allowed',
+              cursor: canPost && !isPending && !isUploadingImages ? 'pointer' : 'not-allowed',
               whiteSpace: 'nowrap',
-              boxShadow: canPost && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              boxShadow:
+                canPost && !isPending && !isUploadingImages
+                  ? '0 2px 10px rgba(212,146,42,0.25)'
+                  : 'none',
               transition: 'background 0.15s, box-shadow 0.15s',
             }}
           >
@@ -433,6 +515,11 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
             {fieldErrors.faceId[0]}
           </p>
         )}
+        {imageError && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {imageError}
+          </p>
+        )}
 
         {/* 画像プレビュー */}
         {images.length > 0 && (
@@ -458,11 +545,41 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
               >
                 <Image
                   src={img.objectUrl}
-                  alt={t('attachedImageAlt', { n: index + 1 })}
+                  alt={
+                    img.isUploading
+                      ? t('uploadingImageAlt', { n: index + 1 })
+                      : t('attachedImageAlt', { n: index + 1 })
+                  }
                   fill
                   style={{ objectFit: 'cover' }}
                   unoptimized
                 />
+                {img.isUploading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(20,24,36,0.45)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <svg
+                      className="mf-spin"
+                      width={20}
+                      height={20}
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 2a8 8 0 018 8" />
+                    </svg>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
