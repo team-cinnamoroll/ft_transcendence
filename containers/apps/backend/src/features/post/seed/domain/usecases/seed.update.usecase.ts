@@ -5,7 +5,7 @@ import type { UserId, UpdateSeedRequest, Seed } from '@tracen/contracts';
 import { SeedEntitySchema } from '../seed.entity';
 import { toSeed } from './seed.mapper';
 import { makeSafeUsecaseResult } from '../../../../../shared/utils/validation';
-import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../../../shared/errors/global.error';
 
 export async function updateSeed(
   repo: SeedRepositorySpec,
@@ -22,7 +22,7 @@ export async function updateSeed(
     }
     // 投稿の所有者チェック
     if (existingSeed.userId !== requesterId) {
-      throw new UnauthorizedError('Unauthorized to update this seed');
+      throw new ForbiddenError(`Seed with ID ${seedId} does not belong to the current user`);
     }
 
     // APIドキュメント要件: 投稿に紐づく faceId が自分のものかを検証する
@@ -31,7 +31,7 @@ export async function updateSeed(
       throw new NotFoundError(`Face with ID ${existingSeed.faceId} not found`);
     }
     if (face.userId !== requesterId) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         `Face with ID ${existingSeed.faceId} does not belong to the current user`
       );
     }

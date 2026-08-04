@@ -9,7 +9,7 @@ import { updateFace } from './domain/usecases/face.update.usecase';
 import { deleteFace } from './domain/usecases/face.delete.usecase';
 import { fetchSummaryFacesByQuery } from './domain/usecases/face.fetch-summary-faces.usecase';
 import { fetchSingleSummaryFace } from './domain/usecases/face.fetch-single-summary-face.usecase';
-import { NotFoundError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../shared/errors/global.error';
 import {
   CreateFaceRequestSchema,
   UpdateFaceRequestSchema,
@@ -85,7 +85,7 @@ export function faceRouter() {
               404
             );
           }
-          if (err instanceof UnauthorizedError) {
+          if (err instanceof ForbiddenError) {
             return c.json(
               makeSafeResponse(FaceUpdateResponseSchema, {
                 success: false,
@@ -116,7 +116,7 @@ export function faceRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SimpleApiResponseSchema, {
               success: false,

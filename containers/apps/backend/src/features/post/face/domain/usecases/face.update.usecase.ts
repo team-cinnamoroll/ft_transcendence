@@ -4,7 +4,7 @@ import type { UserId, UpdateFaceRequest, Face } from '@tracen/contracts';
 import { FaceEntitySchema } from '../face.entity';
 import { toFace } from './face.mapper';
 import { makeSafeUsecaseResult } from '../../../../../shared/utils/validation';
-import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../../../shared/errors/global.error';
 
 export async function updateFace(
   repo: FaceRepositorySpec,
@@ -19,7 +19,7 @@ export async function updateFace(
       throw new NotFoundError(`Face with ID ${faceId} not found`);
     }
     if (existingFace.userId !== requesterId) {
-      throw new UnauthorizedError('Unauthorized to update this face');
+      throw new ForbiddenError(`Face with ID ${faceId} does not belong to the current user`);
     }
 
     const modifiedFace = makeSafeUsecaseResult(FaceEntitySchema, {
@@ -29,7 +29,7 @@ export async function updateFace(
       emoji: request.emoji ?? null,
       description: request.description ?? null,
       imageId: request.imageId ?? null,
-      visibility: request.visibility,
+      visibility: existingFace.visibility,
     });
 
     const updatedFace = await repo.updateFace(modifiedFace);

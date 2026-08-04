@@ -22,7 +22,7 @@ export const CreateFaceRequestSchema = FaceRequestBaseSchema.strict();
 export type CreateFaceRequest = z.infer<typeof CreateFaceRequestSchema>;
 
 // UPDATE
-export const UpdateFaceRequestSchema = FaceRequestBaseSchema.strict();
+export const UpdateFaceRequestSchema = FaceRequestBaseSchema.omit({ visibility: true }).strict();
 export type UpdateFaceRequest = z.infer<typeof UpdateFaceRequestSchema>;
 
 // PUT と DELETE のパスパラメータとして使用するため、faceId のみを持つスキーマを定義

@@ -9,7 +9,7 @@ import { updateSeed } from './domain/usecases/seed.update.usecase';
 import { deleteSeed } from './domain/usecases/seed.delete.usecase';
 import { fetchSeedsByQuery } from './domain/usecases/seed.fetch-seeds.usecase';
 import { fetchSeedById } from './domain/usecases/seed.fetch-seed.usecase';
-import { NotFoundError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../shared/errors/global.error';
 import {
   CreateSeedRequestSchema,
   UpdateSeedRequestSchema,
@@ -61,7 +61,7 @@ export function seedRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SeedCreateResponseSchema, {
               success: false,
@@ -111,11 +111,11 @@ export function seedRouter() {
               404
             );
           }
-          if (err instanceof UnauthorizedError) {
+          if (err instanceof ForbiddenError) {
             return c.json(
               makeSafeResponse(SeedUpdateResponseSchema, {
                 success: false,
-                message: 'Unauthorized to update this seed',
+                message: 'Forbidden to update this seed',
               }),
               403
             );
@@ -143,11 +143,11 @@ export function seedRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
-              message: 'Unauthorized to delete this seed',
+              message: 'Forbidden to delete this seed',
             }),
             403
           );
