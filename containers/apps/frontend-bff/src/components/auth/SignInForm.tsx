@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AuthSignInRequestSchema } from '@tracen/contracts';
 import type { AuthSignInRequest } from '@/types/auth';
 import { signInAction } from '@/server/actions/auth';
-import { buildZodErrorMap } from '@/lib/zod-error-map';
+import { useZodForm } from '@/lib/use-zod-form';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -32,7 +30,6 @@ const labelStyle: React.CSSProperties = {
 
 const SignInForm = () => {
   const t = useTranslations('signIn');
-  const tValidation = useTranslations('validation');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -41,9 +38,7 @@ const SignInForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<AuthSignInRequest>({
-    resolver: zodResolver(AuthSignInRequestSchema, { error: buildZodErrorMap(tValidation) }),
-  });
+  } = useZodForm(AuthSignInRequestSchema);
 
   const onValid = (data: AuthSignInRequest) => {
     if (isPending) return;

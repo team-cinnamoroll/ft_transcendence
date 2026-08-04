@@ -2,22 +2,19 @@
 
 import { useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
+import type { z } from 'zod';
 import { UserProfileUpsertRequestSchema } from '@tracen/contracts';
-import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
+import type { UserProfile } from '@/types/user-profile';
 import { getAvatarUrl } from '@/lib/display';
 import { updateUserProfileAction } from '@/server/actions/user-profile';
 import { uploadAvatarFileAction, deleteUploadedFileAction } from '@/server/actions/file-storage';
-import { buildZodErrorMap } from '@/lib/zod-error-map';
+import { useZodForm } from '@/lib/use-zod-form';
 
 type Props = {
   user: UserProfile;
   onClose: () => void;
 };
-
-type ProfileFormFields = Pick<UserProfileUpsertRequest, 'name' | 'badge'>;
 
 const profileFormSchema = UserProfileUpsertRequestSchema.pick({ name: true, badge: true });
 
@@ -29,7 +26,6 @@ const ALLOWED_AVATAR_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 const ProfileEditModal = ({ user, onClose }: Props) => {
   const t = useTranslations('profileEditModal');
-  const tValidation = useTranslations('validation');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -48,8 +44,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ProfileFormFields>({
-    resolver: zodResolver(profileFormSchema, { error: buildZodErrorMap(tValidation) }),
+  } = useZodForm(profileFormSchema, {
     defaultValues: { name: user.name, badge: user.badge },
   });
 
@@ -116,7 +111,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     })();
   };
 
-  const onValid = (data: ProfileFormFields) => {
+  const onValid = (data: z.infer<typeof profileFormSchema>) => {
     if (isPending || isUploadingAvatar) return;
 
     setError(null);
