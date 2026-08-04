@@ -9,7 +9,6 @@ import type {
   FaceCreate,
   FaceUpdate,
 } from '@/types/face';
-import { faces } from '@/mocks/faces';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 
@@ -41,59 +40,6 @@ export type FaceRepositorySpec = {
   /** 全フェイス一覧を取得（検索用） */
   listAll: (accessToken: string) => Promise<Face[]>;
 };
-
-// ─── モック実装 ────────────────────────────────────────────────
-
-export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
-  return {
-    listByUserId: async (_accessToken, userId) => {
-      return faces.filter((face) => face.userId === userId);
-    },
-
-    findById: async (_accessToken, faceId) => {
-      return faces.find((face) => face.id === faceId) ?? null;
-    },
-
-    create: async (_accessToken, userId, input) => {
-      // モック実装: ダミーの ID を付与して返却するだけ（実際には保存しない）
-      const newFace: Face = {
-        id: `face-mock-${Date.now()}`,
-        userId,
-        ...input,
-        image: input.imageId
-          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
-          : null, // ダミーの画像URL
-      };
-      return newFace;
-    },
-
-    update: async (_accessToken, faceId, userId, input) => {
-      // モック実装: 既存データとマージして返却するだけ（実際には保存しない）
-      const existing = faces.find((f) => f.id === faceId && f.userId === userId);
-      const updated: Face = {
-        id: faceId,
-        userId,
-        ...(existing ?? {}),
-        ...input,
-        image: input.imageId
-          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
-          : null, // ダミーの画像URL
-      };
-      return updated;
-    },
-
-    delete: async () => {
-      // モック実装: no-op（実際には削除しない）
-      // 本番実装では、_faceId, _userIdの二つの引数を定義する
-    },
-
-    listAll: async () => {
-      return faces;
-    },
-  };
-}
-
-export const faceMockRepositoryImpl: FaceRepositorySpec = createFaceMockRepositoryImpl();
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
 

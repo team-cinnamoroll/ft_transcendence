@@ -8,7 +8,6 @@ import type {
   SeedCreate,
   SeedUpdate,
 } from '@/types/seed';
-import { seeds } from '@/mocks/seeds';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 
@@ -33,67 +32,6 @@ export type SeedRepositorySpec = {
   ) => Promise<Seed>;
   delete: (accessToken: string, seedId: string, userId: string) => Promise<void>;
 };
-
-// ─── モック実装 ────────────────────────────────────────────────
-
-export function createSeedMockRepositoryImpl(): SeedRepositorySpec {
-  return {
-    findById: async (_accessToken, seedId) => seeds.find((s) => s.id === seedId) ?? null,
-    listAll: async () => sortByCreatedAtDesc(seeds),
-    listByFaceId: async (_accessToken, faceId) =>
-      sortByCreatedAtDesc(seeds.filter((s) => s.faceId === faceId)),
-    listByUserId: async (_accessToken, userId) =>
-      sortByCreatedAtDesc(seeds.filter((s) => s.userId === userId)),
-    listByFaceIds: async (_accessToken, faceIds) =>
-      sortByCreatedAtDesc(seeds.filter((s) => faceIds.includes(s.faceId))),
-    create: async (_accessToken, userId, input) => {
-      const createdAt = new Date().toISOString();
-      const newSeed: Seed = {
-        id: `seed-mock-${Date.now()}`,
-        userId,
-        ...input,
-        images:
-          input.imageIds.length > 0
-            ? input.imageIds.map((imageId) => ({
-                id: imageId,
-                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
-              }))
-            : [],
-        createdAt: createdAt,
-        updatedAt: createdAt,
-      };
-      seeds.push(newSeed);
-      return newSeed;
-    },
-    update: async (_accessToken, seedId, userId, input) => {
-      const existing = seeds.find((s) => s.id === seedId && s.userId === userId);
-      if (!existing) throw new Error('Seed not found');
-      const updatedAt = new Date().toISOString();
-      const updated: Seed = {
-        ...existing,
-        body: input.body,
-        updatedAt: updatedAt,
-        images:
-          input.imageIds.length > 0
-            ? input.imageIds.map((imageId) => ({
-                id: imageId,
-                url: 'https://example.com/mock-image.jpg', // ダミーの画像URL
-              }))
-            : [],
-      };
-
-      Object.assign(existing, updated);
-      return existing;
-    },
-    delete: async (_accessToken, seedId, userId) => {
-      const index = seeds.findIndex((s) => s.id === seedId && s.userId === userId);
-      if (index === -1) throw new Error('Seed not found');
-      seeds.splice(index, 1);
-    },
-  };
-}
-
-export const seedMockRepositoryImpl: SeedRepositorySpec = createSeedMockRepositoryImpl();
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
 
