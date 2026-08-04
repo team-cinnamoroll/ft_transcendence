@@ -57,6 +57,10 @@
     "descriptionPlaceholder": "このフェイスについて説明してください",
     "privateLabel": "非公開",
     "privateDescription": "オンにすると自分だけが閲覧できます",
+    "image": "画像",
+    "imageSelectButton": "画像を選択",
+    "uploading": "アップロード中…",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "作成する",
     "submitting": "作成中..."
   },
@@ -74,8 +78,16 @@
     "descriptionPlaceholder": "このフェイスについて説明してください",
     "privateLabel": "非公開",
     "privateDescription": "オンにすると自分だけが閲覧できます",
+    "image": "画像",
+    "imageSelectButton": "画像を選択",
+    "uploading": "アップロード中…",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "保存する",
     "submitting": "保存中..."
+  },
+  "faceImageUpload": {
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。"
   },
   "face": {
     "private": "非公開",

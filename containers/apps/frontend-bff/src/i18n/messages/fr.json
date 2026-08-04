@@ -57,6 +57,10 @@
     "descriptionPlaceholder": "Décrivez cette facette",
     "privateLabel": "Privé",
     "privateDescription": "Seul vous pouvez voir cette facette",
+    "image": "Image",
+    "imageSelectButton": "Choisir une image",
+    "uploading": "Envoi en cours…",
+    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Créer",
     "submitting": "Création…"
   },
@@ -74,8 +78,16 @@
     "descriptionPlaceholder": "Décrivez cette facette",
     "privateLabel": "Privé",
     "privateDescription": "Seul vous pouvez voir cette facette",
+    "image": "Image",
+    "imageSelectButton": "Choisir une image",
+    "uploading": "Envoi en cours…",
+    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Enregistrer",
     "submitting": "Enregistrement…"
+  },
+  "faceImageUpload": {
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "errorUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer."
   },
   "face": {
     "private": "Privé",

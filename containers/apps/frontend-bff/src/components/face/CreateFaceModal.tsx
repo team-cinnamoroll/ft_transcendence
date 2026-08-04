@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
+import Image from 'next/image';
 import type { Face } from '@/types/face';
-import { createFaceAction } from '@/server/actions/faces';
+import { createFaceAction, uploadFaceImageAction } from '@/server/actions/faces';
+import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useTranslations } from 'next-intl';
 
 type FieldErrors = Record<string, string[]>;
@@ -13,6 +15,12 @@ type Props = {
   onCreate: (face: Face) => void;
 };
 
+// backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
+const MAX_FACE_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
+
+// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/pngのみに制限する
+const ALLOWED_FACE_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
+
 const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('');
@@ -22,17 +30,80 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
   const t = useTranslations('createFaceModal');
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageId, setImageId] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  // アップロード済みだが、まだ保存(POST)には至っていないファイルのID。後始末の削除対象を追跡する
+  const uploadedFileIdRef = useRef<string | null>(null);
+
   const isValid = name.trim().length > 0;
 
+  const discardPendingUpload = () => {
+    if (uploadedFileIdRef.current) {
+      void deleteUploadedFileAction(uploadedFileIdRef.current);
+      uploadedFileIdRef.current = null;
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // 同じファイルを選び直しても onChange が発火するようにする
+    if (!file) return;
+
+    if (
+      !ALLOWED_FACE_IMAGE_FILE_TYPES.includes(file.type) ||
+      file.size > MAX_FACE_IMAGE_FILE_SIZE
+    ) {
+      setImageError(t('errorImageInvalidType'));
+      return;
+    }
+
+    // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
+    discardPendingUpload();
+
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+    setPreviewUrl(objectUrl);
+    setImageError(null);
+    setIsUploadingImage(true);
+
+    const formData = new FormData();
+    formData.set('file', file);
+
+    void (async () => {
+      const result = await uploadFaceImageAction(formData);
+      setIsUploadingImage(false);
+
+      if (!result.success) {
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setImageError(firstFieldError ?? t('errorImageInvalidType'));
+        return;
+      }
+      if (!result.data.success) {
+        setImageError(result.data.message);
+        return;
+      }
+
+      uploadedFileIdRef.current = result.data.fileId;
+      setImageId(result.data.fileId);
+    })();
+  };
+
   const handleSubmit = () => {
-    if (!isValid || isPending) return;
+    if (!isValid || isPending || isUploadingImage) return;
 
     startTransition(async () => {
       const result = await createFaceAction({
         name: name.trim(),
         emoji: emoji.trim() || null,
         description: description.trim() || null,
-        imageId: null,
+        imageId,
         visibility: isPrivate ? 'private' : 'public',
       });
       if (!result.success) {
@@ -40,16 +111,22 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
         return;
       }
       setFieldErrors(null);
+      // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
+      uploadedFileIdRef.current = null;
       onCreate(result.data);
       handleClose();
     });
   };
 
   const handleClose = () => {
+    discardPendingUpload();
     setName('');
     setEmoji('');
     setDescription('');
     setIsPrivate(false);
+    setPreviewUrl(null);
+    setImageId(null);
+    setImageError(null);
     setFieldErrors(null);
     onClose();
   };
@@ -209,6 +286,94 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
             />
           </div>
 
+          {/* 画像（任意） */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--mf-text-sub)' }}>
+              {t('image')}
+              <span style={{ marginLeft: 4, color: 'var(--mf-text-muted)' }}>{t('optional')}</span>
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {previewUrl && (
+                <div
+                  style={{
+                    position: 'relative',
+                    width: 52,
+                    height: 52,
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    background: 'var(--mf-surface)',
+                  }}
+                >
+                  <Image
+                    src={previewUrl}
+                    alt={t('image')}
+                    width={52}
+                    height={52}
+                    style={{ objectFit: 'cover', display: 'block' }}
+                  />
+                  {isUploadingImage && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'rgba(20,24,36,0.45)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <svg
+                        className="mf-spin"
+                        width={20}
+                        height={20}
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="#fff"
+                        strokeWidth={2.5}
+                        strokeLinecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 2a8 8 0 018 8" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              )}
+              <label
+                htmlFor="face-image-file"
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 10,
+                  border: '0.5px solid var(--mf-line)',
+                  background: 'var(--mf-surface)',
+                  color: 'var(--mf-brand)',
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: isUploadingImage ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {isUploadingImage ? t('uploading') : t('imageSelectButton')}
+              </label>
+              <input
+                id="face-image-file"
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={handleImageFileChange}
+                disabled={isUploadingImage}
+                style={{ display: 'none' }}
+              />
+            </div>
+            {imageError && (
+              <p
+                role="alert"
+                style={{ margin: 0, fontSize: 12, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {imageError}
+              </p>
+            )}
+          </div>
+
           {/* 公開/非公開トグル */}
           <div
             style={{
@@ -266,7 +431,7 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!isValid || isPending}
+            disabled={!isValid || isPending || isUploadingImage}
             style={{
               width: '100%',
               padding: '12px 0',
@@ -274,10 +439,16 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
               fontSize: 14,
               fontWeight: 700,
               border: 'none',
-              cursor: isValid && !isPending ? 'pointer' : 'not-allowed',
-              background: isValid && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
-              color: isValid && !isPending ? '#fff' : 'var(--mf-text-faint)',
-              boxShadow: isValid && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              cursor: isValid && !isPending && !isUploadingImage ? 'pointer' : 'not-allowed',
+              background:
+                isValid && !isPending && !isUploadingImage
+                  ? 'var(--mf-accent)'
+                  : 'var(--mf-surface-tint)',
+              color: isValid && !isPending && !isUploadingImage ? '#fff' : 'var(--mf-text-faint)',
+              boxShadow:
+                isValid && !isPending && !isUploadingImage
+                  ? '0 2px 10px rgba(212,146,42,0.25)'
+                  : 'none',
               transition: 'background 0.15s',
             }}
           >

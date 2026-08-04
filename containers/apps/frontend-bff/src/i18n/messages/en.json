@@ -57,6 +57,10 @@
     "descriptionPlaceholder": "Describe this face",
     "privateLabel": "Private",
     "privateDescription": "Only you can view this face",
+    "image": "Image",
+    "imageSelectButton": "Choose image",
+    "uploading": "Uploading…",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Create",
     "submitting": "Creating..."
   },
@@ -74,8 +78,16 @@
     "descriptionPlaceholder": "Describe this face",
     "privateLabel": "Private",
     "privateDescription": "Only you can view this face",
+    "image": "Image",
+    "imageSelectButton": "Choose image",
+    "uploading": "Uploading…",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Save",
     "submitting": "Saving..."
+  },
+  "faceImageUpload": {
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "face": {
     "private": "Private",
