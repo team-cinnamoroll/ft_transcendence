@@ -239,7 +239,7 @@ services:
 
   # コンテナ単位のリソース使用量(どのコンテナが CPU/メモリを食っているか)
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: ghcr.io/google/cadvisor:v0.57.0
     privileged: true
     volumes:
       - /:/rootfs:ro
