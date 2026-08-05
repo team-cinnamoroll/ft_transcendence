@@ -5,11 +5,13 @@
 ## 1. `pnpm install` が `EACCES` で失敗する問題
 
 ### 症状
+
 Dev Container 起動時（`postCreateCommand`）の依存インストールで、次のようなエラーが出て失敗することがあります。
 
 - `EACCES: permission denied, mkdir '/workspace/node_modules/.pnpm'`
 
 ### 原因
+
 このリポジトリは `docker-compose.dev.yml` で `/workspace/node_modules` を named volume にマウントしています。
 
 - `/workspace` は bind mount（リポジトリ本体）
@@ -25,16 +27,19 @@ Dev Container 起動時（`postCreateCommand`）の依存インストールで�
 - その volume の所有 UID/GID が、現在の `node` と一致しない
 
 ### 対策（このリポジトリに実装済み）
-Dev Container の作成時/起動時に、`/workspace/node_modules` の書き込み権限を自動で整えます。
 
+Dev Container の作成時/起動時に、root で初期化してから `node` ユーザーへ切り替える流れにしています。
+
+- `.devcontainer/scripts/dev-container-bootstrap.sh`
+  - 起動直後に `node_modules` の named volume と `docker.sock` のグループ整合を root で初期化します
 - `.devcontainer/scripts/fix-node-modules-perms.sh`
-  - `node_modules` が書き込み不可の場合に `sudo chown -R <current uid>:<current gid> /workspace/node_modules` を実施
+  - `node_modules` が書き込み不可の場合に、root 実行時は修復し、非 root 実行時は再起動を促します
 - `.devcontainer/scripts/fix-docker-sock-perms.sh`
-  - `/var/run/docker.sock` の group が `docker` 以外なら `sudo chown root:docker /var/run/docker.sock` を実施
+  - `/var/run/docker.sock` の接続可否を確認し、root 実行時は Docker グループを合わせます
 - `.devcontainer/scripts/postCreateCommand.sh`
-  - 上記の権限修正 → `corepack enable` → `pnpm install`
+  - `corepack pnpm install`
 - `.devcontainer/devcontainer.json`
-  - `postCreateCommand` と `postStartCommand` で上記スクリプトを実行
+  - `postCreateCommand` で依存関係を入れ、`postStartCommand` は起動確認だけにしています
 
 また、Corepack の初回ダウンロード確認プロンプトで自動実行が止まらないよう、`pnpm install` 実行時に
 `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` を指定しています。
@@ -43,10 +48,12 @@ Dev Container の作成時/起動時に、`/workspace/node_modules` の書き込
 同じく `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` を付けて、初回起動でプロンプト待ちにならないようにしています。
 
 ### 手動での復旧
+
 もし手元の環境で同様の問題が出た場合は、次で復旧できます。
 
 ```bash
-bash .devcontainer/scripts/fix-node-modules-perms.sh
+docker compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml up -d --force-recreate dev-container backend frontend nginx db redis
 pnpm install
 ```
 
@@ -61,22 +68,24 @@ docker compose -f docker-compose.dev.yml down -v
 ## 2. Dev Container のビルドで `docker-outside-of-docker` が失敗する問題
 
 ### 症状
+
 Dev Container のビルド中に、次のようなエラーで落ちることがあります。
 
 - `The 'moby' option is not supported on Debian 'trixie' ...`
 
 ### 原因
+
 Dev Container のベースイメージが Debian `trixie` 系になると、`docker-outside-of-docker` feature の既定設定（`moby=true`）が非対応になり、feature のインストールに失敗します。
 
 ### 対策（このリポジトリに実装済み）
+
 `.devcontainer/Dockerfile` のベースイメージを `bookworm` 系に固定しています。
 
 - `remoteUser` を変更する場合
   - UID/GID が変わると同じ問題が再発しやすいので、`postStartCommand` の権限修正は残すのが安全です。
-- `docker.sock` は Docker デーモンの再起動や Docker Desktop の再起動で作り直されるため、`local-ci` 実行直前にも権限修正を入れています。
-- `sudo` 前提
-  - `fix-node-modules-perms.sh` は `sudo` が使える前提で最短復旧します。
-    `sudo` を無効化/削除するイメージに変える場合は、代替手段（root での起動、init 時の chown 等）を検討してください。
+- `docker.sock` は Docker デーモンの再起動や Docker Desktop の再起動で作り直されるため、`local-ci` 実行前に接続可否を確認しています。
+- `sudo` 非前提
+  - この構成では `sudo` を使わず、コンテナ起動時の root 初期化で volume と Docker グループを整えます。
 - `chown -R` のコスト
   - `node_modules` が巨大な場合、再帰 chown は時間がかかります。
     現在の実装は「書き込み不可の場合のみ」実行することで、通常起動時の負担を抑えています。

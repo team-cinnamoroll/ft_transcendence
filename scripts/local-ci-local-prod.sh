@@ -25,7 +25,8 @@ if [[ -z "$host_ws" ]]; then
 fi
 
 if ! bash "$repo_root/.devcontainer/scripts/fix-docker-sock-perms.sh"; then
-  echo "[local-ci] warning: fix-docker-sock-perms.sh に失敗しました。docker.sock が bind mount の場合は想定内のため、処理を継続します。" >&2
+  echo "[local-ci] docker.sock の権限が整っていません。Dev Container を再起動してから再実行してください。" >&2
+  exit 1
 fi
 
 # CI/Dev Container 環境では、ホスト（例: Docker Desktop / OrbStack）の DNS/CA 設定に依存すると

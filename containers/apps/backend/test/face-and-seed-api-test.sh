@@ -4,9 +4,10 @@
 # 設定・変数定義
 # ==========================================
 BASE_URL=${BASE_URL:-"http://localhost:8000/api/v1"}
-STATE_FILE=".face_seed_test_state"
-TEMP_RES="temp_face_seed_res.json"
-TEST_IMAGE="face_seed_test_image.jpg"
+
+STATE_FILE="/tmp/.face_seed_test_state"
+TEMP_RES="/tmp/temp_face_seed_res.json"
+TEST_IMAGE="/tmp/face_seed_test_image.jpg"
 
 # テスト用ユーザーデータ（2ユーザーで所有権テストを行う）
 USER1_EMAIL="face_seed_u1_$(date +%s)@example.com"
@@ -896,8 +897,10 @@ print_summary() {
     echo "=========================================="
     if [ "$FAIL_COUNT" -eq 0 ]; then
         echo "  🎉 すべてのテストが成功しました！"
+        return 0
     else
         echo "  ❌ 失敗したテストがあります。上記ログを確認してください。"
+        return 1
     fi
     echo ""
 }
@@ -921,11 +924,17 @@ case "$1" in
         cleanup
         ;;
     all)
+        trap cleanup EXIT INT TERM
+
         setup
         run_face_tests
         run_seed_tests
         print_summary
+        summary_status=$?
         cleanup
+        if [ "$summary_status" -ne 0 ]; then
+            exit 1 # テスト失敗時は非0で終了
+        fi
         ;;
     *)
         echo "使用方法: $0 {setup|face|seed|cleanup|all}"
