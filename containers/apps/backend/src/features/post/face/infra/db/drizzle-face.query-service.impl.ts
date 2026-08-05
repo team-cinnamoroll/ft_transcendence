@@ -1,11 +1,16 @@
 import { and, count, desc, asc, eq, gt, ilike, max, or, sql, SQL } from 'drizzle-orm';
 import type { FaceQueryServiceSpec } from '../../domain/face.query-service';
 import type { TracenDb } from '../../../../../shared/infra/db/client';
-import { FaceEntitySummarySchema, type FaceEntitySummaryList } from '../../domain/face.entity';
+import {
+  FaceEntitySummarySchema,
+  type FaceEntitySummaryList,
+  type FaceEntitySummary,
+} from '../../domain/face.entity';
 import { faces } from '../db/schema';
 import { seeds } from '../../../seed/infra/db/schema';
 import { makeSafeInfraResult } from '../../../../../shared/utils/validation';
-import type { QueryFaceRequest } from '@tracen/contracts';
+import type { FaceId, QueryFaceRequest } from '@tracen/contracts';
+import { InternalValidationError } from '../../../../../shared/errors/global.error';
 
 class DrizzleFaceQueryServiceImpl implements FaceQueryServiceSpec {
   constructor(private readonly db: TracenDb) {}
@@ -159,6 +164,60 @@ class DrizzleFaceQueryServiceImpl implements FaceQueryServiceSpec {
       faceEntitySummaries,
       nextCursor,
     };
+  }
+
+  async getFaceById(id: FaceId): Promise<FaceEntitySummary | null> {
+    const row = await this.db
+      .select({
+        id: faces.id,
+        userId: faces.userId,
+        name: faces.name,
+        emoji: faces.emoji,
+        description: faces.description,
+        imageId: faces.imageId,
+        visibility: faces.visibility,
+        lastPostedAt: max(seeds.createdAt).as('lastPostedAt'),
+        numberOfPosts: count(seeds.id).as('numberOfPosts'),
+      })
+      .from(faces)
+      .leftJoin(seeds, eq(seeds.faceId, faces.id))
+      .$dynamic()
+      .where(eq(faces.id, id))
+      .groupBy(
+        faces.id,
+        faces.userId,
+        faces.name,
+        faces.emoji,
+        faces.description,
+        faces.imageId,
+        faces.visibility
+      );
+
+    if (!row) {
+      return null;
+    }
+
+    if (row.length === 0) {
+      return null;
+    }
+
+    if (row.length > 1) {
+      throw new InternalValidationError(`Multiple rows found for faceId ${id}`);
+    }
+
+    return makeSafeInfraResult(FaceEntitySummarySchema, {
+      faceEntity: {
+        id: row[0].id,
+        userId: row[0].userId,
+        name: row[0].name,
+        emoji: row[0].emoji,
+        description: row[0].description,
+        imageId: row[0].imageId,
+        visibility: row[0].visibility,
+      },
+      lastPostedAt: row[0].lastPostedAt ? row[0].lastPostedAt.toISOString() : null,
+      numberOfPosts: row[0].numberOfPosts,
+    });
   }
 }
 

@@ -123,8 +123,11 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
       if (!json.success) {
         throw new Error(json.message ?? 'FaceRepository.update: backend returned failure');
       }
-      // バックエンドの PUT レスポンスには更新後の本体が含まれないため、
+      // バックエンドの PUT レスポンスには更新後の本体が含まれず、
+      // UpdateFaceRequest には visibility が含まれない(作成後は変更不可のため)ため、
       // 送信した input と faceId/userId から擬似的に Face を組み立てて返す(暫定実装)。
+      // visibility はここでは分からないため、呼び出し元(usecase層)が既存データで補完する前提の
+      // プレースホルダーを入れている(#321参照、Seed側の update と同じ考え方)。
       // image は imageId から実際の url を取得する手段が無いため url は空文字にしている。
       // バックエンドがレスポンスに本体を含めるようになったら、json から取り出す実装に差し替える(#321)。
       return {
@@ -134,7 +137,7 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
         emoji: input.emoji,
         description: input.description,
         image: input.imageId ? { id: input.imageId, url: '' } : null,
-        visibility: input.visibility,
+        visibility: 'public',
       };
     },
 
