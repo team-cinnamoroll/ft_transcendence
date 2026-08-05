@@ -8,7 +8,8 @@ import { createSeed } from './domain/usecases/seed.create.usecase';
 import { updateSeed } from './domain/usecases/seed.update.usecase';
 import { deleteSeed } from './domain/usecases/seed.delete.usecase';
 import { fetchSeedsByQuery } from './domain/usecases/seed.fetch-seeds.usecase';
-import { NotFoundError, UnauthorizedError } from '../../../shared/errors/global.error';
+import { fetchSeedById } from './domain/usecases/seed.fetch-seed.usecase';
+import { NotFoundError, ForbiddenError } from '../../../shared/errors/global.error';
 import {
   CreateSeedRequestSchema,
   UpdateSeedRequestSchema,
@@ -17,6 +18,7 @@ import {
   SeedCreateResponseSchema,
   SeedUpdateResponseSchema,
   SeedListResponseSchema,
+  SeedSingleIdResponseSchema,
   SimpleApiResponseSchema,
 } from '@tracen/contracts';
 import { makeSafeResponse } from '../../../shared/utils/validation';
@@ -59,7 +61,7 @@ export function seedRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SeedCreateResponseSchema, {
               success: false,
@@ -78,14 +80,23 @@ export function seedRouter() {
       async (c) => {
         const seedRepo = c.get('seedRepo');
         const faceRepo = c.get('faceRepo');
+        const fileQueryService = c.get('fileQueryService');
         const requesterId = c.get('requesterId');
         const { seedId } = c.req.valid('param');
         const requestBody = c.req.valid('json');
         try {
-          await updateSeed(seedRepo, faceRepo, requesterId, seedId, requestBody);
+          const updatedSeed = await updateSeed(
+            seedRepo,
+            faceRepo,
+            fileQueryService,
+            requesterId,
+            seedId,
+            requestBody
+          );
           return c.json(
             makeSafeResponse(SeedUpdateResponseSchema, {
               success: true,
+              data: { seed: updatedSeed },
             }),
             200
           );
@@ -100,11 +111,11 @@ export function seedRouter() {
               404
             );
           }
-          if (err instanceof UnauthorizedError) {
+          if (err instanceof ForbiddenError) {
             return c.json(
               makeSafeResponse(SeedUpdateResponseSchema, {
                 success: false,
-                message: 'Unauthorized to update this seed',
+                message: 'Forbidden to update this seed',
               }),
               403
             );
@@ -132,13 +143,40 @@ export function seedRouter() {
             404
           );
         }
-        if (err instanceof UnauthorizedError) {
+        if (err instanceof ForbiddenError) {
           return c.json(
             makeSafeResponse(SimpleApiResponseSchema, {
               success: false,
-              message: 'Unauthorized to delete this seed',
+              message: 'Forbidden to delete this seed',
             }),
             403
+          );
+        }
+        throw err; // グローバルエラーハンドラーに任せる
+      }
+    })
+    .get('/:seedId', cZValidator('param', SpecifySeedRequestSchema), async (c) => {
+      const seedRepo = c.get('seedRepo');
+      const fileQueryService = c.get('fileQueryService');
+      const { seedId } = c.req.valid('param');
+      try {
+        const seed = await fetchSeedById(seedRepo, fileQueryService, seedId);
+        return c.json(
+          makeSafeResponse(SeedSingleIdResponseSchema, {
+            success: true,
+            data: { seed },
+          }),
+          200
+        );
+      } catch (err) {
+        console.error('Error fetching seed by ID:', err);
+        if (err instanceof NotFoundError) {
+          return c.json(
+            makeSafeResponse(SeedSingleIdResponseSchema, {
+              success: false,
+              message: err.message,
+            }),
+            404
           );
         }
         throw err; // グローバルエラーハンドラーに任せる

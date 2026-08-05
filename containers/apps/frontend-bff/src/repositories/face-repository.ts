@@ -57,14 +57,22 @@ export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
     update: async (faceId, userId, input) => {
       // モック実装: 既存データとマージして返却するだけ（実際には保存しない）
       const existing = faces.find((f) => f.id === faceId && f.userId === userId);
+      let request = {};
+      let existingVisibility: 'public' | 'private' = 'public';
+      if (existing) {
+        const { visibility, ...rest } = existing;
+        request = rest;
+        existingVisibility = visibility;
+      }
       const updated: Face = {
         id: faceId,
         userId,
-        ...(existing ?? {}),
+        ...request,
         ...input,
         image: input.imageId
           ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
           : null, // ダミーの画像URL
+        visibility: existingVisibility, // 既存の visibility を保持する
       };
       return updated;
     },

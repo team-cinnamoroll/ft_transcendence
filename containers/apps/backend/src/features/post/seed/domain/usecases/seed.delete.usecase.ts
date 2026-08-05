@@ -1,7 +1,7 @@
 import { SeedRepositorySpec } from '../seed.repository';
 import { FaceRepositorySpec } from '../../../face/domain/face.repository';
 import { UserId } from '@tracen/contracts';
-import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../../../shared/errors/global.error';
 
 export async function deleteSeed(
   repo: SeedRepositorySpec,
@@ -16,7 +16,7 @@ export async function deleteSeed(
     }
     // 投稿の所有者チェック
     if (existingSeed.userId !== requesterId) {
-      throw new UnauthorizedError('Unauthorized to delete this seed');
+      throw new ForbiddenError(`Seed with ID ${seedId} does not belong to the current user`);
     }
 
     // APIドキュメント要件: 投稿に紐づく faceId が自分のものかを検証する
@@ -25,7 +25,7 @@ export async function deleteSeed(
       throw new NotFoundError(`Face with ID ${existingSeed.faceId} not found`);
     }
     if (face.userId !== requesterId) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         `Face with ID ${existingSeed.faceId} does not belong to the current user`
       );
     }

@@ -245,109 +245,134 @@ run_face_tests() {
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X PUT "$BASE_URL/faces/$FACE1_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"name\":\"Updated Face\",\"emoji\":\"🚀\",\"description\":\"Updated Desc\",\"imageId\":\"$IMAGE1_ID\",\"visibility\":\"public\"}")
+        -d "{\"name\":\"Updated Face\",\"emoji\":\"🚀\",\"description\":\"Updated Desc\",\"imageId\":\"$IMAGE1_ID\"}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-6: 自分の Face 更新 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_FACE_ID=$(jq -r '.data.face.id' "$TEMP_RES")
+    UPDATED_NAME=$(jq -r '.data.face.name' "$TEMP_RES")
+    UPDATED_EMOJI=$(jq -r '.data.face.emoji' "$TEMP_RES")
+    UPDATED_DESC=$(jq -r '.data.face.description' "$TEMP_RES")
+    UPDATED_IMAGE_ID=$(jq -r '.data.face.image.id' "$TEMP_RES")
+    UPDATED_VIS=$(jq -r '.data.face.visibility' "$TEMP_RES")
+    assert "F-6: 自分の Face 更新 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_FACE_ID" = "$FACE1_ID" ] && [ "$UPDATED_NAME" = "Updated Face" ] && [ "$UPDATED_EMOJI" = "🚀" ] && [ "$UPDATED_DESC" = "Updated Desc" ] && [ "$UPDATED_IMAGE_ID" = "$IMAGE1_ID" ] && [ "$UPDATED_VIS" = "public" ] && echo true || echo false)" \
+        "更新内容が正しく反映されているか"
 
     # [7] 自分の Face を更新（画像を削除 → imageId: null）
     echo "[F-7] 自分の Face を更新（画像削除 imageId=null）"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X PUT "$BASE_URL/faces/$FACE1_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"name\":\"Updated Face No Image\",\"emoji\":null,\"description\":null,\"imageId\":null,\"visibility\":\"public\"}")
+        -d "{\"name\":\"Updated Face No Image\",\"emoji\":null,\"description\":null,\"imageId\":null}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-7: 自分の Face 更新（画像削除）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_FACE_ID=$(jq -r '.data.face.id' "$TEMP_RES")
+    UPDATED_IMAGE_ID=$(jq -r '.data.face.image' "$TEMP_RES")
+    UPDATED_NAME=$(jq -r '.data.face.name' "$TEMP_RES")
+    UPDATED_EMOJI=$(jq -r '.data.face.emoji' "$TEMP_RES")
+    UPDATED_DESC=$(jq -r '.data.face.description' "$TEMP_RES")
+    UPDATED_VIS=$(jq -r '.data.face.visibility' "$TEMP_RES")
+    assert "F-7: 自分の Face 更新（画像削除）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_FACE_ID" = "$FACE1_ID" ] && [ "$UPDATED_IMAGE_ID" = "null" ] && [ "$UPDATED_NAME" = "Updated Face No Image" ] && [ "$UPDATED_EMOJI" = "null" ] && [ "$UPDATED_DESC" = "null" ] && [ "$UPDATED_VIS" = "public" ] && echo true || echo false)" \
+        "更新内容が正しく反映されているか（画像削除）"
 
-    # [8] 他人の Face を更新 → 403
-    echo "[F-8] User1 が User2 の Face を更新 → 403"
+    # [8] 自分の Face の visibility を変更しようとする → 400
+    echo "[F-8] 自分の Face の visibility を変更しようとする → 400"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X PUT "$BASE_URL/faces/$FACE1_ID" \
+        -H "Authorization: Bearer $U1_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{\"name\":\"Updated Face\",\"visibility\":\"private\"}")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    assert "F-8: visibility 変更エラー (400)" 400 "$HTTP_STATUS" "false" "$SUCCESS"
+
+    # [9] 他人の Face を更新 → 403
+    echo "[F-9] User1 が User2 の Face を更新 → 403"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X PUT "$BASE_URL/faces/$U2_FACE_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"name\":\"Hacked Face\",\"emoji\":null,\"description\":null,\"imageId\":null,\"visibility\":\"public\"}")
+        -d "{\"name\":\"Hacked Face\",\"emoji\":null,\"description\":null,\"imageId\":null}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-8: 他人 Face 更新 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-9: 他人 Face 更新 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
 
-    # [9] 存在しない faceId を更新 → 404
+    # [10] 存在しない faceId を更新 → 404
     FAKE_FACE_ID=$(generate_uuid)
-    echo "[F-9] 存在しない faceId を更新 → 404"
+    echo "[F-10] 存在しない faceId を更新 → 404"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X PUT "$BASE_URL/faces/$FAKE_FACE_ID" \
         -H "Authorization: Bearer $U1_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"name\":\"Ghost Face\",\"emoji\":null,\"description\":null,\"imageId\":null,\"visibility\":\"public\"}")
+        -d "{\"name\":\"Ghost Face\",\"emoji\":null,\"description\":null,\"imageId\":null}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-9: 存在しない faceId 更新 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-10: 存在しない faceId 更新 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # ----------------------------------------------------------------
-    # GET /faces? — Face 一覧取得
+    # GET /faces — Face 一覧取得
     # ----------------------------------------------------------------
-    echo "--- [Face] GET /faces? ---"
+    echo "--- [Face] GET /faces ---"
 
-    # [10] パラメータなし（全件取得）
-    echo "[F-10] パラメータなし（全件取得）"
+    # [11] パラメータなし（全件取得）
+    echo "[F-11] パラメータなし（全件取得）"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/faces" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
     COUNT=$(jq -r '.data.faces.faceSummaries | length' "$TEMP_RES")
-    assert "F-10: 全件取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+    assert "F-11: 全件取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
         "$([ "$COUNT" -ge 3 ] && echo true || echo false)" \
         "3件以上のFaceが取得できるか（作成した3件）"
 
-    # [11] userId フィルタ（User1 のみ）
-    echo "[F-11] userId フィルタ（User1 のみ）"
+    # [12] userId フィルタ（User1 のみ）
+    echo "[F-12] userId フィルタ（User1 のみ）"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" --data-urlencode "userId=$U1_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
     U1_FACE_COUNT=$(jq -r '.data.faces.faceSummaries | length' "$TEMP_RES")
-    assert "F-11: userId フィルタ (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+    assert "F-12: userId フィルタ (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
         "$([ "$U1_FACE_COUNT" -eq 2 ] && echo true || echo false)" \
         "User1 の Face が2件取得できるか"
 
-    # [12] q（キーワード）検索
-    echo "[F-12] q（キーワード）検索 — 'Updated' で検索"
+    # [13] q（キーワード）検索
+    echo "[F-13] q（キーワード）検索 — 'Updated' で検索"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" --data-urlencode "q=Updated" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
     KEYWORD_COUNT=$(jq -r '.data.faces.faceSummaries | length' "$TEMP_RES")
-    assert "F-12: キーワード検索 'Updated' (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+    assert "F-13: キーワード検索 'Updated' (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
         "$([ "$KEYWORD_COUNT" -ge 1 ] && echo true || echo false)" \
         "キーワードに一致するFaceが1件以上"
 
-    # [13] sortBy=lastpostedAt&order=desc
-    echo "[F-13] sortBy=lastpostedAt&order=desc"
+    # [14] sortBy=lastpostedAt&order=desc
+    echo "[F-14] sortBy=lastpostedAt&order=desc"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" \
         --data-urlencode "sortBy=lastpostedAt" \
         --data-urlencode "order=desc" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-13: sortBy=lastpostedAt&order=desc (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    assert "F-14: sortBy=lastpostedAt&order=desc (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
 
-    # [14] sortBy=seedsCount&order=asc
-    echo "[F-14] sortBy=seedsCount&order=asc"
+    # [15] sortBy=seedsCount&order=asc
+    echo "[F-15] sortBy=seedsCount&order=asc"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" \
         --data-urlencode "sortBy=seedsCount" \
         --data-urlencode "order=asc" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-14: sortBy=seedsCount&order=asc (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    assert "F-15: sortBy=seedsCount&order=asc (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
 
-    # [15] limit=1 でページネーション（nextCursor が返るか）
-    echo "[F-15] limit=1 でページネーション確認（nextCursor）"
+    # [16] limit=1 でページネーション（nextCursor が返るか）
+    echo "[F-16] limit=1 でページネーション確認（nextCursor）"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" --data-urlencode "limit=1" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
     NEXT_CURSOR=$(jq -r '.data.faces.nextCursor' "$TEMP_RES")
     FACE_COUNT_P1=$(jq -r '.data.faces.faceSummaries | length' "$TEMP_RES")
-    assert "F-15: limit=1 ページネーション (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+    assert "F-16: limit=1 ページネーション (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
         "$([ "$FACE_COUNT_P1" -eq 1 ] && [ "$NEXT_CURSOR" != "null" ] && echo true || echo false)" \
         "1件だけ返り nextCursor が存在するか"
 
-    # [16] cursor 指定で 2 ページ目を取得
-    echo "[F-16] cursor 指定で 2 ページ目取得"
+    # [17] cursor 指定で 2 ページ目を取得
+    echo "[F-17] cursor 指定で 2 ページ目取得"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" \
         -G "$BASE_URL/faces" \
         --data-urlencode "limit=1" \
@@ -356,55 +381,85 @@ run_face_tests() {
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
     FACE_COUNT_P2=$(jq -r '.data.faces.faceSummaries | length' "$TEMP_RES")
     FIRST_P2_ID=$(jq -r '.data.faces.faceSummaries[0].face.id' "$TEMP_RES")
-    assert "F-16: cursor で 2 ページ目取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+    assert "F-17: cursor で 2 ページ目取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
         "$([ "$FACE_COUNT_P2" -eq 1 ] && [ "$FIRST_P2_ID" != "$NEXT_CURSOR" ] && echo true || echo false)" \
         "1件返り、且つカーソルの Face とは別の Face か"
 
-    # [17] 認証なし → 401
-    echo "[F-17] GET /faces 認証なし → 401"
+    # [18] 認証なし → 401
+    echo "[F-18] GET /faces 認証なし → 401"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/faces")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-17: GET /faces 認証なし (401)" 401 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-18: GET /faces 認証なし (401)" 401 "$HTTP_STATUS" "false" "$SUCCESS"
+
+    # ----------------------------------------------------------------
+    # GET /faces/:faceId — Face 単体取得
+    # ----------------------------------------------------------------
+    echo "--- [Face] GET /faces/:faceId ---"
+
+    # [19] 存在する faceId を取得
+    echo "[F-19] 存在する faceId を取得"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/faces/$FACE1_ID" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    FETCHED_ID=$(jq -r '.data.face.id' "$TEMP_RES")
+    FETCHED_USER_ID=$(jq -r '.data.face.userId' "$TEMP_RES")
+    FETCHED_NAME=$(jq -r '.data.face.name' "$TEMP_RES")
+    assert "F-19: 単体取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$FETCHED_ID" = "$FACE1_ID" ] && [ "$FETCHED_USER_ID" = "$U1_ID" ] && [ -n "$FETCHED_NAME" ] && echo true || echo false)" \
+        "id, userId, name が正しく取得できているか"
+
+    # [20] 存在しない faceId を取得 → 404
+    echo "[F-20] 存在しない faceId を取得 → 404"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/faces/$FAKE_FACE_ID" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    assert "F-20: 存在しない faceId 取得 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+
+    # [21] 認証なし → 401
+    echo "[F-21] 認証なし → 401"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/faces/$FACE1_ID")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    assert "F-21: 認証なし (401)" 401 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # ----------------------------------------------------------------
     # DELETE /faces/:faceId — Face 削除
     # ----------------------------------------------------------------
     echo "--- [Face] DELETE /faces/:faceId ---"
 
-    # [18] 他人の Face を削除 → 403
-    echo "[F-18] User1 が User2 の Face を削除 → 403"
+    # [22] 他人の Face を削除 → 403
+    echo "[F-22] User1 が User2 の Face を削除 → 403"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/faces/$U2_FACE_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-18: 他人 Face 削除 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-22: 他人 Face 削除 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
 
-    # [19] 存在しない faceId を削除 → 404
-    echo "[F-19] 存在しない faceId を削除 → 404"
+    # [23] 存在しない faceId を削除 → 404
+    echo "[F-23] 存在しない faceId を削除 → 404"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/faces/$FAKE_FACE_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-19: 存在しない faceId 削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-23: 存在しない faceId 削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
-    # [20] 自分の Face を削除 → 204（FACE2 を削除）
-    echo "[F-20] 自分の Face を削除 → 204"
+    # [24] 自分の Face を削除 → 204（FACE2 を削除）
+    echo "[F-24] 自分の Face を削除 → 204"
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE_URL/faces/$FACE2_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     # 204 は body なし
     if [ "$HTTP_STATUS" -eq 204 ]; then
-        echo "  => [PASS] F-20: 自分の Face 削除 (204)"
+        echo "  => [PASS] F-24: 自分の Face 削除 (204)"
         PASS_COUNT=$((PASS_COUNT + 1))
     else
-        echo "  => [FAIL] F-20: 自分の Face 削除 (204) — HTTP Status: $HTTP_STATUS"
+        echo "  => [FAIL] F-24: 自分の Face 削除 (204) — HTTP Status: $HTTP_STATUS"
         FAIL_COUNT=$((FAIL_COUNT + 1))
     fi
     echo ""
 
-    # [21] 削除済みの Face を再削除 → 404
-    echo "[F-21] 削除済み faceId を再削除 → 404"
+    # [25] 削除済みの Face を再削除 → 404
+    echo "[F-25] 削除済み faceId を再削除 → 404"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/faces/$FACE2_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "F-21: 削除済み Face 再削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "F-25: 削除済み Face 再削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # --- Face テスト用の状態保存（FACE1_ID, U2_FACE_ID を Seed テストで使う）---
     {
@@ -528,7 +583,11 @@ run_seed_tests() {
         -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated seed without images\",\"imageIds\":[]}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-8: Seed 更新（画像なし）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_BODY=$(jq -r '.data.seed.body' "$TEMP_RES")
+    UPDATED_IMG_COUNT=$(jq -r '.data.seed.images | length' "$TEMP_RES")
+    assert "S-8: Seed 更新（画像なし）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_BODY" = "Updated seed without images" ] && [ "$UPDATED_IMG_COUNT" -eq 0 ] && echo true || echo false)" \
+        "body が更新され画像数が0か"
 
     # [9] 自分の Seed を画像1枚で更新
     echo "[S-9] 自分の Seed を更新（画像1枚）"
@@ -537,7 +596,12 @@ run_seed_tests() {
         -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated seed with 1 image\",\"imageIds\":[\"$IMAGE2_ID\"]}")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-9: Seed 更新（画像1枚）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS"
+    UPDATED_BODY=$(jq -r '.data.seed.body' "$TEMP_RES")
+    UPDATED_IMG_COUNT=$(jq -r '.data.seed.images | length' "$TEMP_RES")
+    UPDATED_IMG_ID=$(jq -r '.data.seed.images[0].id' "$TEMP_RES")
+    assert "S-9: Seed 更新（画像1枚）(200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$UPDATED_BODY" = "Updated seed with 1 image" ] && [ "$UPDATED_IMG_COUNT" -eq 1 ] && [ "$UPDATED_IMG_ID" = "$IMAGE2_ID" ] && echo true || echo false)" \
+        "body が更新され画像数が1かつ正しい画像IDか"
 
     # [10] User2 が User1 の Seed を更新 → 403
     echo "[S-10] User2 が User1 の Seed を更新 → 403"
@@ -558,9 +622,9 @@ run_seed_tests() {
     assert "S-11: 存在しない seedId 更新 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # ----------------------------------------------------------------
-    # GET /seeds? — Seed 一覧取得
+    # GET /seeds — Seed 一覧取得
     # ----------------------------------------------------------------
-    echo "--- [Seed] GET /seeds? ---"
+    echo "--- [Seed] GET /seeds ---"
 
     # [12] パラメータなし（全件取得）
     echo "[S-12] パラメータなし（全件取得）"
@@ -673,43 +737,73 @@ run_seed_tests() {
     assert "S-21: GET /seeds 認証なし (401)" 401 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # ----------------------------------------------------------------
+    # GET /seeds/:seedId — Seed 単体取得
+    # ----------------------------------------------------------------
+    echo "--- [Seed] GET /seeds/:seedId ---"
+
+    # [22] 存在する seedId を取得
+    echo "[S-22] 存在する seedId を取得"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/seeds/$SEED2_ID" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    FETCHED_ID=$(jq -r '.data.seed.id' "$TEMP_RES")
+    FETCHED_FACE_ID=$(jq -r '.data.seed.faceId' "$TEMP_RES")
+    FETCHED_USER_ID=$(jq -r '.data.seed.userId' "$TEMP_RES")
+    assert "S-22: 単体取得 (200)" 200 "$HTTP_STATUS" "true" "$SUCCESS" \
+        "$([ "$FETCHED_ID" = "$SEED2_ID" ] && [ "$FETCHED_FACE_ID" = "$FACE1_ID" ] && [ "$FETCHED_USER_ID" = "$U1_ID" ] && echo true || echo false)" \
+        "id, faceId, userId が正しく取得できているか"
+
+    # [23] 存在しない seedId を取得 → 404
+    echo "[S-23] 存在しない seedId を取得 → 404"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/seeds/$FAKE_SEED_ID" \
+        -H "Authorization: Bearer $U1_TOKEN")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    assert "S-23: 存在しない seedId 取得 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+
+    # [24] 認証なし → 401
+    echo "[S-24] 認証なし → 401"
+    HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X GET "$BASE_URL/seeds/$SEED2_ID")
+    SUCCESS=$(jq -r '.success' "$TEMP_RES")
+    assert "S-24: 認証なし (401)" 401 "$HTTP_STATUS" "false" "$SUCCESS"
+
+    # ----------------------------------------------------------------
     # DELETE /seeds/:seedId — Seed 削除
     # ----------------------------------------------------------------
     echo "--- [Seed] DELETE /seeds/:seedId ---"
 
-    # [22] 他人の Seed を削除 → 403
-    echo "[S-22] User2 が User1 の Seed を削除 → 403"
+    # [25] 他人の Seed を削除 → 403
+    echo "[S-25] User2 が User1 の Seed を削除 → 403"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/seeds/$SEED1_ID" \
         -H "Authorization: Bearer $U2_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-22: 他人 Seed 削除 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "S-25: 他人 Seed 削除 → 403" 403 "$HTTP_STATUS" "false" "$SUCCESS"
 
-    # [23] 存在しない seedId を削除 → 404
-    echo "[S-23] 存在しない seedId を削除 → 404"
+    # [26] 存在しない seedId を削除 → 404
+    echo "[S-26] 存在しない seedId を削除 → 404"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/seeds/$FAKE_SEED_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-23: 存在しない seedId 削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "S-26: 存在しない seedId 削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
-    # [24] 自分の Seed を削除 → 204（SEED3 を削除）
-    echo "[S-24] 自分の Seed を削除 → 204"
+    # [27] 自分の Seed を削除 → 204（SEED3 を削除）
+    echo "[S-27] 自分の Seed を削除 → 204"
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE_URL/seeds/$SEED3_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     if [ "$HTTP_STATUS" -eq 204 ]; then
-        echo "  => [PASS] S-24: 自分の Seed 削除 (204)"
+        echo "  => [PASS] S-27: 自分の Seed 削除 (204)"
         PASS_COUNT=$((PASS_COUNT + 1))
     else
-        echo "  => [FAIL] S-24: 自分の Seed 削除 (204) — HTTP Status: $HTTP_STATUS"
+        echo "  => [FAIL] S-27: 自分の Seed 削除 (204) — HTTP Status: $HTTP_STATUS"
         FAIL_COUNT=$((FAIL_COUNT + 1))
     fi
     echo ""
 
-    # [25] 削除済み Seed を再削除 → 404
-    echo "[S-25] 削除済み Seed を再削除 → 404"
+    # [28] 削除済み Seed を再削除 → 404
+    echo "[S-28] 削除済み Seed を再削除 → 404"
     HTTP_STATUS=$(curl -s -o "$TEMP_RES" -w "%{http_code}" -X DELETE "$BASE_URL/seeds/$SEED3_ID" \
         -H "Authorization: Bearer $U1_TOKEN")
     SUCCESS=$(jq -r '.success' "$TEMP_RES")
-    assert "S-25: 削除済み Seed 再削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
+    assert "S-28: 削除済み Seed 再削除 → 404" 404 "$HTTP_STATUS" "false" "$SUCCESS"
 
     # ----------------------------------------------------------------
     # Face 削除時の Cascade 確認（関連 Seed の削除）
