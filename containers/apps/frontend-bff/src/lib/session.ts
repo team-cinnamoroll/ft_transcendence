@@ -2,8 +2,10 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 
-const ACCESS_TOKEN_COOKIE = 'mf_access_token';
-const REFRESH_TOKEN_COOKIE = 'mf_refresh_token';
+// Middleware（src/proxy.ts）は next/headers の cookies() が使えないため、
+// Cookie名をここから import して request.cookies を直接参照する。
+export const ACCESS_TOKEN_COOKIE = 'mf_access_token';
+export const REFRESH_TOKEN_COOKIE = 'mf_refresh_token';
 
 // backend の env.ts / .env.dev のデフォルト値と揃えている（秒単位）。
 // backend側の ACCESS_TOKEN_EXPIRES_IN / REFRESH_TOKEN_EXPIRES_IN を変更した場合はこちらも更新する。
