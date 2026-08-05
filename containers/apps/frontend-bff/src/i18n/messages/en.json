@@ -10,6 +10,11 @@
     "signUpButton": "Get started",
     "signInButton": "Sign in"
   },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "Failed to load the information. Please try again.",
+    "retryButton": "Try again"
+  },
   "nav": {
     "home": "Home",
     "faces": "Reflection",

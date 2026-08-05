@@ -10,6 +10,11 @@
     "signUpButton": "Commencer",
     "signInButton": "Se connecter"
   },
+  "errorPage": {
+    "title": "Une erreur est survenue",
+    "description": "Impossible de charger les informations. Veuillez réessayer.",
+    "retryButton": "Réessayer"
+  },
   "nav": {
     "home": "Accueil",
     "faces": "Réflexion",

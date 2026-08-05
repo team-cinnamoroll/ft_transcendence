@@ -10,6 +10,11 @@
     "signUpButton": "はじめる",
     "signInButton": "ログイン"
   },
+  "errorPage": {
+    "title": "エラーが発生しました",
+    "description": "情報の取得に失敗しました。再読み込みしてください。",
+    "retryButton": "再読み込み"
+  },
   "nav": {
     "home": "ホーム",
     "faces": "振り返り",
