@@ -9,7 +9,7 @@ import {
   getSeedRepository,
 } from '@/repositories/seed-repository';
 import { findFaceById } from './faces';
-import { getCurrentUser, findUserById } from './users';
+import { findUserById } from './users';
 import { getSessionTokens } from '@/lib/session';
 import { getAuthSession } from './auth';
 
@@ -75,8 +75,7 @@ export async function findSeedById(seedId: string): Promise<Seed | null> {
 
 export async function createSeedForCurrentUser(input: CreateSeedInput): Promise<Seed> {
   const accessToken = await requireAccessToken();
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().create(accessToken, currentUser.id, input);
+  return getSeedRepository().create(accessToken, input);
 }
 
 export async function updateSeedForCurrentUser(
@@ -84,14 +83,12 @@ export async function updateSeedForCurrentUser(
   input: UpdateSeedInput
 ): Promise<Seed> {
   const accessToken = await requireAccessToken();
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().update(accessToken, seedId, currentUser.id, input);
+  return getSeedRepository().update(accessToken, seedId, input);
 }
 
 export async function deleteSeedForCurrentUser(seedId: string): Promise<void> {
   const accessToken = await requireAccessToken();
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().delete(accessToken, seedId, currentUser.id);
+  return getSeedRepository().delete(accessToken, seedId);
 }
 
 export async function getSeedDetailData(seedId: string): Promise<SeedDetailData | null> {

@@ -24,14 +24,9 @@ export type SeedRepositorySpec = {
   listByFaceId: (accessToken: string, faceId: string) => Promise<Seed[]>;
   listByUserId: (accessToken: string, userId: string) => Promise<Seed[]>;
   listByFaceIds: (accessToken: string, faceIds: string[]) => Promise<Seed[]>;
-  create: (accessToken: string, userId: string, input: CreateSeedInput) => Promise<Seed>;
-  update: (
-    accessToken: string,
-    seedId: string,
-    userId: string,
-    input: UpdateSeedInput
-  ) => Promise<Seed>;
-  delete: (accessToken: string, seedId: string, userId: string) => Promise<void>;
+  create: (accessToken: string, input: CreateSeedInput) => Promise<Seed>;
+  update: (accessToken: string, seedId: string, input: UpdateSeedInput) => Promise<Seed>;
+  delete: (accessToken: string, seedId: string) => Promise<void>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -115,7 +110,7 @@ export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
       return sortByCreatedAtDesc(results.flat());
     },
 
-    create: async (accessToken, _userId, input) => {
+    create: async (accessToken, input) => {
       const res = await createBackendClient(accessToken).api.v1.seeds.$post({
         json: input,
       });
@@ -129,7 +124,7 @@ export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
       return json.data.seed;
     },
 
-    update: async (accessToken, seedId, _userId, input) => {
+    update: async (accessToken, seedId, input) => {
       const res = await createBackendClient(accessToken).api.v1.seeds[':seedId'].$put({
         param: { seedId },
         json: input,

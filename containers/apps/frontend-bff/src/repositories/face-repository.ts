@@ -28,16 +28,11 @@ export type FaceRepositorySpec = {
   /** ID でフェイスを1件取得（存在しない場合は null） */
   findById: (accessToken: string, faceId: string) => Promise<Face | null>;
   /** フェイスを作成 */
-  create: (accessToken: string, userId: string, input: CreateFaceInput) => Promise<Face>;
+  create: (accessToken: string, input: CreateFaceInput) => Promise<Face>;
   /** フェイスを更新 */
-  update: (
-    accessToken: string,
-    faceId: string,
-    userId: string,
-    input: UpdateFaceInput
-  ) => Promise<Face>;
+  update: (accessToken: string, faceId: string, input: UpdateFaceInput) => Promise<Face>;
   /** フェイスを削除 */
-  delete: (accessToken: string, faceId: string, userId: string) => Promise<void>;
+  delete: (accessToken: string, faceId: string) => Promise<void>;
   /** 全フェイス一覧を取得（検索用） */
   listAll: (accessToken: string) => Promise<Face[]>;
 };
@@ -107,7 +102,7 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
       return json.data.face;
     },
 
-    create: async (accessToken, _userId, input) => {
+    create: async (accessToken, input) => {
       const res = await createBackendClient(accessToken).api.v1.faces.$post({
         json: input,
       });
@@ -121,7 +116,7 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
       return json.data.face;
     },
 
-    update: async (accessToken, faceId, _userId, input) => {
+    update: async (accessToken, faceId, input) => {
       const res = await createBackendClient(accessToken).api.v1.faces[':faceId'].$put({
         param: { faceId },
         json: input,
