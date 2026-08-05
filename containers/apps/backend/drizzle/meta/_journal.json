@@ -29,6 +29,13 @@
       "when": 1784124863038,
       "tag": "0003_rare_mojo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785862824737,
+      "tag": "0004_nosy_rumiko_fujikawa",
+      "breakpoints": true
     }
   ]
 }
