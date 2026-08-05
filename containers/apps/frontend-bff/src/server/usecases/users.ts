@@ -6,45 +6,39 @@ import type {
   ProfileWithRelationship,
 } from '@/types/user-profile';
 import type { ApiResult } from '@/lib/api-error';
-import { getUserDirectoryRepository } from '@/repositories/user-directory-repository';
 import { getUserProfileRepository } from '@/repositories/user-profile-repository';
 import { getAuthSession } from './auth';
 
 /**
  * ログイン中ユーザーを取得する。
- * ログイン中は id/name/avatarUrl/badge をすべて本物のプロフィールで上書きする
- * （Face/Seedが本物のバックエンドAPIに接続済みのため、id もモックのまま維持する必要がなくなった）。
- * 未ログイン、または本物のプロフィール取得に失敗した場合はモックをそのまま返す。
+ * ページ保護により、この関数は保護されたページの中でしか呼ばれない
+ * （＝呼ばれた時点で必ずログイン済み）ことが前提になっている。
+ * 未ログイン、または本物のプロフィール取得に失敗した場合は例外をthrowし、
+ * error.tsx による汎用エラー表示に委ねる（モックへのフォールバックはしない）。
  */
 export async function getCurrentUser(): Promise<UserProfile> {
-  const mockUser = await getUserDirectoryRepository().getCurrentUser();
-
   const session = await getAuthSession();
   if (!session) {
-    return mockUser;
+    throw new Error('getCurrentUser: 未ログイン状態で呼び出されました');
   }
 
   const realProfile = await getUserProfileRepository().getMyProfile(session.accessToken);
   if (!realProfile) {
-    return mockUser;
+    throw new Error('getCurrentUser: プロフィールの取得に失敗しました');
   }
 
   return {
-    ...mockUser,
+    ...realProfile,
     id: session.userId,
-    name: realProfile.name,
-    avatar: realProfile.avatar || null,
-    badge: realProfile.badge,
   };
 }
 
 /**
  * 指定したユーザーのプロフィールを、閲覧者から見た関係(relationship)込みで取得する。
  *
- * ログイン中は name/avatarUrl/badge を本物のプロフィールで上書きする。
- * モックの一覧に存在しない id でも、バックエンドに実在するユーザーであれば取得できる
- * （Seed経由などモックの id しか知らない経路と、実在ユーザーを直接指す経路の両方に対応するため）。
- * どちらの取得も失敗した場合のみ null を返す。
+ * 「自分自身」を指す場合は getCurrentUser と同じ扱いになる（未ログイン・取得失敗は例外throw）。
+ * 「他人」のプロフィールが見つからない場合は、実在しない userId が指定された場合など
+ * 正常系でも起こりうるため、null を返す（呼び出し元で「見つかりません」表示に使う）。
  */
 export async function findUserById(userId: string): Promise<ProfileWithRelationship | null> {
   // 自分自身を指している場合は、getCurrentUserと同じ本物データの上書きを行う。
@@ -56,29 +50,23 @@ export async function findUserById(userId: string): Promise<ProfileWithRelations
     };
   }
 
-  const mockUser = await getUserDirectoryRepository().findById(userId);
-
   const session = await getAuthSession();
-  const realProfile = session
-    ? await getUserProfileRepository().getProfileById(session.accessToken, userId)
-    : null;
+  if (!session) {
+    throw new Error('findUserById: 未ログイン状態で呼び出されました');
+  }
 
-  if (!mockUser && !realProfile) {
+  const realProfile = await getUserProfileRepository().getProfileById(session.accessToken, userId);
+  if (!realProfile) {
     return null;
   }
 
-  if (realProfile) {
-    return {
-      id: userId,
-      name: realProfile.name,
-      avatar: realProfile.avatar || null,
-      badge: realProfile.badge,
-      relationship: realProfile.relationship,
-    };
-  }
-
-  // realProfile が無い場合、上の null チェックにより mockUser は必ず存在する
-  return { ...(mockUser as UserProfile), relationship: null };
+  return {
+    id: userId,
+    name: realProfile.name,
+    avatar: realProfile.avatar || null,
+    badge: realProfile.badge,
+    relationship: realProfile.relationship,
+  };
 }
 
 /**
