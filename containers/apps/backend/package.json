@@ -35,7 +35,7 @@
     "@tracen/contracts": "workspace:*",
     "argon2": "^0.44.0",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "ioredis": "^5.11.1",
     "mime": "^4.1.0",
     "pino": "^10.3.1",

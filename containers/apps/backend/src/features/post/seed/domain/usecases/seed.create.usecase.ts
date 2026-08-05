@@ -7,7 +7,7 @@ import type { UserId, CreateSeedRequest, Seed } from '@tracen/contracts';
 import { SeedEntitySchema } from '../seed.entity';
 import { toSeed } from './seed.mapper';
 import { makeSafeUsecaseResult } from '../../../../../shared/utils/validation';
-import { NotFoundError, UnauthorizedError } from '../../../../../shared/errors/global.error';
+import { NotFoundError, ForbiddenError } from '../../../../../shared/errors/global.error';
 
 export async function createSeed(
   repo: SeedRepositorySpec,
@@ -23,7 +23,7 @@ export async function createSeed(
       throw new NotFoundError(`Face with ID ${request.faceId} not found`);
     }
     if (face.userId !== requesterId) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         `Face with ID ${request.faceId} does not belong to the current user`
       );
     }
