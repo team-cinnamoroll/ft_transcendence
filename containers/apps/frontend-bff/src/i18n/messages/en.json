@@ -3,6 +3,13 @@
     "title": "MultiFace",
     "description": "A short-text SNS to record your many faces"
   },
+  "landing": {
+    "title": "MultiFace",
+    "tagline": "A short-text SNS to record your many faces",
+    "description": "Keep track of your hobbies and everyday moments, organized by \"face\". Build as many sides of yourself as you like, all in one account.",
+    "signUpButton": "Get started",
+    "signInButton": "Sign in"
+  },
   "nav": {
     "home": "Home",
     "faces": "Reflection",

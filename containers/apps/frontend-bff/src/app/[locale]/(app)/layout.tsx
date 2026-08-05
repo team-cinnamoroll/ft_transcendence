@@ -8,14 +8,19 @@ import { getLayoutData } from '@/server/usecases/layout';
 import { getAuthSession } from '@/server/usecases/auth';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [
-    { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers },
-    session,
-  ] = await Promise.all([getLayoutData(), getAuthSession()]);
-  const isAuthenticated = session !== null;
+  const session = await getAuthSession();
+
+  // 未ログイン時はナビゲーション類(SideNav/AppHeader等)を表示しない。
+  // 現状ルート(/)以外のページはまだ保護されていないが、その対応は別Issue(ページ保護)で行う。
+  if (!session) {
+    return <>{children}</>;
+  }
+
+  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
+    await getLayoutData();
 
   return (
-    <HeartbeatProvider isAuthenticated={isAuthenticated}>
+    <HeartbeatProvider isAuthenticated={true}>
       <div
         className="flex h-screen w-full overflow-hidden"
         style={{ background: 'var(--mf-bg-light)' }}
@@ -23,19 +28,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <SideNav
           faces={myFaces}
           user={currentUser}
-          realUserId={session?.userId}
+          realUserId={session.userId}
           seeds={mySeeds}
           faceCount={myFaces.length}
           seedCount={mySeeds.length}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={true}
         />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           <AppHeader
             user={currentUser}
-            realUserId={session?.userId}
+            realUserId={session.userId}
             faceCount={myFaces.length}
             seedCount={mySeeds.length}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={true}
           />
           <div className="flex flex-1 min-h-0 overflow-hidden">
             <main

@@ -3,6 +3,13 @@
     "title": "MultiFace",
     "description": "フェイス（多面性）で記録する SNS"
   },
+  "landing": {
+    "title": "MultiFace",
+    "tagline": "フェイス（多面性）で記録する SNS",
+    "description": "趣味や日々の出来事を「フェイス」ごとに分けて記録できます。ひとつのアカウントの中に、いくつもの自分を作りましょう。",
+    "signUpButton": "はじめる",
+    "signInButton": "ログイン"
+  },
   "nav": {
     "home": "ホーム",
     "faces": "振り返り",

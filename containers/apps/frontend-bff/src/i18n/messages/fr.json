@@ -3,6 +3,13 @@
     "title": "MultiFace",
     "description": "Un SNS pour enregistrer vos multiples facettes"
   },
+  "landing": {
+    "title": "MultiFace",
+    "tagline": "Un SNS pour enregistrer vos multiples facettes",
+    "description": "Gardez une trace de vos passions et de vos moments du quotidien, organisés par « facette ». Créez autant de facettes de vous-même que vous le souhaitez, au sein d'un même compte.",
+    "signUpButton": "Commencer",
+    "signInButton": "Se connecter"
+  },
   "nav": {
     "home": "Accueil",
     "faces": "Réflexion",
