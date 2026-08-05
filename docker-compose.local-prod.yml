@@ -129,6 +129,7 @@ services:
       local-prod:
         aliases:
           - tracen.local
+          - api.tracen.local
 
 networks:
   local-prod:
