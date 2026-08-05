@@ -1,5 +1,10 @@
 _This project has been created as part of the 42 curriculum by hurabe, nkawaguc, katakada, kharuya._
 
+<!-- ## 2. Description
+- プロジェクトの目的(goal)と簡潔な概要を明確に提示する。
+- プロジェクトの明確な名前を含める。
+- 主要な機能（key features）を含める。 -->
+
 # Description
 
 **MultiFace** は、ユーザーの「多面性」を単位として日々のアクティビティを書き留めるための、個人向けのアクティビティログサービスです。
@@ -21,6 +26,11 @@ _This project has been created as part of the 42 curriculum by hurabe, nkawaguc,
 - **ファイルストレージ**: 画像のアップロード / ダウンロード / 削除（public / private バケット分離）
 - **多言語対応**: 英語・フランス語・日本語の 3 言語（`next-intl`）
 - **運用基盤**: Prometheus + Grafana によるメトリクス監視、ELK によるログ可視化
+
+<!-- ## 3. Instructions
+- コンパイル・インストール・実行に関する情報を記載する。
+- 必要な前提条件をすべて挙げる（ソフトウェア、ツール、バージョン、`.env` 設定などの構成情報）。
+- プロジェクトを動かすための手順を段階的に書く。 -->
 
 # Instruction
 
@@ -169,6 +179,10 @@ pnpm local-prod:down                            # 本番相当環境
 
 `containers/infra/nginx/nginx.conf` を編集した場合、反映には nginx の再起動が必要です。同ファイルには Docker DNS（127.0.0.11）で upstream を再解決する設定を入れており、コンテナ再起動による IP 変化に伴う 502 を防いでいます。
 
+<!-- ## 4. Resources
+- テーマに関連する定番の参考資料を列挙する（ドキュメント、記事、チュートリアル等）。
+- AI をどのように使ったかの説明を含める。どのタスクに、プロジェクトのどの部分に使ったかを明示する。 -->
+
 # Resources
 
 ## 参考資料
@@ -208,12 +222,7 @@ pnpm local-prod:down                            # 本番相当環境
 
 ## AI の利用について
 
-本プロジェクトでは、開発補助として生成 AI（Claude Code / GitHub Copilot）を継続的に利用しました。利用方針と対象タスクはリポジトリ内に明文化しています。
-
-### 方針の明文化
-
-- `CLAUDE.md` / `containers/apps/frontend-bff/CLAUDE.md`: 応答方針、最小差分での変更、破壊的変更の禁止、検証方針などを規定
-- `.github/copilot-instructions.md` / `.github/instructions/frontend-bff.instructions.md`: Copilot 向けの同等の指示
+本プロジェクトでは、開発補助として生成 AI（Claude Code / GitHub Copilot）を継続的に利用しました。
 
 ### AI を使ったタスク
 
@@ -231,7 +240,17 @@ pnpm local-prod:down                            # 本番相当環境
 - セキュリティ・認証・シークレットに関わる変更の可否判断
 - 依存パッケージの脆弱性対応方針（例外運用を含む）
 
+<!-- ## 5. Team Information
+README 冒頭に挙げた各チームメンバーについて、以下を書く。
+- 割り当てられた役割（PO、PM、Tech Lead、Developers 等）
+- その責務の簡潔な説明 -->
+
 # Team Information
+
+<!-- ## 6. Project Management
+- チームがどのように作業を組織したか（タスク分担、ミーティング等）
+- プロジェクト管理に使ったツール（GitHub Issues、Trello 等）
+- 使用したコミュニケーションチャネル（Discord、Slack 等） -->
 
 # Project Management
 
@@ -282,6 +301,13 @@ CI サーバーではなく、**Git hooks とローカル CI** で品質を担�
 - 依存パッケージの脆弱性は `pnpm audit` と OSV-Scanner で検出し、`pnpm-workspace.yaml` の `overrides` で安全なバージョンに固定
 - 直ちに解消できない脆弱性は、期限を区切って扱う運用ルール（`docs/for_dev/SECURITY_EXCEPTION_3DAY_RULE.md`）を定義
 - コミット前に gitleaks でシークレットの混入を検査
+
+<!-- ## 7. Technical Stack
+- 使用したフロントエンドの技術・フレームワーク
+- 使用したバックエンドの技術・フレームワーク
+- データベースシステムと、それを選んだ理由
+- その他の重要な技術・ライブラリ
+- 主要な技術的選択の正当化s-->
 
 # Technical Stack
 
@@ -359,6 +385,11 @@ backend（Hono）
 ### 監視・ログ基盤を分離した構成
 
 アプリケーション本体を改修せずに可観測性を確保するため、メトリクスは各サービスの exporter を Prometheus が収集し、ログはコンテナの標準出力を Filebeat が収集する構成にしました。アプリ側は「決まった形の JSON を標準出力に出す」だけでよく、収集基盤と疎結合に保てます。
+
+<!-- ## 8. Database Schema
+- データベース構造の視覚的な表現、または記述
+- テーブル／コレクションと、それらの関係
+- 主要なフィールドとデータ型 -->
 
 # Database Schema
 
@@ -470,6 +501,11 @@ erDiagram
 
 スキーマは Drizzle ORM の TypeScript 定義を正とし、`drizzle-kit` で生成した SQL マイグレーション（`containers/apps/backend/drizzle/`）で適用します。`RUN_MIGRATIONS=true` の場合、バックエンド起動時に自動適用されます。
 
+<!-- ## 9. Features List
+- 実装した機能の完全なリスト
+- 各機能を担当したチームメンバー
+- 各機能の動作の簡潔な説明 -->
+
 # Features List
 
 ## 認証・アカウント
@@ -494,13 +530,12 @@ erDiagram
 
 ## フェイス・シード（投稿）
 
-| 機能                     | 概要                                                              | 担当 |
-| ------------------------ | ----------------------------------------------------------------- | ---- |
-| フェイス作成・一覧・詳細 | 多面性ごとのカテゴリを作成し、一覧・詳細を表示                    | TBD  |
-| フェイスの公開範囲設定   | `public` / `private` を切り替え。非公開フェイスは本人のみ参照可能 | TBD  |
-| シード投稿               | フェイスに紐づく本文の投稿                                        | TBD  |
-| シードへの画像添付       | 複数画像を表示順つきで添付                                        | TBD  |
-| シード詳細表示           | 個別シードの詳細ページと BFF 経由の取得 API                       | TBD  |
+| 機能                     | 概要                                           | 担当 |
+| ------------------------ | ---------------------------------------------- | ---- |
+| フェイス作成・一覧・詳細 | 多面性ごとのカテゴリを作成し、一覧・詳細を表示 | TBD  |
+| シード投稿               | フェイスに紐づく本文の投稿                     | TBD  |
+| シードへの画像添付       | 複数画像を表示順つきで添付                     | TBD  |
+| シード詳細表示           | 個別シードの詳細ページと BFF 経由の取得 API    | TBD  |
 
 ## フレンドシップ
 
@@ -551,6 +586,18 @@ erDiagram
 - 動画の添付には対応していません。
 - CI は GitHub Actions ではなく、ローカル CI と Git hooks で実行しています。
 
+<!-- ## 10. Modules
+- 選択した全モジュールのリスト（Major / Minor）
+- 点数計算（Major = 2pts、Minor = 1pt）
+- 各モジュール選択の正当化。特に custom の "Modules of choice" について。
+- 各モジュールをどのように実装したか
+- 各モジュールを担当したチームメンバー -->
+
 # Modules
+
+<!-- ## 11. Individual Contributions
+- 各メンバーが何に貢献したかの詳細な内訳
+- 各人が実装した具体的な機能・モジュール・コンポーネント
+- 直面した課題と、それをどう乗り越えたか -->
 
 # Individual Contributions
