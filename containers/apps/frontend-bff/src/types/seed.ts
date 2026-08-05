@@ -7,6 +7,7 @@ export type {
   SeedCreateResponse as SeedCreate,
   SeedUpdateResponse as SeedUpdate,
   SeedListResponse as SeedList,
+  SeedSingleIdResponse as SeedSingleId,
 } from '@tracen/contracts';
 
 type SuccessData<T extends { success: true }> = T extends { data: infer D } ? D : never;

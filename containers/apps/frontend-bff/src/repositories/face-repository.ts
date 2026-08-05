@@ -8,6 +8,7 @@ import type {
   FaceList,
   FaceCreate,
   FaceUpdate,
+  FaceSingleId,
 } from '@/types/face';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
@@ -45,10 +46,8 @@ export type FaceRepositorySpec = {
 
 /**
  * GET /faces をカーソルで全ページ辿って集める。
- *
- * バックエンドには「単一IDで1件取得する」API(GET /faces/:faceId)が無く、
- * 一覧検索APIしか存在しないための暫定実装。
- * 単一取得APIが追加され次第、findById はこの全件走査をやめて置き換える想定(#320)。
+ * listByUserId/listAll のように一覧全体が必要な場合に使う。
+ * 単一IDでの取得(findById)は GET /faces/:faceId を1回呼ぶだけで完結する(#320)。
  */
 async function fetchAllFaceSummaries(
   accessToken: string,
@@ -91,10 +90,21 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
     },
 
     findById: async (accessToken, faceId) => {
-      // userId が分からない状態で呼ばれるため、userId 絞り込みは使えず全件走査になる(暫定実装、#320参照)
-      const summaries = await fetchAllFaceSummaries(accessToken);
-      const found = summaries.find((summary) => summary.face.id === faceId);
-      return found ? found.face : null;
+      const res = await createBackendClient(accessToken).api.v1.faces[':faceId'].$get({
+        param: { faceId },
+      });
+      if (res.status === 404) {
+        return null;
+      }
+      if (!res.ok) {
+        console.error('FaceRepository: backend request failed', res.status);
+        return null;
+      }
+      const json = (await res.json()) as FaceSingleId;
+      if (!json.success) {
+        return null;
+      }
+      return json.data.face;
     },
 
     create: async (accessToken, _userId, input) => {

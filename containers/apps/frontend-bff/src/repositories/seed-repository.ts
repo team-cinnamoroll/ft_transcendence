@@ -7,6 +7,7 @@ import type {
   SeedList,
   SeedCreate,
   SeedUpdate,
+  SeedSingleId,
 } from '@/types/seed';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
@@ -37,10 +38,8 @@ export type SeedRepositorySpec = {
 
 /**
  * GET /seeds をカーソルで全ページ辿って集める。
- *
- * バックエンドには「単一IDで1件取得する」API(GET /seeds/:seedId)が無く、
- * 一覧検索APIしか存在しないための暫定実装。
- * 単一取得APIが追加され次第、findById はこの全件走査をやめて置き換える想定(#320)。
+ * listAll/listByFaceId/listByUserId/listByFaceIds のように一覧全体が必要な場合に使う。
+ * 単一IDでの取得(findById)は GET /seeds/:seedId を1回呼ぶだけで完結する(#320)。
  */
 async function fetchAllSeeds(
   accessToken: string,
@@ -79,9 +78,21 @@ async function fetchAllSeeds(
 export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
   return {
     findById: async (accessToken, seedId) => {
-      // userId が分からない状態で呼ばれるため、userId 絞り込みは使えず全件走査になる(暫定実装、#320参照)
-      const allSeeds = await fetchAllSeeds(accessToken);
-      return allSeeds.find((s) => s.id === seedId) ?? null;
+      const res = await createBackendClient(accessToken).api.v1.seeds[':seedId'].$get({
+        param: { seedId },
+      });
+      if (res.status === 404) {
+        return null;
+      }
+      if (!res.ok) {
+        console.error('SeedRepository: backend request failed', res.status);
+        return null;
+      }
+      const json = (await res.json()) as SeedSingleId;
+      if (!json.success) {
+        return null;
+      }
+      return json.data.seed;
     },
 
     listAll: async (accessToken) => {

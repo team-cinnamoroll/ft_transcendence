@@ -8,6 +8,7 @@ export type {
   FaceCreateResponse as FaceCreate,
   FaceUpdateResponse as FaceUpdate,
   FaceListResponse as FaceList,
+  FaceSingleIdResponse as FaceSingleId,
 } from '@tracen/contracts';
 
 type SuccessData<T extends { success: true }> = T extends { data: infer D } ? D : never;
