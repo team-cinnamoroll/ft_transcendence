@@ -3,33 +3,20 @@
   "dockerComposeFile": ["../docker-compose.dev.yml"],
   "service": "dev-container",
   "workspaceFolder": "/workspace",
-  "runServices": [
-    "dev-container",
-    "backend",
-    "frontend",
-    "nginx",
-    "db",
-    "redis",
-    "prometheus",
-    "grafana",
-    "alertmanager",
-    "node-exporter",
-    "cadvisor",
-    "postgres-exporter",
-    "redis-exporter",
-    "nginx-exporter"
-  ],
+  "runServices": ["dev-container", "backend", "frontend", "nginx", "db", "redis"],
   "forwardPorts": [3000, 8000, 8080, 5432, 4983, 6379, 9200, 5601, 9090, 3001, 9093],
   "mounts": [
-    "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached"
+    // ワークスペース本体のバインドマウント
+    "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+    // ルートおよびサブパッケージごとの node_modules ボリューム分離設定
+    "source=tracen-root-node-modules-${devcontainerId},target=/workspace/node_modules,type=volume",
+    "source=tracen-contracts-node-modules-${devcontainerId},target=/workspace/containers/apps/contracts/node_modules,type=volume",
+    "source=tracen-backend-node-modules-${devcontainerId},target=/workspace/containers/apps/backend/node_modules,type=volume",
+    "source=tracen-frontend-bff-node-modules-${devcontainerId},target=/workspace/containers/apps/frontend-bff/node_modules,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
-  "postStartCommand": "bash .devcontainer/scripts/fix-docker-sock-perms.sh || true; bash .devcontainer/scripts/fix-node-modules-perms.sh",
+  "postStartCommand": "echo 'Container started successfully'",
   "features": {
-    "ghcr.io/devcontainers/features/node:2": {
-      "version": "lts",
-      "pnpmVersion": "11.16.0"
-    },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
