@@ -205,6 +205,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.size=5GB'
     volumes:
       - ./containers/infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./containers/infra/monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
@@ -250,7 +251,7 @@ services:
 
   # コンテナ単位のリソース使用量(どのコンテナが CPU/メモリを食っているか)
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: ghcr.io/google/cadvisor:v0.57.0
     privileged: true
     volumes:
       - /:/rootfs:ro
