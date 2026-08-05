@@ -34,7 +34,6 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isValid },
   } = useZodForm(UpdateFaceRequestSchema, {
     mode: 'onChange',
@@ -43,10 +42,8 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
       emoji: face.emoji,
       description: face.description,
       imageId: originalImageId,
-      visibility: face.visibility,
     },
   });
-  const visibility = watch('visibility');
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(face.image?.url ?? null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -420,7 +417,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
             )}
           </div>
 
-          {/* 公開/非公開トグル */}
+          {/* 公開設定（作成後は変更不可のため読み取り専用で表示） */}
           <div
             style={{
               display: 'flex',
@@ -434,45 +431,26 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--mf-text)' }}>
-                {t('privateLabel')}
+                {face.visibility === 'private' ? t('privateLabel') : t('publicLabel')}
               </span>
               <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>
-                {t('privateDescription')}
+                {t('visibilityImmutableHint')}
               </span>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={visibility === 'private'}
-              onClick={() =>
-                setValue('visibility', visibility === 'private' ? 'public' : 'private')
-              }
+            <span
               style={{
-                position: 'relative',
-                width: 44,
-                height: 24,
                 flexShrink: 0,
+                padding: '4px 12px',
                 borderRadius: 999,
-                background: visibility === 'private' ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background 0.2s',
+                fontSize: 11.5,
+                fontWeight: 700,
+                background:
+                  face.visibility === 'private' ? 'var(--mf-brand)' : 'var(--mf-surface-tint)',
+                color: face.visibility === 'private' ? '#fff' : 'var(--mf-text-sub)',
               }}
             >
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: visibility === 'private' ? 22 : 2,
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
-                  transition: 'left 0.2s',
-                }}
-              />
-            </button>
+              {face.visibility === 'private' ? t('privateLabel') : t('publicLabel')}
+            </span>
           </div>
 
           {error && (
