@@ -129,7 +129,7 @@ export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
       return json.data.seed;
     },
 
-    update: async (accessToken, seedId, userId, input) => {
+    update: async (accessToken, seedId, _userId, input) => {
       const res = await createBackendClient(accessToken).api.v1.seeds[':seedId'].$put({
         param: { seedId },
         json: input,
@@ -141,19 +141,7 @@ export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
       if (!json.success) {
         throw new Error(json.message ?? 'SeedRepository.update: backend returned failure');
       }
-      // バックエンドのPUTレスポンスには更新後の本体が含まれず、
-      // かつ UpdateSeedInput には faceId/createdAt が含まれないため、Repository層だけでは
-      // 正しい Seed を組み立てられない(暫定実装、#321参照)。
-      // faceId/createdAt/images は呼び出し元(usecase層)が既存データで補完する前提のプレースホルダー。
-      return {
-        id: seedId,
-        faceId: '',
-        userId,
-        body: input.body,
-        images: [],
-        createdAt: '',
-        updatedAt: new Date().toISOString(),
-      };
+      return json.data.seed;
     },
 
     delete: async (accessToken, seedId) => {

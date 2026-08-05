@@ -128,13 +128,7 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
         void deleteUploadedFileAction(originalImageId);
       }
 
-      // バックエンドのPUTレスポンスには更新後の本体が含まれず、
-      // Repository層は画像urlを空文字で擬似的に組み立てて返す(#321参照)。
-      // 保存直後の一覧表示が壊れないよう、ここではアップロード時のプレビューURLで補完する。
-      onUpdate({
-        ...result.data,
-        image: data.imageId ? { id: data.imageId, url: previewUrl ?? '' } : null,
-      });
+      onUpdate(result.data);
       onClose();
     });
   };

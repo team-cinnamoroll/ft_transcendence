@@ -55,16 +55,7 @@ export async function updateFace(
   if (!accessToken) {
     throw new Error('updateFace: not authenticated');
   }
-
-  // UpdateFaceRequest には visibility が含まれない(作成後は変更不可のため)。
-  // Repository層は visibility にプレースホルダーを入れて返すため、ここで既存の値に補完する。
-  const existing = await getFaceRepository().findById(accessToken, faceId);
-  const updated = await getFaceRepository().update(accessToken, faceId, userId, input);
-
-  if (!existing) {
-    return updated;
-  }
-  return { ...updated, visibility: existing.visibility };
+  return await getFaceRepository().update(accessToken, faceId, userId, input);
 }
 
 export async function updateFaceForCurrentUser(

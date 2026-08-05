@@ -85,22 +85,7 @@ export async function updateSeedForCurrentUser(
 ): Promise<Seed> {
   const accessToken = await requireAccessToken();
   const currentUser = await getCurrentUser();
-
-  // バックエンドのPUTレスポンスには更新後の本体が含まれず、
-  // UpdateSeedInputにはfaceId/createdAtが含まれないため、
-  // 更新前に既存のSeedを取得しておき、Repository層が返す不完全な値をここで補完する(#321参照)。
-  const existing = await getSeedRepository().findById(accessToken, seedId);
-  const updated = await getSeedRepository().update(accessToken, seedId, currentUser.id, input);
-
-  if (!existing) {
-    return updated;
-  }
-  return {
-    ...updated,
-    faceId: existing.faceId,
-    createdAt: existing.createdAt,
-    images: existing.images,
-  };
+  return getSeedRepository().update(accessToken, seedId, currentUser.id, input);
 }
 
 export async function deleteSeedForCurrentUser(seedId: string): Promise<void> {
