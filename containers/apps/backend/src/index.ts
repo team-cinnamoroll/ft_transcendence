@@ -11,6 +11,7 @@ import { runMigrationsOnce } from './shared/infra/db/migrate';
 import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
 import { injectJwtAuthDeps } from './shared/middleware/inject-jwk-auth';
+import { jwtRateLimiter } from './shared/middleware/jwt-rate-limiter';
 
 import type { AppEnv } from './shared/types/hono';
 import { publicApiRouter } from './public.handler';
@@ -60,6 +61,7 @@ const apiRoutes = apiApp
   .basePath('/api/v1')
   .route('/', publicApiRouter())
   .use('*', injectJwtAuthDeps())
+  .use('*', jwtRateLimiter)
   .route('/', protectedApiRouter());
 
 app.route('/', apiRoutes);
