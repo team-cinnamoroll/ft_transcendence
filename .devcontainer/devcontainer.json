@@ -9,10 +9,22 @@
     // ワークスペース本体のバインドマウント
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
     // ルートおよびサブパッケージごとの node_modules ボリューム分離設定
-    "source=tracen-root-node-modules-${devcontainerId},target=/workspace/node_modules,type=volume",
-    "source=tracen-contracts-node-modules-${devcontainerId},target=/workspace/containers/apps/contracts/node_modules,type=volume",
-    "source=tracen-backend-node-modules-${devcontainerId},target=/workspace/containers/apps/backend/node_modules,type=volume",
-    "source=tracen-frontend-bff-node-modules-${devcontainerId},target=/workspace/containers/apps/frontend-bff/node_modules,type=volume"
+    // docker-compose.dev.yml の backend / frontend サービスと同じ固定名を使い、
+    // devcontainer と backend/frontend サービスが同一ボリュームを共有する。
+    // これにより devcontainer 内の pnpm add が各サービスに即時反映される。
+    //
+    // [設計判断] ${devcontainerId} を付けない理由:
+    //   - ${devcontainerId} は compose のボリューム名解決タイミング（コンテナ起動前）に
+    //     compose 側へ渡す手段がなく、devcontainer 専用ボリュームと compose サービスの
+    //     ボリュームが乖離してしまう。
+    //   - このプロジェクトは 1 開発者 × 1 クローンの単一 devcontainer 運用を想定しており、
+    //     複数インスタンス間のボリューム競合リスクは実質的にない。
+    //   - Rebuild 後の UID/GID 不一致は bootstrap.sh の ensure_node_owned_dir が
+    //     起動のたびに自動修正するため、固定名でも安全性は維持される。
+    "source=tracen-root-node-modules,target=/workspace/node_modules,type=volume",
+    "source=tracen-contracts-node-modules,target=/workspace/containers/apps/contracts/node_modules,type=volume",
+    "source=tracen-backend-node-modules,target=/workspace/containers/apps/backend/node_modules,type=volume",
+    "source=tracen-frontend-bff-node-modules,target=/workspace/containers/apps/frontend-bff/node_modules,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
   "postStartCommand": "echo 'Container started successfully'",
