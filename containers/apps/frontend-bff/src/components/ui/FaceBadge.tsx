@@ -1,4 +1,5 @@
-import { getFaceColor, getFaceKanji, getFaceTitle } from '@/lib/display';
+import Image from 'next/image';
+import { getFaceImageUrl, getFaceTitle } from '@/lib/display';
 import type { Face } from '@/types/face';
 
 type FaceBadgeProps = {
@@ -8,30 +9,28 @@ type FaceBadgeProps = {
 };
 
 const FaceBadge = ({ face, size = 36, radius = 10 }: FaceBadgeProps) => {
-  const color = getFaceColor(face.id);
-  const kanji = getFaceKanji(getFaceTitle(face));
-
   return (
     <div
       style={{
         width: size,
         height: size,
         borderRadius: radius,
-        background: face.image?.url ? undefined : color,
-        backgroundImage: face.image?.url ? `url(${face.image.url})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        color: '#fff',
-        fontFamily: 'var(--mf-font-serif)',
-        fontSize: size * 0.48,
-        fontWeight: 500,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        overflow: 'hidden',
         flexShrink: 0,
       }}
     >
-      {!face.image?.url && kanji}
+      <Image
+        src={getFaceImageUrl(face)}
+        alt={getFaceTitle(face)}
+        width={size}
+        height={size}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+      />
     </div>
   );
 };

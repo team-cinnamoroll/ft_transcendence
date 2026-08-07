@@ -2,10 +2,16 @@ import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 
 const DEFAULT_AVATAR_URL = '/images/default-avatar.png';
+const DEFAULT_FACE_IMAGE_URL = '/images/default-face.png';
 
 /** avatarUrl が未設定の場合にデフォルト画像へフォールバックする */
 export const getAvatarUrl = (user: Pick<UserProfile, 'avatar'>): string => {
   return user.avatar?.url || DEFAULT_AVATAR_URL;
+};
+
+/** Faceの画像が未設定の場合にデフォルト画像へフォールバックする */
+export const getFaceImageUrl = (face: Pick<Face, 'image'>): string => {
+  return face.image?.url || DEFAULT_FACE_IMAGE_URL;
 };
 
 export const createLookupMap = <K extends PropertyKey, T>(
@@ -38,18 +44,4 @@ export const getFaceColor = (faceId: string): string => {
   if (!digits) return MF_FACE_COLORS[0];
   const sum = digits.split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   return MF_FACE_COLORS[sum % MF_FACE_COLORS.length];
-};
-
-/**
- * faceTitle（例："📚 読書"）から最初の非絵文字・非スペース文字を返す。
- * サロゲートペア（絵文字）をスキップして最初の通常文字を取得する。
- */
-export const getFaceKanji = (faceTitle: string): string => {
-  for (const char of faceTitle) {
-    const cp = char.codePointAt(0) ?? 0;
-    if (cp > 0xffff) continue; // サロゲートペア（絵文字）をスキップ
-    if (cp < 0x0021) continue; // 制御文字・スペースをスキップ
-    return char;
-  }
-  return '?';
 };

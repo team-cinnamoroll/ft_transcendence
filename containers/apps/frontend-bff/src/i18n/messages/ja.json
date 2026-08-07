@@ -3,6 +3,18 @@
     "title": "MultiFace",
     "description": "フェイス（多面性）で記録する SNS"
   },
+  "landing": {
+    "title": "MultiFace",
+    "tagline": "フェイス（多面性）で記録する SNS",
+    "description": "趣味や日々の出来事を「フェイス」ごとに分けて記録できます。ひとつのアカウントの中に、いくつもの自分を作りましょう。",
+    "signUpButton": "はじめる",
+    "signInButton": "ログイン"
+  },
+  "errorPage": {
+    "title": "エラーが発生しました",
+    "description": "情報の取得に失敗しました。再読み込みしてください。",
+    "retryButton": "再読み込み"
+  },
   "nav": {
     "home": "ホーム",
     "faces": "振り返り",
@@ -35,13 +47,18 @@
     "textareaPlaceholder": "気軽に書き留めてみましょう…",
     "addPhoto": "写真を追加",
     "addPhotoAriaLabel": "画像を添付",
-    "addLink": "リンクを追加",
     "charCount": "{n} 文字",
-    "draftSaved": "下書き保存済",
     "attachedImageAlt": "添付画像{n}",
     "removeImageAriaLabel": "画像{n}を削除",
+    "uploadingImageAlt": "アップロード中の画像{n}",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "投稿",
-    "submitting": "投稿中..."
+    "submitting": "投稿中...",
+    "errorGeneric": "投稿に失敗しました。時間をおいて再度お試しください。"
+  },
+  "seedImageUpload": {
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。"
   },
   "createFaceModal": {
     "title": "新規フェイスを作成",
@@ -57,8 +74,13 @@
     "descriptionPlaceholder": "このフェイスについて説明してください",
     "privateLabel": "非公開",
     "privateDescription": "オンにすると自分だけが閲覧できます",
+    "image": "画像",
+    "imageSelectButton": "画像を選択",
+    "uploading": "アップロード中…",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "作成する",
-    "submitting": "作成中..."
+    "submitting": "作成中...",
+    "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。"
   },
   "editFaceModal": {
     "title": "フェイスを編集",
@@ -73,9 +95,19 @@
     "description": "説明文",
     "descriptionPlaceholder": "このフェイスについて説明してください",
     "privateLabel": "非公開",
-    "privateDescription": "オンにすると自分だけが閲覧できます",
+    "publicLabel": "公開",
+    "visibilityImmutableHint": "作成後は変更できません",
+    "image": "画像",
+    "imageSelectButton": "画像を選択",
+    "uploading": "アップロード中…",
+    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "保存する",
-    "submitting": "保存中..."
+    "submitting": "保存中...",
+    "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。"
+  },
+  "faceImageUpload": {
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。"
   },
   "face": {
     "private": "非公開",
@@ -387,7 +419,8 @@
     "required": "*",
     "bodyPlaceholder": "内容を入力してください",
     "submit": "保存する",
-    "submitting": "保存中..."
+    "submitting": "保存中...",
+    "errorGeneric": "シードの保存に失敗しました。時間をおいて再度お試しください。"
   },
   "seedActions": {
     "editSeed": "編集",

@@ -1,8 +1,16 @@
 import 'server-only';
 
-import { type CreateFaceRequest, type UpdateFaceRequest } from '@/types/face';
-import { type Face } from '@/types/face';
-import { faces } from '@/mocks/faces';
+import type {
+  CreateFaceRequest,
+  UpdateFaceRequest,
+  FaceSummary,
+  Face,
+  FaceList,
+  FaceCreate,
+  FaceUpdate,
+  FaceSingleId,
+} from '@/types/face';
+import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
@@ -16,83 +24,134 @@ export type UpdateFaceInput = UpdateFaceRequest;
 /** FaceRepository が提供するメソッドの契約（Spec） */
 export type FaceRepositorySpec = {
   /** 指定ユーザーのフェイス一覧を取得 */
-  listByUserId: (userId: string) => Promise<Face[]>;
+  listByUserId: (accessToken: string, userId: string) => Promise<Face[]>;
   /** ID でフェイスを1件取得（存在しない場合は null） */
-  findById: (faceId: string) => Promise<Face | null>;
-  /** フェイスを作成（モック実装はダミー返却） */
-  create: (userId: string, input: CreateFaceInput) => Promise<Face>;
-  /** フェイスを更新（モック実装はダミー返却） */
-  update: (faceId: string, userId: string, input: UpdateFaceInput) => Promise<Face>;
-  /** フェイスを削除（モック実装はno-op） */
-  delete: (faceId: string, userId: string) => Promise<void>;
+  findById: (accessToken: string, faceId: string) => Promise<Face | null>;
+  /** フェイスを作成 */
+  create: (accessToken: string, input: CreateFaceInput) => Promise<Face>;
+  /** フェイスを更新 */
+  update: (accessToken: string, faceId: string, input: UpdateFaceInput) => Promise<Face>;
+  /** フェイスを削除 */
+  delete: (accessToken: string, faceId: string) => Promise<void>;
   /** 全フェイス一覧を取得（検索用） */
-  listAll: () => Promise<Face[]>;
+  listAll: (accessToken: string) => Promise<Face[]>;
 };
 
-// ─── モック実装 ────────────────────────────────────────────────
+// ─── バックエンドAPI実装 ────────────────────────────────────────
 
-export function createFaceMockRepositoryImpl(): FaceRepositorySpec {
+/**
+ * GET /faces をカーソルで全ページ辿って集める。
+ * listByUserId/listAll のように一覧全体が必要な場合に使う。
+ * 単一IDでの取得(findById)は GET /faces/:faceId を1回呼ぶだけで完結する(#320)。
+ */
+async function fetchAllFaceSummaries(
+  accessToken: string,
+  query: { userId?: string } = {}
+): Promise<FaceSummary[]> {
+  const all: FaceSummary[] = [];
+  let cursor: string | undefined;
+
+  for (;;) {
+    const res = await createBackendClient(accessToken).api.v1.faces.$get({
+      query: {
+        ...(query.userId ? { userId: query.userId } : {}),
+        limit: '100',
+        ...(cursor ? { cursor } : {}),
+      },
+    });
+    if (!res.ok) {
+      console.error('FaceRepository: backend request failed', res.status);
+      break;
+    }
+    const json = (await res.json()) as FaceList;
+    if (!json.success) {
+      break;
+    }
+    all.push(...json.data.faces.faceSummaries);
+    if (!json.data.faces.nextCursor) {
+      break;
+    }
+    cursor = json.data.faces.nextCursor;
+  }
+
+  return all;
+}
+
+export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
   return {
-    listByUserId: async (userId) => {
-      return faces.filter((face) => face.userId === userId);
+    listByUserId: async (accessToken, userId) => {
+      const summaries = await fetchAllFaceSummaries(accessToken, { userId });
+      return summaries.map((summary) => summary.face);
     },
 
-    findById: async (faceId) => {
-      return faces.find((face) => face.id === faceId) ?? null;
-    },
-
-    create: async (userId, input) => {
-      // モック実装: ダミーの ID を付与して返却するだけ（実際には保存しない）
-      const newFace: Face = {
-        id: `face-mock-${Date.now()}`,
-        userId,
-        ...input,
-        image: input.imageId
-          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
-          : null, // ダミーの画像URL
-      };
-      return newFace;
-    },
-
-    update: async (faceId, userId, input) => {
-      // モック実装: 既存データとマージして返却するだけ（実際には保存しない）
-      const existing = faces.find((f) => f.id === faceId && f.userId === userId);
-      let request = {};
-      let existingVisibility: 'public' | 'private' = 'public';
-      if (existing) {
-        const { visibility, ...rest } = existing;
-        request = rest;
-        existingVisibility = visibility;
+    findById: async (accessToken, faceId) => {
+      const res = await createBackendClient(accessToken).api.v1.faces[':faceId'].$get({
+        param: { faceId },
+      });
+      if (res.status === 404) {
+        return null;
       }
-      const updated: Face = {
-        id: faceId,
-        userId,
-        ...request,
-        ...input,
-        image: input.imageId
-          ? { id: input.imageId, url: 'https://example.com/mock-image.jpg' }
-          : null, // ダミーの画像URL
-        visibility: existingVisibility, // 既存の visibility を保持する
-      };
-      return updated;
+      if (!res.ok) {
+        console.error('FaceRepository: backend request failed', res.status);
+        return null;
+      }
+      const json = (await res.json()) as FaceSingleId;
+      if (!json.success) {
+        return null;
+      }
+      return json.data.face;
     },
 
-    delete: async () => {
-      // モック実装: no-op（実際には削除しない）
-      // 本番実装では、_faceId, _userIdの二つの引数を定義する
+    create: async (accessToken, input) => {
+      const res = await createBackendClient(accessToken).api.v1.faces.$post({
+        json: input,
+      });
+      if (!res.ok) {
+        throw new Error(`FaceRepository.create: backend request failed (${res.status})`);
+      }
+      const json = (await res.json()) as FaceCreate;
+      if (!json.success) {
+        throw new Error(json.message ?? 'FaceRepository.create: backend returned failure');
+      }
+      return json.data.face;
     },
 
-    listAll: async () => {
-      return faces;
+    update: async (accessToken, faceId, input) => {
+      const res = await createBackendClient(accessToken).api.v1.faces[':faceId'].$put({
+        param: { faceId },
+        json: input,
+      });
+      if (!res.ok) {
+        throw new Error(`FaceRepository.update: backend request failed (${res.status})`);
+      }
+      const json = (await res.json()) as FaceUpdate;
+      if (!json.success) {
+        throw new Error(json.message ?? 'FaceRepository.update: backend returned failure');
+      }
+      return json.data.face;
+    },
+
+    delete: async (accessToken, faceId) => {
+      const res = await createBackendClient(accessToken).api.v1.faces[':faceId'].$delete({
+        param: { faceId },
+      });
+      if (!res.ok) {
+        throw new Error(`FaceRepository.delete: backend request failed (${res.status})`);
+      }
+    },
+
+    listAll: async (accessToken) => {
+      const summaries = await fetchAllFaceSummaries(accessToken);
+      return summaries.map((summary) => summary.face);
     },
   };
 }
 
-export const faceMockRepositoryImpl: FaceRepositorySpec = createFaceMockRepositoryImpl();
+export const faceApiRepositoryImpl: FaceRepositorySpec = createFaceApiRepositoryImpl();
 
 /** Provider: DI の入口（実装の選択はここに閉じ込める） */
 export const getFaceRepository = createSingletonProvider<FaceRepositorySpec>(
-  () => faceMockRepositoryImpl
+  () => faceApiRepositoryImpl
 );
 
 /** 互換用: 従来の import 口（Server 側でのみ使用する） */

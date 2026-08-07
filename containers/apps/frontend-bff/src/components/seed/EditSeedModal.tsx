@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import type { Seed } from '@/types/seed';
+import { UpdateSeedRequestSchema } from '@tracen/contracts';
+import type { Seed, UpdateSeedRequest } from '@/types/seed';
 import { updateSeedAction } from '@/server/actions/seeds';
 import { useTranslations } from 'next-intl';
-
-type FieldErrors = Record<string, string[]>;
+import { useZodForm } from '@/lib/use-zod-form';
 
 type Props = {
   isOpen: boolean;
@@ -15,31 +15,39 @@ type Props = {
 };
 
 const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
-  const [body, setBody] = useState(seed.body);
   const [isPending, startTransition] = useTransition();
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('editSeedModal');
 
-  const isValid = body.trim().length > 0;
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useZodForm(UpdateSeedRequestSchema, {
+    mode: 'onChange',
+    defaultValues: { body: seed.body, imageIds: seed.images.map((image) => image.id) },
+  });
 
-  const handleSubmit = () => {
-    if (!isValid || isPending) return;
+  const onValid = (data: UpdateSeedRequest) => {
+    if (isPending) return;
 
+    setError(null);
     startTransition(async () => {
-      const result = await updateSeedAction(seed.id, { body: body.trim() });
+      const result = await updateSeedAction(seed.id, data);
       if (!result.success) {
-        setFieldErrors(result.errors);
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setError(firstFieldError ?? t('errorGeneric'));
         return;
       }
-      setFieldErrors(null);
       onUpdate(result.data);
       onClose();
     });
   };
 
   const handleClose = () => {
-    setFieldErrors(null);
-    setBody(seed.body);
+    setError(null);
+    reset();
     onClose();
   };
 
@@ -134,8 +142,7 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
             </label>
             <textarea
               id="edit-seed-body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
+              {...register('body')}
               placeholder={t('bodyPlaceholder')}
               rows={5}
               style={{
@@ -152,18 +159,30 @@ const EditSeedModal = ({ isOpen, seed, onClose, onUpdate }: Props) => {
                 resize: 'none',
                 lineHeight: 1.65,
               }}
+              aria-invalid={!!errors.body}
+              aria-describedby={errors.body ? 'edit-seed-body-error' : undefined}
             />
-            {fieldErrors?.body?.map((msg) => (
-              <span key={msg} style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}>
-                {msg}
+            {errors.body && (
+              <span
+                id="edit-seed-body-error"
+                role="alert"
+                style={{ fontSize: 11.5, color: 'var(--mf-danger, #e53e3e)' }}
+              >
+                {errors.body.message}
               </span>
-            ))}
+            )}
           </div>
+
+          {error && (
+            <p role="alert" style={{ margin: 0, fontSize: 12, color: 'var(--mf-danger, #e53e3e)' }}>
+              {error}
+            </p>
+          )}
 
           {/* 保存ボタン */}
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={handleSubmit(onValid)}
             disabled={!isValid || isPending}
             style={{
               width: '100%',

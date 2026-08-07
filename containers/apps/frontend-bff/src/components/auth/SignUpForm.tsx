@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AuthSignUpRequestSchema } from '@tracen/contracts';
 import type { AuthSignUpRequest } from '@/types/auth';
 import { signUpAction } from '@/server/actions/auth';
-import { buildZodErrorMap } from '@/lib/zod-error-map';
+import { useZodForm } from '@/lib/use-zod-form';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -32,7 +30,6 @@ const labelStyle: React.CSSProperties = {
 
 const SignUpForm = () => {
   const t = useTranslations('signUp');
-  const tValidation = useTranslations('validation');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -41,9 +38,7 @@ const SignUpForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<AuthSignUpRequest>({
-    resolver: zodResolver(AuthSignUpRequestSchema, { error: buildZodErrorMap(tValidation) }),
-  });
+  } = useZodForm(AuthSignUpRequestSchema);
 
   const onValid = (data: AuthSignUpRequest) => {
     if (isPending) return;

@@ -87,7 +87,6 @@ type Props = {
   isOwner: boolean;
   outgoingLinks: SeedLink[];
   incomingLinks: SeedLink[];
-  users: UserProfile[];
 };
 
 const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLinks }: Props) => {

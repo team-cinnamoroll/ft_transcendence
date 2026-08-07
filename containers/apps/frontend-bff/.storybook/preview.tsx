@@ -1,18 +1,8 @@
 import React from 'react';
 import type { Preview, Decorator } from '@storybook/react';
 import '../src/app/globals.css';
-import { DetailPanelProvider } from '../src/lib/detail-panel-context';
 import { NextIntlClientProvider } from 'next-intl';
 import ja from '../src/i18n/messages/ja.json';
-
-// ─── グローバルデコレーター ──────────────────────────────────
-// useDetailPanel() を使うコンポーネントが全ストーリーで動作するよう
-// DetailPanelProvider で囲む。
-const withDetailPanel: Decorator = (Story) => (
-  <DetailPanelProvider>
-    <Story />
-  </DetailPanelProvider>
-);
 
 // next-intl の Provider をグローバルに適用する。
 // locale は 'ja' 固定でよい（Storybook はロケール切り替えを想定しない）。
@@ -34,7 +24,7 @@ const customViewports = {
 };
 
 const preview: Preview = {
-  decorators: [withNextIntl, withDetailPanel],
+  decorators: [withNextIntl],
   parameters: {
     viewport: {
       viewports: customViewports,
