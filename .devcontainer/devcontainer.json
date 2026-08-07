@@ -9,10 +9,10 @@
     // ワークスペース本体のバインドマウント
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
     // ルートおよびサブパッケージごとの node_modules ボリューム分離設定
-    "source=tracen-root-node-modules-${devcontainerId},target=/workspace/node_modules,type=volume",
-    "source=tracen-contracts-node-modules-${devcontainerId},target=/workspace/containers/apps/contracts/node_modules,type=volume",
-    "source=tracen-backend-node-modules-${devcontainerId},target=/workspace/containers/apps/backend/node_modules,type=volume",
-    "source=tracen-frontend-bff-node-modules-${devcontainerId},target=/workspace/containers/apps/frontend-bff/node_modules,type=volume"
+    "source=tracen-root-node-modules,target=/workspace/node_modules,type=volume",
+    "source=tracen-contracts-node-modules,target=/workspace/containers/apps/contracts/node_modules,type=volume",
+    "source=tracen-backend-node-modules,target=/workspace/containers/apps/backend/node_modules,type=volume",
+    "source=tracen-frontend-bff-node-modules,target=/workspace/containers/apps/frontend-bff/node_modules,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
   "postStartCommand": "echo 'Container started successfully'",

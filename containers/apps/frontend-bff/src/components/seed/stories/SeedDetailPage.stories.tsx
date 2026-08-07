@@ -34,7 +34,6 @@ export const AsOwner: Story = {
     isOwner: true,
     outgoingLinks: [],
     incomingLinks: [],
-    users,
   },
 };
 
@@ -46,6 +45,5 @@ export const AsVisitor: Story = {
     isOwner: false,
     outgoingLinks: [{ seed: linkedSeed, face: linkedFace }],
     incomingLinks: [{ seed: linkedSeed, face: linkedFace }],
-    users,
   },
 };

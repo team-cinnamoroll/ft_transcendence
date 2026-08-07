@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
-import { type UserProfile } from '@/types/user-profile';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import { useTranslations } from 'next-intl';
@@ -187,7 +186,6 @@ const NotifItem = ({
 
 type Props = {
   notifications: Notification[];
-  users: UserProfile[];
   faces: Face[];
   seeds: Seed[];
 };
