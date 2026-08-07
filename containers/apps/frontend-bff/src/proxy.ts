@@ -19,6 +19,16 @@ const PUBLIC_PATHS = ['/', '/privacy', '/terms', '/auth-check'];
 // ログイン済みの場合のみホームへリダイレクトする認証ページ
 const AUTH_PATHS = ['/sign-in', '/sign-up'];
 
+/**
+ * Server Action呼び出し(Next.jsが自動付与する `Next-Action` ヘッダー付きのリクエスト)かどうかを判定する。
+ * Server Actionへの応答としてリダイレクトを返すと、ブラウザ側が期待するレスポンス形式と食い違い
+ * 「An unexpected response was received from the server.」という Runtime Error になるため、
+ * このリクエストには認証NGでもリダイレクトを返さない。
+ */
+function isServerActionRequest(request: NextRequest): boolean {
+  return request.headers.has('next-action');
+}
+
 /** ロケールプレフィックスの有無に関わらず、現在のロケールとプレフィックスを除いたパスを求める */
 function resolveLocaleAwarePath(pathname: string): { locale: string; path: string } {
   const segments = pathname.split('/');
@@ -84,9 +94,13 @@ export default async function middleware(request: NextRequest) {
   const { locale, path } = resolveLocaleAwarePath(request.nextUrl.pathname);
   const { isAuthenticated, refreshedTokens, shouldClearSession } = await resolveAuthState(request);
   const isAuthPath = AUTH_PATHS.includes(path);
+  const isServerAction = isServerActionRequest(request);
 
   let response: NextResponse;
-  if (!PUBLIC_PATHS.includes(path) && !isAuthenticated && !isAuthPath) {
+  if (isServerAction) {
+    // Server Actionへはリダイレクトを返さず、常にそのまま通す(認証NGの場合の扱いは呼び出し先のActionに委ねる)
+    response = await intlMiddleware(request);
+  } else if (!PUBLIC_PATHS.includes(path) && !isAuthenticated && !isAuthPath) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/sign-in`;
     response = NextResponse.redirect(url);
