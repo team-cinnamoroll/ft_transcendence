@@ -22,15 +22,12 @@ export async function getCurrentUser(): Promise<UserProfile> {
     throw new Error('getCurrentUser: 未ログイン状態で呼び出されました');
   }
 
-  const realProfile = await getUserProfileRepository().getMyProfile(session.accessToken);
-  if (!realProfile) {
+  const profile = await getUserProfileRepository().getMyProfile(session.accessToken);
+  if (!profile) {
     throw new Error('getCurrentUser: プロフィールの取得に失敗しました');
   }
 
-  return {
-    ...realProfile,
-    id: session.userId,
-  };
+  return profile;
 }
 
 /**
@@ -41,7 +38,7 @@ export async function getCurrentUser(): Promise<UserProfile> {
  * 正常系でも起こりうるため、null を返す（呼び出し元で「見つかりません」表示に使う）。
  */
 export async function findUserById(userId: string): Promise<ProfileWithRelationship | null> {
-  // 自分自身を指している場合は、getCurrentUserと同じ本物データの上書きを行う。
+  // 自分自身を指している場合は、getCurrentUserの結果に relationship: null を添えて返す。
   const displayUser = await getCurrentUser();
   if (userId === displayUser.id) {
     return {
@@ -55,18 +52,7 @@ export async function findUserById(userId: string): Promise<ProfileWithRelations
     throw new Error('findUserById: 未ログイン状態で呼び出されました');
   }
 
-  const realProfile = await getUserProfileRepository().getProfileById(session.accessToken, userId);
-  if (!realProfile) {
-    return null;
-  }
-
-  return {
-    id: userId,
-    name: realProfile.name,
-    avatar: realProfile.avatar || null,
-    badge: realProfile.badge,
-    relationship: realProfile.relationship,
-  };
+  return await getUserProfileRepository().getProfileById(session.accessToken, userId);
 }
 
 /**
