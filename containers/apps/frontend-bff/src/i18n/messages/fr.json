@@ -110,9 +110,7 @@
     "errorUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer."
   },
   "face": {
-    "private": "Privé",
-    "subscribe": "S'abonner",
-    "subscribed": "✓ Abonné"
+    "private": "Privé"
   },
   "fab": {
     "ariaLabel": "Publier"
@@ -178,8 +176,7 @@
     "oldest": "Plus anciens",
     "images": "Avec images",
     "seeds": "Graines",
-    "monthly": "Ce mois",
-    "subscribers": "Abonnés"
+    "monthly": "Ce mois"
   },
   "seedFeed": {
     "noSeeds": "Aucune graine pour l'instant"

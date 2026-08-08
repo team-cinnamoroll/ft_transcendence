@@ -110,9 +110,7 @@
     "errorUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。"
   },
   "face": {
-    "private": "非公開",
-    "subscribe": "サブスクする",
-    "subscribed": "✓ サブスク中"
+    "private": "非公開"
   },
   "fab": {
     "ariaLabel": "投稿する"
@@ -178,8 +176,7 @@
     "oldest": "古い順",
     "images": "画像あり",
     "seeds": "シード",
-    "monthly": "今月",
-    "subscribers": "サブスク"
+    "monthly": "今月"
   },
   "seedFeed": {
     "noSeeds": "シードがありません"

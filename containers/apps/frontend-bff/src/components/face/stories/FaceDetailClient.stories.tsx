@@ -17,19 +17,9 @@ const meta: Meta<typeof FaceDetailClient> = {
 export default meta;
 type Story = StoryObj<typeof FaceDetailClient>;
 
-export const AsOwner: Story = {
+export const Default: Story = {
   args: {
     face,
-    isOwner: true,
-    seeds: faceSeeds,
-    users,
-  },
-};
-
-export const AsVisitor: Story = {
-  args: {
-    face,
-    isOwner: false,
     seeds: faceSeeds,
     users,
   },

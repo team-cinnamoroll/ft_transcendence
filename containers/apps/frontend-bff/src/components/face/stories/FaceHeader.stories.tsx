@@ -20,11 +20,11 @@ export const Default: Story = {
 };
 
 export const AsOwner: Story = {
-  args: { face, isOwner: true, onSortChange: () => {} },
+  args: { face, onSortChange: () => {} },
 };
 
 export const WithImage: Story = {
-  args: { face: faceWithImage, isOwner: false },
+  args: { face: faceWithImage },
 };
 
 export const PrivateFace: Story = {
@@ -34,6 +34,5 @@ export const PrivateFace: Story = {
       visibility: 'private',
       name: '非公開フェイス',
     },
-    isOwner: true,
   },
 };

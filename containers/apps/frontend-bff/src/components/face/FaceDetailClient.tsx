@@ -11,28 +11,23 @@ import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
 
 const REFERENCE_MONTH = '2026-04';
-const SUBSCRIBER_COUNT_MOCK = 12;
 
 type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 type Props = {
   face: Face;
-  isOwner: boolean;
   currentUserId: string;
   linkableCurrentUser: UserProfile;
   seeds: Seed[];
   users: UserProfile[];
-  isSubscribed?: boolean;
 };
 
 const FaceDetailClient = ({
   face,
-  isOwner,
   currentUserId,
   linkableCurrentUser,
   seeds: initialSeeds,
   users,
-  isSubscribed = false,
 }: Props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [seeds, setSeeds] = useState<Seed[]>(initialSeeds);
@@ -75,12 +70,9 @@ const FaceDetailClient = ({
       <div style={{ borderBottom: '0.5px solid var(--mf-line)' }}>
         <FaceHeader
           face={face}
-          isOwner={isOwner}
           onSortChange={setSortOrder}
           totalSeeds={totalSeeds}
           monthlySeeds={monthlySeeds}
-          subscriberCount={SUBSCRIBER_COUNT_MOCK}
-          isSubscribed={isSubscribed}
         />
       </div>
       <section>

@@ -110,9 +110,7 @@
     "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "face": {
-    "private": "Private",
-    "subscribe": "Subscribe",
-    "subscribed": "✓ Subscribed"
+    "private": "Private"
   },
   "fab": {
     "ariaLabel": "Post"
@@ -178,8 +176,7 @@
     "oldest": "Oldest",
     "images": "With images",
     "seeds": "Seeds",
-    "monthly": "This month",
-    "subscribers": "Subscribers"
+    "monthly": "This month"
   },
   "seedFeed": {
     "noSeeds": "No seeds yet"

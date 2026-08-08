@@ -26,8 +26,6 @@ const FaceDetailPage = async ({ params }: Props) => {
     findUsersByIds(seeds.map((seed) => seed.userId)),
   ]);
 
-  const isOwner = face.userId === currentUser.id;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header
@@ -62,7 +60,6 @@ const FaceDetailPage = async ({ params }: Props) => {
       <main>
         <FaceDetailClient
           face={face}
-          isOwner={isOwner}
           currentUserId={currentUser.id}
           linkableCurrentUser={linkableCurrentUser}
           seeds={seeds}
