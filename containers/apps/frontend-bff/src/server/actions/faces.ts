@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { CreateFaceRequestSchema, UpdateFaceRequestSchema } from '@tracen/contracts';
 import type { Face } from '@/types/face';
 import type { ApiErrorKind } from '@/lib/api-error';
-import { createFace, updateFace, deleteFace } from '@/server/usecases/faces';
+import { createFace, updateFace, deleteFace, searchFaces } from '@/server/usecases/faces';
 import { uploadMyFile } from '@/server/usecases/file-storage';
 import { buildZodErrorMap } from '@/lib/zod-error-map';
 import type { ActionResult } from './result';
@@ -53,6 +53,11 @@ export async function deleteFaceAction(faceId: string): Promise<ActionResult<voi
   revalidatePath('/faces');
 
   return { success: true, data: undefined };
+}
+
+/** キーワードでフェイスを検索する(検索バー用)。userId指定時は対象ユーザーに絞り込む */
+export async function searchFacesAction(query: { q?: string; userId?: string }): Promise<Face[]> {
+  return searchFaces(query);
 }
 
 type UploadFaceImageResult =

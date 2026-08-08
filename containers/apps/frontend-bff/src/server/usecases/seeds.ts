@@ -57,6 +57,18 @@ export async function listAllSeeds(): Promise<Seed[]> {
   return getSeedRepository().listAll(accessToken);
 }
 
+/**
+ * キーワードでシードを検索する。
+ * userIdを指定すると対象ユーザーのシードのみに絞り込める(未指定なら全体)。
+ */
+export async function searchSeeds(query: { q?: string; userId?: string }): Promise<Seed[]> {
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return getSeedRepository().search(accessToken, query);
+}
+
 export async function listSeedsByFaceIds(faceIds: string[]): Promise<Seed[]> {
   const { accessToken } = await getSessionTokens();
   if (!accessToken) {

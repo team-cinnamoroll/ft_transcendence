@@ -24,6 +24,18 @@ export async function listAllFaces(): Promise<Face[]> {
   return await getFaceRepository().listAll(accessToken);
 }
 
+/**
+ * キーワードでフェイスを検索する。
+ * userIdを指定すると対象ユーザーのフェイスのみに絞り込める(未指定なら全体)。
+ */
+export async function searchFaces(query: { q?: string; userId?: string }): Promise<Face[]> {
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return await getFaceRepository().search(accessToken, query);
+}
+
 export async function findFaceById(faceId: string): Promise<Face | null> {
   const { accessToken } = await getSessionTokens();
   if (!accessToken) {

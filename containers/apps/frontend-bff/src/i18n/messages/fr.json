@@ -148,6 +148,7 @@
     "searchPlaceholder": "Rechercher vos facettes et graines",
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
+    "searching": "Recherche en cours…",
     "noMatch": "Aucun résultat",
     "noFilteredFaces": "Aucune facette trouvée pour \"{query}\"",
     "sortLastAt": "Dernière publication",

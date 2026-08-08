@@ -148,6 +148,7 @@
     "searchPlaceholder": "自分のフェイス・シードを検索",
     "facesSection": "フェイス ({n})",
     "seedsSection": "シード ({n})",
+    "searching": "検索中…",
     "noMatch": "該当なし",
     "noFilteredFaces": "「{query}」に一致するフェイスが見つかりません",
     "sortLastAt": "最終投稿日順",

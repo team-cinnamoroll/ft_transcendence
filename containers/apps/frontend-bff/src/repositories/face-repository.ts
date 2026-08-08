@@ -35,6 +35,8 @@ export type FaceRepositorySpec = {
   delete: (accessToken: string, faceId: string) => Promise<void>;
   /** 全フェイス一覧を取得（検索用） */
   listAll: (accessToken: string) => Promise<Face[]>;
+  /** キーワード検索（q）でフェイスを取得。該当する全件をカーソルで辿って集める */
+  search: (accessToken: string, query: { q?: string; userId?: string }) => Promise<Face[]>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -46,7 +48,7 @@ export type FaceRepositorySpec = {
  */
 async function fetchAllFaceSummaries(
   accessToken: string,
-  query: { userId?: string } = {}
+  query: { userId?: string; q?: string } = {}
 ): Promise<FaceSummary[]> {
   const all: FaceSummary[] = [];
   let cursor: string | undefined;
@@ -55,6 +57,7 @@ async function fetchAllFaceSummaries(
     const res = await createBackendClient(accessToken).api.v1.faces.$get({
       query: {
         ...(query.userId ? { userId: query.userId } : {}),
+        ...(query.q ? { q: query.q } : {}),
         limit: '100',
         ...(cursor ? { cursor } : {}),
       },
@@ -142,6 +145,11 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
 
     listAll: async (accessToken) => {
       const summaries = await fetchAllFaceSummaries(accessToken);
+      return summaries.map((summary) => summary.face);
+    },
+
+    search: async (accessToken, query) => {
+      const summaries = await fetchAllFaceSummaries(accessToken, query);
       return summaries.map((summary) => summary.face);
     },
   };

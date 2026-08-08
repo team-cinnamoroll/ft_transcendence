@@ -148,6 +148,7 @@
     "searchPlaceholder": "Search your faces & seeds",
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
+    "searching": "Searching…",
     "noMatch": "No results",
     "noFilteredFaces": "No faces found for \"{query}\"",
     "sortLastAt": "Last post",
