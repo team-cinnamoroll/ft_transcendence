@@ -2,13 +2,11 @@ import 'server-only';
 
 import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
-import type { Notification } from '@/types/notification';
 import type { UserProfile } from '@/types/user-profile';
 import { getCurrentUser } from './users';
 import { listFacesByUserId } from './faces';
 import { listSeedsByUserId } from './seeds';
 import { getSubscribedFaceIds } from './subscriptions';
-import { listNotifications } from './notifications';
 
 /**
  * GDPR エクスポートで返すユーザーデータ一式。
@@ -24,7 +22,6 @@ export type UserDataExport = {
   seeds: Seed[];
   /** 購読中フェイスの ID 一覧 */
   subscribedFaceIds: string[];
-  notifications: Notification[];
 };
 
 /**
@@ -34,11 +31,10 @@ export type UserDataExport = {
 export async function exportCurrentUserData(): Promise<UserDataExport> {
   const currentUser = await getCurrentUser();
 
-  const [faces, seeds, subscribedFaceIds, notifications] = await Promise.all([
+  const [faces, seeds, subscribedFaceIds] = await Promise.all([
     listFacesByUserId(currentUser.id),
     listSeedsByUserId(currentUser.id),
     getSubscribedFaceIds(),
-    listNotifications(),
   ]);
 
   return {
@@ -47,6 +43,5 @@ export async function exportCurrentUserData(): Promise<UserDataExport> {
     faces,
     seeds,
     subscribedFaceIds,
-    notifications,
   };
 }

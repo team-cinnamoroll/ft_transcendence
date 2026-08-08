@@ -244,33 +244,11 @@
     "subscriberCount": "{n, plural, one {# subscriber} other {# subscribers}}",
     "subscribeAction": "Subscribe"
   },
-  "notificationList": {
-    "noNotifications": "No notifications yet",
-    "linkedBadge": "🔗 Link",
-    "subscribedBadge": "📥 Subscribe",
-    "linkedAction": "linked your post",
-    "subscribedAction": "subscribed to {faceName}",
-    "actionConnector": " ",
-    "filterAll": "All",
-    "filterSub": "Subscribe",
-    "filterLink": "Link",
-    "typeLinkLabel": "Link",
-    "typeUpdateLabel": "Update",
-    "today": "Today",
-    "earlier": "Earlier",
-    "noNotificationsFiltered": "No notifications",
-    "linkedPreview": "A linked seed",
-    "updatedPreview": "New seed posted to {faceName}"
-  },
   "home": {
     "title": "Home"
   },
   "faces": {
     "title": "Faces"
-  },
-  "notifications": {
-    "title": "Notifications",
-    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Search",

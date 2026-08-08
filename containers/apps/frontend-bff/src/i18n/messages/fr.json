@@ -244,33 +244,11 @@
     "subscriberCount": "{n, plural, one {# abonné} other {# abonnés}}",
     "subscribeAction": "S'abonner"
   },
-  "notificationList": {
-    "noNotifications": "Aucune notification pour l'instant",
-    "linkedBadge": "🔗 Lien",
-    "subscribedBadge": "📥 Abonnement",
-    "linkedAction": "a lié votre publication",
-    "subscribedAction": "s'est abonné à {faceName}",
-    "actionConnector": " ",
-    "filterAll": "Tout",
-    "filterSub": "Abonnement",
-    "filterLink": "Lien",
-    "typeLinkLabel": "Lien",
-    "typeUpdateLabel": "Mise à jour",
-    "today": "Aujourd'hui",
-    "earlier": "Auparavant",
-    "noNotificationsFiltered": "Aucune notification",
-    "linkedPreview": "Une graine liée",
-    "updatedPreview": "Nouvelle graine publiée sur {faceName}"
-  },
   "home": {
     "title": "Accueil"
   },
   "faces": {
     "title": "Facettes"
-  },
-  "notifications": {
-    "title": "Notifications",
-    "count": "{count, plural, one {# notification} other {# notifications}}"
   },
   "search": {
     "title": "Recherche",

@@ -244,33 +244,11 @@
     "subscriberCount": "{n} サブスク",
     "subscribeAction": "サブスク"
   },
-  "notificationList": {
-    "noNotifications": "まだ通知はありません",
-    "linkedBadge": "🔗 リンク",
-    "subscribedBadge": "📥 サブスク",
-    "linkedAction": "あなたの投稿をリンクしました",
-    "subscribedAction": "{faceName} をサブスクライブしました",
-    "actionConnector": " さんが ",
-    "filterAll": "すべて",
-    "filterSub": "サブスク",
-    "filterLink": "リンク",
-    "typeLinkLabel": "リンク",
-    "typeUpdateLabel": "更新",
-    "today": "今日",
-    "earlier": "以前",
-    "noNotificationsFiltered": "通知はありません",
-    "linkedPreview": "リンクされたシードです",
-    "updatedPreview": "{faceName} に新しいシードが投稿されました"
-  },
   "home": {
     "title": "ホーム"
   },
   "faces": {
     "title": "フェイス"
-  },
-  "notifications": {
-    "title": "通知",
-    "count": "{count} 件の通知"
   },
   "search": {
     "title": "検索",
