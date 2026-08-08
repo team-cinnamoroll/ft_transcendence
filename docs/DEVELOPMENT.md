@@ -122,7 +122,7 @@ pnpm dev
 ホストOSの `/etc/hosts` に以下を追加します。
 
 ```
-127.0.0.1 tracen.local registry.tracen.local
+127.0.0.1 tracen.local registry.tracen.local api.tracen.local
 ```
 
 #### 手順 2: mkcert を用意して TLS 資材を生成

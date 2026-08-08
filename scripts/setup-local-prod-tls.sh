@@ -36,7 +36,7 @@ TLS 資材を生成しました:
 
 次の 1回だけのセットアップが必要です:
 1) /etc/hosts に以下を追加
-   127.0.0.1 tracen.local registry.tracen.local
+   127.0.0.1 tracen.local registry.tracen.local api.tracen.local
 
 2) Docker が registry.tracen.local:5000 のTLSを信頼できるように CA を配置
    sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
