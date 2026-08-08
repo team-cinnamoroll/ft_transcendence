@@ -45,6 +45,8 @@ const EnvSchema = z
         "REFRESH_TOKEN_EXPIRES_IN は '15m', '2h', '7d' のような形式（数値 + s/m/h/d/w/y）で指定してください",
     }),
     FILE_STORAGE_BASE_DIR: z.string().min(1).default('/app/uploads'),
+    MASTER_API_KEY_RATE_LIMIT: z.coerce.number().int().positive().default(500), // デフォルトは1分あたり500リクエスト
+    MASTER_API_KEY: z.string().min(1),
   })
   .strict()
   .superRefine((val, ctx) => {
@@ -159,5 +161,7 @@ export function parseEnv(raw: NodeJS.ProcessEnv): Config {
     ACCESS_TOKEN_EXPIRES_IN: raw.ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_EXPIRES_IN: raw.REFRESH_TOKEN_EXPIRES_IN!,
     FILE_STORAGE_BASE_DIR: raw.FILE_STORAGE_BASE_DIR,
+    MASTER_API_KEY: raw.MASTER_API_KEY!,
+    MASTER_API_KEY_RATE_LIMIT: raw.MASTER_API_KEY_RATE_LIMIT,
   });
 }
