@@ -6,7 +6,9 @@ const mockFace = {
   userId: 'user-1',
   name: '読書',
   emoji: '📚',
-  isPrivate: false,
+  visibility: 'public' as const,
+  description: '読書に関する記録',
+  image: null,
 };
 
 const meta: Meta<typeof MobileComposeBar> = {

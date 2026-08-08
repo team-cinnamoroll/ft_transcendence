@@ -9,7 +9,9 @@ import {
   getSeedRepository,
 } from '@/repositories/seed-repository';
 import { findFaceById } from './faces';
-import { getCurrentUser, findUserById, listAllUsers } from './users';
+import { findUserById } from './users';
+import { getSessionTokens } from '@/lib/session';
+import { getAuthSession } from './auth';
 
 export type SeedLink = {
   seed: Seed;
@@ -21,86 +23,88 @@ export type SeedDetailData = {
   face: Face;
   author: UserProfile | null;
   isOwner: boolean;
-  outgoingLinks: SeedLink[];
-  incomingLinks: SeedLink[];
-  users: UserProfile[];
 };
 
+async function requireAccessToken(): Promise<string> {
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    throw new Error('Not authenticated');
+  }
+  return accessToken;
+}
+
 export async function listSeedsByUserId(userId: string): Promise<Seed[]> {
-  return getSeedRepository().listByUserId(userId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return getSeedRepository().listByUserId(accessToken, userId);
 }
 
 export async function listSeedsByFaceId(faceId: string): Promise<Seed[]> {
-  return getSeedRepository().listByFaceId(faceId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return getSeedRepository().listByFaceId(accessToken, faceId);
 }
 
 export async function listAllSeeds(): Promise<Seed[]> {
-  return getSeedRepository().listAll();
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return getSeedRepository().listAll(accessToken);
 }
 
 export async function listSeedsByFaceIds(faceIds: string[]): Promise<Seed[]> {
-  return getSeedRepository().listByFaceIds(faceIds);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return getSeedRepository().listByFaceIds(accessToken, faceIds);
 }
 
 export async function findSeedById(seedId: string): Promise<Seed | null> {
-  return getSeedRepository().findById(seedId);
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return null;
+  }
+  return getSeedRepository().findById(accessToken, seedId);
 }
 
 export async function createSeedForCurrentUser(input: CreateSeedInput): Promise<Seed> {
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().create(currentUser.id, input);
+  const accessToken = await requireAccessToken();
+  return getSeedRepository().create(accessToken, input);
 }
 
 export async function updateSeedForCurrentUser(
   seedId: string,
   input: UpdateSeedInput
 ): Promise<Seed> {
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().update(seedId, currentUser.id, input);
+  const accessToken = await requireAccessToken();
+  return getSeedRepository().update(accessToken, seedId, input);
 }
 
 export async function deleteSeedForCurrentUser(seedId: string): Promise<void> {
-  const currentUser = await getCurrentUser();
-  return getSeedRepository().delete(seedId, currentUser.id);
+  const accessToken = await requireAccessToken();
+  return getSeedRepository().delete(accessToken, seedId);
 }
 
 export async function getSeedDetailData(seedId: string): Promise<SeedDetailData | null> {
-  const seed = await getSeedRepository().findById(seedId);
+  const session = await getAuthSession();
+  if (!session) {
+    return null;
+  }
+  const seed = await getSeedRepository().findById(session.accessToken, seedId);
   if (!seed) return null;
 
   const face = await findFaceById(seed.faceId);
   if (!face) return null;
 
-  const [currentUser, author, allSeeds, users] = await Promise.all([
-    getCurrentUser(),
-    findUserById(seed.userId),
-    getSeedRepository().listAll(),
-    listAllUsers(),
-  ]);
+  const author = await findUserById(seed.userId);
 
-  const isOwner = seed.userId === currentUser.id;
+  const isOwner = seed.userId === session.userId;
 
-  const outgoingLinks: SeedLink[] = (
-    await Promise.all(
-      (seed.linkedSeedIds ?? []).map(async (id) => {
-        const linked = await getSeedRepository().findById(id);
-        if (!linked) return null;
-        const linkedFace = await findFaceById(linked.faceId);
-        return linkedFace ? { seed: linked, face: linkedFace } : null;
-      })
-    )
-  ).filter((x): x is SeedLink => x !== null);
-
-  const incomingLinks: SeedLink[] = (
-    await Promise.all(
-      allSeeds
-        .filter((s) => s.id !== seed.id && (s.linkedSeedIds ?? []).includes(seed.id))
-        .map(async (s) => {
-          const linkedFace = await findFaceById(s.faceId);
-          return linkedFace ? { seed: s, face: linkedFace } : null;
-        })
-    )
-  ).filter((x): x is SeedLink => x !== null);
-
-  return { seed, face, author, isOwner, outgoingLinks, incomingLinks, users };
+  return { seed, face, author, isOwner };
 }

@@ -1,13 +1,20 @@
 import HomeProfile from '@/components/home/HomeProfile';
 import HomeClient from '@/components/home/HomeClient';
+import LandingPage from '@/components/landing/LandingPage';
 import { listSeedsByUserId } from '@/server/usecases/seeds';
 import { getViewerContext } from '@/server/usecases/viewer';
+import { getAuthSession } from '@/server/usecases/auth';
 import { getFormatter } from 'next-intl/server';
 
 const REFERENCE_DATE = new Date('2026-03-31');
 
 export default async function Home() {
-  const { currentUser, myFaces } = await getViewerContext();
+  const session = await getAuthSession();
+  if (!session) {
+    return <LandingPage />;
+  }
+
+  const { currentUser, linkableCurrentUser, myFaces } = await getViewerContext();
   const seeds = await listSeedsByUserId(currentUser.id);
   const format = await getFormatter();
 
@@ -36,6 +43,7 @@ export default async function Home() {
         {/* 中部〜下部: フェイスフィルタ + シードフィード（Client Component） */}
         <HomeClient
           currentUser={currentUser}
+          linkableCurrentUser={linkableCurrentUser}
           faces={myFaces}
           seeds={seeds}
           onThisDay={onThisDay}

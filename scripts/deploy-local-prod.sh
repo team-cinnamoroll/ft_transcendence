@@ -6,6 +6,7 @@ default_compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
 env_file="$repo_root/.env.local-prod"
+test_script="$repo_root/containers/apps/backend/test"
 
 # Dev Container から docker.sock 経由でホスト Docker を操作する場合、
 # compose の bind mount source (例: ./jwt-certs) は「ホスト側パス」で解決される。
@@ -83,9 +84,11 @@ for f in ca.crt tls.crt tls.key; do
 done
 
 if [[ "$smoke_strategy" != "container" ]]; then
-  if ! getent hosts tracen.local >/dev/null 2>&1; then
-    echo "警告: tracen.local が名前解決できません。/etc/hosts に 127.0.0.1 tracen.local を追加してください。" >&2
-  fi
+  for target_host in tracen.local api.tracen.local; do
+    if ! getent hosts "$target_host" >/dev/null 2>&1; then
+      echo "警告: $target_host が名前解決できません。/etc/hosts に 127.0.0.1 $target_host を追加してください。" >&2
+    fi
+  done
 fi
 
 if [[ "$mode" == "full" ]]; then
@@ -179,6 +182,8 @@ fi
 if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; then
   ok_api=""
   ok_root=""
+  ok_hono_api=""
+
   for _ in $(seq 1 "$smoke_attempts"); do
     printf '.' >&2
     if [[ "$ok_api" != "yes" ]]; then
@@ -205,7 +210,19 @@ if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; th
       fi
     fi
 
-    if [[ "$ok_api" == "yes" && "$ok_root" == "yes" ]]; then
+    if [[ "$ok_hono_api" != "yes" ]]; then
+      if [[ "$smoke_strategy" == "container" ]]; then
+        if container_curl "https://api.tracen.local/api/v1/health" >/dev/null 2>/dev/null; then
+          ok_hono_api="yes"
+        fi
+      else
+        if curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://api.tracen.local/api/v1/health" >/dev/null 2>/dev/null; then
+          ok_hono_api="yes"
+        fi
+      fi
+    fi
+
+    if [[ "$ok_api" == "yes" && "$ok_root" == "yes" && "$ok_hono_api" == "yes" ]]; then
       break
     fi
     sleep 0.5
@@ -213,13 +230,16 @@ if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; th
 
   echo >&2
 
-  if [[ "$ok_api" != "yes" || "$ok_root" != "yes" ]]; then
+  if [[ "$ok_api" != "yes" || "$ok_root" != "yes" || "$ok_hono_api" != "yes" ]]; then
     echo "スモークテストに失敗しました。ログを確認してください:" >&2
     if [[ "$ok_api" != "yes" ]]; then
       echo "- NG: https://tracen.local/api/health" >&2
     fi
     if [[ "$ok_root" != "yes" ]]; then
       echo "- NG: https://tracen.local/" >&2
+    fi
+    if [[ "$ok_hono_api" != "yes" ]]; then
+      echo "- NG: https://api.tracen.local/api/v1/health" >&2
     fi
 
     echo "curl のエラー詳細:" >&2
@@ -237,6 +257,13 @@ if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; th
         curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://tracen.local/" >/dev/null || true
       fi
     fi
+    if [[ "$ok_hono_api" != "yes" ]]; then
+      if [[ "$smoke_strategy" == "container" ]]; then
+        container_curl_debug "https://api.tracen.local/api/v1/health" || true
+      else
+        curl -fsS --connect-timeout "$smoke_max_time" --max-time "$smoke_max_time" --cacert "$cert_dir/ca.crt" "https://api.tracen.local/api/v1/health" >/dev/null || true
+      fi
+    fi
 
     echo "compose logs (tail=200):" >&2
     "${compose_cmd[@]}" logs --tail=200 || true
@@ -245,6 +272,38 @@ if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; th
 
   echo "OK: https://tracen.local"
   echo "OK: https://tracen.local/api/health"
+  echo "OK: https://api.tracen.local/api/v1/health"
+
+  # ▼▼ 追加: API 結合テスト (face-and-seed-api-test.sh) の実行 ▼▼
+  api_test_script="$test_script/face-and-seed-api-test.sh"
+
+  if [[ -f "$api_test_script" ]]; then
+    echo ""
+    echo "=========================================="
+    echo " Run API Integration Tests"
+    echo "=========================================="
+
+    if [[ "$smoke_strategy" == "container" ]]; then
+      # $compose_project_dir（ホストOS側の絶対パス）を使ってマウントする
+      # 証明書もマウントされた /workspace 配下のパスを直接参照させる
+      docker run --rm \
+        --network "${project_name}_local-prod" \
+        -v "$compose_project_dir:/workspace" \
+        -w /workspace \
+        -e BASE_URL="https://api.tracen.local/api/v1" \
+        -e CURL_CA_BUNDLE="/workspace/containers/infra/local-prod/certs/ca.crt" \
+        alpine:latest \
+        sh -c "apk add --no-cache bash curl jq coreutils util-linux >/dev/null && bash containers/apps/backend/test/face-and-seed-api-test.sh all"
+    else
+      # ホスト実行モード
+      BASE_URL="https://api.tracen.local/api/v1" \
+      CURL_CA_BUNDLE="$cert_dir/ca.crt" \
+      bash "$api_test_script" all
+    fi
+  else
+    echo "警告: APIテストスクリプトが見つかりません: $api_test_script" >&2
+  fi
+  # ▲▲
 else
   echo "curl が無いためスモークテストをスキップしました。" >&2
   echo "ブラウザで https://tracen.local を開いて確認してください。" >&2

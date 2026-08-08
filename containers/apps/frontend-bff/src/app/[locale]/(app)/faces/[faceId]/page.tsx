@@ -3,7 +3,7 @@ import FaceDetailClient from '@/components/face/FaceDetailClient';
 import FaceBackButton from '@/components/face/FaceBackButton';
 import { listSeedsByFaceId } from '@/server/usecases/seeds';
 import { findFaceById } from '@/server/usecases/faces';
-import { getCurrentUser, listAllUsers } from '@/server/usecases/users';
+import { getCurrentUser, findUserById, findUsersByIds } from '@/server/usecases/users';
 import { getSubscribedFaceIds } from '@/server/usecases/subscriptions';
 import type { Face } from '@/types/face';
 
@@ -21,11 +21,14 @@ const FaceDetailPage = async ({ params }: Props) => {
 
   const face = maybeFace as Face;
 
-  const [currentUser, seeds, users, subscribedFaceIds] = await Promise.all([
+  const [currentUser, seeds, subscribedFaceIds] = await Promise.all([
     getCurrentUser(),
     listSeedsByFaceId(faceId),
-    listAllUsers(),
     getSubscribedFaceIds(),
+  ]);
+  const [linkableCurrentUser, users] = await Promise.all([
+    findUserById(currentUser.id).then((u) => u ?? currentUser),
+    findUsersByIds(seeds.map((seed) => seed.userId)),
   ]);
 
   const isOwner = face.userId === currentUser.id;
@@ -67,6 +70,7 @@ const FaceDetailPage = async ({ params }: Props) => {
           face={face}
           isOwner={isOwner}
           currentUserId={currentUser.id}
+          linkableCurrentUser={linkableCurrentUser}
           seeds={seeds}
           users={users}
           isSubscribed={isSubscribed}

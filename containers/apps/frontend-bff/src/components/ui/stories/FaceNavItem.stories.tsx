@@ -8,7 +8,8 @@ const SAMPLE_FACE: Face = {
   name: '仕事',
   emoji: '💼',
   description: '仕事に関する投稿',
-  isPrivate: false,
+  visibility: 'public' as const,
+  image: null,
 };
 
 const meta: Meta<typeof FaceNavItem> = {
@@ -48,7 +49,9 @@ export const PrivateFace: Story = {
       id: 'face-2',
       name: 'プライベート',
       emoji: '🔒',
-      isPrivate: true,
+      visibility: 'private' as const,
+      description: 'プライベートなフェイス',
+      image: null,
     },
   },
 };

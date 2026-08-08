@@ -18,6 +18,7 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 type Props = {
   currentUser: UserProfile;
+  linkableCurrentUser: UserProfile;
   faces: Face[];
   seeds: Seed[];
   onThisDay?: Seed;
@@ -28,6 +29,7 @@ type Props = {
 
 const HomeClient = ({
   currentUser,
+  linkableCurrentUser,
   faces,
   seeds: initialSeeds,
   onThisDay,
@@ -222,6 +224,7 @@ const HomeClient = ({
 
       <div style={{ padding: '0 28px' }}>
         <SeedFeed
+          currentUser={linkableCurrentUser}
           faces={faces}
           seeds={seeds}
           selectedFaceId={selectedFaceId}

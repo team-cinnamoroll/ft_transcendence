@@ -29,17 +29,6 @@ export const Default: Story = {
     user: mockUser,
     faceCount: 5,
     seedCount: 42,
-    unreadCount: 0,
-    isAuthenticated: true,
-  },
-};
-
-export const WithUnread: Story = {
-  args: {
-    user: mockUser,
-    faceCount: 5,
-    seedCount: 42,
-    unreadCount: 3,
     isAuthenticated: true,
   },
 };

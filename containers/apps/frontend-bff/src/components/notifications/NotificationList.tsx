@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import { type Notification } from '@/types/notification';
-import { type UserProfile } from '@/types/user-profile';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import { createLookupMap, getFaceTitle } from '@/lib/display';
 import { useTranslations } from 'next-intl';
@@ -47,8 +46,10 @@ const NotifItem = ({
         id: faceId,
         name: faceName ?? '',
         userId: '',
-        isPrivate: false,
-        imageUrl: faceImageUrl ?? undefined,
+        visibility: 'public' as const,
+        emoji: null,
+        description: null,
+        image: faceImageUrl ? { id: 'mock', url: faceImageUrl } : null,
       }
     : null;
 
@@ -185,7 +186,6 @@ const NotifItem = ({
 
 type Props = {
   notifications: Notification[];
-  users: UserProfile[];
   faces: Face[];
   seeds: Seed[];
 };
@@ -294,7 +294,7 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
                     notification={notification}
                     faceName={linkedFace ? getFaceTitle(linkedFace) : undefined}
                     faceId={linkedFace?.id}
-                    faceImageUrl={linkedFace?.imageUrl}
+                    faceImageUrl={linkedFace?.image?.url}
                     preview={seed?.body ?? t('linkedPreview')}
                     typeLinkLabel={t('typeLinkLabel')}
                     typeUpdateLabel={t('typeUpdateLabel')}
@@ -309,7 +309,7 @@ const NotificationList = ({ notifications, faces, seeds }: Props) => {
                   notification={notification}
                   faceName={face ? getFaceTitle(face) : undefined}
                   faceId={face?.id}
-                  faceImageUrl={face?.imageUrl}
+                  faceImageUrl={face?.image?.url}
                   preview={
                     face
                       ? t('updatedPreview', { faceName: getFaceTitle(face) })

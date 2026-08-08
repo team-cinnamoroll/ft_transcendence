@@ -32,5 +32,8 @@ curl -fsSL -o "$tmpdir/osv-scanner_SHA256SUMS" "$base_url/osv-scanner_SHA256SUMS
   grep "  ${asset_name}$" osv-scanner_SHA256SUMS | sha256sum -c -
 )
 
-sudo install -m 0755 "$tmpdir/$asset_name" /usr/local/bin/osv-scanner
+target_dir="${HOME:-/home/node}/.local/bin"
+mkdir -p "$target_dir"
+install -m 0755 "$tmpdir/$asset_name" "$target_dir/osv-scanner"
+
 osv-scanner --version

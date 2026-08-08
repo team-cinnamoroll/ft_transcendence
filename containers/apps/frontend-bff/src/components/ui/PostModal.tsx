@@ -2,23 +2,34 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
+import { CreateSeedRequestSchema } from '@tracen/contracts';
 import type { Face } from '@/types/face';
-import type { Seed } from '@/types/seed';
+import type { Seed, CreateSeedRequest } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
-import { createSeedAction } from '@/server/actions/seeds';
+import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds';
+import { deleteUploadedFileAction } from '@/server/actions/file-storage';
+import { useZodForm } from '@/lib/use-zod-form';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
 
+// backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
+const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
+
+// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/pngのみに制限する
+const ALLOWED_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
+
 type AttachedImage = {
   file: File;
   objectUrl: string;
+  /** アップロード成功後にセットされる。file-storageへのfileId */
+  fileId: string | null;
+  isUploading: boolean;
+  error: string | null;
 };
-
-type FieldErrors = Record<string, string[]>;
 
 type Props = {
   isOpen: boolean;
@@ -39,7 +50,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const imagesRef = useRef<AttachedImage[]>([]);
 
   useEffect(() => {
@@ -79,8 +90,22 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
   const initialSelectedFaceId = useMemo(() => {
     return defaultFaceId ?? myFaces[0]?.id ?? '';
   }, [defaultFaceId, myFaces]);
-  const [selectedFaceId, setSelectedFaceId] = useState<string>(initialSelectedFaceId);
-  const [text, setText] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isValid },
+  } = useZodForm(CreateSeedRequestSchema, {
+    mode: 'onChange',
+    defaultValues: { faceId: initialSelectedFaceId, body: '', imageIds: [] },
+  });
+  const selectedFaceId = watch('faceId');
+  const text = watch('body');
+  const bodyField = register('body');
+
   const [images, setImages] = useState<AttachedImage[]>([]);
   const [showFacePicker, setShowFacePicker] = useState(false);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
@@ -91,43 +116,65 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
     imagesRef.current = images;
   }, [images]);
 
+  useEffect(() => {
+    setValue(
+      'imageIds',
+      images.flatMap((img) => (img.fileId ? [img.fileId] : []))
+    );
+  }, [images, setValue]);
+
   const selectedFace = myFaces.find((f) => f.id === selectedFaceId);
 
   useEffect(() => {
     if (!isOpen) return;
-    setSelectedFaceId(initialSelectedFaceId);
-  }, [initialSelectedFaceId, isOpen]);
+    setValue('faceId', initialSelectedFaceId);
+  }, [initialSelectedFaceId, isOpen, setValue]);
 
   useEffect(() => {
     if (!isOpen) {
-      setImages((prev) => {
-        prev.forEach((img) => URL.revokeObjectURL(img.objectUrl));
-        return [];
+      // 保存されずに閉じられた場合、アップロード済みファイルは後始末として削除する（ベストエフォート）
+      imagesRef.current.forEach((img) => {
+        URL.revokeObjectURL(img.objectUrl);
+        if (img.fileId) {
+          void deleteUploadedFileAction(img.fileId);
+        }
       });
-      setText('');
-      setSelectedFaceId(initialSelectedFaceId);
+      setImages([]);
+      reset({ faceId: initialSelectedFaceId, body: '', imageIds: [] });
       setShowFacePicker(false);
-      setFieldErrors(null);
+      setError(null);
     } else {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
-  }, [initialSelectedFaceId, isOpen]);
+  }, [initialSelectedFaceId, isOpen, reset]);
 
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.objectUrl));
+      imagesRef.current.forEach((img) => {
+        URL.revokeObjectURL(img.objectUrl);
+        if (img.fileId) {
+          void deleteUploadedFileAction(img.fileId);
+        }
+      });
     };
   }, []);
 
-  const handleSubmit = () => {
-    if (!canPost || !selectedFaceId) return;
-    setFieldErrors(null);
+  const isUploadingImages = images.some((img) => img.isUploading);
+  const imageUploadError = images.find((img) => img.error)?.error ?? null;
+
+  const onValid = (data: CreateSeedRequest) => {
+    if (isUploadingImages) return;
+    setError(null);
     startTransition(async () => {
-      const result = await createSeedAction({ faceId: selectedFaceId, body: text });
+      const result = await createSeedAction(data);
       if (!result.success) {
-        setFieldErrors(result.errors);
+        const firstFieldError = Object.values(result.errors)[0]?.[0];
+        setError(firstFieldError ?? t('errorGeneric'));
         return;
       }
+      // 投稿成功後にモーダルを閉じた際、未保存アップロードとして誤って削除されないよう先にクリアする
+      images.forEach((img) => URL.revokeObjectURL(img.objectUrl));
+      setImages([]);
       onCreate?.(result.data);
       onClose();
     });
@@ -135,25 +182,72 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
     const remaining = MAX_IMAGES - images.length;
     const toAdd = files.slice(0, remaining);
-    setImages((prev) => [
-      ...prev,
-      ...toAdd.map((file) => ({ file, objectUrl: URL.createObjectURL(file) })),
-    ]);
-    e.target.value = '';
-  };
 
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => {
-      URL.revokeObjectURL(prev[index].objectUrl);
-      return prev.filter((_, i) => i !== index);
+    const newImages: AttachedImage[] = toAdd.map((file) => ({
+      file,
+      objectUrl: URL.createObjectURL(file),
+      fileId: null,
+      isUploading: true,
+      error: null,
+    }));
+    setImages((prev) => [...prev, ...newImages]);
+
+    newImages.forEach((img) => {
+      if (
+        !ALLOWED_IMAGE_FILE_TYPES.includes(img.file.type) ||
+        img.file.size > MAX_IMAGE_FILE_SIZE
+      ) {
+        setImages((prev) =>
+          prev.map((i) =>
+            i.objectUrl === img.objectUrl
+              ? { ...i, isUploading: false, error: t('errorImageInvalidType') }
+              : i
+          )
+        );
+        return;
+      }
+
+      const formData = new FormData();
+      formData.set('file', img.file);
+
+      void (async () => {
+        const result = await uploadSeedImageAction(formData);
+        setImages((prev) =>
+          prev.map((i) => {
+            if (i.objectUrl !== img.objectUrl) return i;
+            if (!result.success) {
+              const firstFieldError = Object.values(result.errors)[0]?.[0];
+              return {
+                ...i,
+                isUploading: false,
+                error: firstFieldError ?? t('errorImageInvalidType'),
+              };
+            }
+            if (!result.data.success) {
+              return { ...i, isUploading: false, error: result.data.message };
+            }
+            return { ...i, isUploading: false, fileId: result.data.fileId };
+          })
+        );
+      })();
     });
   };
 
-  if (!isOpen) return null;
+  const handleRemoveImage = (index: number) => {
+    const target = images[index];
+    if (target) {
+      URL.revokeObjectURL(target.objectUrl);
+      if (target.fileId) {
+        void deleteUploadedFileAction(target.fileId);
+      }
+    }
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  const canPost = text.trim().length > 0;
+  if (!isOpen) return null;
 
   return (
     <div
@@ -269,20 +363,26 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
           {/* 投稿ボタン */}
           <button
             type="button"
-            disabled={!canPost || isPending}
-            onClick={handleSubmit}
+            disabled={!isValid || isPending || isUploadingImages}
+            onClick={handleSubmit(onValid)}
             style={{
               padding: '8px 18px',
               borderRadius: 999,
-              background: canPost && !isPending ? 'var(--mf-accent)' : 'var(--mf-surface-tint)',
-              color: canPost && !isPending ? '#fff' : 'var(--mf-text-faint)',
+              background:
+                isValid && !isPending && !isUploadingImages
+                  ? 'var(--mf-accent)'
+                  : 'var(--mf-surface-tint)',
+              color: isValid && !isPending && !isUploadingImages ? '#fff' : 'var(--mf-text-faint)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: 0.3,
               border: 'none',
-              cursor: canPost && !isPending ? 'pointer' : 'not-allowed',
+              cursor: isValid && !isPending && !isUploadingImages ? 'pointer' : 'not-allowed',
               whiteSpace: 'nowrap',
-              boxShadow: canPost && !isPending ? '0 2px 10px rgba(212,146,42,0.25)' : 'none',
+              boxShadow:
+                isValid && !isPending && !isUploadingImages
+                  ? '0 2px 10px rgba(212,146,42,0.25)'
+                  : 'none',
               transition: 'background 0.15s, box-shadow 0.15s',
             }}
           >
@@ -359,7 +459,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
                 key={face.id}
                 type="button"
                 onClick={() => {
-                  setSelectedFaceId(face.id);
+                  setValue('faceId', face.id, { shouldValidate: true });
                   setShowFacePicker(false);
                 }}
                 style={{
@@ -401,9 +501,11 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
       {/* 書き込みキャンバス */}
       <div style={{ flex: 1, padding: '4px 22px', overflowY: 'auto' }}>
         <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          {...bodyField}
+          ref={(el) => {
+            bodyField.ref(el);
+            textareaRef.current = el;
+          }}
           maxLength={MAX_LENGTH}
           placeholder={t('textareaPlaceholder')}
           style={{
@@ -423,14 +525,24 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
         />
 
         {/* バリデーションエラー */}
-        {fieldErrors?.body && (
+        {errors.body && (
           <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
-            {fieldErrors.body[0]}
+            {errors.body.message}
           </p>
         )}
-        {fieldErrors?.faceId && (
+        {errors.faceId && (
           <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
-            {fieldErrors.faceId[0]}
+            {errors.faceId.message}
+          </p>
+        )}
+        {error && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {error}
+          </p>
+        )}
+        {imageUploadError && (
+          <p style={{ color: 'var(--mf-error, #e53e3e)', fontSize: 13, margin: '4px 0 8px' }}>
+            {imageUploadError}
           </p>
         )}
 
@@ -458,11 +570,41 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
               >
                 <Image
                   src={img.objectUrl}
-                  alt={t('attachedImageAlt', { n: index + 1 })}
+                  alt={
+                    img.isUploading
+                      ? t('uploadingImageAlt', { n: index + 1 })
+                      : t('attachedImageAlt', { n: index + 1 })
+                  }
                   fill
                   style={{ objectFit: 'cover' }}
                   unoptimized
                 />
+                {img.isUploading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(20,24,36,0.45)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <svg
+                      className="mf-spin"
+                      width={20}
+                      height={20}
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 2a8 8 0 018 8" />
+                    </svg>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
@@ -530,21 +672,21 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
             aria-label={t('addPhotoAriaLabel')}
             style={{
               position: 'relative',
-              width: 34,
-              height: 34,
+              width: 40,
+              height: 40,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '50%',
-              background: 'none',
+              background: images.length >= MAX_IMAGES ? 'none' : 'var(--mf-surface-tint)',
               border: 'none',
               cursor: images.length >= MAX_IMAGES ? 'not-allowed' : 'pointer',
               color: images.length >= MAX_IMAGES ? 'var(--mf-text-faint)' : 'var(--mf-brand)',
             }}
           >
             <svg
-              width={20}
-              height={20}
+              width={22}
+              height={22}
               viewBox="0 0 20 20"
               fill="none"
               stroke="currentColor"
@@ -580,56 +722,21 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
               </span>
             )}
           </button>
-
-          {/* リンクボタン */}
-          <button
-            type="button"
-            aria-label={t('addLink')}
-            style={{
-              width: 34,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--mf-brand)',
-            }}
-          >
-            <svg
-              width={18}
-              height={18}
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6.5 9.5a3.54 3.54 0 005 0l2-2a3.54 3.54 0 00-5-5l-1 1" />
-              <path d="M9.5 6.5a3.54 3.54 0 00-5 0l-2 2a3.54 3.54 0 005 5l1-1" />
-            </svg>
-          </button>
         </div>
 
-        {/* 文字数カウント + 下書き */}
+        {/* 文字数カウント */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            fontSize: 11.5,
-            color: 'var(--mf-text-muted)',
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: 'var(--mf-text-sub)',
             whiteSpace: 'nowrap',
           }}
         >
           <span>{t('charCount', { n: text.length })}</span>
-          <div
-            style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--mf-line-soft)' }}
-          />
-          <span>{t('draftSaved')}</span>
         </div>
       </div>
     </div>

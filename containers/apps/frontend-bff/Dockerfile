@@ -43,6 +43,8 @@ COPY --from=builder /workspace/.next-runtime-deps/next-dist-compiled /tmp/next-d
 # Next.js standalone + pnpm の組み合わせだと、standalone 出力に含まれる node_modules が
 # `.pnpm/` だけになり、`node_modules/next` のようなトップレベルのリンクが欠けることがある。
 # その場合 `require('next')` できず起動に失敗するため、virtual store のリンクを復元する。
+# ルートに複数の next インスタンスがある場合、壊れたシンボリックリンクが残ることがあるため
+# `-L` で既存リンク（正常・壊れを問わず）をスキップして `ln` の失敗を防ぐ。
 RUN set -eux; \
 	cd /app/node_modules; \
 	if [ ! -d .pnpm/node_modules ]; then \
@@ -51,11 +53,17 @@ RUN set -eux; \
 	fi; \
 	for target in .pnpm/node_modules/*; do \
 		name="$(basename "$target")"; \
-		[ -e "$name" ] || ln -s "$target" "$name"; \
+		[ -e "$name" ] || [ -L "$name" ] || ln -s "$target" "$name"; \
 	done
 
+# ルートの devDependencies に next が追加されると pnpm workspace に 2 つの next インスタンス
+# (@babel/core のバージョン違いで区別される) が生成される。standalone に含まれるのは
+# frontend-bff が実際に使う @babel+core@7.29.7 版のみであり、ルートの next
+# (@babel+core@8.0.1版) は standalone に存在しないため broken symlink になる。
+# require.resolve を /app ではなく frontend-bff 固有のパスで解決することで、
+# standalone に実際含まれる正しいインスタンスを参照する。
 RUN set -eux; \
-	next_dir="$(node -p "require('path').dirname(require.resolve('next/package.json', { paths: ['/app'] }))")"; \
+	next_dir="$(node -p "require('path').dirname(require.resolve('next/package.json', { paths: ['/app/containers/apps/frontend-bff'] }))")";\
 	if [ ! -e "$next_dir/dist/compiled/@babel/runtime/package.json" ] || [ ! -e "$next_dir/dist/compiled/webpack/webpack-lib.js" ]; then \
 		rm -rf "$next_dir/dist/compiled"; \
 		mkdir -p "$next_dir/dist"; \

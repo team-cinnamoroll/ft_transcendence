@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useMemo, useTransition } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Face } from '@/types/face';
 import type { Seed } from '@/types/seed';
-import { getFaceTitle, getFaceColor, getFaceKanji, createLookupMap } from '@/lib/display';
+import type { UserProfile } from '@/types/user-profile';
+import { getFaceTitle, getFaceImageUrl, createLookupMap } from '@/lib/display';
 import CreateFaceModal from './CreateFaceModal';
 import EditFaceModal from './EditFaceModal';
+import FaceBadge from '@/components/ui/FaceBadge';
 import SeedRow from '@/components/ui/SeedRow';
 import Pagination from '@/components/ui/Pagination';
 import EditSeedModal from '@/components/seed/EditSeedModal';
@@ -19,6 +22,7 @@ type Props = {
   initialFaces: Face[];
   seeds: Seed[];
   currentUserId?: string;
+  currentUser?: UserProfile;
 };
 
 type SortType = 'lastAt' | 'total' | 'name';
@@ -28,7 +32,7 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 const REFERENCE_MONTH = '2026-04';
 
-const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props) => {
+const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, currentUser }: Props) => {
   const router = useRouter();
   const [faces, setFaces] = useState<Face[]>(initialFaces);
   const [seeds, setSeeds] = useState(initialSeeds);
@@ -265,7 +269,6 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
             >
               {filteredFaces.map((face) => {
                 const stats = faceStats.get(face.id);
-                const color = getFaceColor(face.id);
                 return (
                   <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
                     <div
@@ -283,19 +286,23 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                         style={{
                           height: 130,
                           flexShrink: 0,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
+                          position: 'relative',
                           padding: 10,
                           display: 'flex',
                           alignItems: 'flex-start',
                           justifyContent: 'flex-end',
                         }}
                       >
-                        {face.isPrivate && (
+                        <Image
+                          src={getFaceImageUrl(face)}
+                          alt={getFaceTitle(face)}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                        {face.visibility === 'private' && (
                           <div
                             style={{
+                              position: 'relative',
                               display: 'flex',
                               alignItems: 'center',
                               gap: 3,
@@ -446,6 +453,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       key={act.id}
                       seed={act}
                       face={face}
+                      author={currentUser}
                       currentUserId={currentUserId}
                       onMoreOptions={openSeedActionMenu}
                       onClick={() => router.push(`/seeds/${act.id}`)}
@@ -648,7 +656,6 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
               }}
             >
               {filteredFaces.map((face) => {
-                const color = getFaceColor(face.id);
                 const stats = faceStats.get(face.id);
                 return (
                   <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
@@ -667,10 +674,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                       <div
                         style={{
                           height: 130,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
+                          position: 'relative',
                           padding: 10,
                           display: 'flex',
                           alignItems: 'flex-start',
@@ -678,9 +682,16 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                           flexShrink: 0,
                         }}
                       >
-                        {face.isPrivate && (
+                        <Image
+                          src={getFaceImageUrl(face)}
+                          alt={getFaceTitle(face)}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                        {face.visibility === 'private' && (
                           <div
                             style={{
+                              position: 'relative',
                               display: 'flex',
                               alignItems: 'center',
                               gap: 3,
@@ -838,7 +849,6 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
             /* リストビュー */
             <div style={{ padding: '0 0 32px' }}>
               {filteredFaces.map((face, i) => {
-                const color = getFaceColor(face.id);
                 const stats = faceStats.get(face.id);
                 return (
                   <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
@@ -853,34 +863,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId }: Props
                         cursor: 'pointer',
                       }}
                     >
-                      <div
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 12,
-                          flexShrink: 0,
-                          background: face.imageUrl ? undefined : color,
-                          backgroundImage: face.imageUrl ? `url(${face.imageUrl})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          display: face.imageUrl ? 'block' : 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {!face.imageUrl && (
-                          <span
-                            style={{
-                              fontFamily: 'var(--mf-font-serif)',
-                              fontSize: 18,
-                              fontWeight: 600,
-                              color: '#fff',
-                            }}
-                          >
-                            {getFaceKanji(getFaceTitle(face))}
-                          </span>
-                        )}
-                      </div>
+                      <FaceBadge face={face} size={44} radius={12} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
                           style={{

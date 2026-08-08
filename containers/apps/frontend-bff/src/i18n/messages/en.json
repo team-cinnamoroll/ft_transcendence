@@ -3,11 +3,23 @@
     "title": "MultiFace",
     "description": "A short-text SNS to record your many faces"
   },
+  "landing": {
+    "title": "MultiFace",
+    "tagline": "A short-text SNS to record your many faces",
+    "description": "Keep track of your hobbies and everyday moments, organized by \"face\". Build as many sides of yourself as you like, all in one account.",
+    "signUpButton": "Get started",
+    "signInButton": "Sign in"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "Failed to load the information. Please try again.",
+    "retryButton": "Try again"
+  },
   "nav": {
     "home": "Home",
     "faces": "Reflection",
     "subscriptions": "Collection",
-    "notifications": "Notifications",
+    "friends": "Friends",
     "search": "Search",
     "faceDetail": "Face Detail"
   },
@@ -35,13 +47,18 @@
     "textareaPlaceholder": "Jot something down…",
     "addPhoto": "Add photo",
     "addPhotoAriaLabel": "Attach image",
-    "addLink": "Add link",
     "charCount": "{n, plural, one {# char} other {# chars}}",
-    "draftSaved": "Draft saved",
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
+    "uploadingImageAlt": "Uploading image {n}",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Post",
-    "submitting": "Posting..."
+    "submitting": "Posting...",
+    "errorGeneric": "Failed to post. Please try again later."
+  },
+  "seedImageUpload": {
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "createFaceModal": {
     "title": "Create New Face",
@@ -57,8 +74,13 @@
     "descriptionPlaceholder": "Describe this face",
     "privateLabel": "Private",
     "privateDescription": "Only you can view this face",
+    "image": "Image",
+    "imageSelectButton": "Choose image",
+    "uploading": "Uploading…",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Create",
-    "submitting": "Creating..."
+    "submitting": "Creating...",
+    "errorGeneric": "Failed to create the face. Please try again later."
   },
   "editFaceModal": {
     "title": "Edit Face",
@@ -73,9 +95,19 @@
     "description": "Description",
     "descriptionPlaceholder": "Describe this face",
     "privateLabel": "Private",
-    "privateDescription": "Only you can view this face",
+    "publicLabel": "Public",
+    "visibilityImmutableHint": "Cannot be changed after creation",
+    "image": "Image",
+    "imageSelectButton": "Choose image",
+    "uploading": "Uploading…",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Save",
-    "submitting": "Saving..."
+    "submitting": "Saving...",
+    "errorGeneric": "Failed to save the face. Please try again later."
+  },
+  "faceImageUpload": {
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "face": {
     "private": "Private",
@@ -300,10 +332,53 @@
     "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
     "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
     "errorGeneric": "Failed to save profile. Please try again later.",
+    "errorAvatarNotFound": "The selected image could not be found. Please choose the image again.",
     "errorSessionExpired": "Your session has expired. Please sign in again."
   },
   "faceDetailPage": {
     "backAriaLabel": "Go back"
+  },
+  "friendsPage": {
+    "title": "Friends",
+    "tabFriend": "Friends",
+    "tabOutgoing": "Sent",
+    "tabIncoming": "Requests",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "noFriends": "No friends yet",
+    "noOutgoing": "No pending sent requests",
+    "noIncoming": "No incoming requests",
+    "online": "Online",
+    "offline": "Offline",
+    "accept": "Accept",
+    "reject": "Decline",
+    "cancelRequest": "Cancel",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "processing": "Processing…",
+    "errorGeneric": "Something went wrong. Please try again later."
+  },
+  "profilePage": {
+    "facesHeading": "Faces ({count})",
+    "noFaces": "No faces yet",
+    "private": "Private",
+    "sendRequest": "Add friend",
+    "pendingRequest": "Requested",
+    "accept": "Accept",
+    "reject": "Decline",
+    "removeFriend": "Remove friend",
+    "removeFriendConfirmTitle": "Remove this friend?",
+    "removeFriendConfirmMessage": "You will no longer be friends with {name}. This action cannot be undone.",
+    "removeFriendConfirmButton": "Remove",
+    "removeFriendCancel": "Cancel",
+    "unblock": "Unblock",
+    "blockedByMessage": "You can't send a friend request to this user",
+    "removing": "Processing…",
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorGeneric": "Something went wrong. Please try again later."
   },
   "relativeTime": {
     "justNow": "Just now",
@@ -316,6 +391,8 @@
     "post": "Post"
   },
   "accountMenu": {
+    "viewProfile": "Profile",
+    "viewProfileSub": "View your profile",
     "settings": "Account Settings",
     "settingsSub": "Profile · Password",
     "otherSettings": "Other Settings",
@@ -342,7 +419,8 @@
     "required": "*",
     "bodyPlaceholder": "Write something…",
     "submit": "Save",
-    "submitting": "Saving…"
+    "submitting": "Saving…",
+    "errorGeneric": "Failed to save the seed. Please try again later."
   },
   "seedActions": {
     "editSeed": "Edit",

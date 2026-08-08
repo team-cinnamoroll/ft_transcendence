@@ -3,13 +3,21 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
+    entrypoint: []
+    user: root
     volumes:
       - .:/workspace:cached
-      - workspace_node_modules:/workspace/node_modules
+      - tracen-root-node-modules:/workspace/node_modules
+      - tracen-contracts-node-modules:/workspace/containers/apps/contracts/node_modules
+      - tracen-backend-node-modules:/workspace/containers/apps/backend/node_modules
+      - tracen-frontend-bff-node-modules:/workspace/containers/apps/frontend-bff/node_modules
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}/.claude:/home/node/.claude:cached
     working_dir: /workspace
-    command: sleep infinity
+    command:
+      - sh
+      - -lc
+      - bash .devcontainer/scripts/dev-container-bootstrap.sh && exec sleep infinity
     extra_hosts:
       - 'tracen.local:127.0.0.1'
       - 'registry.tracen.local:127.0.0.1'
@@ -45,9 +53,11 @@ services:
       - .env.dev
     volumes:
       - .:/workspace:cached
-      - workspace_node_modules:/workspace/node_modules
+      - tracen-root-node-modules:/workspace/node_modules
+      - tracen-contracts-node-modules:/workspace/containers/apps/contracts/node_modules
+      - tracen-frontend-bff-node-modules:/workspace/containers/apps/frontend-bff/node_modules
     working_dir: /workspace
-    command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
+    command: sh -lc "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
     depends_on:
       - backend
     ports:
@@ -63,10 +73,12 @@ services:
       - REDIS_URL=redis://:${REDIS_PASSWORD:-tracen_secret}@redis:6379
     volumes:
       - .:/workspace:cached
-      - workspace_node_modules:/workspace/node_modules
+      - tracen-root-node-modules:/workspace/node_modules
+      - tracen-contracts-node-modules:/workspace/containers/apps/contracts/node_modules
+      - tracen-backend-node-modules:/workspace/containers/apps/backend/node_modules
       - file_storage_data:${FILE_STORAGE_BASE_DIR:-/app/uploads}
     working_dir: /workspace
-    command: sh -lc "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
+    command: sh -lc "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
@@ -193,6 +205,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.size=5GB'
     volumes:
       - ./containers/infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./containers/infra/monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
@@ -238,7 +251,7 @@ services:
 
   # コンテナ単位のリソース使用量(どのコンテナが CPU/メモリを食っているか)
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: ghcr.io/google/cadvisor:v0.57.0
     privileged: true
     volumes:
       - /:/rootfs:ro
@@ -272,7 +285,10 @@ services:
       - nginx
 
 volumes:
-  workspace_node_modules:
+  tracen-root-node-modules:
+  tracen-contracts-node-modules:
+  tracen-backend-node-modules:
+  tracen-frontend-bff-node-modules:
   postgres_data:
   ci_docker_data:
   redis_data:

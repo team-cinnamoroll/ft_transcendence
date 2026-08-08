@@ -2,22 +2,19 @@
 
 import { useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
+import type { z } from 'zod';
 import { UserProfileUpsertRequestSchema } from '@tracen/contracts';
-import type { UserProfile, UserProfileUpsertRequest } from '@/types/user-profile';
+import type { UserProfile } from '@/types/user-profile';
 import { getAvatarUrl } from '@/lib/display';
 import { updateUserProfileAction } from '@/server/actions/user-profile';
 import { uploadAvatarFileAction, deleteUploadedFileAction } from '@/server/actions/file-storage';
-import { buildZodErrorMap } from '@/lib/zod-error-map';
+import { useZodForm } from '@/lib/use-zod-form';
 
 type Props = {
   user: UserProfile;
   onClose: () => void;
 };
-
-type ProfileFormFields = Pick<UserProfileUpsertRequest, 'name' | 'badge'>;
 
 const profileFormSchema = UserProfileUpsertRequestSchema.pick({ name: true, badge: true });
 
@@ -29,12 +26,14 @@ const ALLOWED_AVATAR_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 const ProfileEditModal = ({ user, onClose }: Props) => {
   const t = useTranslations('profileEditModal');
-  const tValidation = useTranslations('validation');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // モーダルを開いた時点で設定されていたアバターのファイルID（差し替え検知・後始末の削除対象の判定に使う）
+  const originalAvatarFileId = user.avatar?.id ?? null;
+
   const [previewUrl, setPreviewUrl] = useState<string>(getAvatarUrl(user));
-  const [avatarFileId, setAvatarFileId] = useState<string | undefined>(undefined);
+  const [avatarFileId, setAvatarFileId] = useState<string | null>(originalAvatarFileId);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -45,8 +44,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ProfileFormFields>({
-    resolver: zodResolver(profileFormSchema, { error: buildZodErrorMap(tValidation) }),
+  } = useZodForm(profileFormSchema, {
     defaultValues: { name: user.name, badge: user.badge },
   });
 
@@ -88,7 +86,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
     setAvatarError(null);
-    setAvatarFileId(undefined);
+    // avatarFileIdはここでは変更しない（アップロードが失敗した場合に、既存のアバターを消してしまわないため）
     setIsUploadingAvatar(true);
 
     const formData = new FormData();
@@ -113,7 +111,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     })();
   };
 
-  const onValid = (data: ProfileFormFields) => {
+  const onValid = (data: z.infer<typeof profileFormSchema>) => {
     if (isPending || isUploadingAvatar) return;
 
     setError(null);
@@ -132,6 +130,12 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
 
       // 保存に成功したので、これ以降はモーダルを閉じても削除対象にしない
       uploadedFileIdRef.current = null;
+
+      // アバターを差し替えた場合、置き換えられた古いファイルを後始末として削除する（ベストエフォート）
+      if (originalAvatarFileId && avatarFileId !== originalAvatarFileId) {
+        void deleteUploadedFileAction(originalAvatarFileId);
+      }
+
       onClose();
     });
   };
@@ -263,7 +267,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
             <input
               id="profile-badge"
               type="text"
-              {...register('badge', { setValueAs: (v: string) => (v === '' ? undefined : v) })}
+              {...register('badge', { setValueAs: (v: string) => (v === '' ? null : v) })}
               placeholder={t('badgePlaceholder')}
               style={inputStyle}
               aria-invalid={!!errors.badge}

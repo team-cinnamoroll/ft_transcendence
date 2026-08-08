@@ -3,19 +3,24 @@ import SideNav from '@/components/ui/SideNav';
 import AppHeader from '@/components/ui/AppHeader';
 import ContextRail from '@/components/ui/ContextRail';
 import MobileComposeBar from '@/components/ui/MobileComposeBar';
-import { DetailPanelProvider } from '@/lib/detail-panel-context';
+import { HeartbeatProvider } from '@/lib/heartbeat-provider';
 import { getLayoutData } from '@/server/usecases/layout';
 import { getAuthSession } from '@/server/usecases/auth';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [
-    { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers },
-    session,
-  ] = await Promise.all([getLayoutData(), getAuthSession()]);
-  const isAuthenticated = session !== null;
+  const session = await getAuthSession();
+
+  // 未ログイン時はナビゲーション類(SideNav/AppHeader等)を表示しない。
+  // 現状ルート(/)以外のページはまだ保護されていないが、その対応は別Issue(ページ保護)で行う。
+  if (!session) {
+    return <>{children}</>;
+  }
+
+  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
+    await getLayoutData();
 
   return (
-    <DetailPanelProvider>
+    <HeartbeatProvider isAuthenticated={true}>
       <div
         className="flex h-screen w-full overflow-hidden"
         style={{ background: 'var(--mf-bg-light)' }}
@@ -23,17 +28,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <SideNav
           faces={myFaces}
           user={currentUser}
+          realUserId={session.userId}
           seeds={mySeeds}
           faceCount={myFaces.length}
           seedCount={mySeeds.length}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={true}
         />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           <AppHeader
             user={currentUser}
+            realUserId={session.userId}
             faceCount={myFaces.length}
             seedCount={mySeeds.length}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={true}
           />
           <div className="flex flex-1 min-h-0 overflow-hidden">
             <main
@@ -55,6 +62,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <BottomNav className="md:hidden" />
       <MobileComposeBar defaultFace={myFaces[0]} />
-    </DetailPanelProvider>
+    </HeartbeatProvider>
   );
 }
