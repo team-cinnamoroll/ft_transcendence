@@ -235,9 +235,9 @@ services:
       - .env.local-prod
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-      - ./containers/infra/local-prod/certs/tls.crt:/certs/tls.crt:ro
-      - ./containers/infra/local-prod/certs/tls.key:/certs/tls.key:ro
-      - ./containers/infra/local-prod/certs/ca.crt:/certs/ca.crt:ro
+      - ./containers/infra/local-prod/certs/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
+      - ./containers/infra/local-prod/certs/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
+      - ./containers/infra/local-prod/certs/ca.crt:/usr/share/elasticsearch/config/certs/ca.crt:ro
     healthcheck:
       test: ['CMD-SHELL', 'curl -sk https://localhost:9200 >/dev/null || exit 1']
       interval: 5s
@@ -299,9 +299,9 @@ services:
       - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./containers/infra/analytics/logstash/pipeline-local-prod:/usr/share/logstash/pipeline:ro
       - ./containers/infra/analytics/logstash/templates:/usr/share/logstash/templates:ro
-      - ./containers/infra/local-prod/certs/tls.crt:/certs/tls.crt:ro
-      - ./containers/infra/local-prod/certs/tls.key:/certs/tls.key:ro
-      - ./containers/infra/local-prod/certs/ca.crt:/certs/ca.crt:ro
+      - ./containers/infra/local-prod/certs/tls.crt:/usr/share/logstash/config/certs/tls.crt:ro
+      - ./containers/infra/local-prod/certs/tls.key:/usr/share/logstash/config/certs/tls.key:ro
+      - ./containers/infra/local-prod/certs/ca.crt:/usr/share/logstash/config/certs/ca.crt:ro
     depends_on:
       elasticsearch:
         condition: service_healthy
