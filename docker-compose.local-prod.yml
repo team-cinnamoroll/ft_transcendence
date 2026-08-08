@@ -71,6 +71,8 @@ services:
       REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
       FILE_STORAGE_BASE_DIR: ${FILE_STORAGE_BASE_DIR}
       JWT_ISSUER: ${JWT_ISSUER}
+      MASTER_API_KEY_RATE_LIMIT: ${MASTER_API_KEY_RATE_LIMIT}
+      MASTER_API_KEY: ${MASTER_API_KEY}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -102,6 +104,7 @@ services:
       NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS}
       APP_API_BASE_URL: ${APP_API_BASE_URL}
       NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
+      MASTER_API_KEY: ${MASTER_API_KEY}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
