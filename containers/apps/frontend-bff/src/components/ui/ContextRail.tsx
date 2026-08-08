@@ -1,13 +1,14 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { getFaceTitle, getFaceColor } from '@/lib/display';
-import { useRelativeTime } from '@/lib/use-relative-time';
+import type { FriendProfileWithOnlineStatus } from '@/types/friendship';
+import { getFaceTitle, getFaceColor, getAvatarUrl } from '@/lib/display';
 import FaceBadge from '@/components/ui/FaceBadge';
 import FaceChip from '@/components/ui/FaceChip';
 import RailCard from '@/components/ui/RailCard';
@@ -179,90 +180,73 @@ const ReflectionRail = ({ faces, seeds }: ReflectionRailProps) => {
 
 // ── CollectionRail ─────────────────────────────────────────────
 
-const RECOMMENDED_FACES_MOCK = [
-  { name: '読書', handle: 'h_maru', subs: 412 },
-  { name: '映画断片', handle: 'sayaka_t', subs: 287 },
-  { name: '朝の珈琲', handle: 'kettle_co', subs: 198 },
-];
-
-const RECOMMENDED_COLORS = ['#5B8DB8', '#7B6B9E', '#A89050'];
-
 type CollectionRailProps = {
-  subscribedFaces: Face[];
-  latestSeedByFaceId: Record<string, Seed>;
-  users: UserProfile[];
+  friends: FriendProfileWithOnlineStatus[];
 };
 
-const CollectionRail = ({ subscribedFaces, latestSeedByFaceId, users }: CollectionRailProps) => {
+const CollectionRail = ({ friends }: CollectionRailProps) => {
   const t = useTranslations('contextRail');
-  const formatRelative = useRelativeTime();
-  const userMap = new Map(users.map((u) => [u.id, u]));
-
-  const UNREAD_CUTOFF = new Date(REFERENCE_DATE.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {subscribedFaces.length > 0 ? (
-        <RailCard title={t('subscribedFaces')}>
+      {friends.length > 0 ? (
+        <RailCard title={t('friends')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {subscribedFaces.map((face) => {
-              const lastAct = latestSeedByFaceId[face.id];
-              const owner = userMap.get(face.userId);
-              const hasUnread = lastAct && lastAct.createdAt >= UNREAD_CUTOFF;
-              return (
-                <Link
-                  key={face.id}
-                  href={`/faces/${face.id}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
-                >
-                  <div style={{ position: 'relative', flexShrink: 0 }}>
-                    <FaceBadge face={face} size={32} radius={9} />
-                    {hasUnread && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: -2,
-                          right: -2,
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          background: 'var(--mf-accent)',
-                          border: '1.5px solid var(--mf-surface)',
-                        }}
-                      />
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
+            {friends.map(({ friendshipId, friendProfile, isOnline }) => (
+              <Link
+                key={friendshipId}
+                href={`/profile/${friendProfile.id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
+              >
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden' }}>
+                    <Image
+                      src={getAvatarUrl(friendProfile)}
+                      alt={friendProfile.name}
+                      width={32}
+                      height={32}
                       style={{
-                        fontSize: 12.5,
-                        fontWeight: 700,
-                        color: 'var(--mf-brand)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        objectFit: 'cover',
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
                       }}
-                    >
-                      {getFaceTitle(face)}
-                    </div>
-                    {owner && (
-                      <div style={{ fontSize: 11, color: 'var(--mf-text-muted)', marginTop: 1 }}>
-                        {owner.name}
-                      </div>
-                    )}
+                    />
                   </div>
-                  {lastAct && (
-                    <span style={{ fontSize: 10.5, color: 'var(--mf-text-faint)', flexShrink: 0 }}>
-                      {formatRelative(lastAct.createdAt)}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      bottom: -1,
+                      right: -1,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: isOnline ? '#4caf50' : '#9aa0a6',
+                      border: '1.5px solid var(--mf-surface)',
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      color: 'var(--mf-brand)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {friendProfile.name}
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </RailCard>
       ) : (
-        <RailCard title={t('subscribedFaces')}>
+        <RailCard title={t('friends')}>
           <p
             style={{
               fontSize: 12.5,
@@ -271,83 +255,21 @@ const CollectionRail = ({ subscribedFaces, latestSeedByFaceId, users }: Collecti
               lineHeight: 1.7,
             }}
           >
-            {t('noSubscriptions')}
+            {t('noFriends')}
             <br />
             <Link
-              href="/collection"
+              href="/friends"
               style={{
                 color: 'var(--mf-accent)',
                 textDecoration: 'none',
                 fontWeight: 600,
               }}
             >
-              {t('findFaces')}
+              {t('findFriends')}
             </Link>
           </p>
         </RailCard>
       )}
-
-      {/* 人気のフェイス */}
-      <RailCard title={t('popularFaces')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {RECOMMENDED_FACES_MOCK.map((rec, i) => (
-            <div key={rec.handle} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 9,
-                  background: RECOMMENDED_COLORS[i % RECOMMENDED_COLORS.length],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  fontFamily: 'var(--mf-font-serif)',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: '#fff',
-                }}
-              >
-                {rec.name.slice(0, 1)}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    color: 'var(--mf-brand)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {rec.name}
-                </div>
-                <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
-                  @{rec.handle} · {rec.subs} {t('subscribersUnit', { count: rec.subs })}
-                </div>
-              </div>
-              <button
-                type="button"
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: 999,
-                  background: 'transparent',
-                  border: '1px solid var(--mf-brand)',
-                  color: 'var(--mf-brand)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-              >
-                {t('subscribeButton')}
-              </button>
-            </div>
-          ))}
-        </div>
-      </RailCard>
     </div>
   );
 };
@@ -358,18 +280,10 @@ export type ContextRailProps = {
   user: UserProfile;
   faces: Face[];
   seeds: Seed[];
-  subscribedFaces: Face[];
-  latestSeedByFaceId: Record<string, Seed>;
-  users: UserProfile[];
+  friends: FriendProfileWithOnlineStatus[];
 };
 
-const ContextRail = ({
-  faces,
-  seeds,
-  subscribedFaces,
-  latestSeedByFaceId,
-  users,
-}: ContextRailProps) => {
+const ContextRail = ({ faces, seeds, friends }: ContextRailProps) => {
   const pathname = usePathname();
 
   const renderContent = () => {
@@ -377,13 +291,7 @@ const ContextRail = ({
       return <ReflectionRail faces={faces} seeds={seeds} />;
     }
     if (pathname === '/collection') {
-      return (
-        <CollectionRail
-          subscribedFaces={subscribedFaces}
-          latestSeedByFaceId={latestSeedByFaceId}
-          users={users}
-        />
-      );
+      return <CollectionRail friends={friends} />;
     }
     return <WritingRail seeds={seeds} faces={faces} />;
   };

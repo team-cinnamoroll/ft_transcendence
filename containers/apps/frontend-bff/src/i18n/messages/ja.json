@@ -412,12 +412,9 @@
     "seedsThisMonth": "シード",
     "thisMonth": "今月",
     "noSeedsThisMonth": "今月はまだ記録がありません",
-    "subscribedFaces": "サブスク中",
-    "noSubscriptions": "サブスクしているフェイスがありません。",
-    "findFaces": "フェイスを探す →",
-    "popularFaces": "人気のフェイス",
-    "subscribersUnit": "{count, plural, other {サブスク}}",
-    "subscribeButton": "サブスク"
+    "friends": "フレンド",
+    "noFriends": "フレンドがいません。",
+    "findFriends": "フレンドを探す →"
   },
   "validation": {
     "required": "必須項目です",

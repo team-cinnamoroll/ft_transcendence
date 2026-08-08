@@ -412,12 +412,9 @@
     "seedsThisMonth": "Seeds",
     "thisMonth": "This month",
     "noSeedsThisMonth": "No seeds this month",
-    "subscribedFaces": "Subscribed",
-    "noSubscriptions": "You haven't subscribed to any faces yet.",
-    "findFaces": "Find Faces →",
-    "popularFaces": "Popular Faces",
-    "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
-    "subscribeButton": "Subscribe"
+    "friends": "Friends",
+    "noFriends": "You don't have any friends yet.",
+    "findFriends": "Find Friends →"
   },
   "validation": {
     "required": "This field is required",

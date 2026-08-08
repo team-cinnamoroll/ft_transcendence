@@ -16,8 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     return <>{children}</>;
   }
 
-  const { currentUser, myFaces, mySeeds, subscribedFaces, latestSeedByFaceId, allUsers } =
-    await getLayoutData();
+  const { currentUser, myFaces, mySeeds, friends } = await getLayoutData();
 
   return (
     <HeartbeatProvider isAuthenticated={true}>
@@ -49,14 +48,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               {children}
             </main>
-            <ContextRail
-              user={currentUser}
-              faces={myFaces}
-              seeds={mySeeds}
-              subscribedFaces={subscribedFaces}
-              latestSeedByFaceId={latestSeedByFaceId}
-              users={allUsers}
-            />
+            <ContextRail user={currentUser} faces={myFaces} seeds={mySeeds} friends={friends} />
           </div>
         </div>
       </div>

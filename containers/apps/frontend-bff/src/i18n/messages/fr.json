@@ -412,12 +412,9 @@
     "seedsThisMonth": "Graines",
     "thisMonth": "Ce mois-ci",
     "noSeedsThisMonth": "Aucune graine ce mois-ci",
-    "subscribedFaces": "Abonnements",
-    "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
-    "findFaces": "Chercher des facettes →",
-    "popularFaces": "Facettes populaires",
-    "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
-    "subscribeButton": "S'abonner"
+    "friends": "Amis",
+    "noFriends": "Vous n'avez pas encore d'amis.",
+    "findFriends": "Trouver des amis →"
   },
   "validation": {
     "required": "Ce champ est requis",
