@@ -92,18 +92,26 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
 
 ## 本番 (local-prod)
 
-`docker-compose.local-prod.yml` に ELK を **security 有効**で追加済み。dev と同じ Logstash pipeline / Filebeat / ダッシュボードを、認証付きで使う。
+`docker-compose.local-prod.yml` に ELK を **security + TLS 有効**で追加済み。dev と同じ Logstash pipeline / Filebeat / ダッシュボードを、**入口〜コンテナ間まで全区間 HTTPS**・認証付きで使う。
 
+- **前提(初回)**: hosts に `kibana.tracen.local` を追加、TLS 資材を生成:
+  ```txt
+  127.0.0.1 tracen.local registry.tracen.local kibana.tracen.local
+  ```
+  ```bash
+  pnpm local-prod:setup-tls   # *.tracen.local のワイルドカード証明書を生成
+  pnpm make-env:force         # .env.local-prod を生成(パスワードは本番前に変更)
+  ```
 - **起動**:
   ```bash
   docker compose -f docker-compose.local-prod.yml --profile analytics up -d \
-    elasticsearch kibana logstash filebeat
+    elasticsearch es-setup kibana logstash filebeat
   ```
-- **環境変数**: `.env.local-prod`（`ELASTIC_PASSWORD` 等）。`pnpm make-env:force` で `.env.local-prod.example` から生成。**本番前にパスワードを変更する**。
-- **security**: `xpack.security.enabled=true`。Kibana / Logstash は `elastic` ユーザーで ES に接続（`.env.local-prod` の認証情報を注入）。
-- **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://tracen.local/kibana`（**ログイン必須** = admin 限定）。
-- **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が拾う。mock-producer は含めない。
-- **provision**: index template は Logstash が自動登録する。ダッシュボード投入は ES/Kibana にアクセスできる環境から `provision-kibana.sh` を実行（ES は非公開のため、Kibana import は `KIBANA_URL=https://tracen.local/kibana` を指定）。
+- **全区間 HTTPS**: ES/Kibana/Logstash が `*.tracen.local` 証明書(`/certs` にマウント)で TLS 待ち受け・相互接続する。サービス間はサブドメイン(`elasticsearch.tracen.local` 等、証明書 SAN 一致)で通信。
+- **security**: `xpack.security.enabled=true`。**Logstash → `elastic`**、**Kibana → `kibana_system`** で ES に接続(Kibana は elastic superuser を拒否するため、`es-setup` が kibana_system のパスワードを設定)。
+- **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://kibana.tracen.local`（**ログイン必須** = admin 限定）。
+- **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が TLS で Logstash に送る。mock-producer は含めない。
+- **provision**: index template は Logstash が自動登録する。ダッシュボード投入は Kibana にアクセスできる環境から `KIBANA_URL=https://kibana.tracen.local provision-kibana.sh` を実行。
 
 ## 注意
 
