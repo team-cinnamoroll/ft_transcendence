@@ -116,7 +116,7 @@ Nginx は `/api/*` と `/*` をいずれも `frontend:3000` に転送し、必�
 ホスト OS の `/etc/hosts` に以下を追加します。
 
 ```
-127.0.0.1 tracen.local registry.tracen.local
+127.0.0.1 tracen.local registry.tracen.local api.tracen.local
 ```
 
 ### 手順 2: TLS 資材を生成
