@@ -102,11 +102,13 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
   pnpm local-prod:setup-tls   # *.tracen.local のワイルドカード証明書を生成
   pnpm make-env:force         # .env.local-prod を生成(パスワードは本番前に変更)
   ```
-- **起動**:
+- **起動(ワンコマンド)**:
   ```bash
-  docker compose -f docker-compose.local-prod.yml --profile analytics up -d \
-    elasticsearch es-setup kibana logstash filebeat
+  pnpm local-prod:deploy:analytics   # ELK 込みで起動(app/monitoring も含む)
+  # ELK が不要なときは基本 deploy(ELK は起動しない):
+  pnpm local-prod:deploy
   ```
+  ELK は `profiles: [analytics]` のため基本 deploy では起動せず、`deploy:analytics`(内部で `--profile analytics`)を付けたときのみ起動する。`pnpm local-prod:down` で ELK 含め停止。
 - **全区間 HTTPS**: ES/Kibana/Logstash が `*.tracen.local` 証明書(`/certs` にマウント)で TLS 待ち受け・相互接続する。サービス間はサブドメイン(`elasticsearch.tracen.local` 等、証明書 SAN 一致)で通信。
 - **security**: `xpack.security.enabled=true`。**Logstash → `elastic`**、**Kibana → `kibana_system`** で ES に接続(Kibana は elastic superuser を拒否するため、`es-setup` が kibana_system のパスワードを設定)。
 - **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://kibana.tracen.local`（**ログイン必須** = admin 限定）。
