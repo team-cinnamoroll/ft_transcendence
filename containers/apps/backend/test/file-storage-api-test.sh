@@ -7,6 +7,8 @@ BASE_URL=${BASE_URL:-"http://localhost:8000/api/v1"}
 STATIC_BASE_URL=${STATIC_BASE_URL:-"http://localhost:8000"}
 STATE_FILE=".storage_test_state"
 
+API_KEY=${MASTER_API_KEY:-"tracen_master_api_key"}  # APIキー（必要に応じて変更）
+
 # テスト用ダミー画像の設定
 TEST_IMAGE="test_source.jpg"
 DOWNLOADED_IMAGE="test_downloaded.jpg"
@@ -135,6 +137,7 @@ setup() {
     echo "Signing up test user ($TEST_EMAIL)..."
     RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
         -H "Content-Type: application/json" \
+        -H "X-API-Key: $API_KEY" \
         -d "{\"email\":\"$TEST_EMAIL\",\"name\":\"$TEST_NAME\",\"password\":\"$TEST_PASS\"}")
 
     SUCCESS=$(echo "$RES" | jq -r '.success')
