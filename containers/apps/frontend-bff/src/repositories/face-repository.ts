@@ -4,6 +4,7 @@ import type {
   CreateFaceRequest,
   UpdateFaceRequest,
   FaceSummary,
+  FaceSummaryPage,
   Face,
   FaceList,
   FaceCreate,
@@ -12,6 +13,7 @@ import type {
 } from '@/types/face';
 import { createBackendClient } from '@/lib/backend-client';
 import { createSingletonProvider } from '@/repositories/provider';
+import { classifyHttpStatus, type ApiResult } from '@/lib/api-error';
 
 // ─── 型（インターフェース）定義 ─────────────────────────────────
 
@@ -25,6 +27,11 @@ export type UpdateFaceInput = UpdateFaceRequest;
 export type FaceRepositorySpec = {
   /** 指定ユーザーのフェイス一覧を取得 */
   listByUserId: (accessToken: string, userId: string) => Promise<Face[]>;
+  /** 指定ユーザーのフェイス一覧を1ページ分だけ取得(「もっと見る」用 */
+  listPageByUserId: (
+    accessToken: string,
+    params: { userId: string; cursor?: string | null }
+  ) => Promise<ApiResult<FaceSummaryPage>>;
   /** ID でフェイスを1件取得（存在しない場合は null） */
   findById: (accessToken: string, faceId: string) => Promise<Face | null>;
   /** フェイスを作成 */
@@ -88,6 +95,21 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
     listByUserId: async (accessToken, userId) => {
       const summaries = await fetchAllFaceSummaries(accessToken, { userId });
       return summaries.map((summary) => summary.face);
+    },
+
+    listPageByUserId: async (accessToken, { userId, cursor }) => {
+      const res = await createBackendClient(accessToken).api.v1.faces.$get({
+        query: { userId, ...(cursor ? { cursor } : {}) },
+      });
+      if (!res.ok) {
+        console.error('FaceRepository.listPageByUserId: backend request failed', res.status);
+        return { success: false, errorKind: classifyHttpStatus(res.status) };
+      }
+      const json = (await res.json()) as FaceList;
+      if (!json.success) {
+        return { success: false, errorKind: 'UNKNOWN' };
+      }
+      return { success: true, data: json.data.faces };
     },
 
     findById: async (accessToken, faceId) => {

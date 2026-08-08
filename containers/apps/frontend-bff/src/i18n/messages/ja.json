@@ -322,6 +322,8 @@
   "profilePage": {
     "facesHeading": "フェイス（{count}）",
     "noFaces": "フェイスがありません",
+    "loadMore": "もっと見る",
+    "loading": "読み込み中…",
     "private": "非公開",
     "sendRequest": "フレンド申請する",
     "pendingRequest": "申請中",

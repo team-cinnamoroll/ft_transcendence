@@ -322,6 +322,8 @@
   "profilePage": {
     "facesHeading": "Faces ({count})",
     "noFaces": "No faces yet",
+    "loadMore": "Load more",
+    "loading": "Loading…",
     "private": "Private",
     "sendRequest": "Add friend",
     "pendingRequest": "Requested",

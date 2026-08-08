@@ -322,6 +322,8 @@
   "profilePage": {
     "facesHeading": "Facettes ({count})",
     "noFaces": "Aucune facette pour le moment",
+    "loadMore": "Voir plus",
+    "loading": "Chargement…",
     "private": "Privé",
     "sendRequest": "Ajouter en ami",
     "pendingRequest": "Demande envoyée",
