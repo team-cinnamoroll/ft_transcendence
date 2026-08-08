@@ -12,6 +12,7 @@ const MOCK_FILES = {
 // const BASE_URL = process.env.BASE_URL || 'http://localhost:8000/api/v1';
 const BASE_URL = 'http://backend:8000/api/v1';
 const DEFAULT_PASSWORD = 'password1234';
+const API_KEY = process.env.MASTER_API_KEY || 'tracen_master_api_key'; // 適切なAPIキーに置き換えてください
 
 // ==========================================
 // 型定義 & マッピング用インターフェース
@@ -100,7 +101,7 @@ async function main() {
     // サインアップAPI呼出
     const signUpRes = await fetch(`${BASE_URL}/auth/sign-up`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
       body: JSON.stringify({
         email,
         name: user.name,
@@ -165,6 +166,7 @@ async function main() {
       headers: {
         Authorization: `Bearer ${session.token}`,
         'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
       },
       body: JSON.stringify({
         name: face.name,
