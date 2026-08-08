@@ -220,7 +220,12 @@
   },
   "collection": {
     "title": "Collection",
-    "empty": "Aucune publication d'amis pour l'instant"
+    "empty": "Aucune publication d'amis pour l'instant",
+    "searchPlaceholder": "Rechercher des facettes et graines pour trouver des amis",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "searching": "Recherche en cours…",
+    "noMatch": "Aucun résultat"
   },
   "settings": {
     "title": "Paramètres",

@@ -220,7 +220,12 @@
   },
   "collection": {
     "title": "収集",
-    "empty": "まだフレンドの投稿がありません"
+    "empty": "まだフレンドの投稿がありません",
+    "searchPlaceholder": "フェイス・シードを検索してフレンドを見つける",
+    "facesSection": "フェイス ({n})",
+    "seedsSection": "シード ({n})",
+    "searching": "検索中…",
+    "noMatch": "該当なし"
   },
   "settings": {
     "title": "設定",

@@ -220,7 +220,12 @@
   },
   "collection": {
     "title": "Collection",
-    "empty": "No friend posts yet"
+    "empty": "No friend posts yet",
+    "searchPlaceholder": "Search faces & seeds to find friends",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "searching": "Searching…",
+    "noMatch": "No results"
   },
   "settings": {
     "title": "Settings",
