@@ -274,7 +274,7 @@ const CollectionRail = ({ subscribedFaces, latestSeedByFaceId, users }: Collecti
             {t('noSubscriptions')}
             <br />
             <Link
-              href="/subscriptions"
+              href="/collection"
               style={{
                 color: 'var(--mf-accent)',
                 textDecoration: 'none',
@@ -376,7 +376,7 @@ const ContextRail = ({
     if (pathname === '/faces' || pathname.startsWith('/faces/')) {
       return <ReflectionRail faces={faces} seeds={seeds} />;
     }
-    if (pathname === '/subscriptions') {
+    if (pathname === '/collection') {
       return (
         <CollectionRail
           subscribedFaces={subscribedFaces}

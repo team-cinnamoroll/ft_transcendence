@@ -210,40 +210,6 @@
     "weekRecord": "{range} enregistrement(s)",
     "noRecord": "Aucune graine cette semaine"
   },
-  "subscriptionSeed": {
-    "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "timelineTab": "Fil d'actualité",
-    "subscriptionsTab": "Abonnements",
-    "filterPlaceholder": "Trouver de nouveaux visages / graines",
-    "filterByFace": "Filtrer par facette",
-    "facesSection": "Facettes ({n})",
-    "seedsSection": "Graines ({n})",
-    "sectionTitle": "Semences d'abonnement récentes",
-    "exploringAll": "Exploration globale",
-    "explorePromptTitle": "Entrez un mot-clé",
-    "explorePromptHint": "Recherchez toutes les facettes et graines, abonnées ou non",
-    "searchTabSubscribed": "Abonnés",
-    "searchTabOther": "Autres",
-    "searchSubscribedFacesSection": "Facettes abonnées ({n})",
-    "searchOtherFacesSection": "Autres facettes ({n})",
-    "searchSubscribedSeedsSection": "Graines abonnées ({n})",
-    "searchOtherSeedsSection": "Autres graines ({n})",
-    "subscribe": "S'abonner",
-    "subscribed": "✓ Abonné",
-    "subscribeAriaLabel": "S'abonner à {name}",
-    "unsubscribeAriaLabel": "Se désabonner de {name}",
-    "noMatch": "Aucun résultat",
-    "seedCount": "{count, plural, one {Graine} other {Graines}}",
-    "noFilteredSeeds": "Aucune graine trouvée",
-    "viewFace": "Voir la facette →",
-    "noSubscribedFaces": "Aucune facette abonnée",
-    "emptyHeadline": "Vous n'êtes encore abonné<br></br>à aucun visage.",
-    "emptyBody": "Commencez par choisir un seul visage qui vous intéresse.<br></br>Conçu pour préserver le sens des notifications.",
-    "recommendedTitle": "Visages recommandés",
-    "recommendedSubtitle": "· Choisis pour vous",
-    "subscriberCount": "{n, plural, one {# abonné} other {# abonnés}}",
-    "subscribeAction": "S'abonner"
-  },
   "home": {
     "title": "Accueil"
   },
@@ -254,9 +220,9 @@
     "title": "Recherche",
     "placeholder": "Rechercher..."
   },
-  "subscriptions": {
-    "title": "Abonnements",
-    "subscribedCount": "{count, plural, one {# facette suivie} other {# facettes suivies}}"
+  "collection": {
+    "title": "Collection",
+    "empty": "Aucune publication d'amis pour l'instant"
   },
   "settings": {
     "title": "Paramètres",

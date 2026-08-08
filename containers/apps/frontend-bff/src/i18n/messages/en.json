@@ -210,40 +210,6 @@
     "weekRecord": "{range} record",
     "noRecord": "No seeds this week"
   },
-  "subscriptionSeed": {
-    "noSubscriptions": "You haven't subscribed to any faces yet",
-    "timelineTab": "Timeline",
-    "subscriptionsTab": "Subscriptions",
-    "filterPlaceholder": "Find a new face / seed",
-    "filterByFace": "Filter by face",
-    "facesSection": "Faces ({n})",
-    "seedsSection": "Seeds ({n})",
-    "sectionTitle": "Recent subscription seed",
-    "exploringAll": "Exploring all",
-    "explorePromptTitle": "Enter a keyword",
-    "explorePromptHint": "Search all faces and seeds — subscribed or not",
-    "searchTabSubscribed": "Subscribed",
-    "searchTabOther": "Others",
-    "searchSubscribedFacesSection": "Subscribed Faces ({n})",
-    "searchOtherFacesSection": "Other Faces ({n})",
-    "searchSubscribedSeedsSection": "Subscribed Seeds ({n})",
-    "searchOtherSeedsSection": "Other Seeds ({n})",
-    "subscribe": "Subscribe",
-    "subscribed": "✓ Subscribed",
-    "subscribeAriaLabel": "Subscribe to {name}",
-    "unsubscribeAriaLabel": "Unsubscribe from {name}",
-    "noMatch": "No results",
-    "seedCount": "{count, plural, one {Seed} other {Seeds}}",
-    "noFilteredSeeds": "No seeds found",
-    "viewFace": "View face →",
-    "noSubscribedFaces": "No subscribed faces",
-    "emptyHeadline": "You haven't subscribed to<br></br>anyone's face yet.",
-    "emptyBody": "Start by picking just one face that interests you.<br></br>This is designed to keep notifications meaningful.",
-    "recommendedTitle": "Recommended faces",
-    "recommendedSubtitle": "· Picked for you",
-    "subscriberCount": "{n, plural, one {# subscriber} other {# subscribers}}",
-    "subscribeAction": "Subscribe"
-  },
   "home": {
     "title": "Home"
   },
@@ -254,9 +220,9 @@
     "title": "Search",
     "placeholder": "Search..."
   },
-  "subscriptions": {
-    "title": "Subscriptions",
-    "subscribedCount": "{count, plural, one {# face subscribed} other {# faces subscribed}}"
+  "collection": {
+    "title": "Collection",
+    "empty": "No friend posts yet"
   },
   "settings": {
     "title": "Settings",

@@ -6,7 +6,6 @@ import type { UserProfile } from '@/types/user-profile';
 import { getCurrentUser } from './users';
 import { listFacesByUserId } from './faces';
 import { listSeedsByUserId } from './seeds';
-import { getSubscribedFaceIds } from './subscriptions';
 
 /**
  * GDPR エクスポートで返すユーザーデータ一式。
@@ -20,8 +19,6 @@ export type UserDataExport = {
   faces: Face[];
   /** アクティビティ（このコードベースでは Seed が activity に相当。#205/#206 で統一） */
   seeds: Seed[];
-  /** 購読中フェイスの ID 一覧 */
-  subscribedFaceIds: string[];
 };
 
 /**
@@ -31,10 +28,9 @@ export type UserDataExport = {
 export async function exportCurrentUserData(): Promise<UserDataExport> {
   const currentUser = await getCurrentUser();
 
-  const [faces, seeds, subscribedFaceIds] = await Promise.all([
+  const [faces, seeds] = await Promise.all([
     listFacesByUserId(currentUser.id),
     listSeedsByUserId(currentUser.id),
-    getSubscribedFaceIds(),
   ]);
 
   return {
@@ -42,6 +38,5 @@ export async function exportCurrentUserData(): Promise<UserDataExport> {
     profile: currentUser,
     faces,
     seeds,
-    subscribedFaceIds,
   };
 }

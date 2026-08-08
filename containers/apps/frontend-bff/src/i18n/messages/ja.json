@@ -210,40 +210,6 @@
     "weekRecord": "{range}の記録",
     "noRecord": "この週には記録がありません"
   },
-  "subscriptionSeed": {
-    "noSubscriptions": "まだサブスクしているフェイスがありません",
-    "timelineTab": "タイムライン",
-    "subscriptionsTab": "サブスク一覧",
-    "filterPlaceholder": "新しいフェイス・シードを見つける",
-    "filterByFace": "フェイスで絞り込み",
-    "facesSection": "フェイス ({n})",
-    "seedsSection": "シード ({n})",
-    "sectionTitle": "最新のサブスクシード",
-    "exploringAll": "全体を探索中",
-    "explorePromptTitle": "キーワードを入力してください",
-    "explorePromptHint": "サブスク中・サブスク外のフェイス・シードを一括検索できます",
-    "searchTabSubscribed": "サブスク中",
-    "searchTabOther": "その他",
-    "searchSubscribedFacesSection": "サブスク中のフェイス ({n})",
-    "searchOtherFacesSection": "その他のフェイス ({n})",
-    "searchSubscribedSeedsSection": "サブスク中のシード ({n})",
-    "searchOtherSeedsSection": "その他のシード ({n})",
-    "subscribe": "サブスクする",
-    "subscribed": "✓ サブスク中",
-    "subscribeAriaLabel": "{name}をサブスクする",
-    "unsubscribeAriaLabel": "{name}のサブスクを解除",
-    "noMatch": "該当なし",
-    "seedCount": "{count, plural, other {シード}}",
-    "noFilteredSeeds": "該当するシードがありません",
-    "viewFace": "フェイスを見る →",
-    "noSubscribedFaces": "サブスクしているフェイスがありません",
-    "emptyHeadline": "まだ、誰のフェイスも<br></br>サブスクライブしていない。",
-    "emptyBody": "気になるフェイスを1つだけ、まず選んでみる。<br></br>通知の重みを大切にする設計です。",
-    "recommendedTitle": "おすすめのフェイス",
-    "recommendedSubtitle": "· あなたに合いそうな",
-    "subscriberCount": "{n} サブスク",
-    "subscribeAction": "サブスク"
-  },
   "home": {
     "title": "ホーム"
   },
@@ -254,9 +220,9 @@
     "title": "検索",
     "placeholder": "検索..."
   },
-  "subscriptions": {
-    "title": "サブスク",
-    "subscribedCount": "{count} フェイスをサブスク中"
+  "collection": {
+    "title": "収集",
+    "empty": "まだフレンドの投稿がありません"
   },
   "settings": {
     "title": "設定",
