@@ -595,6 +595,82 @@ erDiagram
 
 # Modules
 
+○個のMajor moduleと○個のMinor moduleを実装しました。点数は合計でxx点です。
+
+## 1 Web
+
+### Major: Use a framework for both the frontend and backend.
+
+- 担当: xx
+- 内容を簡潔に書く
+
+### Major: A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints:
+
+- 担当: xx
+- 内容を簡潔に書く
+
+### Minor: Use an ORM for the database.
+
+### Minor: Server-Side Rendering (SSR) for improved performance and SEO.
+
+### Minor: Custom-made design system with reusable components, including a proper color palette, typography, and icons (minimum: 10 reusable components).
+
+### Minor: Implement advanced search functionality with filters, sorting, and pagination.
+
+### Minor: File upload and management system.
+
+## 2 Accessibility and Internationalization
+
+### Minor: Support for multiple languages (at least 3 languages).
+
+## 3 User Management
+
+### Major: Standard user management and authentication.
+
+## 4 Artificial Intelligence
+
+No modules implemented.
+
+## 5 Cybersecurity
+
+No modules implemented.
+
+## 6 Gaming and user experience
+
+No modules implemented.
+
+## 7 Devops
+
+### Major: Infrastructure for log management using ELK (Elasticsearch, Logstash,
+
+Kibana).
+
+### Major: Monitoring system with Prometheus and Grafana.
+
+## 8 Data and Analytics
+
+No modules implemented.
+
+## 9 Blockchain
+
+No modules implemented.
+
+## 10 Modules of choice
+
+### Major: カスタムモジュール1
+
+堅牢なDevSecOps開発プロセスとコンテナ検証パイプラインの自動化
+Devコンテナを使用した開発コンテナ環境とプロダクションデプロイ検証コンテナ（DinD）の構築
+安全な開発及び検証環境の構築（開発とプロダクションコンテナの分離、開発コンテナ上でのviteとturbopackによる開発サーバーの提供、pnpmを使用したパッケージ管理の導入、huskyを使用したコミット前などの事前検証環境の構築、lint-staged、pnpm auditに加えてosv:scan-lockfilesの導入、push前のtypecheckとローカルDinDによるci検証を含む）
+
+### Major: カスタムモジュール2
+
+同一ユーザーによる複数端末からの個別ログインと、不正アクセス検知時の強制ログアウトの実装（JWTトークンと公開鍵（well-known APIを含む）による自己検証認証トークンとリフレッシュトークンの提供を含む）
+
+### Minor: カスタムモジュール3
+
+publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS S3のようなAPIベースのローカルファイルストレージをバックエンドサーバにスクラッチ実装
+
 <!-- ## 11. Individual Contributions
 - 各メンバーが何に貢献したかの詳細な内訳
 - 各人が実装した具体的な機能・モジュール・コンポーネント
