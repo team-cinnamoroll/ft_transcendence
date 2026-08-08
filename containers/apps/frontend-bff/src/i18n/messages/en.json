@@ -154,6 +154,10 @@
     "sortLastAt": "Last post",
     "sortTotal": "Most seeds",
     "sortName": "Name",
+    "sortSeedNewest": "Newest",
+    "sortSeedOldest": "Oldest",
+    "fromDate": "From date",
+    "toDate": "To date",
     "gridView": "Grid view",
     "listView": "List view",
     "actionMenu": "Action menu",
@@ -225,7 +229,13 @@
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
     "searching": "Searching…",
-    "noMatch": "No results"
+    "noMatch": "No results",
+    "sortLastPostedAt": "Last post",
+    "sortNumberOfPosts": "Most seeds",
+    "sortSeedNewest": "Newest",
+    "sortSeedOldest": "Oldest",
+    "fromDate": "From date",
+    "toDate": "To date"
   },
   "settings": {
     "title": "Settings",

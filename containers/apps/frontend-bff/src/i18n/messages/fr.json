@@ -154,6 +154,10 @@
     "sortLastAt": "Dernière publication",
     "sortTotal": "Plus de graines",
     "sortName": "Nom",
+    "sortSeedNewest": "Plus récentes",
+    "sortSeedOldest": "Plus anciennes",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin",
     "gridView": "Vue grille",
     "listView": "Vue liste",
     "actionMenu": "Menu d'actions",
@@ -225,7 +229,13 @@
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
     "searching": "Recherche en cours…",
-    "noMatch": "Aucun résultat"
+    "noMatch": "Aucun résultat",
+    "sortLastPostedAt": "Dernière publication",
+    "sortNumberOfPosts": "Plus de graines",
+    "sortSeedNewest": "Plus récentes",
+    "sortSeedOldest": "Plus anciennes",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin"
   },
   "settings": {
     "title": "Paramètres",

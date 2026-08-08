@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { Face } from '@/types/face';
+import type { Face, FaceSummary } from '@/types/face';
 import type { Seed } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { getFaceTitle, getFaceImageUrl, createLookupMap } from '@/lib/display';
@@ -15,6 +15,8 @@ import FaceBadge from '@/components/ui/FaceBadge';
 import SeedRow from '@/components/ui/SeedRow';
 import Pagination from '@/components/ui/Pagination';
 import SearchBar from '@/components/ui/SearchBar';
+import SortMenu from '@/components/ui/SortMenu';
+import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteFaceAction, searchFacesAction } from '@/server/actions/faces';
 import { deleteSeedAction, searchSeedsAction } from '@/server/actions/seeds';
@@ -33,6 +35,8 @@ type SortType = 'lastAt' | 'total' | 'name';
 type ViewType = 'grid' | 'list';
 type ActionMenu = { face: Face; top: number; right: number };
 type SeedActionMenu = { seed: Seed; top: number; right: number };
+type FaceSearchSortKey = 'lastPostedAt' | 'numberOfPosts';
+type SeedSortOrder = 'newest' | 'oldest';
 
 const REFERENCE_MONTH = '2026-04';
 
@@ -70,13 +74,17 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
   const [isDeletingSeed, startSeedDeleteTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
-  const [searchedFaces, setSearchedFaces] = useState<Face[]>([]);
+  const [searchedFaces, setSearchedFaces] = useState<FaceSummary[]>([]);
   const [searchedSeeds, setSearchedSeeds] = useState<Seed[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [seedsPage, setSeedsPage] = useState(1);
   const [sortType, setSortType] = useState<SortType>('lastAt');
   const [viewType, setViewType] = useState<ViewType>('grid');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [faceSearchSortKey, setFaceSearchSortKey] = useState<FaceSearchSortKey>('lastPostedAt');
+  const [seedFromDate, setSeedFromDate] = useState('');
+  const [seedToDate, setSeedToDate] = useState('');
+  const [seedSearchSortOrder, setSeedSearchSortOrder] = useState<SeedSortOrder>('newest');
   const t = useTranslations('facesClient');
   const tSeed = useTranslations('seedActions');
 
@@ -160,7 +168,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
   };
 
   const filteredFaces = useMemo(() => {
-    const result = searchQuery.trim() ? [...searchedFaces] : [...faces];
+    const result = [...faces];
     result.sort((a, b) => {
       const sa = faceStats.get(a.id);
       const sb = faceStats.get(b.id);
@@ -173,11 +181,52 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
       return getFaceTitle(a).localeCompare(getFaceTitle(b), 'ja');
     });
     return result;
-  }, [faces, searchedFaces, faceStats, searchQuery, sortType]);
+  }, [faces, faceStats, sortType]);
 
   const faceMap = useMemo(() => createLookupMap(faces, (f) => f.id), [faces]);
 
-  const matchingSeeds = searchQuery.trim() ? searchedSeeds : [];
+  const FACE_SEARCH_SORT_LABELS: Record<FaceSearchSortKey, string> = {
+    lastPostedAt: t('sortLastAt'),
+    numberOfPosts: t('sortTotal'),
+  };
+
+  const sortedSearchedFaces = useMemo(() => {
+    const result = [...searchedFaces];
+    result.sort((a, b) => {
+      if (faceSearchSortKey === 'numberOfPosts') {
+        return b.numberOfPosts - a.numberOfPosts;
+      }
+      return (b.lastPostedAt ?? '').localeCompare(a.lastPostedAt ?? '');
+    });
+    return result;
+  }, [searchedFaces, faceSearchSortKey]);
+
+  const SEED_SEARCH_SORT_LABELS: Record<SeedSortOrder, string> = {
+    newest: t('sortSeedNewest'),
+    oldest: t('sortSeedOldest'),
+  };
+
+  const filteredAndSortedSearchedSeeds = useMemo(() => {
+    const fromTime = seedFromDate ? new Date(seedFromDate).getTime() : null;
+    const toTime = seedToDate ? new Date(`${seedToDate}T23:59:59.999`).getTime() : null;
+
+    const result = searchedSeeds.filter((seed) => {
+      const createdAtTime = new Date(seed.createdAt).getTime();
+      if (fromTime !== null && createdAtTime < fromTime) return false;
+      if (toTime !== null && createdAtTime > toTime) return false;
+      return true;
+    });
+
+    result.sort((a, b) => {
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return seedSearchSortOrder === 'oldest' ? ta - tb : tb - ta;
+    });
+
+    return result;
+  }, [searchedSeeds, seedFromDate, seedToDate, seedSearchSortOrder]);
+
+  const matchingSeeds = searchQuery.trim() ? filteredAndSortedSearchedSeeds : [];
 
   const SEEDS_PAGE_SIZE = 10;
   const seedsTotalPages = Math.ceil(matchingSeeds.length / SEEDS_PAGE_SIZE);
@@ -209,7 +258,14 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
             </p>
           )}
           {/* フェイス結果 */}
-          <div style={{ padding: '12px 20px 6px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 20px 6px',
+            }}
+          >
             <span
               style={{
                 fontSize: 11,
@@ -219,10 +275,17 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
                 textTransform: 'uppercase',
               }}
             >
-              {t('facesSection', { n: filteredFaces.length })}
+              {t('facesSection', { n: sortedSearchedFaces.length })}
             </span>
+            <SortMenu
+              value={faceSearchSortKey}
+              onChange={setFaceSearchSortKey}
+              options={(
+                Object.entries(FACE_SEARCH_SORT_LABELS) as [FaceSearchSortKey, string][]
+              ).map(([key, label]) => ({ key, label }))}
+            />
           </div>
-          {filteredFaces.length === 0 ? (
+          {sortedSearchedFaces.length === 0 ? (
             <p style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', padding: '4px 20px' }}>
               {t('noMatch')}
             </p>
@@ -235,8 +298,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
                 gap: 12,
               }}
             >
-              {filteredFaces.map((face) => {
-                const stats = faceStats.get(face.id);
+              {sortedSearchedFaces.map(({ face, lastPostedAt, numberOfPosts }) => {
                 return (
                   <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
                     <div
@@ -371,16 +433,16 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
                           }}
                         >
                           <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)' }}>
-                            {stats?.lastDate ? stats.lastDate.replace(/-/g, '/') : '—'}
+                            {lastPostedAt ? lastPostedAt.slice(0, 10).replace(/-/g, '/') : '—'}
                           </div>
                           <span style={{ flexShrink: 0, textAlign: 'right' }}>
                             <b style={{ color: 'var(--mf-text)', fontWeight: 700, fontSize: 17 }}>
-                              {stats?.total ?? 0}
+                              {numberOfPosts}
                             </b>
                             <span
                               style={{ fontSize: 10, color: 'var(--mf-text-muted)', marginLeft: 2 }}
                             >
-                              {t('seedCount', { count: stats?.total ?? 0 })}
+                              {t('seedCount', { count: numberOfPosts })}
                             </span>
                           </span>
                         </div>
@@ -393,7 +455,16 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
           )}
 
           {/* シード結果 */}
-          <div style={{ padding: '16px 20px 6px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 8,
+              padding: '16px 20px 6px',
+            }}
+          >
             <span
               style={{
                 fontSize: 11,
@@ -405,6 +476,32 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
             >
               {t('seedsSection', { n: matchingSeeds.length })}
             </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <DateRangeFilter
+                fromDate={seedFromDate}
+                toDate={seedToDate}
+                onFromDateChange={(v) => {
+                  setSeedFromDate(v);
+                  setSeedsPage(1);
+                }}
+                onToDateChange={(v) => {
+                  setSeedToDate(v);
+                  setSeedsPage(1);
+                }}
+                fromLabel={t('fromDate')}
+                toLabel={t('toDate')}
+              />
+              <SortMenu
+                value={seedSearchSortOrder}
+                onChange={(v) => {
+                  setSeedSearchSortOrder(v);
+                  setSeedsPage(1);
+                }}
+                options={(Object.entries(SEED_SEARCH_SORT_LABELS) as [SeedSortOrder, string][]).map(
+                  ([key, label]) => ({ key, label })
+                )}
+              />
+            </div>
           </div>
           {matchingSeeds.length === 0 ? (
             <p style={{ fontSize: 12.5, color: 'var(--mf-text-muted)', padding: '4px 20px' }}>

@@ -154,6 +154,10 @@
     "sortLastAt": "最終投稿日順",
     "sortTotal": "シード数順",
     "sortName": "名前順",
+    "sortSeedNewest": "新しい順",
+    "sortSeedOldest": "古い順",
+    "fromDate": "開始日",
+    "toDate": "終了日",
     "gridView": "グリッド表示",
     "listView": "リスト表示",
     "actionMenu": "アクションメニュー",
@@ -225,7 +229,13 @@
     "facesSection": "フェイス ({n})",
     "seedsSection": "シード ({n})",
     "searching": "検索中…",
-    "noMatch": "該当なし"
+    "noMatch": "該当なし",
+    "sortLastPostedAt": "最終投稿日順",
+    "sortNumberOfPosts": "シード数順",
+    "sortSeedNewest": "新しい順",
+    "sortSeedOldest": "古い順",
+    "fromDate": "開始日",
+    "toDate": "終了日"
   },
   "settings": {
     "title": "設定",

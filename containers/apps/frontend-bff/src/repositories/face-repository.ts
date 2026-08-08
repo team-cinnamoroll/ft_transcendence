@@ -35,8 +35,11 @@ export type FaceRepositorySpec = {
   delete: (accessToken: string, faceId: string) => Promise<void>;
   /** 全フェイス一覧を取得（検索用） */
   listAll: (accessToken: string) => Promise<Face[]>;
-  /** キーワード検索（q）でフェイスを取得。該当する全件をカーソルで辿って集める */
-  search: (accessToken: string, query: { q?: string; userId?: string }) => Promise<Face[]>;
+  /**
+   * キーワード検索（q）でフェイスを取得。該当する全件をカーソルで辿って集める。
+   * lastPostedAt/numberOfPosts はクライアント側でのソートに使うため、Faceに絞らずFaceSummaryのまま返す。
+   */
+  search: (accessToken: string, query: { q?: string; userId?: string }) => Promise<FaceSummary[]>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -149,8 +152,7 @@ export function createFaceApiRepositoryImpl(): FaceRepositorySpec {
     },
 
     search: async (accessToken, query) => {
-      const summaries = await fetchAllFaceSummaries(accessToken, query);
-      return summaries.map((summary) => summary.face);
+      return await fetchAllFaceSummaries(accessToken, query);
     },
   };
 }

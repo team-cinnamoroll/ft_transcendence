@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Face } from '@/types/face';
+import type { Face, FaceSummary } from '@/types/face';
 import {
   type CreateFaceInput,
   type UpdateFaceInput,
@@ -27,8 +27,9 @@ export async function listAllFaces(): Promise<Face[]> {
 /**
  * キーワードでフェイスを検索する。
  * userIdを指定すると対象ユーザーのフェイスのみに絞り込める(未指定なら全体)。
+ * lastPostedAt/numberOfPostsはクライアント側でのソートに使うため、FaceSummaryのまま返す。
  */
-export async function searchFaces(query: { q?: string; userId?: string }): Promise<Face[]> {
+export async function searchFaces(query: { q?: string; userId?: string }): Promise<FaceSummary[]> {
   const { accessToken } = await getSessionTokens();
   if (!accessToken) {
     return [];
