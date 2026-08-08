@@ -1,10 +1,8 @@
 import { z } from 'zod';
+import { FileNameSchema, MimeTypeSchema } from '../../shared/file-metadata';
 
-export const FileNameSchema = z.string().min(1).max(255);
-export type FileName = z.infer<typeof FileNameSchema>;
-
-export const MimeTypeSchema = z.string().min(1).max(255);
-export type MimeType = z.infer<typeof MimeTypeSchema>;
+export { FileNameSchema, MimeTypeSchema };
+export type { FileName, MimeType } from '../../shared/file-metadata';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export const FileSizeSchema = z.number().int().positive().max(MAX_FILE_SIZE);
