@@ -51,7 +51,8 @@
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
     "uploadingImageAlt": "Image en cours d'envoi {n}",
-    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
+    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG, ou un fichier PDF.",
+    "pdfFileNameFallback": "Fichier PDF",
     "submit": "Publier",
     "submitting": "Publication…",
     "errorGeneric": "Échec de la publication. Veuillez réessayer plus tard."
@@ -394,7 +395,9 @@
     "imageAlt": "Image {n}",
     "moreOptions": "Plus d'options",
     "edit": "Modifier",
-    "linksCount": "{count, plural, one {# lien} other {# liens}}"
+    "linksCount": "{count, plural, one {# lien} other {# liens}}",
+    "openPdfAriaLabel": "Ouvrir le PDF dans un nouvel onglet",
+    "pdfFileNameFallback": "Fichier PDF"
   },
   "seedDetail": {
     "title": "Seed",
@@ -408,7 +411,9 @@
     "incomingLinks": "Liens vers ce seed",
     "linksUnit": "",
     "showMore": "Voir {count} de plus →",
-    "imageAlt": "Image {n}"
+    "imageAlt": "Image {n}",
+    "openPdfAriaLabel": "Ouvrir le PDF dans un nouvel onglet",
+    "pdfFileNameFallback": "Fichier PDF"
   },
   "pagination": {
     "ariaLabel": "Pagination",

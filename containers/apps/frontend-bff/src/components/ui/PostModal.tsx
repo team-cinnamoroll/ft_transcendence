@@ -8,7 +8,8 @@ import type { Seed, CreateSeedRequest } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
-import { getFaceTitle, getFaceColor } from '@/lib/display';
+import PdfThumbnail from '@/components/ui/PdfThumbnail';
+import { getFaceTitle, getFaceColor, isImageFile } from '@/lib/display';
 import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds';
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useZodForm } from '@/lib/use-zod-form';
@@ -19,8 +20,8 @@ const MAX_LENGTH = 5000;
 // backendのFileSizeSchemaと同じ上限（無駄なアップロードを避けるためのクライアント側の早期チェック）
 const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 
-// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/pngのみに制限する
-const ALLOWED_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png'];
+// backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/png/pdfのみに制限する
+const ALLOWED_SEED_ATTACHMENT_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
 type AttachedImage = {
   file: File;
@@ -197,7 +198,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
 
     newImages.forEach((img) => {
       if (
-        !ALLOWED_IMAGE_FILE_TYPES.includes(img.file.type) ||
+        !ALLOWED_SEED_ATTACHMENT_FILE_TYPES.includes(img.file.type) ||
         img.file.size > MAX_IMAGE_FILE_SIZE
       ) {
         setImages((prev) =>
@@ -568,17 +569,25 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
                   gridRow: index === 0 ? '1 / 3' : undefined,
                 }}
               >
-                <Image
-                  src={img.objectUrl}
-                  alt={
-                    img.isUploading
-                      ? t('uploadingImageAlt', { n: index + 1 })
-                      : t('attachedImageAlt', { n: index + 1 })
-                  }
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  unoptimized
-                />
+                {isImageFile(img.file.type) ? (
+                  <Image
+                    src={img.objectUrl}
+                    alt={
+                      img.isUploading
+                        ? t('uploadingImageAlt', { n: index + 1 })
+                        : t('attachedImageAlt', { n: index + 1 })
+                    }
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    unoptimized
+                  />
+                ) : (
+                  <PdfThumbnail
+                    src={img.objectUrl}
+                    fileName={img.file.name}
+                    fallbackLabel={t('pdfFileNameFallback')}
+                  />
+                )}
                 {img.isUploading && (
                   <div
                     style={{
@@ -660,7 +669,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             multiple
             style={{ display: 'none' }}
             onChange={handleFileChange}

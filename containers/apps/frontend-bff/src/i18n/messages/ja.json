@@ -51,7 +51,8 @@
     "attachedImageAlt": "添付画像{n}",
     "removeImageAriaLabel": "画像{n}を削除",
     "uploadingImageAlt": "アップロード中の画像{n}",
-    "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorImageInvalidType": "JPEG・PNG形式の画像、またはPDFファイルを選択してください。",
+    "pdfFileNameFallback": "PDFファイル",
     "submit": "投稿",
     "submitting": "投稿中...",
     "errorGeneric": "投稿に失敗しました。時間をおいて再度お試しください。"
@@ -394,7 +395,9 @@
     "imageAlt": "画像 {n}",
     "moreOptions": "その他",
     "edit": "編集",
-    "linksCount": "{count} 件のリンク"
+    "linksCount": "{count} 件のリンク",
+    "openPdfAriaLabel": "PDFを新しいタブで開く",
+    "pdfFileNameFallback": "PDFファイル"
   },
   "seedDetail": {
     "title": "シード",
@@ -408,7 +411,9 @@
     "incomingLinks": "このシードへのリンク",
     "linksUnit": "件",
     "showMore": "さらに {count} 件を見る →",
-    "imageAlt": "画像 {n}"
+    "imageAlt": "画像 {n}",
+    "openPdfAriaLabel": "PDFを新しいタブで開く",
+    "pdfFileNameFallback": "PDFファイル"
   },
   "pagination": {
     "ariaLabel": "ページネーション",
