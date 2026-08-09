@@ -10,9 +10,10 @@ type Props = {
   user: UserProfile;
   faces: Face[];
   seeds: Seed[];
+  today: Date;
 };
 
-const HomeProfile = ({ user, faces, seeds }: Props) => {
+const HomeProfile = ({ user, faces, seeds, today }: Props) => {
   const t = useTranslations('homeProfile');
 
   return (
@@ -63,7 +64,7 @@ const HomeProfile = ({ user, faces, seeds }: Props) => {
       </div>
 
       {/* タイルカレンダー */}
-      <SeedTileCalendar seeds={seeds} />
+      <SeedTileCalendar seeds={seeds} today={today} />
     </div>
   );
 };

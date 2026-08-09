@@ -6,6 +6,8 @@ import { useTranslations, useFormatter } from 'next-intl';
 
 type SeedTileCalendarProps = {
   seeds: Seed[];
+  /** サーバー側で算出した基準日。クライアント側で `new Date()` を呼ぶとSSRとの間でhydration mismatchが起きるため、必ず親から受け取る */
+  today: Date;
 };
 
 const getColorStyle = (count: number): string => {
@@ -33,13 +35,12 @@ type WeekData = {
 
 const LEGEND_COUNTS = [0, 1, 2, 4, 6];
 
-const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
+const SeedTileCalendar = ({ seeds, today }: SeedTileCalendarProps) => {
   const [selectedWeekIdx, setSelectedWeekIdx] = useState<number | null>(null);
   const t = useTranslations('seedTileCalendar');
   const format = useFormatter();
 
   const weeks = useMemo<WeekData[]>(() => {
-    const today = new Date();
     const dayOfWeek = today.getDay();
     const sundayOfThisWeek = new Date(today);
     sundayOfThisWeek.setDate(today.getDate() - dayOfWeek);
@@ -65,7 +66,7 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
       result.push({ days, startDate: days[0].date, endDate: days[6].date });
     }
     return result;
-  }, [seeds]);
+  }, [seeds, today]);
 
   const monthLabels = useMemo(() => {
     const labels: Record<number, string> = {};

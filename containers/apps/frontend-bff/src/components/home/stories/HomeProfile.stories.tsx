@@ -18,9 +18,9 @@ const myFaces = faces.filter((f) => f.userId === USER_IDS.user1);
 const mySeeds = seeds.filter((s) => s.userId === USER_IDS.user1);
 
 export const Default: Story = {
-  args: { user: currentUser, faces: myFaces, seeds: mySeeds },
+  args: { user: currentUser, faces: myFaces, seeds: mySeeds, today: new Date() },
 };
 
 export const NoSeeds: Story = {
-  args: { user: currentUser, faces: myFaces, seeds: [] },
+  args: { user: currentUser, faces: myFaces, seeds: [], today: new Date() },
 };

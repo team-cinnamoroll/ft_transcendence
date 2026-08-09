@@ -37,7 +37,7 @@ export default async function Home() {
     <div className="flex flex-col">
       <main>
         {/* 上部: プロフィールエリア（Server Component） */}
-        <HomeProfile user={currentUser} faces={myFaces} seeds={seeds} />
+        <HomeProfile user={currentUser} faces={myFaces} seeds={seeds} today={today} />
 
         {/* 中部〜下部: フェイスフィルタ + シードフィード（Client Component） */}
         <HomeClient

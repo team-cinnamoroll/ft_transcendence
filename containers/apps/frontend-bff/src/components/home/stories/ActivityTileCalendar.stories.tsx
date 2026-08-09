@@ -12,9 +12,9 @@ export default meta;
 type Story = StoryObj<typeof SeedTileCalendar>;
 
 export const Default: Story = {
-  args: { seeds },
+  args: { seeds, today: new Date() },
 };
 
 export const Empty: Story = {
-  args: { seeds: [] },
+  args: { seeds: [], today: new Date() },
 };
