@@ -8,8 +8,6 @@ type SeedTileCalendarProps = {
   seeds: Seed[];
 };
 
-const REFERENCE_DATE = new Date('2026-04-01');
-
 const getColorStyle = (count: number): string => {
   if (count === 0) return 'var(--mf-surface-tint)';
   if (count === 1) return 'rgba(212,146,42,0.25)';
@@ -41,7 +39,7 @@ const SeedTileCalendar = ({ seeds }: SeedTileCalendarProps) => {
   const format = useFormatter();
 
   const weeks = useMemo<WeekData[]>(() => {
-    const today = new Date(REFERENCE_DATE);
+    const today = new Date();
     const dayOfWeek = today.getDay();
     const sundayOfThisWeek = new Date(today);
     sundayOfThisWeek.setDate(today.getDate() - dayOfWeek);

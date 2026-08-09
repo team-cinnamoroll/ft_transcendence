@@ -38,8 +38,6 @@ type SeedActionMenu = { seed: Seed; top: number; right: number };
 type FaceSearchSortKey = 'lastPostedAt' | 'numberOfPosts';
 type SeedSortOrder = 'newest' | 'oldest';
 
-const REFERENCE_MONTH = '2026-04';
-
 const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, currentUser }: Props) => {
   const router = useRouter();
   const [faces, setFaces] = useState<Face[]>(initialFaces);
@@ -147,10 +145,11 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
   };
 
   const faceStats = useMemo(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
     const stats = new Map<string, { total: number; monthly: number; lastDate: string | null }>();
     for (const face of faces) {
       const faceSeeds = seeds.filter((a) => a.faceId === face.id);
-      const monthly = faceSeeds.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length;
+      const monthly = faceSeeds.filter((a) => a.createdAt.startsWith(currentMonth)).length;
       const sorted = [...faceSeeds].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       stats.set(face.id, {
         total: faceSeeds.length,

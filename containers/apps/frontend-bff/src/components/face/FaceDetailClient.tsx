@@ -11,8 +11,6 @@ import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
 import { useSubscribeSeedCreated } from '@/lib/seed-created-provider';
 
-const REFERENCE_MONTH = '2026-04';
-
 type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 type Props = {
@@ -44,10 +42,10 @@ const FaceDetailClient = ({
   });
 
   const totalSeeds = seeds.length;
-  const monthlySeeds = useMemo(
-    () => seeds.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length,
-    [seeds]
-  );
+  const monthlySeeds = useMemo(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    return seeds.filter((a) => a.createdAt.startsWith(currentMonth)).length;
+  }, [seeds]);
 
   const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
     const rect = e.currentTarget.getBoundingClientRect();
