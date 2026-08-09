@@ -18,7 +18,7 @@
   "nav": {
     "home": "Home",
     "faces": "Reflection",
-    "subscriptions": "Collection",
+    "collection": "Collection",
     "friends": "Friends",
     "search": "Search",
     "faceDetail": "Face Detail"

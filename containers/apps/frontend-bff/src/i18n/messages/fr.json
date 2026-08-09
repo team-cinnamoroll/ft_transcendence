@@ -18,7 +18,7 @@
   "nav": {
     "home": "Accueil",
     "faces": "Réflexion",
-    "subscriptions": "Collection",
+    "collection": "Collection",
     "friends": "Amis",
     "search": "Recherche",
     "faceDetail": "Détail de la facette"

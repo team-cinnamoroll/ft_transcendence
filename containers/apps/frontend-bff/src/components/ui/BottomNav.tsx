@@ -68,7 +68,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
   {
     href: '/collection',
-    labelKey: 'nav.subscriptions',
+    labelKey: 'nav.collection',
     icon: (a) => <CompassIcon active={a} />,
   },
 ];
