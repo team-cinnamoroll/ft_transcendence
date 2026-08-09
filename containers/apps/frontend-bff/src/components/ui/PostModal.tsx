@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import { CreateSeedRequestSchema } from '@tracen/contracts';
 import type { Face } from '@/types/face';
-import type { Seed, CreateSeedRequest } from '@/types/seed';
+import type { CreateSeedRequest } from '@/types/seed';
 import type { UserProfile } from '@/types/user-profile';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
@@ -13,6 +13,7 @@ import { getFaceTitle, getFaceColor, isImageFile } from '@/lib/display';
 import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds';
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useZodForm } from '@/lib/use-zod-form';
+import { usePublishSeedCreated } from '@/lib/seed-created-provider';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -36,7 +37,6 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   defaultFaceId?: string;
-  onCreate?: (seed: Seed) => void;
 };
 
 type ViewerApiResponse = {
@@ -46,8 +46,9 @@ type ViewerApiResponse = {
 
 const EMPTY_FACES: Face[] = [];
 
-const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
+const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
   const t = useTranslations('postModal');
+  const publishSeedCreated = usePublishSeedCreated();
   const [viewer, setViewer] = useState<ViewerApiResponse | null>(null);
   const [isViewerLoading, setIsViewerLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -176,7 +177,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId, onCreate }: Props) => {
       // 投稿成功後にモーダルを閉じた際、未保存アップロードとして誤って削除されないよう先にクリアする
       images.forEach((img) => URL.revokeObjectURL(img.objectUrl));
       setImages([]);
-      onCreate?.(result.data);
+      publishSeedCreated(result.data);
       onClose();
     });
   };

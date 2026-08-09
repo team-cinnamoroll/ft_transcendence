@@ -9,6 +9,7 @@ import FaceHeader, { type SortOrder } from './FaceHeader';
 import FaceSeedFeed from './FaceSeedFeed';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
+import { useSubscribeSeedCreated } from '@/lib/seed-created-provider';
 
 const REFERENCE_MONTH = '2026-04';
 
@@ -36,6 +37,11 @@ const FaceDetailClient = ({
   const [deletingSeed, setDeletingSeed] = useState<Seed | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
   const tSeed = useTranslations('seedActions');
+
+  useSubscribeSeedCreated((seed) => {
+    if (seed.faceId !== face.id) return;
+    setSeeds((prev) => [seed, ...prev]);
+  });
 
   const totalSeeds = seeds.length;
   const monthlySeeds = useMemo(
