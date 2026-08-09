@@ -4,8 +4,9 @@ import { fn } from '@storybook/test';
 import PostModal from '../PostModal';
 import { currentUser } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
+import { USER_IDS, FACE_IDS } from '@/mocks/ids';
 
-const myFaces = faces.filter((f) => f.userId === 'user-1');
+const myFaces = faces.filter((f) => f.userId === USER_IDS.user1);
 
 // モジュールロード時点（モック適用前）の fetch を保存する
 const originalFetch = window.fetch;
@@ -57,7 +58,7 @@ export const OpenWithDefaultFace: Story = {
   args: {
     isOpen: true,
     onClose: fn(),
-    defaultFaceId: 'face-1-1',
+    defaultFaceId: FACE_IDS.face11,
   },
 };
 

@@ -3,6 +3,7 @@ import FaceSeedFeed from '../FaceSeedFeed';
 import { faces } from '@/mocks/faces';
 import { users } from '@/mocks/users';
 import { seeds } from '@/mocks/seeds';
+import { FACE_IDS } from '@/mocks/ids';
 
 const meta: Meta<typeof FaceSeedFeed> = {
   title: 'Face/FaceSeedFeed',
@@ -13,7 +14,7 @@ const meta: Meta<typeof FaceSeedFeed> = {
 export default meta;
 type Story = StoryObj<typeof FaceSeedFeed>;
 
-const face = faces.find((f) => f.id === 'face-1-1')!;
+const face = faces.find((f) => f.id === FACE_IDS.face11)!;
 const faceSeeds = seeds.filter((s) => s.faceId === face.id);
 
 export const Default: Story = {
@@ -26,8 +27,8 @@ export const Empty: Story = {
 
 export const OtherFace: Story = {
   args: {
-    face: faces.find((f) => f.id === 'face-1-2') ?? face,
-    seeds: seeds.filter((s) => s.faceId === 'face-1-2'),
+    face: faces.find((f) => f.id === FACE_IDS.face12) ?? face,
+    seeds: seeds.filter((s) => s.faceId === FACE_IDS.face12),
     users,
   },
 };
