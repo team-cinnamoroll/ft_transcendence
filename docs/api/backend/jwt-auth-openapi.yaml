@@ -1,0 +1,1488 @@
+openapi: 3.0.3
+info:
+  title: Tracen JWT Protected API
+  description: >-
+    Tracen バックエンドにおける JWT アクセストークン (Authorization: Bearer <token>) を必要とするAPI
+  version: 1.0.0
+servers:
+  - url: https://api.tracen.local/api/v1
+    description: Tracen API Base Server
+  - url: http://localhost:8000/api/v1
+    description: ローカル開発環境用
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+    description: 認証関連のエンドポイント(サインアウト)
+  - name: User & Profile
+    description: ユーザー情報およびプロフィール関連のエンドポイント
+  - name: Face
+    description: マルチアイデンティティ (Face) 関連のエンドポイント
+  - name: Seed
+    description: 投稿コンテンツ (Seed) 関連のエンドポイント
+  - name: File Storage
+    description: ファイルストレージ関連のエンドポイント
+  - name: Friendship
+    description: フレンドシップ関連のエンドポイント
+  - name: Presence
+    description: フレンドのオンラインステータス関連のエンドポイント
+
+paths:
+  # ==========================================
+  # 1. ユーザー & プロフィール API
+  # ==========================================
+  /users/me:
+    get:
+      tags:
+        - User & Profile
+      summary: ログインユーザー情報取得
+      description: 現在認証されているユーザーの基本情報およびプロフィール情報を返却します。
+      operationId: getMyProfile
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMeResponse'
+        '401':
+          description: 認証エラー (トークン未設定・無効・期限切れ)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}:
+    delete:
+      tags:
+        - User & Profile
+      summary: ユーザーアカウント削除
+      description: 現在認証されているユーザーのアカウントを削除します (自分自身のアカウントのみ)。
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 削除するユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 削除成功
+        '403':
+          description: 自分以外のアカウントを削除しようとした
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ユーザーが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-profile/profiles:
+    get:
+      tags:
+        - User & Profile
+      summary: 複数ユーザープロフィール一括取得
+      description: 複数のユーザーIDを指定して、プロフィールと自分からのリレーション(フレンド状態など)を取得します。
+      operationId: getProfiles
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          description: 対象ユーザーのUUID(カンマ区切り、または複数回指定)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfilesResponse'
+        '400':
+          description: リクエストパラメータ不正 (最大100件までの制限超過等)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-profile/{userId}:
+    put:
+      tags:
+        - User & Profile
+      summary: ユーザープロフィール更新
+      description: 指定されたユーザーIDのプロフィール (バイオ、アバターURL等) を更新します。
+      operationId: upsertUserProfile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 対象ユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: プロフィール更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sign-out:
+    post:
+      tags:
+        - Auth
+      summary: ユーザーサインアウト
+      description: 現在のセッションの認証トークンを無効化し、サインアウト処理を行います。
+      operationId: signOutUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: サインアウト成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
+  # 2. Face (マルチアイデンティティ) API
+  # ==========================================
+  /faces:
+    get:
+      tags:
+        - Face
+      summary: Face 一覧サマリ取得
+      description: ログインユーザーが所持する Face (アイデンティティ) の一覧および最終投稿サマリを取得します。
+      operationId: fetchSummaryFaces
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          description: 特定のユーザーの Face に絞り込む場合の User ID (UUID)
+          schema:
+            type: string
+            format: uuid
+        - name: q
+          in: query
+          required: false
+          description: キーワード検索
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          required: false
+          description: ソート基準 (lastpostedAt, seedsCount など)
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          description: ソート順 (asc または desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: limit
+          in: query
+          required: false
+          description: 1ページの取得件数
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          description: 次ページ取得用カーソル
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacesResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Face
+      summary: Face 新規作成
+      description: 新しい Face (表示名・公開範囲・アバター等) を作成します。
+      operationId: createFace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFaceRequest'
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceSingleResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /faces/{id}:
+    put:
+      tags:
+        - Face
+      summary: Face 更新
+      description: 指定された ID の Face 情報を更新します (所有者権限が必要)。
+      operationId: updateFace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Face ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFaceRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceSingleResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定の Face が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Face
+      summary: Face 削除
+      description: 指定された ID の Face を削除します。
+      operationId: deleteFace
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Face ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定の Face が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
+  # 3. Seed (投稿コンテンツ) API
+  # ==========================================
+  /seeds:
+    get:
+      tags:
+        - Seed
+      summary: Seed 一覧取得 (フィード / 検索)
+      description: 特定の Face またはタイムラインの Seed 一覧をカーソルページネーションで取得します。
+      operationId: fetchSeeds
+      parameters:
+        - name: faceId
+          in: query
+          required: false
+          description: 特定の Face で絞り込む場合の Face ID (UUID)
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          required: false
+          description: 特定の User で絞り込む場合の User ID (UUID)
+          schema:
+            type: string
+            format: uuid
+        - name: q
+          in: query
+          required: false
+          description: キーワード検索
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          required: false
+          description: 検索開始日時
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          required: false
+          description: 検索終了日時
+          schema:
+            type: string
+            format: date-time
+        - name: order
+          in: query
+          required: false
+          description: ソート順 (asc または desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: cursor
+          in: query
+          required: false
+          description: 次ページ取得用カーソル
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 1ページの取得件数
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeedsResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Seed
+      summary: Seed 新規投稿
+      description: 指定された Face を差出人として新しい Seed (投稿) を作成します。
+      operationId: createSeed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSeedRequest'
+      responses:
+        '201':
+          description: 投稿成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeedSingleResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /seeds/{id}:
+    put:
+      tags:
+        - Seed
+      summary: Seed 更新
+      description: 投稿済みの Seed コンテンツを更新します (投稿者 Face の所有確認が必要)。
+      operationId: updateSeed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Seed ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSeedRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeedSingleResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Seed が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Seed
+      summary: Seed 削除
+      description: 指定された Seed を削除します。
+      operationId: deleteSeed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Seed ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Seed が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
+  # 4. ファイルストレージ API
+  # ==========================================
+  /file-storage/upload:
+    post:
+      tags:
+        - File Storage
+      summary: ファイルアップロード
+      description: 画像等のファイルをアップロードし、メタデータ ID とアクセス URL を取得します。
+      operationId: uploadFile
+      parameters:
+        - name: x-file-name
+          in: header
+          required: true
+          description: アップロードするファイルの元の名前
+          schema:
+            type: string
+        - name: x-file-type
+          in: header
+          required: true
+          description: 'ファイルのMIMEタイプ (例: image/jpeg)'
+          schema:
+            type: string
+        - name: x-visibility
+          in: header
+          required: true
+          description: ファイルの公開範囲 (public または private)
+          schema:
+            type: string
+            enum: [public, private]
+        - name: content-length
+          in: header
+          required: true
+          description: ファイルのサイズ (バイト数)
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              description: アップロードするファイルデータ (生のバイナリストリーム)
+      responses:
+        '200':
+          description: アップロード成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploadResponse'
+        '400':
+          description: 無効なファイルフォーマットまたはサイズオーバー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /file-storage/download/{fileId}:
+    get:
+      tags:
+        - File Storage
+      summary: ファイルダウンロード
+      description: アップロード済みファイルをストレージからダウンロードします。
+      operationId: downloadFile
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          description: ファイルメタデータ ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ダウンロード成功
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: アクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ファイルが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /file-storage/delete/{fileId}:
+    delete:
+      tags:
+        - File Storage
+      summary: ファイル削除
+      description: アップロード済みファイルをストレージから削除します。
+      operationId: deleteFile
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          description: ファイルメタデータ ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 削除成功
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 削除権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ファイルが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
+  # 5. フレンドシップ API
+  # ==========================================
+  /friendships:
+    get:
+      tags:
+        - Friendship
+      summary: フレンド一覧取得
+      description: 現在のユーザーの承認済みフレンド一覧を取得します。
+      operationId: fetchFriendships
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipsResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friendships/requests:
+    get:
+      tags:
+        - Friendship
+      summary: フレンド申請一覧取得
+      description: フレンド申請一覧（送信・受信）を取得します。
+      operationId: fetchPendingFriendships
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: incoming (受信) または outgoing (送信)
+          schema:
+            type: string
+            enum: [incoming, outgoing]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipPendingListResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Friendship
+      summary: フレンド申請送信
+      description: 他のユーザーに対してフレンドリクエストを送信します。
+      operationId: createFriendship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - addresseeId
+              properties:
+                addresseeId:
+                  type: string
+                  format: uuid
+                  description: 申請先ユーザーの UUID
+      responses:
+        '201':
+          description: 申請成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipCreateResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: ブロックされている等で申請不可
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 既に申請済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friendships/requests/{requestId}/accept:
+    patch:
+      tags:
+        - Friendship
+      summary: フレンド申請承認
+      description: 受信したフレンド申請を承認します。
+      operationId: acceptFriendship
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: フレンドシップ ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 承認成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipAcceptResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 申請が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 既に承認済み、または状態が競合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friendships/requests/{requestId}:
+    delete:
+      tags:
+        - Friendship
+      summary: フレンド申請拒否・キャンセル
+      description: 送信したフレンド申請のキャンセル、または受信したフレンド申請の拒否を行います。
+      operationId: rejectFriendship
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: フレンドシップ ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: キャンセル・拒否成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipRejectResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 申請が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /friendships/{targetUserId}:
+    delete:
+      tags:
+        - Friendship
+      summary: フレンド解除
+      description: 既存のフレンド関係を解消します。
+      operationId: deleteFriendship
+      parameters:
+        - name: targetUserId
+          in: path
+          required: true
+          description: 対象ユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: フレンド解除成功
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: フレンド関係が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
+  # 6. プレゼンス API
+  # ==========================================
+  /presence/heartbeat:
+    post:
+      tags:
+        - Presence
+      summary: 自身のオンラインステータス更新 (ハートビート)
+      description: 定期的に自身のオンライン状態 (online) を維持するためのハートビートを送信します。
+      operationId: sendHeartbeat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: ハートビート送信成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /presence/status:
+    post:
+      tags:
+        - Presence
+      summary: 複数ユーザーのオンラインステータス取得
+      description: 指定した複数のユーザーIDの現在のオンラインステータスを一括取得します。
+      operationId: fetchPresenceStatuses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresenceStatusRequest'
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresenceStatusResponse'
+        '400':
+          description: リクエストパラメータ不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /presence/offline:
+    post:
+      tags:
+        - Presence
+      summary: 自身のオンラインステータスをオフラインに更新
+      description: 意図的に自身のオンライン状態をオフラインに切り替えます。
+      operationId: setOffline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: オフライン状態への更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleApiResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ==========================================
+# コンポーネント・スキーマ定義
+# ==========================================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Authorization ヘッダーに 'Bearer <accessToken>' を設定して送信してください。
+
+  schemas:
+    # --- 共通レスポンス ---
+    SimpleApiResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: description of the error
+
+    # --- ユーザー & プロフィール ---
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        avatar:
+          type: string
+          nullable: true
+        badge:
+          type: string
+          nullable: true
+
+    UserProfileWithRelation:
+      type: object
+      required:
+        - id
+        - name
+        - relationship
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        avatar:
+          type: string
+          nullable: true
+        badge:
+          type: string
+          nullable: true
+        relationship:
+          type: object
+          required: [status]
+          properties:
+            status:
+              type: string
+              enum: [NONE, SELF, PENDING_INCOMING, PENDING_OUTGOING, FRIEND, BLOCKED_BY, BLOCKED]
+            friendshipId:
+              type: string
+              format: uuid
+              nullable: true
+
+    UserProfilesResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - profileMap
+          properties:
+            profileMap:
+              type: object
+              additionalProperties:
+                nullable: true
+                allOf:
+                  - $ref: '#/components/schemas/UserProfileWithRelation'
+
+    UserMeResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - user
+            - userProfile
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            userProfile:
+              $ref: '#/components/schemas/UserProfile'
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        avatarUrl: { type: string, nullable: true }
+        bio: { type: string, nullable: true }
+
+    # --- Face ---
+    CreateFaceRequest:
+      type: object
+      required: [name, visibility]
+      properties:
+        name: { type: string, minLength: 1 }
+        emoji: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        imageId: { type: string, format: uuid, nullable: true }
+        visibility: { type: string, enum: [public, private, unlisted] }
+
+    UpdateFaceRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        emoji: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        imageId: { type: string, format: uuid, nullable: true }
+
+    FaceSingleResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [face]
+          properties:
+            face:
+              type: object
+              required: [id, userId, name, visibility]
+              properties:
+                id: { type: string, format: uuid }
+                userId: { type: string, format: uuid }
+                name: { type: string }
+                emoji: { type: string, nullable: true }
+                description: { type: string, nullable: true }
+                image:
+                  type: object
+                  nullable: true
+                  properties:
+                    id: { type: string, format: uuid }
+                    url: { type: string }
+                visibility: { type: string, enum: [public, private, unlisted] }
+
+    FacesResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [faces]
+          properties:
+            faces:
+              type: object
+              required: [faceSummaries]
+              properties:
+                faceSummaries:
+                  type: array
+                  items:
+                    type: object
+                    required: [face, numberOfPosts]
+                    properties:
+                      face:
+                        type: object
+                        required: [id, userId, name, visibility]
+                        properties:
+                          id: { type: string, format: uuid }
+                          userId: { type: string, format: uuid }
+                          name: { type: string }
+                          emoji: { type: string, nullable: true }
+                          description: { type: string, nullable: true }
+                          image:
+                            type: object
+                            nullable: true
+                            properties:
+                              id: { type: string, format: uuid }
+                              url: { type: string }
+                          visibility: { type: string, enum: [public, private, unlisted] }
+                      lastPostedAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      numberOfPosts:
+                        type: integer
+                nextCursor: { type: string, nullable: true }
+
+    # --- Seed ---
+    CreateSeedRequest:
+      type: object
+      required: [faceId, body]
+      properties:
+        faceId: { type: string, format: uuid }
+        body: { type: string, minLength: 1 }
+        imageIds:
+          type: array
+          items: { type: string, format: uuid }
+
+    UpdateSeedRequest:
+      type: object
+      properties:
+        body: { type: string, minLength: 1 }
+        imageIds:
+          type: array
+          items: { type: string, format: uuid }
+
+    SeedSingleResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [seed]
+          properties:
+            seed:
+              type: object
+              required: [id, faceId, userId, body, createdAt, updatedAt]
+              properties:
+                id: { type: string, format: uuid }
+                faceId: { type: string, format: uuid }
+                userId: { type: string, format: uuid }
+                body: { type: string }
+                images:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      url: { type: string }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+
+    SeedsResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [seeds]
+          properties:
+            seeds:
+              type: object
+              required: [seeds]
+              properties:
+                seeds:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, faceId, userId, body, createdAt, updatedAt]
+                    properties:
+                      id: { type: string, format: uuid }
+                      faceId: { type: string, format: uuid }
+                      userId: { type: string, format: uuid }
+                      body: { type: string }
+                      images:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string, format: uuid }
+                            url: { type: string }
+                      createdAt: { type: string, format: date-time }
+                      updatedAt: { type: string, format: date-time }
+                nextCursor: { type: string, nullable: true }
+
+    # --- ファイルストレージ ---
+    FileUploadResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [id, url]
+          properties:
+            id: { type: string, format: uuid }
+            url: { type: string }
+
+    # --- フレンドシップ ---
+    FriendshipCreateResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [friendship]
+          properties:
+            friendship:
+              type: object
+              required: [id, requesterId, addresseeId, status, createdAt, updatedAt]
+              properties:
+                id: { type: string, format: uuid }
+                requesterId: { type: string, format: uuid }
+                addresseeId: { type: string, format: uuid }
+                status: { type: string, enum: [PENDING, ACCEPTED, REJECTED, BLOCKED] }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+
+    FriendshipAcceptResponse:
+      $ref: '#/components/schemas/FriendshipCreateResponse'
+
+    FriendshipRejectResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            friendship:
+              type: object
+              nullable: true
+              required: [id, requesterId, addresseeId, status, createdAt, updatedAt]
+              properties:
+                id: { type: string, format: uuid }
+                requesterId: { type: string, format: uuid }
+                addresseeId: { type: string, format: uuid }
+                status: { type: string, enum: [PENDING, ACCEPTED, REJECTED, BLOCKED] }
+                createdAt: { type: string, format: date-time }
+                updatedAt: { type: string, format: date-time }
+
+    FriendshipItem:
+      type: object
+      required: [friendshipId, userProfile, isOnline]
+      properties:
+        friendshipId: { type: string, format: uuid }
+        userProfile: { $ref: '#/components/schemas/UserProfile' }
+        isOnline: { type: boolean }
+
+    FriendshipsResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [friendships]
+          properties:
+            friendships: { type: array, items: { $ref: '#/components/schemas/FriendshipItem' } }
+            nextCursor: { type: string, nullable: true }
+
+    FriendshipPendingListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [pendingRequests]
+          properties:
+            pendingRequests:
+              type: array
+              items:
+                type: object
+                required: [requestId, userProfile, requestedAt]
+                properties:
+                  requestId: { type: string, format: uuid }
+                  userProfile: { $ref: '#/components/schemas/UserProfile' }
+                  requestedAt: { type: string, format: date-time }
+            nextCursor: { type: string, nullable: true }
+
+    # --- プレゼンス ---
+    PresenceStatusRequest:
+      type: object
+      required: [userIds]
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: ステータスを取得したいユーザーのIDリスト
+
+    PresenceStatusResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          required: [onlineStatuses]
+          properties:
+            onlineStatuses:
+              type: object
+              additionalProperties:
+                type: string
+                enum: [online, away, offline]
+              description: ユーザーIDをキーとしたステータスのマップ
