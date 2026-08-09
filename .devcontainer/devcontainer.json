@@ -64,7 +64,10 @@
         "mhutchie.git-graph",
         "github.vscode-pull-request-github",
         "github.vscode-github-actions",
-        "ms-vsliveshare.vsliveshare"
+        "ms-vsliveshare.vsliveshare",
+
+        // Markdown / ドキュメント
+        "42crunch.vscode-openapi"
       ]
     }
   },
