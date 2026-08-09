@@ -12,7 +12,7 @@
       "paragraphs": [
         "1. The Service is a web application intended to let users \"write for themselves.\" Rather than being primarily about connecting people with one another, it is designed with a focus on allowing users to record their own thoughts and notes.",
         "2. Users may create multiple \"faces\" for different themes or aspects of themselves and write posts (seeds) separately for each face. Each face and each post can be set to public or private.",
-        "3. The Service provides features such as account registration and profile settings, creation and editing of faces and posts, search, subscriptions, notifications, file management, and multilingual display.",
+        "3. The Service provides features such as account registration and profile settings, creation and editing of faces and posts, search, friend features, file management, and multilingual display.",
         "4. The Operator may add, change, or discontinue part of the features of the Service (changes, suspension, and termination are set out in Article 7)."
       ]
     },
@@ -34,9 +34,7 @@
     },
     {
       "heading": "Article 5 (Prohibited Acts)",
-      "paragraphs": [
-        "When using the Service, users must not engage in any of the following acts."
-      ],
+      "paragraphs": ["When using the Service, users must not engage in any of the following acts."],
       "list": [
         "Acts that violate laws, regulations, or public order and morals",
         "Acts that infringe the intellectual property rights, privacy, reputation, or other rights of others",
