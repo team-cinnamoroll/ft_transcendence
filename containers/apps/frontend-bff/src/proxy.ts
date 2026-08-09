@@ -3,7 +3,7 @@ import { decodeJwt } from 'jose';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import { verifyToken } from './lib/backend-client';
-import { getAuthRepository } from './repositories/auth-repository';
+import { getAuthRepository, type AuthRepositorySpec } from './repositories/auth-repository';
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
@@ -64,6 +64,29 @@ type AuthState = {
   shouldClearSession: boolean;
 };
 
+type RefreshResult = Awaited<ReturnType<AuthRepositorySpec['refresh']>>;
+
+// 同一リフレッシュトークンに対して進行中のリフレッシュ処理を保持するキャッシュ。
+// アクセストークン失効直後は、Next.jsのLink prefetch等により複数のリクエストがほぼ同時に
+// このMiddlewareを通過する。それぞれが独立にbackendの/auth/refreshを呼ぶと、backend側の
+// トークンローテーション(revoke直後の再利用をreuse detectionとみなす実装)が誤検知し、
+// familyごとトークンが失効してセッションが切れてしまうため、同一プロセス内では1回にまとめる。
+const inFlightRefreshes = new Map<string, Promise<RefreshResult>>();
+
+function refreshTokens(userId: string, refreshToken: string): Promise<RefreshResult> {
+  const existing = inFlightRefreshes.get(refreshToken);
+  if (existing) {
+    return existing;
+  }
+  const promise = getAuthRepository()
+    .refresh(userId, refreshToken)
+    .finally(() => {
+      inFlightRefreshes.delete(refreshToken);
+    });
+  inFlightRefreshes.set(refreshToken, promise);
+  return promise;
+}
+
 /** アクセストークンを検証し、無効/期限切れならリフレッシュトークンでの再発行を試みる */
 async function resolveAuthState(request: NextRequest): Promise<AuthState> {
   const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
@@ -83,7 +106,7 @@ async function resolveAuthState(request: NextRequest): Promise<AuthState> {
     return { isAuthenticated: false, refreshedTokens: null, shouldClearSession: true };
   }
 
-  const result = await getAuthRepository().refresh(userId, refreshToken);
+  const result = await refreshTokens(userId, refreshToken);
   if (result.success) {
     return { isAuthenticated: true, refreshedTokens: result.data, shouldClearSession: false };
   }
