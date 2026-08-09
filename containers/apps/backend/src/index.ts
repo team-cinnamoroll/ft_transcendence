@@ -10,13 +10,10 @@ import { fileURLToPath } from 'node:url';
 import { runMigrationsOnce } from './shared/infra/db/migrate';
 import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
-import { injectJwtAuthDeps } from './shared/middleware/inject-jwk-auth';
-import { jwtRateLimiter } from './shared/middleware/jwt-rate-limiter';
-import { selectiveApiProtection } from './shared/middleware/api-key-auth';
 
 import type { AppEnv } from './shared/types/hono';
 import { publicApiRouter } from './public.handler';
-import { protectedApiRouter } from './protected.handler';
+import { apiKeyProtectedRouter, jwtProtectedRouter } from './protected.handler';
 import { type GlobalErrorResponse, globalErrorHandler } from './global.error.handler';
 
 let config: ReturnType<typeof parseEnv> | null = null;
@@ -60,11 +57,9 @@ app.use(
 const apiApp = new Hono<AppEnv>();
 const apiRoutes = apiApp
   .basePath('/api/v1')
-  .use('*', selectiveApiProtection) // APIキー認証が必要なルートを保護
   .route('/', publicApiRouter())
-  .use('*', injectJwtAuthDeps())
-  .use('*', jwtRateLimiter)
-  .route('/', protectedApiRouter());
+  .route('/', apiKeyProtectedRouter())
+  .route('/', jwtProtectedRouter());
 
 app.route('/', apiRoutes);
 

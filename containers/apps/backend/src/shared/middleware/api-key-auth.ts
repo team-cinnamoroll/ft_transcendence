@@ -55,9 +55,9 @@ const apiKeyAuth = createMiddleware<ApiKeyEnv>(async (c, next) => {
     return c.json(
       makeSafeResponse(SimpleApiResponseSchema, {
         success: false,
-        message: 'Forbidden: Invalid API Key',
+        message: 'Unauthorized: Invalid API Key',
       }),
-      403
+      401
     );
   }
 
@@ -103,7 +103,12 @@ const apiKeyRateLimiter = createMiddleware<ApiKeyEnv>(async (c, next) => {
 });
 
 // 保護対象にするパスリスト（前方一致）
-const TARGET_PATHS = ['/api/v1/auth/sign-up', '/api/v1/auth/sign-in', '/api/v1/auth/refresh'];
+const TARGET_PATHS = [
+  '/api/v1/auth/sign-up',
+  '/api/v1/auth/sign-in',
+  '/api/v1/auth/refresh',
+  '/api/v1/admin/users',
+];
 
 export const selectiveApiProtection = createMiddleware<ApiKeyEnv>(async (c, next) => {
   const currentPath = c.req.path;
