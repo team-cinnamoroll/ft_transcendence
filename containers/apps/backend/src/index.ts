@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { createServer as createHttpsServer } from 'node:https';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cors } from 'hono/cors';
 
 import { runMigrationsOnce } from './shared/infra/db/migrate';
 import { parseEnv } from './env';
@@ -30,7 +31,15 @@ try {
 }
 
 const app = new Hono<AppEnv>();
-
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // x-api-key などのカスタムヘッダーを明示的に許可します
+    allowHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
+  })
+);
 // 全局共通ミドルウェア
 app.use('*', injectConfig(config ? config : undefined));
 
