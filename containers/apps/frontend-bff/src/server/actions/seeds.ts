@@ -11,6 +11,7 @@ import {
   createSeedForCurrentUser,
   updateSeedForCurrentUser,
   deleteSeedForCurrentUser,
+  searchSeeds,
 } from '@/server/usecases/seeds';
 import { uploadMyFile } from '@/server/usecases/file-storage';
 import { buildZodErrorMap } from '@/lib/zod-error-map';
@@ -53,6 +54,11 @@ export async function deleteSeedAction(seedId: string): Promise<ActionResult<voi
   revalidatePath('/');
 
   return { success: true, data: undefined };
+}
+
+/** キーワードでシードを検索する(検索バー用)。userId指定時は対象ユーザーに絞り込む */
+export async function searchSeedsAction(query: { q?: string; userId?: string }): Promise<Seed[]> {
+  return searchSeeds(query);
 }
 
 type UploadSeedImageResult =

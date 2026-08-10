@@ -1,51 +1,25 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { type Face } from '@/types/face';
 import { useTranslations } from 'next-intl';
 import FaceBadge from '@/components/ui/FaceBadge';
 import { getFaceTitle, getFaceColor } from '@/lib/display';
-import { subscribeAction, unsubscribeAction } from '@/server/actions/subscriptions';
 
 export type SortOrder = 'newest' | 'oldest' | 'images';
 
 type FaceHeaderProps = {
   face: Face;
-  isOwner?: boolean;
   onSortChange?: (sort: SortOrder) => void;
   totalSeeds?: number;
   monthlySeeds?: number;
-  subscriberCount?: number;
-  isSubscribed?: boolean;
 };
 
-const FaceHeader = ({
-  face,
-  isOwner = false,
-  onSortChange,
-  totalSeeds = 0,
-  monthlySeeds = 0,
-  subscriberCount = 0,
-  isSubscribed: initialSubscribed = false,
-}: FaceHeaderProps) => {
-  const [subscribed, setSubscribed] = useState(initialSubscribed);
+const FaceHeader = ({ face, onSortChange, totalSeeds = 0, monthlySeeds = 0 }: FaceHeaderProps) => {
   const [sort, setSort] = useState<SortOrder>('newest');
-  const [isToggling, startToggleTransition] = useTransition();
   const t = useTranslations('face');
   const tHeader = useTranslations('faceHeader');
-
-  const handleSubscribeToggle = () => {
-    const next = !subscribed;
-    setSubscribed(next);
-    startToggleTransition(async () => {
-      if (next) {
-        await subscribeAction(face.id);
-      } else {
-        await unsubscribeAction(face.id);
-      }
-    });
-  };
 
   const handleSort = (s: SortOrder) => {
     setSort(s);
@@ -117,26 +91,6 @@ const FaceHeader = ({
                 {face.description}
               </p>
             )}
-            {!isOwner && (
-              <button
-                type="button"
-                onClick={handleSubscribeToggle}
-                disabled={isToggling}
-                style={{
-                  marginTop: 4,
-                  padding: '8px 24px',
-                  borderRadius: 999,
-                  background: subscribed ? 'rgba(255,255,255,0.15)' : 'var(--mf-accent)',
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {subscribed ? t('subscribed') : t('subscribe')}
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -191,25 +145,6 @@ const FaceHeader = ({
               {face.description}
             </p>
           )}
-          {!isOwner && (
-            <button
-              type="button"
-              onClick={handleSubscribeToggle}
-              disabled={isToggling}
-              style={{
-                padding: '8px 24px',
-                borderRadius: 999,
-                background: subscribed ? 'var(--mf-surface-tint)' : 'var(--mf-accent)',
-                color: subscribed ? 'var(--mf-text-sub)' : '#fff',
-                fontSize: 13,
-                fontWeight: 700,
-                border: subscribed ? '1px solid var(--mf-line)' : 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {subscribed ? t('subscribed') : t('subscribe')}
-            </button>
-          )}
         </div>
       )}
 
@@ -241,19 +176,6 @@ const FaceHeader = ({
             {tHeader('monthly')}
           </div>
         </div>
-        {!isOwner && (
-          <>
-            <div style={{ width: 0.5, height: 28, background: 'var(--mf-line)' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--mf-brand)' }}>
-                {subscriberCount}
-              </div>
-              <div style={{ fontSize: 10.5, color: 'var(--mf-text-muted)', marginTop: 1 }}>
-                {tHeader('subscribers')}
-              </div>
-            </div>
-          </>
-        )}
       </div>
 
       {/* ソートピル */}

@@ -18,7 +18,7 @@
   "nav": {
     "home": "Accueil",
     "faces": "Réflexion",
-    "subscriptions": "Collection",
+    "collection": "Collection",
     "friends": "Amis",
     "search": "Recherche",
     "faceDetail": "Détail de la facette"
@@ -51,7 +51,8 @@
     "attachedImageAlt": "Image jointe {n}",
     "removeImageAriaLabel": "Supprimer l'image {n}",
     "uploadingImageAlt": "Image en cours d'envoi {n}",
-    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
+    "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG, ou un fichier PDF.",
+    "pdfFileNameFallback": "Fichier PDF",
     "submit": "Publier",
     "submitting": "Publication…",
     "errorGeneric": "Échec de la publication. Veuillez réessayer plus tard."
@@ -110,9 +111,7 @@
     "errorUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer."
   },
   "face": {
-    "private": "Privé",
-    "subscribe": "S'abonner",
-    "subscribed": "✓ Abonné"
+    "private": "Privé"
   },
   "fab": {
     "ariaLabel": "Publier"
@@ -150,11 +149,16 @@
     "searchPlaceholder": "Rechercher vos facettes et graines",
     "facesSection": "Facettes ({n})",
     "seedsSection": "Graines ({n})",
+    "searching": "Recherche en cours…",
     "noMatch": "Aucun résultat",
     "noFilteredFaces": "Aucune facette trouvée pour \"{query}\"",
     "sortLastAt": "Dernière publication",
     "sortTotal": "Plus de graines",
     "sortName": "Nom",
+    "sortSeedNewest": "Plus récentes",
+    "sortSeedOldest": "Plus anciennes",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin",
     "gridView": "Vue grille",
     "listView": "Vue liste",
     "actionMenu": "Menu d'actions",
@@ -178,8 +182,7 @@
     "oldest": "Plus anciens",
     "images": "Avec images",
     "seeds": "Graines",
-    "monthly": "Ce mois",
-    "subscribers": "Abonnés"
+    "monthly": "Ce mois"
   },
   "seedFeed": {
     "noSeeds": "Aucune graine pour l'instant"
@@ -210,75 +213,30 @@
     "weekRecord": "{range} enregistrement(s)",
     "noRecord": "Aucune graine cette semaine"
   },
-  "subscriptionSeed": {
-    "noSubscriptions": "Vous n'êtes abonné à aucune facette pour l'instant",
-    "timelineTab": "Fil d'actualité",
-    "subscriptionsTab": "Abonnements",
-    "filterPlaceholder": "Trouver de nouveaux visages / graines",
-    "filterByFace": "Filtrer par facette",
-    "facesSection": "Facettes ({n})",
-    "seedsSection": "Graines ({n})",
-    "sectionTitle": "Semences d'abonnement récentes",
-    "exploringAll": "Exploration globale",
-    "explorePromptTitle": "Entrez un mot-clé",
-    "explorePromptHint": "Recherchez toutes les facettes et graines, abonnées ou non",
-    "searchTabSubscribed": "Abonnés",
-    "searchTabOther": "Autres",
-    "searchSubscribedFacesSection": "Facettes abonnées ({n})",
-    "searchOtherFacesSection": "Autres facettes ({n})",
-    "searchSubscribedSeedsSection": "Graines abonnées ({n})",
-    "searchOtherSeedsSection": "Autres graines ({n})",
-    "subscribe": "S'abonner",
-    "subscribed": "✓ Abonné",
-    "subscribeAriaLabel": "S'abonner à {name}",
-    "unsubscribeAriaLabel": "Se désabonner de {name}",
-    "noMatch": "Aucun résultat",
-    "seedCount": "{count, plural, one {Graine} other {Graines}}",
-    "noFilteredSeeds": "Aucune graine trouvée",
-    "viewFace": "Voir la facette →",
-    "noSubscribedFaces": "Aucune facette abonnée",
-    "emptyHeadline": "Vous n'êtes encore abonné<br></br>à aucun visage.",
-    "emptyBody": "Commencez par choisir un seul visage qui vous intéresse.<br></br>Conçu pour préserver le sens des notifications.",
-    "recommendedTitle": "Visages recommandés",
-    "recommendedSubtitle": "· Choisis pour vous",
-    "subscriberCount": "{n, plural, one {# abonné} other {# abonnés}}",
-    "subscribeAction": "S'abonner"
-  },
-  "notificationList": {
-    "noNotifications": "Aucune notification pour l'instant",
-    "linkedBadge": "🔗 Lien",
-    "subscribedBadge": "📥 Abonnement",
-    "linkedAction": "a lié votre publication",
-    "subscribedAction": "s'est abonné à {faceName}",
-    "actionConnector": " ",
-    "filterAll": "Tout",
-    "filterSub": "Abonnement",
-    "filterLink": "Lien",
-    "typeLinkLabel": "Lien",
-    "typeUpdateLabel": "Mise à jour",
-    "today": "Aujourd'hui",
-    "earlier": "Auparavant",
-    "noNotificationsFiltered": "Aucune notification",
-    "linkedPreview": "Une graine liée",
-    "updatedPreview": "Nouvelle graine publiée sur {faceName}"
-  },
   "home": {
     "title": "Accueil"
   },
   "faces": {
     "title": "Facettes"
   },
-  "notifications": {
-    "title": "Notifications",
-    "count": "{count, plural, one {# notification} other {# notifications}}"
-  },
   "search": {
     "title": "Recherche",
     "placeholder": "Rechercher..."
   },
-  "subscriptions": {
-    "title": "Abonnements",
-    "subscribedCount": "{count, plural, one {# facette suivie} other {# facettes suivies}}"
+  "collection": {
+    "title": "Collection",
+    "empty": "Aucune publication d'amis pour l'instant",
+    "searchPlaceholder": "Rechercher des facettes et graines pour trouver des amis",
+    "facesSection": "Facettes ({n})",
+    "seedsSection": "Graines ({n})",
+    "searching": "Recherche en cours…",
+    "noMatch": "Aucun résultat",
+    "sortLastPostedAt": "Dernière publication",
+    "sortNumberOfPosts": "Plus de graines",
+    "sortSeedNewest": "Plus récentes",
+    "sortSeedOldest": "Plus anciennes",
+    "fromDate": "Date de début",
+    "toDate": "Date de fin"
   },
   "settings": {
     "title": "Paramètres",
@@ -364,6 +322,8 @@
   "profilePage": {
     "facesHeading": "Facettes ({count})",
     "noFaces": "Aucune facette pour le moment",
+    "loadMore": "Voir plus",
+    "loading": "Chargement…",
     "private": "Privé",
     "sendRequest": "Ajouter en ami",
     "pendingRequest": "Demande envoyée",
@@ -437,7 +397,9 @@
     "imageAlt": "Image {n}",
     "moreOptions": "Plus d'options",
     "edit": "Modifier",
-    "linksCount": "{count, plural, one {# lien} other {# liens}}"
+    "linksCount": "{count, plural, one {# lien} other {# liens}}",
+    "openPdfAriaLabel": "Ouvrir le PDF dans un nouvel onglet",
+    "pdfFileNameFallback": "Fichier PDF"
   },
   "seedDetail": {
     "title": "Seed",
@@ -451,7 +413,9 @@
     "incomingLinks": "Liens vers ce seed",
     "linksUnit": "",
     "showMore": "Voir {count} de plus →",
-    "imageAlt": "Image {n}"
+    "imageAlt": "Image {n}",
+    "openPdfAriaLabel": "Ouvrir le PDF dans un nouvel onglet",
+    "pdfFileNameFallback": "Fichier PDF"
   },
   "pagination": {
     "ariaLabel": "Pagination",
@@ -468,12 +432,9 @@
     "seedsThisMonth": "Graines",
     "thisMonth": "Ce mois-ci",
     "noSeedsThisMonth": "Aucune graine ce mois-ci",
-    "subscribedFaces": "Abonnements",
-    "noSubscriptions": "Vous n'avez pas encore d'abonnements.",
-    "findFaces": "Chercher des facettes →",
-    "popularFaces": "Facettes populaires",
-    "subscribersUnit": "{count, plural, one {abonné} other {abonnés}}",
-    "subscribeButton": "S'abonner"
+    "friends": "Amis",
+    "noFriends": "Vous n'avez pas encore d'amis.",
+    "findFriends": "Trouver des amis →"
   },
   "validation": {
     "required": "Ce champ est requis",

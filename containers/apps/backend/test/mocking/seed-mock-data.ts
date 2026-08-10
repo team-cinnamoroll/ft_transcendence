@@ -1,24 +1,45 @@
-import path from 'path';
+import { getFaceRepository } from '../../src/features/post/face/infra/face.repository.di';
+import { getSeedRepository } from '../../src/features/post/seed/infra/seed.repository.di';
+import { getDatabaseUrl } from '../../src/shared/infra/db/database-url';
+import { FaceEntitySchema } from '../../src/features/post/face/domain/face.entity';
+import { SeedEntitySchema } from '../../src/features/post/seed/domain/seed.entity';
+import { v4 as uuidv4 } from 'uuid';
+
+import { users } from './data/users';
+import { faces } from './data/faces';
+import { seeds } from './data/seeds';
+import { friendships } from './data/friendships';
 
 // ==========================================
-// 1. ファイルパス・設定定義 (変更可能)
+// 設定
 // ==========================================
-const MOCK_FILES = {
-  users: '../../../frontend-bff/src/mocks/users',
-  faces: '../../../frontend-bff/src/mocks/faces',
-  seeds: '../../../frontend-bff/src/mocks/seeds',
-};
-
-// const BASE_URL = process.env.BASE_URL || 'http://localhost:8000/api/v1';
 const BASE_URL = 'http://backend:8000/api/v1';
 const DEFAULT_PASSWORD = 'password1234';
 const API_KEY = process.env.MASTER_API_KEY || 'tracen_master_api_key'; // 適切なAPIキーに置き換えてください
+
+const MOCK_PDF_CONTENT = `%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj
+4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+5 0 obj<</Length 62>>stream
+BT /F1 24 Tf 20 100 Td (Mock PDF Document) Tj ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f
+trailer<</Size 6/Root 1 0 R>>
+startxref
+0
+%%EOF
+`;
 
 // ==========================================
 // 型定義 & マッピング用インターフェース
 // ==========================================
 interface UserSession {
-  originalId: string;
+  key: string;
   newUserId: string;
   token: string;
   refreshToken: string;
@@ -27,7 +48,7 @@ interface UserSession {
 // 画像の重複取得・アップロードを防ぐためのキャッシュ (URL -> fileId)
 const imageCache = new Map<string, string>();
 
-// ID マッピングテーブル (元ID -> 新API ID)
+// ID マッピングテーブル (key -> 実API ID)
 const userSessionMap = new Map<string, UserSession>();
 const faceIdMap = new Map<string, string>();
 
@@ -76,29 +97,50 @@ async function uploadImageFromUrl(url: string, token: string): Promise<string> {
   return fileId;
 }
 
+/**
+ * ダミーのPDFバイナリを /file-storage/upload APIでアップロードして fileId を取得(#349のPDF添付表示確認用)
+ */
+async function uploadMockPdf(token: string): Promise<string> {
+  const buffer = Buffer.from(MOCK_PDF_CONTENT, 'utf-8');
+  const fileName = `seeded_document_${Date.now()}.pdf`;
+
+  const uploadRes = await fetch(`${BASE_URL}/file-storage/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-file-name': fileName,
+      'x-file-type': 'application/pdf',
+      'content-length': buffer.byteLength.toString(),
+      'x-visibility': 'public',
+    },
+    body: buffer,
+  });
+
+  const uploadData = await uploadRes.json();
+  if (!uploadRes.ok || !uploadData.success) {
+    throw new Error(`PDFのアップロードに失敗しました: ${JSON.stringify(uploadData)}`);
+  }
+
+  return uploadData.data.fileId;
+}
+
 // ==========================================
 // メイン処理
 // ==========================================
 async function main() {
   console.log('🚀 モックデータのシード処理を開始します...\n');
 
-  // モックファイルの動的インポート
-  const usersPath = path.resolve(MOCK_FILES.users);
-  const facesPath = path.resolve(MOCK_FILES.faces);
-  const seedsPath = path.resolve(MOCK_FILES.seeds);
-
-  const { users } = await import(usersPath);
-  const { faces } = await import(facesPath);
-  const { seeds } = await import(seedsPath);
+  const databaseUrl = getDatabaseUrl();
+  const faceRepo = getFaceRepository(databaseUrl);
+  const seedRepo = getSeedRepository(databaseUrl);
 
   // ------------------------------------------
-  // ステップ 1: ユーザー登録 & 画像アップロード
+  // ステップ 1: ユーザー登録 & アバター画像アップロード(HTTP API経由)
   // ------------------------------------------
-  console.log('👤 [1/4] ユーザー登録処理中...');
+  console.log('👤 [1/5] ユーザー登録処理中...');
   for (const user of users) {
-    const email = `${user.id.toLowerCase()}@example.com`;
+    const email = `${user.key.toLowerCase()}@example.com`;
 
-    // サインアップAPI呼出
     const signUpRes = await fetch(`${BASE_URL}/auth/sign-up`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
@@ -119,17 +161,24 @@ async function main() {
     const refreshToken = signUpData.data.refreshToken;
     const newUserId = signUpData.data.user.id;
 
-    userSessionMap.set(user.id, {
-      originalId: user.id,
-      newUserId,
-      token,
-      refreshToken,
-    });
+    userSessionMap.set(user.key, { key: user.key, newUserId, token, refreshToken });
 
-    // ユーザーアバター画像のアップロード（存在する場合）
-    if (user.avatar?.url) {
+    if (user.avatarUrl) {
       try {
-        await uploadImageFromUrl(user.avatar.url, token);
+        const avatarFileId = await uploadImageFromUrl(user.avatarUrl, token);
+        const profileRes = await fetch(`${BASE_URL}/user-profile/${newUserId}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: user.name, avatarFileId, badge: null }),
+        });
+        if (!profileRes.ok) {
+          console.warn(
+            `⚠️ アバター設定に失敗しました (${user.name}): ステータスコード ${profileRes.status}`
+          );
+        }
       } catch (err) {
         console.warn(`⚠️ アバター画像の処理をスキップしました:`, err);
       }
@@ -140,111 +189,145 @@ async function main() {
   console.log('');
 
   // ------------------------------------------
-  // ステップ 2: Face 登録
+  // ステップ 2: フレンド関係構築(HTTP API経由)
   // ------------------------------------------
-  console.log('🎭 [2/4] Face 登録処理中...');
+  console.log('🤝 [2/5] フレンド関係構築中...');
+  for (const fs of friendships) {
+    const requesterSession = userSessionMap.get(fs.requesterKey);
+    const addresseeSession = userSessionMap.get(fs.addresseeKey);
+    if (!requesterSession || !addresseeSession) {
+      console.warn(
+        `⚠️ 対応するユーザーが見つからないためスキップ: ${fs.requesterKey} -> ${fs.addresseeKey}`
+      );
+      continue;
+    }
+
+    const createRes = await fetch(`${BASE_URL}/friendships/requests`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${requesterSession.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ addresseeId: addresseeSession.newUserId }),
+    });
+    const createData = await createRes.json();
+    if (!createRes.ok || !createData.success) {
+      console.error(`❌ フレンド申請失敗 (${fs.requesterKey} -> ${fs.addresseeKey}):`, createData);
+      continue;
+    }
+
+    if (fs.accept) {
+      const requestId = createData.data.friendship.id;
+      const acceptRes = await fetch(`${BASE_URL}/friendships/requests/${requestId}/accept`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${addresseeSession.token}` },
+      });
+      const acceptData = await acceptRes.json();
+      if (!acceptRes.ok || !acceptData.success) {
+        console.error(`❌ フレンド承認失敗 (${fs.addresseeKey}):`, acceptData);
+        continue;
+      }
+    }
+
+    console.log(
+      `  ✅ フレンド関係作成完了: ${fs.requesterKey} -> ${fs.addresseeKey} (${fs.accept ? '承認済み' : '申請中'})`
+    );
+  }
+  console.log('');
+
+  // ------------------------------------------
+  // ステップ 3: Face作成(repository層を直接呼び出し、createdAtは持たないためHTTPと同等)
+  // ------------------------------------------
+  console.log('🎭 [3/5] Face 登録処理中...');
   for (const face of faces) {
-    const session = userSessionMap.get(face.userId);
+    const session = userSessionMap.get(face.userKey);
     if (!session) {
       console.warn(`⚠️ 対応するユーザーが見つからないためスキップ: ${face.name}`);
       continue;
     }
 
-    // 画像のアップロード（urlが存在する場合、idは無視して新規アップロード）
     let imageId: string | null = null;
-    if (face.image?.url) {
+    if (face.imageUrl) {
       try {
-        imageId = await uploadImageFromUrl(face.image.url, session.token);
+        imageId = await uploadImageFromUrl(face.imageUrl, session.token);
       } catch (err) {
         console.warn(`⚠️ Face画像の取得/アップロード失敗 (${face.name}):`, err);
       }
     }
 
-    // Face 作成API呼出
-    const faceRes = await fetch(`${BASE_URL}/faces`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-        'X-API-Key': API_KEY,
-      },
-      body: JSON.stringify({
+    try {
+      const faceId = uuidv4();
+      const entity = FaceEntitySchema.parse({
+        id: faceId,
+        userId: session.newUserId,
         name: face.name,
-        emoji: face.emoji || null,
-        description: face.description || null,
+        emoji: face.emoji,
+        description: face.description,
         imageId,
-        visibility: face.visibility || 'public',
-      }),
-    });
-
-    const faceData = await faceRes.json();
-    if (!faceRes.ok || !faceData.success) {
-      console.error(`❌ Face作成失敗 (${face.name}):`, faceData);
-      continue;
+        visibility: face.visibility,
+      });
+      await faceRepo.createFace(entity);
+      faceIdMap.set(face.key, faceId);
+      console.log(`  ✅ Face作成完了: ${face.name} (ID: ${faceId})`);
+    } catch (err) {
+      console.error(`❌ Face作成失敗 (${face.name}):`, err);
     }
-
-    const newFaceId = faceData.data.face.id;
-    faceIdMap.set(face.id, newFaceId);
-    console.log(`  ✅ Face作成完了: ${face.name} (ID: ${newFaceId})`);
   }
   console.log('');
 
   // ------------------------------------------
-  // ステップ 3: Seed 登録
+  // ステップ 4: Seed作成(repository層を直接呼び出し、createdAtを相対日付で指定)
   // ------------------------------------------
-  console.log('🌱 [3/4] Seed 登録処理中...');
+  console.log('🌱 [4/5] Seed 登録処理中...');
+  let seedCount = 0;
   for (const seed of seeds) {
-    const session = userSessionMap.get(seed.userId);
-    const newFaceId = faceIdMap.get(seed.faceId);
+    const face = faces.find((f) => f.key === seed.faceKey);
+    const newFaceId = faceIdMap.get(seed.faceKey);
+    const session = face ? userSessionMap.get(face.userKey) : undefined;
 
-    if (!session || !newFaceId) {
-      console.warn(`⚠️ 紐づくユーザーまたはFaceが見つからないためSeedスキップ: ID ${seed.id}`);
+    if (!face || !newFaceId || !session) {
+      console.warn(`⚠️ 紐づくFaceまたはユーザーが見つからないためSeedスキップ: ${seed.faceKey}`);
       continue;
     }
 
-    // 画像のアップロード処理（複数対応）
     const imageIds: string[] = [];
-    if (seed.images && seed.images.length > 0) {
-      for (const img of seed.images) {
-        if (img.url) {
-          try {
-            const uploadedFileId = await uploadImageFromUrl(img.url, session.token);
-            imageIds.push(uploadedFileId);
-          } catch (err) {
-            console.warn(`⚠️ Seed画像の取得/アップロード失敗:`, err);
+    if (seed.attachments) {
+      for (const attachment of seed.attachments) {
+        try {
+          if (attachment.kind === 'photo') {
+            imageIds.push(await uploadImageFromUrl(attachment.url, session.token));
+          } else {
+            imageIds.push(await uploadMockPdf(session.token));
           }
+        } catch (err) {
+          console.warn(`⚠️ Seed添付ファイルの処理に失敗しました:`, err);
         }
       }
     }
 
-    // Seed 作成API呼出
-    const seedRes = await fetch(`${BASE_URL}/seeds`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    try {
+      const entity = SeedEntitySchema.parse({
+        id: uuidv4(),
         faceId: newFaceId,
+        userId: session.newUserId,
         body: seed.body,
         imageIds,
-      }),
-    });
-
-    const seedData = await seedRes.json();
-    if (!seedRes.ok || !seedData.success) {
-      console.error(`❌ Seed作成失敗:`, seedData);
-      continue;
+        createdAt: seed.createdAt,
+        updatedAt: seed.createdAt,
+      });
+      await seedRepo.createSeed(entity);
+      seedCount++;
+    } catch (err) {
+      console.error(`❌ Seed作成失敗 (${seed.faceKey}):`, err);
     }
-
-    console.log(`  ✅ Seed作成完了 (FaceID: ${newFaceId})`);
   }
+  console.log(`  ✅ Seed作成完了: ${seedCount}件`);
   console.log('');
 
   // ------------------------------------------
-  // ステップ 4: 全ユーザーのログアウト
+  // ステップ 5: 全ユーザーのログアウト
   // ------------------------------------------
-  console.log('🚪 [4/4] ログアウト処理中...');
+  console.log('🚪 [5/5] ログアウト処理中...');
   for (const session of userSessionMap.values()) {
     try {
       const signOutRes = await fetch(`${BASE_URL}/auth/sign-out`, {
@@ -253,24 +336,23 @@ async function main() {
           Authorization: `Bearer ${session.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          refreshToken: session.refreshToken,
-        }),
+        body: JSON.stringify({ refreshToken: session.refreshToken }),
       });
 
       if (!signOutRes.ok) {
-        console.warn(
-          `⚠️ ログアウト失敗 (${session.originalId}): ステータスコード ${signOutRes.status}`
-        );
+        console.warn(`⚠️ ログアウト失敗 (${session.key}): ステータスコード ${signOutRes.status}`);
       } else {
-        console.log(`  ✅ ログアウト完了: ${session.originalId}`);
+        console.log(`  ✅ ログアウト完了: ${session.key}`);
       }
     } catch (err) {
-      console.warn(`⚠️ ログアウト処理エラー (${session.originalId}):`, err);
+      console.warn(`⚠️ ログアウト処理エラー (${session.key}):`, err);
     }
   }
 
   console.log('\n🎉 すべてのシードデータ投入およびログアウト処理が完了しました！');
+  console.log(
+    'ℹ️  メールアドレスは決定論的なため、再実行する場合は先に `pnpm --filter backend db:reset` でDBをクリアしてください。'
+  );
 }
 
 main().catch((err) => {

@@ -3,52 +3,33 @@ import 'server-only';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
-import { getCurrentUser, findUsersByIds } from './users';
-import { listFacesByUserId, findFaceById } from './faces';
-import { listSeedsByUserId, listSeedsByFaceId } from './seeds';
-import { getSubscribedFaceIds } from './subscriptions';
+import type { FriendProfileWithOnlineStatus } from '@/types/friendship';
+import { getCurrentUser } from './users';
+import { listFacesByUserId } from './faces';
+import { listSeedsByUserId } from './seeds';
+import { getMyFriends } from './friendship';
 
 export type LayoutData = {
   currentUser: UserProfile;
   myFaces: Face[];
   mySeeds: Seed[];
-  subscribedFaces: Face[];
-  latestSeedByFaceId: Record<string, Seed>;
-  allUsers: UserProfile[];
+  /** ContextRail の「収集」セクションに表示するフレンド一覧。1ページ目のみを対象とする。 */
+  friends: FriendProfileWithOnlineStatus[];
 };
 
 export async function getLayoutData(): Promise<LayoutData> {
   const currentUser = await getCurrentUser();
 
-  const [myFaces, mySeeds, subscribedFaceIds] = await Promise.all([
+  const [myFaces, mySeeds, friendsResult] = await Promise.all([
     listFacesByUserId(currentUser.id),
     listSeedsByUserId(currentUser.id),
-    getSubscribedFaceIds(),
+    getMyFriends(),
   ]);
-
-  const subscribedFaces: Face[] = (
-    await Promise.all(subscribedFaceIds.map((id) => findFaceById(id)))
-  ).filter((f): f is Face => f !== null);
-
-  const [latestSeedEntries, allUsers] = await Promise.all([
-    Promise.all(
-      subscribedFaces.map(async (face) => {
-        const faceSeeds = await listSeedsByFaceId(face.id);
-        return faceSeeds.length > 0 ? ([face.id, faceSeeds[0]] as const) : null;
-      })
-    ),
-    findUsersByIds(subscribedFaces.map((face) => face.userId)),
-  ]);
-  const latestSeedByFaceId: Record<string, Seed> = Object.fromEntries(
-    latestSeedEntries.filter((e): e is [string, Seed] => e !== null)
-  );
 
   return {
     currentUser,
     myFaces,
     mySeeds,
-    subscribedFaces,
-    latestSeedByFaceId,
-    allUsers,
+    friends: friendsResult.success ? friendsResult.data.friendships : [],
   };
 }

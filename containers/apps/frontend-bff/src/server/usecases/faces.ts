@@ -1,12 +1,13 @@
 import 'server-only';
 
-import type { Face } from '@/types/face';
+import type { Face, FaceSummary, FaceSummaryPage } from '@/types/face';
 import {
   type CreateFaceInput,
   type UpdateFaceInput,
   getFaceRepository,
 } from '@/repositories/face-repository';
 import { getSessionTokens } from '@/lib/session';
+import type { ApiResult } from '@/lib/api-error';
 
 export async function listFacesByUserId(userId: string): Promise<Face[]> {
   const { accessToken } = await getSessionTokens();
@@ -16,12 +17,37 @@ export async function listFacesByUserId(userId: string): Promise<Face[]> {
   return await getFaceRepository().listByUserId(accessToken, userId);
 }
 
+/** 指定ユーザーのフェイス一覧を1ページ分だけ取得する(「もっと見る」用) */
+export async function listFacesPageByUserId(
+  userId: string,
+  cursor?: string | null
+): Promise<ApiResult<FaceSummaryPage>> {
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return { success: false, errorKind: 'UNAUTHORIZED' };
+  }
+  return await getFaceRepository().listPageByUserId(accessToken, { userId, cursor });
+}
+
 export async function listAllFaces(): Promise<Face[]> {
   const { accessToken } = await getSessionTokens();
   if (!accessToken) {
     return [];
   }
   return await getFaceRepository().listAll(accessToken);
+}
+
+/**
+ * キーワードでフェイスを検索する。
+ * userIdを指定すると対象ユーザーのフェイスのみに絞り込める(未指定なら全体)。
+ * lastPostedAt/numberOfPostsはクライアント側でのソートに使うため、FaceSummaryのまま返す。
+ */
+export async function searchFaces(query: { q?: string; userId?: string }): Promise<FaceSummary[]> {
+  const { accessToken } = await getSessionTokens();
+  if (!accessToken) {
+    return [];
+  }
+  return await getFaceRepository().search(accessToken, query);
 }
 
 export async function findFaceById(faceId: string): Promise<Face | null> {

@@ -63,16 +63,16 @@ curl -s http://localhost:9200/events/_count
 
 ## ファイル
 
-| ファイル                                  | 内容                                                                                  |
-| ----------------------------------------- | ------------------------------------------------------------------------------------- |
-| `mock-producer/produce.py`                | mock イベントを1行 JSON で stdout に出す（`BACKFILL_COUNT` / `LIVE_INTERVAL` で調整） |
-| `filebeat/filebeat.yml`                   | `analytics_source=true` のコンテナログを autodiscover し Logstash へ送る              |
-| `logstash/pipeline/events.conf`           | beats input → JSON パース → 非分析ログを drop → date filter → メタ除去 → ES output    |
-| `logstash/config/logstash.yml`            | Logstash 本体設定（monitoring 無効・pipeline 自動リロード）                           |
-| `logstash/templates/events-template.json` | `events*` の index template（`dynamic:false`）。Logstash が ES に登録する             |
-| `kibana-objects.ndjson`                   | データビュー（`events*` / runtime field `hour_of_day`）＋ 可視化4種 ＋ ダッシュボード |
+| ファイル                                  | 内容                                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `mock-producer/produce.py`                | mock イベントを1行 JSON で stdout に出す（`BACKFILL_COUNT` / `LIVE_INTERVAL` で調整）                        |
+| `filebeat/filebeat.yml`                   | `analytics_source=true` のコンテナログを autodiscover し Logstash へ送る                                     |
+| `logstash/pipeline/events.conf`           | beats input → JSON パース → 非分析ログを drop → date filter → メタ除去 → ES output                           |
+| `logstash/config/logstash.yml`            | Logstash 本体設定（monitoring 無効・pipeline 自動リロード）                                                  |
+| `logstash/templates/events-template.json` | `events*` の index template（`dynamic:false`）。Logstash が ES に登録する                                    |
+| `kibana-objects.ndjson`                   | データビュー（`events*` / runtime field `hour_of_day`）＋ 可視化4種 ＋ ダッシュボード                        |
 | `provision-kibana.sh`                     | index template + events index を作成（dynamic なら修復）し、`kibana-objects.ndjson` を Kibana に import する |
-| `BACKEND_INTEGRATION.md`                  | backend の実イベントを可視化に載せる手順（送信側がやること）                          |
+| `BACKEND_INTEGRATION.md`                  | backend の実イベントを可視化に載せる手順（送信側がやること）                                                 |
 
 ## スキーマ
 
@@ -90,10 +90,33 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
 
 `category` は大分類・`action` は種別。`faceId` は `face`/`seed` の `created` のみ。mapping は `logstash/templates/events-template.json` が単一の所有元で、`dynamic:false` のため定義外フィールドは保存されても index されない。
 
-## 本番化（TODO）
+## 本番 (local-prod)
 
-- mock-producer を止め、**backend コンテナを収集対象にする**（[BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)）。
-- `docker-compose.local-prod.yml` に ELK を追加する際は、**environment を最小限**にし、**security を有効化**、**Kibana は admin 限定アクセス**（Nginx 側で制限）にする。
+`docker-compose.local-prod.yml` に ELK を **security + TLS 有効**で追加済み。dev と同じ Logstash pipeline / Filebeat / ダッシュボードを、**入口〜コンテナ間まで全区間 HTTPS**・認証付きで使う。
+
+- **前提(初回)**: hosts に `kibana.tracen.local` を追加、TLS 資材を生成:
+  ```txt
+  127.0.0.1 tracen.local registry.tracen.local kibana.tracen.local
+  ```
+  ```bash
+  pnpm local-prod:setup-tls   # *.tracen.local のワイルドカード証明書を生成
+  pnpm make-env:force         # .env.local-prod を生成(パスワードは本番前に変更)
+  ```
+- **起動(ワンコマンド)**:
+  ```bash
+  pnpm local-prod:deploy:analytics   # ELK 込みで起動(app/monitoring も含む)
+  # ELK が不要なときは基本 deploy(ELK は起動しない):
+  pnpm local-prod:deploy
+  ```
+  ELK は `profiles: [analytics]` のため基本 deploy では起動せず、`deploy:analytics`(内部で `--profile analytics`)を付けたときのみ起動する。`pnpm local-prod:down` で ELK 含め停止。
+- **全区間 HTTPS**: ES/Kibana/Logstash が `*.tracen.local` 証明書(`/certs` にマウント)で TLS 待ち受け・相互接続する。サービス間はサブドメイン(`elasticsearch.tracen.local` 等、証明書 SAN 一致)で通信。
+- **security**: `xpack.security.enabled=true`。**Logstash → `elastic`**、**Kibana → `kibana_system`** で ES に接続(Kibana は elastic superuser を拒否するため、`es-setup` が kibana_system のパスワードを設定)。
+- **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://kibana.tracen.local`（**ログイン必須** = admin 限定）。
+- **ログイン**: ユーザー **`elastic`** / パスワードは `.env.local-prod` の `ELASTIC_PASSWORD`。
+  `kibana_system` は Kibana⇄ES の内部接続専用で UI 権限を持たないため、それでログインすると認証は通っても
+  「You do not have permission to access the requested page」になる。
+- **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が TLS で Logstash に送る。mock-producer は含めない。
+- **provision**: 手動実行は不要。index template は Logstash が、ダッシュボード投入は `kibana-provision` サービスが起動時に行う（`provision-kibana.sh` は dev 用）。
 
 ## 注意
 

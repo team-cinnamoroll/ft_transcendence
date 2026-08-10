@@ -3,6 +3,7 @@ import HomeProfile from '../HomeProfile';
 import { currentUser } from '@/mocks/users';
 import { faces } from '@/mocks/faces';
 import { seeds } from '@/mocks/seeds';
+import { USER_IDS } from '@/mocks/ids';
 
 const meta: Meta<typeof HomeProfile> = {
   title: 'Home/HomeProfile',
@@ -13,13 +14,13 @@ const meta: Meta<typeof HomeProfile> = {
 export default meta;
 type Story = StoryObj<typeof HomeProfile>;
 
-const myFaces = faces.filter((f) => f.userId === 'user-1');
-const mySeeds = seeds.filter((s) => s.userId === 'user-1');
+const myFaces = faces.filter((f) => f.userId === USER_IDS.user1);
+const mySeeds = seeds.filter((s) => s.userId === USER_IDS.user1);
 
 export const Default: Story = {
-  args: { user: currentUser, faces: myFaces, seeds: mySeeds },
+  args: { user: currentUser, faces: myFaces, seeds: mySeeds, today: new Date() },
 };
 
 export const NoSeeds: Story = {
-  args: { user: currentUser, faces: myFaces, seeds: [] },
+  args: { user: currentUser, faces: myFaces, seeds: [], today: new Date() },
 };

@@ -3,6 +3,7 @@ import SideNav from '../SideNav';
 import { faces } from '@/mocks/faces';
 import { currentUser } from '@/mocks/users';
 import { seeds } from '@/mocks/seeds';
+import { USER_IDS } from '@/mocks/ids';
 
 const meta: Meta<typeof SideNav> = {
   title: 'UI/SideNav',
@@ -14,8 +15,8 @@ const meta: Meta<typeof SideNav> = {
   },
   args: {
     user: currentUser,
-    faceCount: faces.filter((f) => f.userId === 'user-1').length,
-    seedCount: seeds.filter((s) => s.userId === 'user-1').length,
+    faceCount: faces.filter((f) => f.userId === USER_IDS.user1).length,
+    seedCount: seeds.filter((s) => s.userId === USER_IDS.user1).length,
     isAuthenticated: true,
   },
 };
@@ -34,7 +35,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 export const Default: Story = {
   args: {
-    faces: faces.filter((f) => f.userId === 'user-1'),
+    faces: faces.filter((f) => f.userId === USER_IDS.user1),
   },
   decorators: [
     (Story) => (

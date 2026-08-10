@@ -11,6 +11,8 @@ filebeat.autodiscover:
                 - /var/lib/docker/containers/${data.docker.container.id}/*.log
 
 output.logstash:
-  hosts: ['logstash:5044']
+  hosts: ['${LOGSTASH_HOSTS:logstash:5044}']
+  ssl.enabled: ${LOGSTASH_SSL_ENABLED:false}
+  ssl.certificate_authorities: ['${LOGSTASH_SSL_CA:}']
 
 logging.level: info

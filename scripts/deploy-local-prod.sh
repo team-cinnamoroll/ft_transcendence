@@ -131,6 +131,12 @@ for f in "${compose_files[@]}"; do
   compose_cmd+=( -f "$f" )
 done
 
+# WITH_ANALYTICS=1 のとき ELK(analytics profile)も含めて起動する
+if [[ "${WITH_ANALYTICS:-0}" == "1" ]]; then
+  compose_cmd+=( --profile analytics )
+  echo "analytics (ELK) を含めて起動します"
+fi
+
 if [[ "$mode" == "full" ]]; then
   echo "[1/5] Start local registry (https://registry.tracen.local:5000)"
   "${compose_cmd[@]}" up -d registry
