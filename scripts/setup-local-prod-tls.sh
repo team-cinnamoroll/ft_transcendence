@@ -25,8 +25,10 @@ if [[ ! -f "$caroot/rootCA.pem" ]]; then
 fi
 
 cp "$caroot/rootCA.pem" "$cert_dir/ca.crt"
-# ES/Logstash は非 root(elasticsearch uid)で秘密鍵を読むため 644 にする(ローカル検証用途)
-chmod 644 "$cert_dir/tls.key" || true
+# 秘密鍵はホスト側では 600 のままでよい。
+# ELK(非 root, uid 1000)には elk-certs-init が volume に複製して所有者を揃えるため、
+# ホストの uid や OS(macOS/Linux)の違いによらず読める。
+chmod 600 "$cert_dir/tls.key" || true
 
 cat <<'EOF'
 
