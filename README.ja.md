@@ -616,21 +616,42 @@ erDiagram
 
 ### Minor: Use an ORM for the database.
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: Server-Side Rendering (SSR) for improved performance and SEO.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ### Minor: Custom-made design system with reusable components, including a proper color palette, typography, and icons (minimum: 10 reusable components).
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: Implement advanced search functionality with filters, sorting, and pagination.
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: File upload and management system.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ## 2 Accessibility and Internationalization
 
 ### Minor: Support for multiple languages (at least 3 languages).
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ## 3 User Management
 
 ### Major: Standard user management and authentication.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ## 4 Artificial Intelligence
 
@@ -646,11 +667,15 @@ No modules implemented.
 
 ## 7 Devops
 
-### Major: Infrastructure for log management using ELK (Elasticsearch, Logstash,
+### Major: Infrastructure for log management using ELK (Elasticsearch, Logstash, Kibana).
 
-Kibana).
+- 担当: xx
+- 内容を簡潔に書く
 
 ### Major: Monitoring system with Prometheus and Grafana.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ## 8 Data and Analytics
 
