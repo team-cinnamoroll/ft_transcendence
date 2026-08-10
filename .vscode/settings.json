@@ -71,5 +71,16 @@
       }
     ],
     "scanLimit": 200
+  },
+  "yaml.disableSchemaDetection": [
+    "**/.github/workflows/*.yml",
+    "**/.github/workflows/*.yaml",
+    "**/.gitea/workflows/*.yml",
+    "**/.gitea/workflows/*.yaml",
+    "**/.forgejo/workflows/*.yml",
+    "**/.forgejo/workflows/*.yaml"
+  ],
+  "yaml.schemas": {
+    "openapi:v3": "file:///workspace/docs/api/api-key-openapi.yaml"
   }
 }

@@ -7,6 +7,8 @@
 BASE_URL=${BASE_URL:-"http://localhost:8000/api/v1"}
 STATE_FILE=".test_state"
 
+API_KEY=${API_KEY:-"tracen_master_api_key"}  # APIキー（必要に応じて変更）
+
 # テスト用ユーザーデータ
 U1_EMAIL="user1@example.com"
 U1_NAME="User One"
@@ -70,6 +72,7 @@ setup() {
         echo "Signing up User $i ($email)..."
         RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
             -H "Content-Type: application/json" \
+            -H "x-api-key: $API_KEY" \
             -d "{\"email\":\"$email\",\"name\":\"$name\",\"password\":\"$pass\"}")
 
         SUCCESS=$(echo "$RES" | jq -r '.success')

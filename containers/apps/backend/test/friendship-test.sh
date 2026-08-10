@@ -7,6 +7,8 @@ BASE_URL=${BASE_URL:-"http://localhost:8000/api/v1"}
 STATE_FILE=".test_state_friendships"
 TOTAL_USERS=101
 
+API_KEY=${MASTER_API_KEY:-"tracen_master_api_key"}  # APIキー（必要に応じて変更）
+
 # ==========================================
 # ヘルパー関数
 # ==========================================
@@ -86,6 +88,7 @@ setup() {
 
         RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
             -H "Content-Type: application/json" \
+            -H "X-API-Key: $API_KEY" \
             -d "{\"email\":\"$email\",\"name\":\"$name\",\"password\":\"$pass\"}")
 
         SUCCESS=$(echo "$RES" | jq -r '.success')

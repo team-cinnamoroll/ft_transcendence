@@ -15,6 +15,12 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8000,
     allowedHosts: ['backend'],
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
+      credentials: true,
+    },
     forwardConsole: {
       unhandledErrors: true, // 未キャッチのエラーやPromise拒否を転送
       logLevels: ['error', 'warn', 'info', 'log'], // 転送したいconsoleのレベル

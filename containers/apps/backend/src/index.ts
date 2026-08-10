@@ -6,15 +6,15 @@ import { readFileSync } from 'node:fs';
 import { createServer as createHttpsServer } from 'node:https';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cors } from 'hono/cors';
 
 import { runMigrationsOnce } from './shared/infra/db/migrate';
 import { parseEnv } from './env';
 import { injectConfig } from './shared/middleware/inject-config';
-import { injectJwtAuthDeps } from './shared/middleware/inject-jwk-auth';
 
 import type { AppEnv } from './shared/types/hono';
 import { publicApiRouter } from './public.handler';
-import { protectedApiRouter } from './protected.handler';
+import { apiKeyProtectedRouter, jwtProtectedRouter } from './protected.handler';
 import { type GlobalErrorResponse, globalErrorHandler } from './global.error.handler';
 
 let config: ReturnType<typeof parseEnv> | null = null;
@@ -31,7 +31,15 @@ try {
 }
 
 const app = new Hono<AppEnv>();
-
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // x-api-key などのカスタムヘッダーを明示的に許可します
+    allowHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
+  })
+);
 // 全局共通ミドルウェア
 app.use('*', injectConfig(config ? config : undefined));
 
@@ -59,8 +67,8 @@ const apiApp = new Hono<AppEnv>();
 const apiRoutes = apiApp
   .basePath('/api/v1')
   .route('/', publicApiRouter())
-  .use('*', injectJwtAuthDeps())
-  .route('/', protectedApiRouter());
+  .route('/', apiKeyProtectedRouter())
+  .route('/', jwtProtectedRouter());
 
 app.route('/', apiRoutes);
 

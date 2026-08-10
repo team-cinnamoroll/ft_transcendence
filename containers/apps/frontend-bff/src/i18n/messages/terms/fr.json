@@ -12,7 +12,7 @@
       "paragraphs": [
         "1. Le Service est une application web destinée à permettre à l'utilisateur d'« écrire pour soi-même ». Plutôt que de viser principalement la mise en relation des personnes entre elles, il est conçu en mettant l'accent sur l'enregistrement des pensées et des notes personnelles de l'utilisateur.",
         "2. L'utilisateur peut créer plusieurs « faces » correspondant à différents thèmes ou facettes de lui-même et rédiger des publications (seeds) séparément pour chaque face. Chaque face et chaque publication peuvent être définies comme publiques ou privées.",
-        "3. Le Service fournit des fonctionnalités telles que la création de compte et les paramètres de profil, la création et la modification de faces et de publications, la recherche, les abonnements, les notifications, la gestion des fichiers et l'affichage multilingue.",
+        "3. Le Service fournit des fonctionnalités telles que la création de compte et les paramètres de profil, la création et la modification de faces et de publications, la recherche, les fonctionnalités d'amis, la gestion des fichiers et l'affichage multilingue.",
         "4. L'Exploitant peut ajouter, modifier ou supprimer une partie des fonctionnalités du Service (les modifications, l'interruption et la cessation sont prévues à l'article 7)."
       ]
     },

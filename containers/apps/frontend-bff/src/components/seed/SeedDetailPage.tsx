@@ -7,9 +7,10 @@ import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
 import type { SeedLink } from '@/server/usecases/seeds';
-import { getFaceTitle, getFaceColor, getAvatarUrl } from '@/lib/display';
+import { getFaceTitle, getFaceColor, getAvatarUrl, isImageFile } from '@/lib/display';
 import { useRelativeTime } from '@/lib/use-relative-time';
 import FaceBadge from '@/components/ui/FaceBadge';
+import PdfThumbnail from '@/components/ui/PdfThumbnail';
 
 // ── LinkedSeedRow ───────────────────────────────────────────────
 
@@ -255,13 +256,34 @@ const SeedDetailPage = ({ seed, face, author, isOwner, outgoingLinks, incomingLi
                 aspectRatio: seed.images.length === 1 ? '16/10' : '1/1',
               }}
             >
-              <Image
-                src={image.url}
-                alt={t('imageAlt', { n: i + 1 })}
-                fill
-                className="object-cover"
-                sizes="300px"
-              />
+              {isImageFile(image.mimeType ?? '') ? (
+                <Image
+                  src={image.url}
+                  alt={t('imageAlt', { n: i + 1 })}
+                  fill
+                  className="object-cover"
+                  sizes="300px"
+                />
+              ) : (
+                <a
+                  href={image.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t('openPdfAriaLabel')}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'block',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <PdfThumbnail
+                    src={image.url}
+                    fileName={image.fileName}
+                    fallbackLabel={t('pdfFileNameFallback')}
+                  />
+                </a>
+              )}
             </div>
           ))}
         </div>

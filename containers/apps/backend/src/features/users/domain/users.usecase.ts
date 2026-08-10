@@ -2,6 +2,7 @@ import { type UserId, type User, UserSchema } from '@tracen/contracts';
 import { type UserEntity } from './users.entity';
 import type { UserRepositorySpec } from './users.repository';
 import { EmailAlreadyExistsError, UserAlreadyExistsError } from './users.error';
+import { NotFoundError } from '../../../shared/errors/global.error';
 import { makeSafeUsecaseResult } from '../../../shared/utils/validation';
 
 export async function createUser(repo: UserRepositorySpec, newUser: UserEntity): Promise<User> {
@@ -19,6 +20,29 @@ export async function createUser(repo: UserRepositorySpec, newUser: UserEntity):
     email: created.email,
     name: created.name,
     createdAt: created.createdAt,
+  });
+}
+
+export async function updateUser(
+  repo: UserRepositorySpec,
+  updatedUser: Omit<UserEntity, 'createdAt'>
+): Promise<User> {
+  const existingUser = await repo.findById(updatedUser.id);
+  if (!existingUser) {
+    throw new NotFoundError('User not found');
+  }
+  if (existingUser.email !== updatedUser.email) {
+    const existingEmail = await repo.findByEmail(updatedUser.email);
+    if (existingEmail) {
+      throw new EmailAlreadyExistsError();
+    }
+  }
+  const updated = await repo.update({ ...updatedUser, createdAt: existingUser.createdAt });
+  return makeSafeUsecaseResult(UserSchema, {
+    id: updated.id,
+    email: updated.email,
+    name: updated.name,
+    createdAt: updated.createdAt,
   });
 }
 

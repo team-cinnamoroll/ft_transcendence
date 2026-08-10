@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Tracen Public API
+  description: >-
+    Tracen バックエンドにおける認証不要の公開ヘルスチェック、JWKS (JSON Web Key Set) API
+  version: 1.0.0
+servers:
+  - url: https://api.tracen.local/api/v1
+    description: Tracen API Base Server
+  - url: http://localhost:8000/api/v1
+    description: ローカル開発環境用
+
+tags:
+  - name: Health
+    description: システムヘルスチェック関連のエンドポイント
+  - name: JWKS
+    description: JWT (JSON Web Token) 署名検証用の公開鍵セット
+
+paths:
+  /hello:
+    get:
+      tags:
+        - Health
+      summary: コマンドテスト用 Hello エンドポイント
+      description: >-
+        サーバーの基本的な稼働確認を行う公開エンドポイントです。認証不要でアクセスできます。
+      operationId: getHello
+      security: []
+      responses:
+        '200':
+          description: 正常応答
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    description: 応答メッセージ
+                    example: Hello from Hono!
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: 疎通確認用システムヘルスチェック
+      description: >-
+        サーバーの基本的な稼働確認を行う公開エンドポイントです。認証不要でアクセスできます。
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: システム正常稼働中
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/redis:
+    get:
+      tags:
+        - Health
+      summary: Redis 接続ヘルスチェック
+      description: >-
+        Redis (キャッシュ / セッションストア) との接続状態を確認します。
+      operationId: getHealthRedis
+      security: []
+      responses:
+        '200':
+          description: Redis 正常接続
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisHealthResponse'
+        '500':
+          description: Redis 接続失敗またはエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisHealthErrorResponse'
+
+  /.well-known/jwks.json:
+    get:
+      tags:
+        - JWKS
+      summary: JWKS (JSON Web Key Set) 公開鍵取得
+      description: >-
+        JWT (JSON Web Token) の署名検証に使用する公開鍵セット (JWKS) を取得します (RFC 7517 準拠)。
+      operationId: getJwks
+      security: []
+      responses:
+        '200':
+          description: JWKS 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwksResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - ok
+      properties:
+        ok:
+          type: boolean
+          description: ヘルスステータス
+          example: true
+
+    RedisHealthResponse:
+      type: object
+      required:
+        - redis
+        - result
+      properties:
+        redis:
+          type: string
+          description: Redis ヘルスステータス
+          example: ok
+        result:
+          type: string
+          description: Redis の読み書きテスト結果
+          example: ok_1786281320571
+
+    RedisHealthErrorResponse:
+      type: object
+      required:
+        - redis
+        - details
+      properties:
+        redis:
+          type: string
+          example: error
+        details:
+          type: string
+          description: エラー詳細
+          example: Redis read/write verification failed
+
+    JwkKey:
+      type: object
+      required:
+        - 'kty'
+        - 'use'
+        - 'alg'
+        - 'kid'
+        - 'n'
+        - 'e'
+      properties:
+        'kty':
+          type: string
+          description: '鍵タイプ (例: RSA)'
+          example: 'RSA'
+        'use':
+          type: string
+          description: '用途 (例: sig)'
+          example: 'sig'
+        'alg':
+          type: string
+          description: 'アルゴリズム (例: RS256)'
+          example: 'RS256'
+        'kid':
+          type: string
+          description: 'キー ID'
+          example: 'tracen-auth-key-1'
+        'n':
+          type: string
+          description: 'RSA Modulus (Base64URL エンコード)'
+          example: 'u1V_...'
+        'e':
+          type: string
+          description: 'RSA Exponent (Base64URL エンコード)'
+          example: 'AQAB'
+
+    JwksResponse:
+      type: object
+      required:
+        - keys
+      properties:
+        keys:
+          type: array
+          description: 公開鍵の配列
+          items:
+            $ref: '#/components/schemas/JwkKey'

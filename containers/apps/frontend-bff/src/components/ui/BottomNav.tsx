@@ -67,8 +67,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/', labelKey: 'nav.home', icon: (a) => <HomeIcon active={a} /> },
   { href: '/faces', labelKey: 'nav.faces', icon: (a) => <LayersIcon active={a} /> },
   {
-    href: '/subscriptions',
-    labelKey: 'nav.subscriptions',
+    href: '/collection',
+    labelKey: 'nav.collection',
     icon: (a) => <CompassIcon active={a} />,
   },
 ];

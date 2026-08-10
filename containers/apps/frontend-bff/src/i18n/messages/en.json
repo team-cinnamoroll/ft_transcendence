@@ -18,7 +18,7 @@
   "nav": {
     "home": "Home",
     "faces": "Reflection",
-    "subscriptions": "Collection",
+    "collection": "Collection",
     "friends": "Friends",
     "search": "Search",
     "faceDetail": "Face Detail"
@@ -51,7 +51,8 @@
     "attachedImageAlt": "Attached image {n}",
     "removeImageAriaLabel": "Remove image {n}",
     "uploadingImageAlt": "Uploading image {n}",
-    "errorImageInvalidType": "Please choose a JPEG or PNG image.",
+    "errorImageInvalidType": "Please choose a JPEG or PNG image, or a PDF file.",
+    "pdfFileNameFallback": "PDF file",
     "submit": "Post",
     "submitting": "Posting...",
     "errorGeneric": "Failed to post. Please try again later."
@@ -110,9 +111,7 @@
     "errorUploadFailed": "Failed to upload the image. Please try again."
   },
   "face": {
-    "private": "Private",
-    "subscribe": "Subscribe",
-    "subscribed": "✓ Subscribed"
+    "private": "Private"
   },
   "fab": {
     "ariaLabel": "Post"
@@ -150,11 +149,16 @@
     "searchPlaceholder": "Search your faces & seeds",
     "facesSection": "Faces ({n})",
     "seedsSection": "Seeds ({n})",
+    "searching": "Searching…",
     "noMatch": "No results",
     "noFilteredFaces": "No faces found for \"{query}\"",
     "sortLastAt": "Last post",
     "sortTotal": "Most seeds",
     "sortName": "Name",
+    "sortSeedNewest": "Newest",
+    "sortSeedOldest": "Oldest",
+    "fromDate": "From date",
+    "toDate": "To date",
     "gridView": "Grid view",
     "listView": "List view",
     "actionMenu": "Action menu",
@@ -178,8 +182,7 @@
     "oldest": "Oldest",
     "images": "With images",
     "seeds": "Seeds",
-    "monthly": "This month",
-    "subscribers": "Subscribers"
+    "monthly": "This month"
   },
   "seedFeed": {
     "noSeeds": "No seeds yet"
@@ -210,75 +213,30 @@
     "weekRecord": "{range} record",
     "noRecord": "No seeds this week"
   },
-  "subscriptionSeed": {
-    "noSubscriptions": "You haven't subscribed to any faces yet",
-    "timelineTab": "Timeline",
-    "subscriptionsTab": "Subscriptions",
-    "filterPlaceholder": "Find a new face / seed",
-    "filterByFace": "Filter by face",
-    "facesSection": "Faces ({n})",
-    "seedsSection": "Seeds ({n})",
-    "sectionTitle": "Recent subscription seed",
-    "exploringAll": "Exploring all",
-    "explorePromptTitle": "Enter a keyword",
-    "explorePromptHint": "Search all faces and seeds — subscribed or not",
-    "searchTabSubscribed": "Subscribed",
-    "searchTabOther": "Others",
-    "searchSubscribedFacesSection": "Subscribed Faces ({n})",
-    "searchOtherFacesSection": "Other Faces ({n})",
-    "searchSubscribedSeedsSection": "Subscribed Seeds ({n})",
-    "searchOtherSeedsSection": "Other Seeds ({n})",
-    "subscribe": "Subscribe",
-    "subscribed": "✓ Subscribed",
-    "subscribeAriaLabel": "Subscribe to {name}",
-    "unsubscribeAriaLabel": "Unsubscribe from {name}",
-    "noMatch": "No results",
-    "seedCount": "{count, plural, one {Seed} other {Seeds}}",
-    "noFilteredSeeds": "No seeds found",
-    "viewFace": "View face →",
-    "noSubscribedFaces": "No subscribed faces",
-    "emptyHeadline": "You haven't subscribed to<br></br>anyone's face yet.",
-    "emptyBody": "Start by picking just one face that interests you.<br></br>This is designed to keep notifications meaningful.",
-    "recommendedTitle": "Recommended faces",
-    "recommendedSubtitle": "· Picked for you",
-    "subscriberCount": "{n, plural, one {# subscriber} other {# subscribers}}",
-    "subscribeAction": "Subscribe"
-  },
-  "notificationList": {
-    "noNotifications": "No notifications yet",
-    "linkedBadge": "🔗 Link",
-    "subscribedBadge": "📥 Subscribe",
-    "linkedAction": "linked your post",
-    "subscribedAction": "subscribed to {faceName}",
-    "actionConnector": " ",
-    "filterAll": "All",
-    "filterSub": "Subscribe",
-    "filterLink": "Link",
-    "typeLinkLabel": "Link",
-    "typeUpdateLabel": "Update",
-    "today": "Today",
-    "earlier": "Earlier",
-    "noNotificationsFiltered": "No notifications",
-    "linkedPreview": "A linked seed",
-    "updatedPreview": "New seed posted to {faceName}"
-  },
   "home": {
     "title": "Home"
   },
   "faces": {
     "title": "Faces"
   },
-  "notifications": {
-    "title": "Notifications",
-    "count": "{count, plural, one {# notification} other {# notifications}}"
-  },
   "search": {
     "title": "Search",
     "placeholder": "Search..."
   },
-  "subscriptions": {
-    "title": "Subscriptions",
-    "subscribedCount": "{count, plural, one {# face subscribed} other {# faces subscribed}}"
+  "collection": {
+    "title": "Collection",
+    "empty": "No friend posts yet",
+    "searchPlaceholder": "Search faces & seeds to find friends",
+    "facesSection": "Faces ({n})",
+    "seedsSection": "Seeds ({n})",
+    "searching": "Searching…",
+    "noMatch": "No results",
+    "sortLastPostedAt": "Last post",
+    "sortNumberOfPosts": "Most seeds",
+    "sortSeedNewest": "Newest",
+    "sortSeedOldest": "Oldest",
+    "fromDate": "From date",
+    "toDate": "To date"
   },
   "settings": {
     "title": "Settings",
@@ -364,6 +322,8 @@
   "profilePage": {
     "facesHeading": "Faces ({count})",
     "noFaces": "No faces yet",
+    "loadMore": "Load more",
+    "loading": "Loading…",
     "private": "Private",
     "sendRequest": "Add friend",
     "pendingRequest": "Requested",
@@ -437,7 +397,9 @@
     "imageAlt": "Image {n}",
     "moreOptions": "More options",
     "edit": "Edit",
-    "linksCount": "{count, plural, one {# link} other {# links}}"
+    "linksCount": "{count, plural, one {# link} other {# links}}",
+    "openPdfAriaLabel": "Open PDF in a new tab",
+    "pdfFileNameFallback": "PDF file"
   },
   "seedDetail": {
     "title": "Seed",
@@ -451,7 +413,9 @@
     "incomingLinks": "Links to this seed",
     "linksUnit": "",
     "showMore": "Show {count} more →",
-    "imageAlt": "Image {n}"
+    "imageAlt": "Image {n}",
+    "openPdfAriaLabel": "Open PDF in a new tab",
+    "pdfFileNameFallback": "PDF file"
   },
   "pagination": {
     "ariaLabel": "Pagination",
@@ -468,12 +432,9 @@
     "seedsThisMonth": "Seeds",
     "thisMonth": "This month",
     "noSeedsThisMonth": "No seeds this month",
-    "subscribedFaces": "Subscribed",
-    "noSubscriptions": "You haven't subscribed to any faces yet.",
-    "findFaces": "Find Faces →",
-    "popularFaces": "Popular Faces",
-    "subscribersUnit": "{count, plural, one {subscriber} other {subscribers}}",
-    "subscribeButton": "Subscribe"
+    "friends": "Friends",
+    "noFriends": "You don't have any friends yet.",
+    "findFriends": "Find Friends →"
   },
   "validation": {
     "required": "This field is required",

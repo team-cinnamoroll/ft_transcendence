@@ -14,6 +14,9 @@ export const getFaceImageUrl = (face: Pick<Face, 'image'>): string => {
   return face.image?.url || DEFAULT_FACE_IMAGE_URL;
 };
 
+/** mimeTypeが画像かどうかを判定する。Seedの添付ファイル(PDF等)の表示切り替えに使う */
+export const isImageFile = (mimeType: string): boolean => mimeType.startsWith('image/');
+
 export const createLookupMap = <K extends PropertyKey, T>(
   items: T[],
   getKey: (item: T) => K

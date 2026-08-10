@@ -9,6 +9,10 @@ export const expiresInSchema = z
   });
 export type ExpiresIn = z.infer<typeof expiresInSchema>;
 
+// APIkey
+export const ApiKeySchema = z.string().min(1);
+export type ApiKey = z.infer<typeof ApiKeySchema>;
+
 // JWTペイロード
 export const jwtPayloadSchema = z.object({
   sub: z.string(), // ユーザーID（Subject）

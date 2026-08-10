@@ -11,6 +11,7 @@ services:
       - tracen-contracts-node-modules:/workspace/containers/apps/contracts/node_modules
       - tracen-backend-node-modules:/workspace/containers/apps/backend/node_modules
       - tracen-frontend-bff-node-modules:/workspace/containers/apps/frontend-bff/node_modules
+      - file_storage_data:${FILE_STORAGE_BASE_DIR:-/app/uploads}
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}/.claude:/home/node/.claude:cached
     working_dir: /workspace
@@ -49,6 +50,7 @@ services:
 
   frontend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
+    restart: unless-stopped
     env_file:
       - .env.dev
     volumes:
@@ -57,7 +59,7 @@ services:
       - tracen-contracts-node-modules:/workspace/containers/apps/contracts/node_modules
       - tracen-frontend-bff-node-modules:/workspace/containers/apps/frontend-bff/node_modules
     working_dir: /workspace
-    command: sh -lc "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
+    command: sh .devcontainer/scripts/run-as-workspace-owner.sh sh -lc "while [ ! -f node_modules/.bin/next ]; do echo 'Waiting for pnpm install to finish...'; sleep 3; done; COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/frontend-bff exec next dev --hostname 0.0.0.0 --port 3000"
     depends_on:
       - backend
     ports:
@@ -65,6 +67,7 @@ services:
 
   backend:
     image: mcr.microsoft.com/devcontainers/javascript-node:24
+    restart: unless-stopped
     labels:
       analytics_source: 'true'
     env_file:
@@ -78,7 +81,7 @@ services:
       - tracen-backend-node-modules:/workspace/containers/apps/backend/node_modules
       - file_storage_data:${FILE_STORAGE_BASE_DIR:-/app/uploads}
     working_dir: /workspace
-    command: sh -lc "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
+    command: sh .devcontainer/scripts/run-as-workspace-owner.sh sh -lc "while [ ! -f node_modules/.bin/vite ]; do echo 'Waiting for pnpm install to finish...'; sleep 3; done; COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --filter @tracen/backend exec vite --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy

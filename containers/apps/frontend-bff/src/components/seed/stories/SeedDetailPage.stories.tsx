@@ -3,10 +3,11 @@ import SeedDetailPage from '../SeedDetailPage';
 import { faces } from '@/mocks/faces';
 import { seeds } from '@/mocks/seeds';
 import { users } from '@/mocks/users';
+import { FACE_IDS } from '@/mocks/ids';
 
-const face = faces.find((f) => f.id === 'face-1-1')!;
-const seed = seeds.find((s) => s.faceId === 'face-1-1')!;
-const linkedSeed = seeds.find((s) => s.faceId !== 'face-1-1')!;
+const face = faces.find((f) => f.id === FACE_IDS.face11)!;
+const seed = seeds.find((s) => s.faceId === FACE_IDS.face11)!;
+const linkedSeed = seeds.find((s) => s.faceId !== FACE_IDS.face11)!;
 const linkedFace = faces.find((f) => f.id === linkedSeed?.faceId) ?? faces[1];
 
 const meta: Meta<typeof SeedDetailPage> = {

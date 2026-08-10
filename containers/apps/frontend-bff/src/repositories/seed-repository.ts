@@ -27,6 +27,8 @@ export type SeedRepositorySpec = {
   create: (accessToken: string, input: CreateSeedInput) => Promise<Seed>;
   update: (accessToken: string, seedId: string, input: UpdateSeedInput) => Promise<Seed>;
   delete: (accessToken: string, seedId: string) => Promise<void>;
+  /** キーワード検索（q）でシードを取得。該当する全件をカーソルで辿って集める */
+  search: (accessToken: string, query: { q?: string; userId?: string }) => Promise<Seed[]>;
 };
 
 // ─── バックエンドAPI実装 ────────────────────────────────────────
@@ -38,7 +40,7 @@ export type SeedRepositorySpec = {
  */
 async function fetchAllSeeds(
   accessToken: string,
-  query: { faceId?: string; userId?: string } = {}
+  query: { faceId?: string; userId?: string; q?: string } = {}
 ): Promise<Seed[]> {
   const all: Seed[] = [];
   let cursor: string | undefined;
@@ -48,6 +50,7 @@ async function fetchAllSeeds(
       query: {
         ...(query.faceId ? { faceId: query.faceId } : {}),
         ...(query.userId ? { userId: query.userId } : {}),
+        ...(query.q ? { q: query.q } : {}),
         limit: '100',
         ...(cursor ? { cursor } : {}),
       },
@@ -108,6 +111,10 @@ export function createSeedApiRepositoryImpl(): SeedRepositorySpec {
         faceIds.map((faceId) => fetchAllSeeds(accessToken, { faceId }))
       );
       return sortByCreatedAtDesc(results.flat());
+    },
+
+    search: async (accessToken, query) => {
+      return sortByCreatedAtDesc(await fetchAllSeeds(accessToken, query));
     },
 
     create: async (accessToken, input) => {

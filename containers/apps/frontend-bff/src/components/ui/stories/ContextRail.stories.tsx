@@ -3,6 +3,7 @@ import ContextRail from '../ContextRail';
 import type { Seed } from '@/types/seed';
 import type { Face } from '@/types/face';
 import type { UserProfile } from '@/types/user-profile';
+import type { FriendProfileWithOnlineStatus } from '@/types/friendship';
 
 const mockUser: UserProfile = {
   id: 'user-1',
@@ -57,38 +58,31 @@ const mockSeeds: Seed[] = [
   },
 ];
 
-const mockSubscribedFace: Face = {
-  id: 'face-sub-1',
-  userId: 'user-2',
-  name: '珈琲',
-  emoji: '☕',
-  visibility: 'public',
-  description: 'コーヒーに関する記録',
-  image: null,
-};
-
-const mockLatestSeedByFaceId: Record<string, Seed> = {
-  'face-sub-1': {
-    id: 'act-sub-1',
-    faceId: 'face-sub-1',
-    userId: 'user-2',
-    body: '今朝の一杯',
-    images: [],
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-};
-
-const mockUsers: UserProfile[] = [
-  mockUser,
+const mockFriends: FriendProfileWithOnlineStatus[] = [
   {
-    id: 'user-2',
-    name: '佐藤 花子',
-    avatar: {
-      id: 'avatar-2',
-      url: 'https://i.pravatar.cc/150?u=user-2',
+    friendshipId: 'friendship-1',
+    friendProfile: {
+      id: 'user-2',
+      name: '佐藤 花子',
+      avatar: {
+        id: 'avatar-2',
+        url: 'https://i.pravatar.cc/150?u=user-2',
+      },
+      badge: '💖',
     },
-    badge: '💖',
+    becameFriendsAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    isOnline: true,
+  },
+  {
+    friendshipId: 'friendship-2',
+    friendProfile: {
+      id: 'user-3',
+      name: '鈴木 一郎',
+      avatar: null,
+      badge: null,
+    },
+    becameFriendsAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    isOnline: false,
   },
 ];
 
@@ -114,19 +108,15 @@ export const WritingRail: Story = {
     user: mockUser,
     faces: mockFaces,
     seeds: mockSeeds,
-    subscribedFaces: [],
-    latestSeedByFaceId: {},
-    users: mockUsers,
+    friends: [],
   },
 };
 
-export const WithSubscriptions: Story = {
+export const WithFriends: Story = {
   args: {
     user: mockUser,
     faces: mockFaces,
     seeds: mockSeeds,
-    subscribedFaces: [mockSubscribedFace],
-    latestSeedByFaceId: mockLatestSeedByFaceId,
-    users: mockUsers,
+    friends: mockFriends,
   },
 };

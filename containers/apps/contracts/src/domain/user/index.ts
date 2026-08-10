@@ -6,3 +6,4 @@ export * from './user-profile.bulk.request';
 export * from './user-profile.with-relationship';
 export * from './user.me';
 export * from './user.information';
+export * from './user.responses';

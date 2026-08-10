@@ -5,9 +5,15 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import { CreateFaceRequestSchema, UpdateFaceRequestSchema } from '@tracen/contracts';
-import type { Face } from '@/types/face';
-import type { ApiErrorKind } from '@/lib/api-error';
-import { createFace, updateFace, deleteFace } from '@/server/usecases/faces';
+import type { Face, FaceSummary, FaceSummaryPage } from '@/types/face';
+import type { ApiErrorKind, ApiResult } from '@/lib/api-error';
+import {
+  createFace,
+  updateFace,
+  deleteFace,
+  searchFaces,
+  listFacesPageByUserId,
+} from '@/server/usecases/faces';
 import { uploadMyFile } from '@/server/usecases/file-storage';
 import { buildZodErrorMap } from '@/lib/zod-error-map';
 import type { ActionResult } from './result';
@@ -53,6 +59,22 @@ export async function deleteFaceAction(faceId: string): Promise<ActionResult<voi
   revalidatePath('/faces');
 
   return { success: true, data: undefined };
+}
+
+/** キーワードでフェイスを検索する(検索バー用)。userId指定時は対象ユーザーに絞り込む */
+export async function searchFacesAction(query: {
+  q?: string;
+  userId?: string;
+}): Promise<FaceSummary[]> {
+  return searchFaces(query);
+}
+
+/** 指定ユーザーのフェイス一覧の続きを取得する(「もっと見る」用) */
+export async function loadMoreFacesAction(
+  userId: string,
+  cursor: string | null
+): Promise<ApiResult<FaceSummaryPage>> {
+  return listFacesPageByUserId(userId, cursor);
 }
 
 type UploadFaceImageResult =

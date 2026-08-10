@@ -30,12 +30,14 @@
     "mock:add-seed": "cd test/mocking && tsx seed-mock-data.ts"
   },
   "dependencies": {
+    "@hono-rate-limiter/redis": "^0.1.4",
     "@hono/node-server": "^2.0.11",
     "@hono/zod-validator": "^0.7.6",
     "@tracen/contracts": "workspace:*",
     "argon2": "^0.44.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.34",
+    "hono-rate-limiter": "^0.5.3",
     "ioredis": "^5.11.1",
     "mime": "^4.1.0",
     "pino": "^10.3.1",
