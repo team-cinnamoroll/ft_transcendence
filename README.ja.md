@@ -247,15 +247,15 @@ README 冒頭に挙げた各チームメンバーについて、以下を書く�
 
 # Team Information
 
+- hurabe (PM+Developers)
+- nkawaguc (PO+Developers): サービスコンセプトの立案、プロダクト方向性の決定
+- katakada (Tech Lead+Developers)
+- kharuya (Developers)
+
 <!-- ## 6. Project Management
 - チームがどのように作業を組織したか（タスク分担、ミーティング等）
 - プロジェクト管理に使ったツール（GitHub Issues、Trello 等）
 - 使用したコミュニケーションチャネル（Discord、Slack 等） -->
-
-- hurabe (PM+Developers)
-- nkawaguc (PO+Developers)
-- katakada (Tech Lead+Developers)
-- kharuya (Developers)
 
 # Project Management
 
@@ -600,7 +600,7 @@ erDiagram
 
 # Modules
 
-○個のMajor moduleと○個のMinor moduleを実装しました。点数は合計でxx点です。
+7個のMajor moduleと7個のMinor moduleを実装しました。点数は合計で21点です。
 
 ## 1 Web
 
@@ -643,8 +643,9 @@ erDiagram
 
 ### Minor: Support for multiple languages (at least 3 languages).
 
-- 担当: xx
-- 内容を簡潔に書く
+- 担当: kharuya, nkawaguc
+- next-intl を用いて日本語/英語/フランス語の3言語に対応
+- Cookie とブラウザの Accept-Language からロケールを自動判定しつつ、UI上のセレクタで手動切り替えも可能
 
 ## 3 User Management
 
@@ -674,8 +675,9 @@ No modules implemented.
 
 ### Major: Monitoring system with Prometheus and Grafana.
 
-- 担当: xx
-- 内容を簡潔に書く
+- 担当: nkawaguc
+- Prometheus が node-exporter/cadvisor/postgres-exporter/redis-exporter/nginx-exporter の各 exporter からメトリクスを収集し、Grafana のダッシュボードで可視化、Alertmanager が異常検知時に Discord へ通知
+- Grafana は管理者パスワードを環境変数で設定しサインアップを無効化してアクセスを保護
 
 ## 8 Data and Analytics
 
@@ -711,6 +713,21 @@ publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS
 ## hurabe
 
 ## nkawaguc
+
+### サービスコンセプトの立案（PO）
+
+従来の SNS のような「人と人が密につながる」設計ではなく、他者のリアクションを意識せず自分の好きなことを書き留められる、関係の疎なサービスというコンセプトを提案した。自分の好きなアクティビティを気兼ねなく記録できるサービス「Trickle」がサービス終了したことをきっかけに着想し、類似サービスの有無を調査した上で（同種のサービスは見当たらなかった）、MultiFace のコアコンセプトとして採用した。
+
+### 実装
+
+- 監視基盤の構築: Prometheus + Grafana + Alertmanager の導入、および local-prod（本番相当環境）への対応
+- README の整備: 雛形の作成と内容の追記
+- i18n 対応: user-facing text の i18n leak 監査・修正、ICU plural 対応、`@tracen/contracts` の zod errormap の i18n 化
+- 利用規約・プライバシーポリシーページの実装
+
+### 実機検証
+
+校舎の環境で VM を立て、その VM 内で local-prod（本番相当環境）を実際にデプロイして動作確認と調整を行った。
 
 ## katakada
 
