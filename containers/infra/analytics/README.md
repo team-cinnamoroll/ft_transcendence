@@ -116,7 +116,7 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
   `kibana_system` は Kibana⇄ES の内部接続専用で UI 権限を持たないため、それでログインすると認証は通っても
   「You do not have permission to access the requested page」になる。
 - **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が TLS で Logstash に送る。mock-producer は含めない。
-- **provision**: index template は Logstash が自動登録する。ダッシュボード投入は Kibana にアクセスできる環境から `KIBANA_URL=https://kibana.tracen.local provision-kibana.sh` を実行。
+- **provision**: 手動実行は不要。index template は Logstash が、ダッシュボード投入は `kibana-provision` サービスが起動時に行う（`provision-kibana.sh` は dev 用）。
 
 ## 注意
 

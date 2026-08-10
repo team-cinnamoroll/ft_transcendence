@@ -279,11 +279,11 @@ services:
     entrypoint: ['bash', '-c']
     command:
       - |
-        until curl -s --cacert /certs/ca.crt -u "elastic:$${ELASTIC_PASSWORD}" https://elasticsearch.tracen.local:9200 >/dev/null; do sleep 2; done
-        curl -s --cacert /certs/ca.crt -X POST -u "elastic:$${ELASTIC_PASSWORD}" \
+        until curl -s -o /dev/null --cacert /certs/ca.crt https://elasticsearch.tracen.local:9200; do sleep 2; done
+        curl -fsS --cacert /certs/ca.crt -X POST -u "elastic:$${ELASTIC_PASSWORD}" \
           https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password \
           -H 'Content-Type: application/json' \
-          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}"
+          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -308,6 +308,28 @@ services:
       local-prod:
         aliases:
           - kibana.tracen.local
+
+  kibana-provision:
+    image: curlimages/curl:8.11.1
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - ./containers/infra/analytics/kibana-objects.ndjson:/objects.ndjson:ro
+      - elk_certs:/certs:ro
+    entrypoint: ['sh', '-ec']
+    command:
+      - |
+        until curl -fsS -o /dev/null --cacert /certs/ca.crt https://kibana.tracen.local:5601/api/status; do sleep 3; done
+        result=$$(curl -fsS --cacert /certs/ca.crt -u "elastic:$${ELASTIC_PASSWORD}" \
+          -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' \
+          -H 'kbn-xsrf: true' -F file=@/objects.ndjson)
+        echo "$$result"
+        echo "$$result" | grep -q '"success":true'
+    depends_on:
+      - kibana
+    networks:
+      - local-prod
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.3
