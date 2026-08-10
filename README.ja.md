@@ -722,7 +722,7 @@ publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS
 
 - 監視基盤の構築: Prometheus + Grafana + Alertmanager の導入、および local-prod（本番相当環境）への対応
 - README の整備: 雛形の作成と内容の追記
-- i18n 対応: user-facing text の i18n leak 監査・修正、ICU plural 対応、`@tracen/contracts` の zod errormap の i18n 化
+- i18n 対応: user-facing text の i18n leak 監査・修正、ICU plural 対応、zod errormap の i18n 化
 - 利用規約・プライバシーポリシーページの実装
 
 ### 実機検証
