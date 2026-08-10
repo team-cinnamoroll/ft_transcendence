@@ -29,7 +29,9 @@
   "postCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
   "postStartCommand": "echo 'Container started successfully'",
   "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "enableNonRootDocker": false
+    },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "remoteEnv": {
@@ -71,5 +73,6 @@
       ]
     }
   },
-  "remoteUser": "node"
+  "remoteUser": "node",
+  "updateRemoteUserUID": true
 }

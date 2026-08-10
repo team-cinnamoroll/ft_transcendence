@@ -20,11 +20,9 @@ prepare_docker_group() {
 
 ensure_node_owned_dir() {
 	local dir="$1"
-	local owner_uid
-	owner_uid="$(stat -c '%u' "$dir" 2>/dev/null || echo "")"
-	if [[ -z "$owner_uid" || "$owner_uid" != "$node_uid" || ! -w "$dir" ]]; then
-		chown -R node:node "$dir"
-	fi
+	# 過去に root で作られてしまった内部のファイルを確実に修復するため、
+	# チェックを省略して強制的に chown -R を実行します。
+	chown -R node:node "$dir"
 }
 
 prepare_node_dirs() {
@@ -32,6 +30,7 @@ prepare_node_dirs() {
 		/home/node/.cache \
 		/home/node/.local \
 		/home/node/.pnpm-store \
+		/workspace/.pnpm-store \
 		/workspace/node_modules \
 		/workspace/containers/apps/contracts/node_modules \
 		/workspace/containers/apps/backend/node_modules \
@@ -41,11 +40,5 @@ prepare_node_dirs() {
 	done
 }
 
-install_workspace_packages() {
-	COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --dir /workspace/containers/apps/backend install --frozen-lockfile
-	COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm --dir /workspace/containers/apps/frontend-bff install --frozen-lockfile
-}
-
 prepare_docker_group
 prepare_node_dirs
-install_workspace_packages
