@@ -224,6 +224,152 @@ services:
     networks:
       - local-prod
 
+  # ── 可視化基盤 (ELK, security + TLS 有効, analytics profile) ─────────────
+  # 全区間 HTTPS。ES/Logstash は外部公開せず、Kibana のみ Nginx 経由(kibana.tracen.local, 要ログイン)で公開する。
+  # 各サービスは *.tracen.local のワイルドカード証明書を /certs にマウントして TLS 通信する。
+  #   docker compose -f docker-compose.local-prod.yml --profile analytics up -d
+  # ELK は非 root(uid 1000)で動くため、ホストの秘密鍵(600)を bind mount すると読めない。
+  # ホストの uid や OS(macOS/Linux)による差をなくすため、root で volume に複製し所有者を揃える。
+  elk-certs-init:
+    image: alpine:3.20
+    profiles: ['analytics']
+    user: root
+    volumes:
+      - ./containers/infra/local-prod/certs:/src:ro
+      - elk_certs:/dst
+    command:
+      - sh
+      - -ec
+      - |
+        cp /src/tls.crt /src/tls.key /src/ca.crt /dst/
+        chown -R 1000:0 /dst
+        chmod 640 /dst/tls.key
+        chmod 644 /dst/tls.crt /dst/ca.crt
+    networks:
+      - local-prod
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - elk_certs:/usr/share/elasticsearch/config/certs:ro
+    depends_on:
+      elk-certs-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sk https://localhost:9200 >/dev/null || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    networks:
+      local-prod:
+        aliases:
+          - elasticsearch.tracen.local
+
+  es-setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - elk_certs:/certs:ro
+    entrypoint: ['bash', '-c']
+    command:
+      - |
+        until curl -s -o /dev/null --cacert /certs/ca.crt https://elasticsearch.tracen.local:9200; do sleep 2; done
+        curl -fsS --cacert /certs/ca.crt -X POST -u "elastic:$${ELASTIC_PASSWORD}" \
+          https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password \
+          -H 'Content-Type: application/json' \
+          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      local-prod:
+        aliases:
+          - es-setup
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - elk_certs:/certs:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
+    networks:
+      local-prod:
+        aliases:
+          - kibana.tracen.local
+
+  kibana-provision:
+    image: curlimages/curl:8.11.1
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - ./containers/infra/analytics/kibana-objects.ndjson:/objects.ndjson:ro
+      - elk_certs:/certs:ro
+    entrypoint: ['sh', '-ec']
+    command:
+      - |
+        until curl -fsS -o /dev/null --cacert /certs/ca.crt https://kibana.tracen.local:5601/api/status; do sleep 3; done
+        result=$$(curl -fsS --cacert /certs/ca.crt -u "elastic:$${ELASTIC_PASSWORD}" \
+          -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' \
+          -H 'kbn-xsrf: true' -F file=@/objects.ndjson)
+        echo "$$result"
+        echo "$$result" | grep -q '"success":true'
+    depends_on:
+      - kibana
+    networks:
+      - local-prod
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    profiles: ['analytics']
+    env_file:
+      - .env.local-prod
+    volumes:
+      - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./containers/infra/analytics/logstash/pipeline-local-prod:/usr/share/logstash/pipeline:ro
+      - ./containers/infra/analytics/logstash/templates:/usr/share/logstash/templates:ro
+      - elk_certs:/usr/share/logstash/config/certs:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      local-prod:
+        aliases:
+          - logstash.tracen.local
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.3
+    profiles: ['analytics']
+    user: root
+    command: ['filebeat', '-e', '--strict.perms=false']
+    # filebeat.yml が ${LOGSTASH_SSL_ENABLED} 等を参照するため env_file が必須。
+    # 無いと既定値(ssl.enabled=false)になり、TLS 待ち受けの Logstash に接続できない。
+    env_file:
+      - .env.local-prod
+    volumes:
+      - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - elk_certs:/certs:ro
+    depends_on:
+      - logstash
+    networks:
+      local-prod:
+        aliases:
+          - filebeat
+
 networks:
   local-prod:
 
@@ -232,5 +378,7 @@ volumes:
   postgres_data:
   redis_data:
   file_storage_data:
+  elasticsearch_data:
+  elk_certs:
   prometheus_data:
   grafana_data:
