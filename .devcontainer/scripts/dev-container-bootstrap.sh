@@ -26,6 +26,15 @@ ensure_node_owned_dir() {
 }
 
 prepare_node_dirs() {
+	# .env.dev があれば grep で FILE_STORAGE_BASE_DIR を抽出する
+	local file_storage_dir="/app/uploads"
+	if [ -f "/workspace/.env.dev" ]; then
+		local env_val="$(grep '^FILE_STORAGE_BASE_DIR=' "/workspace/.env.dev" | head -n 1 | cut -d '=' -f 2- | tr -d '\r')"
+		if [ -n "$env_val" ]; then
+			file_storage_dir="$env_val"
+		fi
+	fi
+
 	for dir in \
 		/home/node/.cache \
 		/home/node/.local \
@@ -34,7 +43,8 @@ prepare_node_dirs() {
 		/workspace/node_modules \
 		/workspace/containers/apps/contracts/node_modules \
 		/workspace/containers/apps/backend/node_modules \
-		/workspace/containers/apps/frontend-bff/node_modules; do
+		/workspace/containers/apps/frontend-bff/node_modules \
+		"$file_storage_dir"; do
 		mkdir -p "$dir"
 		ensure_node_owned_dir "$dir"
 	done
@@ -42,3 +52,4 @@ prepare_node_dirs() {
 
 prepare_docker_group
 prepare_node_dirs
+touch /tmp/bootstrap_done
