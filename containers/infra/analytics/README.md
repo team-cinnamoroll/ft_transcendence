@@ -104,7 +104,7 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
   ```
 - **起動(ワンコマンド)**:
   ```bash
-  pnpm local-prod:deploy:analytics   # ELK 込みで起動(app/monitoring も含む)
+  pnpm local-prod:deploy:with-analytics   # ELK 込みで起動(app/monitoring も含む)
   # ELK が不要なときは基本 deploy(ELK は起動しない):
   pnpm local-prod:deploy
   ```
