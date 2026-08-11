@@ -33,4 +33,6 @@ for f in "${compose_files[@]}"; do
   fi
 done
 
+compose_cmd+=( --profile "*" )
+
 "${compose_cmd[@]}" down --remove-orphans
