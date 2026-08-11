@@ -37,8 +37,8 @@
   "editor.formatOnSave": true,
 
   // TypeScript設定
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
 
   // エディター設定
   "editor.trimAutoWhitespace": true,
@@ -81,6 +81,6 @@
     "**/.forgejo/workflows/*.yaml"
   ],
   "yaml.schemas": {
-    "openapi:v3": "file:///workspace/docs/api/api-key-openapi.yaml"
+    "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json": "**/*-openapi.yaml"
   }
 }
