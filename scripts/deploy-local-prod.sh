@@ -61,8 +61,11 @@ done
 
 if [[ ! -f "$env_file" ]]; then
   echo "環境変数ファイルが見つかりません: $env_file" >&2
-  echo "次を作成してください: cp .env.local-prod.example .env.local-prod" >&2
-  exit 1
+  echo "make-env-contexts.sh keep を実行して生成を試みます..." >&2
+  if ! bash "$repo_root/scripts/make-env-contexts.sh" keep; then
+    echo "ERROR: 環境変数ファイルの自動生成に失敗しました。" >&2
+    exit 1
+  fi
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -75,13 +78,21 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
+tls_missing=""
 for f in ca.crt tls.crt tls.key; do
   if [[ ! -f "$cert_dir/$f" ]]; then
-    echo "TLS 資材が不足しています: $cert_dir/$f" >&2
-    echo "先に次を実行してください: bash scripts/setup-local-prod-tls.sh" >&2
-    exit 1
+    tls_missing="yes"
+    break
   fi
 done
+
+if [[ "$tls_missing" == "yes" ]]; then
+  echo "TLS 資材が不足しています。setup-local-prod-tls.sh を実行して生成を試みます..." >&2
+  if ! bash "$repo_root/scripts/setup-local-prod-tls.sh"; then
+    echo "ERROR: TLS 資材の自動生成に失敗しました。" >&2
+    exit 1
+  fi
+fi
 
 if [[ "$smoke_strategy" != "container" ]]; then
   for target_host in tracen.local api.tracen.local; do
