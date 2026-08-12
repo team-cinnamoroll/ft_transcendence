@@ -5,7 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 default_compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
-env_file="$repo_root/.env.local-prod"
+env_file="$repo_root/.env"
 test_script="$repo_root/containers/apps/backend/test"
 
 # Dev Container から docker.sock 経由でホスト Docker を操作する場合、
@@ -135,7 +135,7 @@ else
 fi
 
 export TRACEN_IMAGE_TAG="$tag"
-echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local-prod.local"
+echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local"
 
 compose_cmd=(docker compose --project-directory "$compose_project_dir" --env-file "$env_file" -p "$project_name")
 for f in "${compose_files[@]}"; do

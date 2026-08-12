@@ -255,7 +255,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     profiles: ['analytics']
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
       - elk_certs:/usr/share/elasticsearch/config/certs:ro
@@ -276,7 +276,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     profiles: ['analytics']
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - elk_certs:/certs:ro
     entrypoint: ['bash', '-c']
@@ -296,7 +296,7 @@ services:
     image: docker.elastic.co/kibana/kibana:8.15.3
     profiles: ['analytics']
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - elk_certs:/certs:ro
     depends_on:
@@ -313,7 +313,7 @@ services:
     image: curlimages/curl:8.11.1
     profiles: ['analytics']
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - ./containers/infra/analytics/kibana-objects.ndjson:/objects.ndjson:ro
       - elk_certs:/certs:ro
@@ -333,7 +333,7 @@ services:
     image: docker.elastic.co/logstash/logstash:8.15.3
     profiles: ['analytics']
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./containers/infra/analytics/logstash/pipeline-local-prod:/usr/share/logstash/pipeline:ro
@@ -355,7 +355,7 @@ services:
     # filebeat.yml が ${LOGSTASH_SSL_ENABLED} 等を参照するため env_file が必須。
     # 無いと既定値(ssl.enabled=false)になり、TLS 待ち受けの Logstash に接続できない。
     env_file:
-      - .env.local-prod
+      - .env
     volumes:
       - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
