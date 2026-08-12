@@ -116,7 +116,7 @@ export type AuthSignUpRequest = z.infer<typeof AuthSignUpRequestSchema>;
 #### 【backend パッケージ】
 
 ```typescript
-// containers/apps/backend/src/features/user/domain/users.entity.ts
+// containers/apps/backend/src/features/users/domain/users.entity.ts
 import { z } from 'zod';
 import { UserSchema } from '@tracen/contracts';
 
@@ -163,7 +163,7 @@ export type UserEntity = z.infer<typeof UserEntitySchema>;
 **実装例:**
 
 ```typescript
-// containers/apps/backend/src/features/user/domain/users.entity.ts
+// containers/apps/backend/src/features/users/domain/users.entity.ts
 import { z } from 'zod';
 import { UserSchema } from '@tracen/contracts';
 
@@ -231,8 +231,8 @@ export type UserViewModel = User & {
 ### 10.2. `domain` 内のファイル分割（Request / Response）
 
 - `domain` 内の契約は、**リクエストとレスポンスをファイルで分離**します。
-  - リクエスト: `xx.request.ts`（例: `auth.sign-up.request.ts`, `user.request.ts`）
-  - レスポンス: `xx.ts`（例: `auth.sign-up.ts`, `user.ts`）
+  - リクエスト: `xx.request.ts` または `xx.requests.ts`（例: `auth.sign-up.request.ts`, `face.requests.ts`）
+  - レスポンス: `xx.ts` または `xx.responses.ts`（例: `auth.sign-up.ts`, `face.responses.ts`）
 - レスポンス側は、バックエンド内で Entity に `.extend()` して利用する前提のため、ファイル名をプレーン（`.ts`）にしています。
 
 ### 10.3. `index.ts` によるディレクトリ単位の import
@@ -264,10 +264,10 @@ export type UserViewModel = User & {
 
 | 種類         | contracts での名前   | src/types/ での名前 | 規則                          |
 | ------------ | -------------------- | ------------------- | ----------------------------- |
-| レスポンス型 | `FaceResponse`       | `Face`              | `Response` サフィックスを除去 |
+| レスポンス型 | `FaceCreateResponse` | `FaceCreate`        | `Response` サフィックスを除去 |
 | レスポンス型 | `AuthSignUpResponse` | `AuthSignUp`        | `Response` サフィックスを除去 |
 | リクエスト型 | `CreateFaceRequest`  | `CreateFaceRequest` | そのまま（変更しない）        |
-| リクエスト型 | `SignUpRequest`      | `SignUpRequest`     | そのまま（変更しない）        |
+| リクエスト型 | `AuthSignUpRequest`  | `AuthSignUpRequest` | そのまま（変更しない）        |
 
 **理由:**
 
@@ -279,12 +279,12 @@ export type UserViewModel = User & {
 
 ```ts
 // src/types/face.ts
-export type { FaceResponse as Face, CreateFaceRequest } from '@tracen/contracts';
+export type { Face, FaceCreateResponse as FaceCreate, CreateFaceRequest } from '@tracen/contracts';
 
 // src/types/auth.ts
 export type {
-  SignUpRequest,
-  SignInRequest,
+  AuthSignUpRequest,
+  AuthSignInRequest,
   AuthSignUpResponse as AuthSignUp,
   AuthSignInResponse as AuthSignIn,
   AuthRefreshResponse as AuthRefresh,

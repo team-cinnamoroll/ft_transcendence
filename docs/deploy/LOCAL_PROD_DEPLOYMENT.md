@@ -40,19 +40,19 @@
 
 手順の詳細はリポジトリの README を参照しつつ、流れだけをまとめると以下です。
 
-1) ホストOSで hosts を設定
+1. ホストOSで hosts を設定
 
 ```txt
-127.0.0.1 tracen.local registry.tracen.local
+127.0.0.1 tracen.local registry.tracen.local api.tracen.local kibana.tracen.local
 ```
 
-2) ホストOSで mkcert の準備（初回のみ）
+2. ホストOSで mkcert の準備（初回のみ）
 
 ```bash
 mkcert -install
 ```
 
-3) TLS 資材を生成
+3. TLS 資材を生成
 
 ```bash
 pnpm local-prod:setup-tls
@@ -60,26 +60,36 @@ pnpm local-prod:setup-tls
 bash scripts/setup-local-prod-tls.sh
 ```
 
-4) Docker がレジストリの CA を信頼するように設定（初回のみ）
+4. Docker がレジストリの CA を信頼するように設定（初回のみ）
 
 ```bash
 sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
 sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
 ```
 
-5) デプロイ
+5. デプロイ
 
 事前に環境変数ファイルを用意します。
 
 ```bash
-cp .env.local-prod.example .env.local-prod
+cp .env.example .env
 ```
 
 ```bash
-pnpm local-prod:deploy
-# または
+# frontend / backend + monitoring のみを起動する場合は
 bash scripts/deploy-local-prod.sh
+
+# analyticを含めた全コンテナを起動する場合は
+WITH_ANALYTICS=1 bash scripts/deploy-local-prod.sh
 ```
+
+起動後のアクセス先:
+
+- 入口: https://tracen.local
+- BFF API: https://tracen.local/api/
+- backend API: https://api.tracen.local/api/v1/
+- monitoring: https://tracen.local/grafana
+- analytics: https://kibana.tracen.local
 
 停止:
 
@@ -130,22 +140,31 @@ bash scripts/down-local-prod.sh
 
 ## デプロイの流れ（scripts/deploy-local-prod.sh）
 
-1. `TRACEN_IMAGE_TAG` を決定（git の短い SHA を基本に、dirty なら `-dirty` を付与）し、`docker compose` の変数として利用
-2. local registry を起動（TLS付き）
-3. backend/frontend のイメージをビルド
-4. 3 で作ったイメージを local registry に push
-5. local-prod の Compose 全体を起動（`--remove-orphans`）
-6. `curl --cacert containers/infra/local-prod/certs/ca.crt` でスモークテスト
-   - `https://tracen.local/api/hello`
-   - `https://tracen.local/`
-
+1. 事前準備の自動確認と生成
+   - `.env` ファイルが無い場合は `scripts/make-env-contexts.sh keep` を実行して自動生成します。
+   - TLS資材（`ca.crt` 等）が無い場合は `scripts/setup-local-prod-tls.sh` を呼び出して自動生成します。
+   - `/etc/hosts` における名前解決の確認を行い、不足時は警告を表示します。
+2. `TRACEN_IMAGE_TAG` を決定（git の短い SHA を基本に、dirty なら `-dirty` を付与）し、`.env.local` に書き出して `docker compose` の変数として利用
+3. local registry を起動（TLS付き）
+4. backend/frontend のイメージをビルド
+5. 4 で作ったイメージを local registry に push
+6. local-prod の Compose 全体を起動（`--remove-orphans`）
+   - 環境変数 `WITH_ANALYTICS=1` が指定されている場合は `--profile analytics` オプションを付与し、ELK スタックも起動します。
+7. スモークテスト（`curl` コマンド、または `curlimages/curl` コンテナを起動してのネットワーク内通信）
+   - 以下のエンドポイントへの疎通をリトライしながら確認します。
+     - `https://tracen.local/api/health`
+     - `https://tracen.local/`
+     - `https://api.tracen.local/api/v1/health`
+8. API結合テストの実行
+   - スモークテスト通過後、`containers/apps/backend/test/face-and-seed-api-test.sh` を呼び出し、シード（投稿）やフェイス機能のAPI動作を自動検証します。
 
 補足:
 
+- Dev Container 上からホストの Docker を操作していると判定した場合、マウントパスの解決基点調整や、スモークテスト専用のコンテナを立てて同一ネットワーク内から実行するフォールバックが自動で働きます。
 - スモークテストは最大 30 回リトライします（起動直後の立ち上がり待ちのため。最大で約 15 秒）。
 - リトライ中に発生する一時的なエラー（例: TLS の `unexpected eof` / nginx の `502`）は、ログが汚れないよう **表示しません**。
   - 最終的に失敗した場合のみ、最後に `curl` のエラー詳細を表示します。
-- `curl` が無い環境ではスモークテストをスキップします。
+- `curl` が無い環境（かつコンテナ戦略が使えない場合）はスモークテストをスキップします。
 
 ## 証明書と信頼関係（なぜ CA が必要か）
 

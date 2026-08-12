@@ -88,14 +88,21 @@ pnpm local-ci:full
 
 ## 重要な注意点
 
-### 1) docker-outside-of-docker（権限が強い）
+### 1) docker-outside-of-docker (DooD) と Docker-in-Docker (DinD) の併用
 
-このローカルCIは Dev Container からホストの Docker を操作します。
+このローカルCIは、Dev Container からホストの Docker を操作する権限（DooD）と、完全に隔離されたコンテナ内 Docker 環境（DinD）を組み合わせて実現されています。
 
-- 仕組み: `/var/run/docker.sock` を Dev Container にマウントして `docker`/`docker compose` を実行
-- 影響: Dev Container 内プロセスがホスト Docker を広範に操作できる（= 強い権限）
+- **DooD (Docker-outside-of-Docker) の役割:**
+  - Dev Container（`.devcontainer/devcontainer.json`）は `/var/run/docker.sock` をマウントしており、ホストの Docker デーモンを直接操作できる強い権限を持っています。
+  - ローカルCI実行時（`scripts/local-ci-local-prod.sh`）、まずこの DooD の権限を使ってホストの Docker 上に `ci-docker` という **DinD (Docker-in-Docker)** コンテナを立ち上げます。
+- **DinD (Docker-in-Docker) の役割:**
+  - 立ち上がった `ci-docker` コンテナ内には独立した Docker デーモンが動いています。
+  - スクリプトは途中で `DOCKER_HOST` 環境変数を切り替え、以後のビルド（build）、ローカルレジストリへのプッシュ（push）、本番相当コンテナ群の起動（up）をすべてこの `ci-docker` 内の隔離されたデーモンに対して行います。
+- **この構成にする理由:**
+  - ホストの Docker Desktop や OrbStack の DNS / CA 信頼設定に依存すると、ローカル環境用の証明書（`registry.tracen.local`）の解決や通信で失敗しやすい問題があります。
+  - DinD 内の独立した Docker 環境を利用することで、証明書の信頼設定（`/etc/docker/certs.d/`）やネットワークを確実にコントロールでき、ホスト環境を汚さずに使い捨ての CI 環境を再現できるためです。
 
-チームのポリシー上、これが許容できない場合は採用しないでください（代替として dind 等がありますが、構成が重くなります）。
+> **注意:** チームのポリシー上、Dev Container からホスト Docker への `/var/run/docker.sock` マウント（広範な操作権限）が許容できない場合は、このローカル CI 構成は採用しないでください。
 
 ### 2) compose の bind mount パスは「ホスト側で解決」される
 

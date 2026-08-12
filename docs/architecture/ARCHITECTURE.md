@@ -2,15 +2,15 @@
 
 ## 技術スタック
 
-| レイヤー             | 技術                              |
-| -------------------- | --------------------------------- |
-| フロントエンド / BFF | Next.js（React 19）, Tailwind CSS |
-| バックエンド API     | Hono（Node.js）                   |
-| 型共有               | pnpm workspaces（モノレポ）       |
-| リバースプロキシ     | Nginx                             |
-| データベース         | PostgreSQL                        |
-| パッケージ管理       | pnpm                              |
-| テスト               | Vitest                            |
+| レイヤー             | 技術                           |
+| -------------------- | ------------------------------ |
+| フロントエンド / BFF | Next.js（React）, Tailwind CSS |
+| バックエンド API     | Hono（Node.js）                |
+| 型共有               | pnpm workspaces（モノレポ）    |
+| リバースプロキシ     | Nginx                          |
+| データベース         | PostgreSQL                     |
+| パッケージ管理       | pnpm                           |
+| テスト               | Vitest                         |
 
 ## リポジトリ構成
 
@@ -18,38 +18,43 @@
 tracen/
 ├── .devcontainer/                     # Dev Container 設定（VSCode Remote / GitHub Codespaces）
 ├── .vscode/                           # VSCode ワークスペース設定
-├── apps/                              # 各アプリへのシンボリックリンク等（参照用）
 ├── containers/                        # Docker コンテナ関連の実体
 │   ├── apps/
 │   │   ├── backend/                   # Hono バックエンド API
 │   │   │   └── src/
 │   │   │       ├── index.ts           # エントリーポイント・ルーティング定義
-│   │   │       └── env.ts             # 環境変数バリデーション（Zod）
+│   │   │       ├── env.ts             # 環境変数バリデーション（Zod）
+│   │   │       ├── app_services/      # アプリケーションサービス
+│   │   │       ├── core-domain/       # ドメインモデル
+│   │   │       ├── features/          # 機能ごとの実装
+│   │   │       └── shared/            # 共通モジュール
+│   │   ├── contracts/                 # API スキーマ（OpenAPI など）
 │   │   └── frontend-bff/              # Next.js フロントエンド + BFF
 │   │       └── src/
 │   │           ├── app/               # Next.js App Router（ページ・Route Handler）
-│   │           │   ├── page.tsx       # ホーム
-│   │           │   ├── faces/         # フェイス一覧・詳細
-│   │           │   ├── search/        # 検索
-│   │           │   ├── notifications/ # 通知
-│   │           │   ├── subscriptions/ # サブスクリプション
+│   │           │   ├── [locale]/      # 多言語対応（i18n）
+│   │           │   │   ├── (app)/     # メインアプリ画面（faces, friends, profile, seeds, settings 等）
+│   │           │   │   └── (auth)/    # 認証関連画面
 │   │           │   └── api/           # BFF API Route Handler
 │   │           ├── components/        # UI コンポーネント
+│   │           ├── i18n/              # 多言語対応設定
+│   │           ├── lib/               # ユーティリティ・クライアント
+│   │           ├── mocks/             # モックデータ
+│   │           ├── repositories/      # データ取得ロジック
 │   │           ├── server/            # server-only（usecases / actions）
 │   │           │   ├── usecases/      # 画面向けの集約・整形ロジック
 │   │           │   └── actions/       # Server Actions（更新系の入口）
-│   │           ├── repositories/      # データ取得ロジック
-│   │           ├── types/             # 型定義
-│   │           ├── lib/               # ユーティリティ・クライアント
-│   │           └── mocks/             # モックデータ
+│   │           └── types/             # 型定義
 │   └── infra/
+│       ├── analytics/                 # 分析基盤
 │       ├── db/
 │       │   └── init.sql               # DB 初期化（PostgreSQL）
+│       ├── local-prod/                # ローカル本番用設定
+│       ├── monitoring/                # 監視基盤
 │       └── nginx/
 │           ├── nginx.conf             # 開発環境: HTTP リバースプロキシ設定
 │           └── nginx.https.conf       # ローカル本番相当: HTTPS リバースプロキシ設定
 ├── docs/                              # 設計・運用ドキュメント
-├── infra/                             # インフラ設定（クラウド等）
 ├── scripts/                           # 開発補助スクリプト
 │   ├── deploy-local-prod.sh           # ローカル本番環境デプロイ
 │   ├── down-local-prod.sh             # ローカル本番環境停止
@@ -57,8 +62,8 @@ tracen/
 ├── .editorconfig                      # エディタ設定（インデント・改行コード統一）
 ├── .env.dev                           # 開発環境 環境変数（git 管理外）
 ├── .env.dev.example                   # 開発環境 環境変数サンプル
-├── .env.local-prod                    # ローカル本番環境 環境変数（git 管理外）
-├── .env.local-prod.example            # ローカル本番環境 環境変数サンプル
+├── .env                    # ローカル本番環境 環境変数（git 管理外）
+├── .env.example            # ローカル本番環境 環境変数サンプル
 ├── .gitignore
 ├── .npmrc                             # pnpm 設定
 ├── .prettierrc.json                   # Prettier 設定
@@ -147,8 +152,7 @@ tracen/
 
 ```
 packages:
-  - containers/apps/backend      (@tracen/backend)
-  - containers/apps/frontend-bff (@tracen/frontend-bff)
+  - 'containers/apps/*'
 ```
 
 `frontend-bff` の `package.json` で `@tracen/backend` を `workspace:*` で参照することで、**バックエンドの `AppType`（ルート型）を直接インポート**できます。これにより Hono RPC による型安全な API 呼び出しが実現されています。
@@ -164,9 +168,9 @@ const client = hc<AppType>(APP_API_BASE_URL);
 
 ## 環境構成
 
-| 環境             | 構成ファイル                    | 用途                                 |
-| ---------------- | ------------------------------- | ------------------------------------ |
-| 開発             | `docker-compose.dev.yml`        | 通常の開発作業（HTTP / ホットリロードあり） |
+| 環境             | 構成ファイル                    | 用途                                                   |
+| ---------------- | ------------------------------- | ------------------------------------------------------ |
+| 開発             | `docker-compose.dev.yml`        | 通常の開発作業（HTTP / ホットリロードあり）            |
 | ローカル本番相当 | `docker-compose.local-prod.yml` | 本番に近い動作確認（入口〜コンテナ間まで全区間 HTTPS） |
 
 詳細: [docs/deploy/LOCAL_PROD_DEPLOYMENT.md](../deploy/LOCAL_PROD_DEPLOYMENT.md)
@@ -182,5 +186,5 @@ const client = hc<AppType>(APP_API_BASE_URL);
 
 ## 関連ドキュメント
 
-- [BFF API ガイド](../api/BFF_API_GUIDE.md)
+- [BFF API ガイド](../../containers/apps/frontend-bff/docs/api/BFF_API_GUIDE.md)
 - [ローカル本番環境デプロイ](../deploy/LOCAL_PROD_DEPLOYMENT.md)

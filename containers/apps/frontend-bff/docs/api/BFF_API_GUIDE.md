@@ -7,7 +7,7 @@
 - **backend（Hono）の API をブラウザから直接使わせない**
 - frontend（ブラウザ）は **BFF が提供する API だけ**を呼ぶ
 - BFF は必要に応じて backend の API を呼び、レスポンスを **加工・集約**して返す
-- backend をそのまま外部に公開するための **汎用プロキシ（`/api/* -> backend/*` の透過転送）は実装しない**
+- backend をサードパーティ開発者向けに公開するためのAPIは別途提供する
 
 補足（型・バリデーション共有）:
 
@@ -79,8 +79,8 @@ Tips: `hc<AppType>()` で期待したルート（例: `client.users`）が型と
 ### ファイル
 
 - 開発: `.env.dev`（Git管理しない） / `.env.dev.example`（Git管理する）
-- local-prod: `.env.local-prod`（Git管理しない） / `.env.local-prod.example`（Git管理する）
-- デプロイスクリプトが生成する `.env.local-prod.local` は **現状運用のまま**（`TRACEN_IMAGE_TAG` 用）
+- local-prod: `.env`（Git管理しない） / `.env.example`（Git管理する）
+- デプロイスクリプトが生成する `.env.local` は **現状運用のまま**（`TRACEN_IMAGE_TAG` 用）
 
 ### 必須（frontend-bff）
 
@@ -202,8 +202,8 @@ backend 呼び出しを Route Handler から直に行うこともできますが
 
 Repository パターンの詳細は以下も参照してください:
 
-- [FRONTEND_ARCHITECTURE.md](../frontend-bff/FRONTEND_ARCHITECTURE.md)
-- [BACKEND_ARCHITECTURE.md](../architecture/BACKEND_ARCHITECTURE.md)
+- [FRONTEND_ARCHITECTURE.md](../../containers/apps/frontend-bff/docs/architecture/FRONTEND_ARCHITECTURE.md)
+- [BACKEND_ARCHITECTURE.md](../../containers/apps/backend/docs/architecture/BACKEND_ARCHITECTURE.md)
 
 ### エラーハンドリング指針
 
@@ -275,8 +275,8 @@ const res = await createBackendClient().users[':id'].$get({ param: { id } });
 
 ### D) 必要なら env を追加する
 
-- `.env.dev` / `.env.local-prod`（コメント付き）
-- `.env.dev.example` / `.env.local-prod.example`（Git 管理。コメント＋安全なデフォルト値）
+- `.env.dev` / `.env`（コメント付き）
+- `.env.dev.example` / `.env.example`（Git 管理。コメント＋安全なデフォルト値）
 - Zod スキーマ（public/server/backend）を更新
 
 ### E) 検証
