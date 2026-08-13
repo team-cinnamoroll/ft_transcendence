@@ -270,7 +270,7 @@ README 冒頭に挙げた各チームメンバーについて、以下を書く�
 
 # Team Information
 
-- hurabe (PM+Developers)
+- hurabe (PM+Developers): 進行管理とタスクの割り振り、ログ可視化基盤（ELK）のインフラ設計・構築（全区間 HTTPS・認証・ログ保持方針の設計を含む）、実装レビュー
 - nkawaguc (PO+Developers): サービスコンセプトの立案、プロダクト方向性の決定、モニタリング基盤実装
 - katakada (Tech Lead+Developers): アーキテクチャ設計、技術選定、CI パイプライン設計、開発環境構築、バックエンド実装
 - kharuya (Developers): フロントエンド/BFF実装
