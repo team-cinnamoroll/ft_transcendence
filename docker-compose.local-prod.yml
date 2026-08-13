@@ -254,8 +254,18 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     profiles: ['analytics']
-    env_file:
-      - .env.local-prod
+    environment:
+      # ドットを含む設定名は compose の変数展開が使えないため直接指定する
+      discovery.type: single-node
+      xpack.security.enabled: 'true'
+      xpack.security.http.ssl.enabled: 'true'
+      # SSL リソースは config ディレクトリ配下に置く必要がある。パスは config 相対
+      xpack.security.http.ssl.certificate: certs/tls.crt
+      xpack.security.http.ssl.key: certs/tls.key
+      # Linux で vm.max_map_count が未設定でも起動できるよう mmap を無効化する
+      node.store.allow_mmap: 'false'
+      ES_JAVA_OPTS: ${ES_JAVA_OPTS}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
       - elk_certs:/usr/share/elasticsearch/config/certs:ro
@@ -275,15 +285,30 @@ services:
   es-setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     profiles: ['analytics']
-    env_file:
-      - .env.local-prod
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
     volumes:
       - elk_certs:/certs:ro
+      - ./containers/infra/analytics/es:/es:ro
     entrypoint: ['bash', '-c']
     command:
       - |
-        until curl -s -o /dev/null --cacert /certs/ca.crt https://elasticsearch.tracen.local:9200; do sleep 2; done
-        curl -fsS --cacert /certs/ca.crt -X POST -u "$${ELASTIC_USERNAME}:$${ELASTIC_PASSWORD}" https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null # gitleaks:allow
+        set -e
+        ES=https://elasticsearch.tracen.local:9200
+        CURL="curl -fsS --cacert /certs/ca.crt -u $${ELASTIC_USERNAME:-elastic}:$${ELASTIC_PASSWORD}"
+        until curl -s -o /dev/null --cacert /certs/ca.crt $$ES; do sleep 2; done
+        $$CURL -X POST $$ES/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null # gitleaks:allow
+        $$CURL -X PUT $$ES/_ilm/policy/events -H 'Content-Type: application/json' -d @/es/events-ilm-policy.json >/dev/null
+        if $$CURL -o /dev/null $$ES/_alias/events 2>/dev/null; then
+          echo "events は alias として存在します(ILM 移行済み)。何もしません。"
+        elif $$CURL -o /dev/null -I $$ES/events 2>/dev/null; then
+          echo "旧方式の events index を検出しました。ILM 方式へ移行するため一度だけ削除します。"
+          $$CURL -o /dev/null -X DELETE $$ES/events
+        else
+          echo "events は未作成です。Logstash が ILM の初期 index を作成します。"
+        fi
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -295,8 +320,15 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.3
     profiles: ['analytics']
-    env_file:
-      - .env.local-prod
+    environment:
+      ELASTICSEARCH_HOSTS: ${ELASTICSEARCH_HOSTS}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: ${ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES}
+      SERVER_SSL_ENABLED: ${SERVER_SSL_ENABLED}
+      SERVER_SSL_CERTIFICATE: ${SERVER_SSL_CERTIFICATE}
+      SERVER_SSL_KEY: ${SERVER_SSL_KEY}
+      SERVER_PUBLICBASEURL: ${SERVER_PUBLICBASEURL}
     volumes:
       - elk_certs:/certs:ro
     depends_on:
@@ -312,8 +344,9 @@ services:
   kibana-provision:
     image: curlimages/curl:8.11.1
     profiles: ['analytics']
-    env_file:
-      - .env.local-prod
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     volumes:
       - ./containers/infra/analytics/kibana-objects.ndjson:/objects.ndjson:ro
       - elk_certs:/certs:ro
@@ -321,7 +354,7 @@ services:
     command:
       - |
         until curl -fsS -o /dev/null --cacert /certs/ca.crt https://kibana.tracen.local:5601/api/status; do sleep 3; done
-        result=$$(curl -fsS --cacert /certs/ca.crt -u "$${ELASTIC_USERNAME}:$${ELASTIC_PASSWORD}" -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' -H 'kbn-xsrf: true' -F file=@/objects.ndjson) # gitleaks:allow
+        result=$$(curl -fsS --cacert /certs/ca.crt -u "$${ELASTIC_USERNAME:-elastic}:$${ELASTIC_PASSWORD}" -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' -H 'kbn-xsrf: true' -F file=@/objects.ndjson) # gitleaks:allow
         echo "$$result"
         echo "$$result" | grep -q '"success":true'
     depends_on:
@@ -332,8 +365,10 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.3
     profiles: ['analytics']
-    env_file:
-      - .env.local-prod
+    environment:
+      LS_JAVA_OPTS: ${LS_JAVA_OPTS}
+      LOGSTASH_ES_USER: ${LOGSTASH_ES_USER}
+      LOGSTASH_ES_PASSWORD: ${LOGSTASH_ES_PASSWORD}
     volumes:
       - ./containers/infra/analytics/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./containers/infra/analytics/logstash/pipeline-local-prod:/usr/share/logstash/pipeline:ro
@@ -342,6 +377,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
     networks:
       local-prod:
         aliases:
@@ -352,15 +389,20 @@ services:
     profiles: ['analytics']
     user: root
     command: ['filebeat', '-e', '--strict.perms=false']
-    # filebeat.yml が ${LOGSTASH_SSL_ENABLED} 等を参照するため env_file が必須。
+    # filebeat.yml が ${LOGSTASH_SSL_ENABLED} 等を参照するため必須。
     # 無いと既定値(ssl.enabled=false)になり、TLS 待ち受けの Logstash に接続できない。
-    env_file:
-      - .env.local-prod
+    environment:
+      LOGSTASH_HOSTS: ${LOGSTASH_HOSTS}
+      LOGSTASH_SSL_ENABLED: ${LOGSTASH_SSL_ENABLED}
+      LOGSTASH_SSL_CA: ${LOGSTASH_SSL_CA}
     volumes:
       - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - elk_certs:/certs:ro
+      # 読み取り位置(registry)。永続化しないとコンテナ作り直しのたびに
+      # 既存のコンテナログを先頭から読み直し、同じログが重複投入される
+      - filebeat_data:/usr/share/filebeat/data
     depends_on:
       - logstash
     networks:
@@ -378,5 +420,6 @@ volumes:
   file_storage_data:
   elasticsearch_data:
   elk_certs:
+  filebeat_data:
   prometheus_data:
   grafana_data:
