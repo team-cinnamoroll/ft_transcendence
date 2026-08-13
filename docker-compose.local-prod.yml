@@ -279,11 +279,24 @@ services:
       - .env.local-prod
     volumes:
       - elk_certs:/certs:ro
+      - ./containers/infra/analytics/es:/es:ro
     entrypoint: ['bash', '-c']
     command:
       - |
-        until curl -s -o /dev/null --cacert /certs/ca.crt https://elasticsearch.tracen.local:9200; do sleep 2; done
-        curl -fsS --cacert /certs/ca.crt -X POST -u "$${ELASTIC_USERNAME}:$${ELASTIC_PASSWORD}" https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null # gitleaks:allow
+        set -e
+        ES=https://elasticsearch.tracen.local:9200
+        CURL="curl -fsS --cacert /certs/ca.crt -u $${ELASTIC_USERNAME:-elastic}:$${ELASTIC_PASSWORD}"
+        until curl -s -o /dev/null --cacert /certs/ca.crt $$ES; do sleep 2; done
+        $$CURL -X POST $$ES/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null # gitleaks:allow
+        $$CURL -X PUT $$ES/_ilm/policy/events -H 'Content-Type: application/json' -d @/es/events-ilm-policy.json >/dev/null
+        if $$CURL -o /dev/null $$ES/_alias/events 2>/dev/null; then
+          echo "events は alias として存在します(ILM 移行済み)。何もしません。"
+        elif $$CURL -o /dev/null -I $$ES/events 2>/dev/null; then
+          echo "旧方式の events index を検出しました。ILM 方式へ移行するため一度だけ削除します。"
+          $$CURL -o /dev/null -X DELETE $$ES/events
+        else
+          echo "events は未作成です。Logstash が ILM の初期 index を作成します。"
+        fi
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -342,6 +355,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
     networks:
       local-prod:
         aliases:
