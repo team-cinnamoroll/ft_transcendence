@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import type { AppEnv } from './shared/types/hono';
 
 import { wellKnownRouter } from './app_services/well-known/well-known.handler';
-import { authRouter } from './app_services/auth/auth.handler';
 
 import { getRedisClient } from './shared/infra/redis/client';
 
@@ -37,6 +36,5 @@ export function publicApiRouter() {
         }
       }
     })
-    .route('/.well-known', wellKnownRouter())
-    .route('/auth', authRouter());
+    .route('/.well-known', wellKnownRouter());
 }

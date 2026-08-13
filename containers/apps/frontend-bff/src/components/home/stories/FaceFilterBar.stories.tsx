@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import FaceFilterBar from '../FaceFilterBar';
 import { faces } from '@/mocks/faces';
+import { USER_IDS } from '@/mocks/ids';
 
 const meta: Meta<typeof FaceFilterBar> = {
   title: 'Home/FaceFilterBar',
@@ -12,7 +13,7 @@ const meta: Meta<typeof FaceFilterBar> = {
 export default meta;
 type Story = StoryObj<typeof FaceFilterBar>;
 
-const myFaces = faces.filter((f) => f.userId === 'user-1');
+const myFaces = faces.filter((f) => f.userId === USER_IDS.user1);
 
 export const Default: Story = {
   args: { faces: myFaces, selectedFaceId: null, onSelect: fn() },

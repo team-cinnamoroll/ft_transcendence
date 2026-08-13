@@ -13,6 +13,7 @@ import PostModal from '@/components/ui/PostModal';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
 import { getFaceTitle } from '@/lib/display';
+import { useSubscribeSeedCreated } from '@/lib/seed-created-provider';
 
 type SeedActionMenu = { seed: Seed; top: number; right: number };
 
@@ -46,6 +47,10 @@ const HomeClient = ({
   const [isDeleting, startDeleteTransition] = useTransition();
   const t = useTranslations('homeClient');
   const tSeed = useTranslations('seedActions');
+
+  useSubscribeSeedCreated((seed) => {
+    setSeeds((prev) => [seed, ...prev]);
+  });
 
   const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -233,11 +238,7 @@ const HomeClient = ({
         />
       </div>
 
-      <PostModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreate={(seed) => setSeeds((prev) => [seed, ...prev])}
-      />
+      <PostModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* シードアクションドロップダウン */}
       {seedActionMenu && (

@@ -15,3 +15,6 @@ type SuccessData<T extends { success: true }> = T extends { data: infer D } ? D 
 
 /** フェイス一覧APIのレスポンスから、成功時の data 部分だけを取り出した型 */
 export type FaceListPage = SuccessData<Extract<FaceListResponse, { success: true }>>;
+
+/** フェイス一覧の1ページ分(faceSummaries + nextCursor)を取り出した型 */
+export type FaceSummaryPage = FaceListPage['faces'];

@@ -1,19 +1,38 @@
+'use client';
+
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import type { ProfileWithRelationship } from '@/types/user-profile';
-import type { Face } from '@/types/face';
+import type { FaceSummary } from '@/types/face';
 import { getAvatarUrl, getFaceTitle, getFaceColor } from '@/lib/display';
+import { loadMoreFacesAction } from '@/server/actions/faces';
 import FriendActionButton from './FriendActionButton';
 
 type Props = {
   profile: ProfileWithRelationship;
-  faces: Face[];
+  initialFaceSummaries: FaceSummary[];
+  facesNextCursor: string | null;
   isOwner: boolean;
 };
 
-const ProfileView = async ({ profile, faces, isOwner }: Props) => {
-  const t = await getTranslations('profilePage');
+const ProfileView = ({ profile, initialFaceSummaries, facesNextCursor, isOwner }: Props) => {
+  const t = useTranslations('profilePage');
+  const [faceSummaries, setFaceSummaries] = useState(initialFaceSummaries);
+  const [facesCursor, setFacesCursor] = useState(facesNextCursor);
+  const [isPending, startTransition] = useTransition();
+
+  const handleLoadMoreFaces = () => {
+    startTransition(async () => {
+      const result = await loadMoreFacesAction(profile.id, facesCursor);
+      if (!result.success) {
+        return;
+      }
+      setFaceSummaries((prev) => [...prev, ...result.data.faceSummaries]);
+      setFacesCursor(result.data.nextCursor);
+    });
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -63,11 +82,11 @@ const ProfileView = async ({ profile, faces, isOwner }: Props) => {
             textTransform: 'uppercase',
           }}
         >
-          {t('facesHeading', { count: faces.length })}
+          {t('facesHeading', { count: faceSummaries.length })}
         </span>
       </div>
 
-      {faces.length === 0 ? (
+      {faceSummaries.length === 0 ? (
         <div style={{ padding: '40px 20px', textAlign: 'center' }}>
           <p style={{ fontSize: 13, color: 'var(--mf-text-muted)' }}>{t('noFaces')}</p>
         </div>
@@ -80,7 +99,7 @@ const ProfileView = async ({ profile, faces, isOwner }: Props) => {
             gap: 12,
           }}
         >
-          {faces.map((face) => {
+          {faceSummaries.map(({ face }) => {
             const color = getFaceColor(face.id);
             return (
               <Link key={face.id} href={`/faces/${face.id}`} style={{ textDecoration: 'none' }}>
@@ -143,6 +162,29 @@ const ProfileView = async ({ profile, faces, isOwner }: Props) => {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {facesCursor && (
+        <div style={{ textAlign: 'center', padding: '0 20px 32px' }}>
+          <button
+            type="button"
+            onClick={handleLoadMoreFaces}
+            disabled={isPending}
+            style={{
+              padding: '9px 20px',
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 600,
+              border: '0.5px solid var(--mf-line)',
+              background: 'var(--mf-surface)',
+              color: 'var(--mf-text)',
+              cursor: isPending ? 'not-allowed' : 'pointer',
+              opacity: isPending ? 0.7 : 1,
+            }}
+          >
+            {isPending ? t('loading') : t('loadMore')}
+          </button>
         </div>
       )}
     </div>

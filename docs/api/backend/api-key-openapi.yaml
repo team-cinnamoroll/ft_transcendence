@@ -1,0 +1,546 @@
+openapi: 3.0.3
+info:
+  title: Tracen API-Key Authorized API
+  description: >-
+    Tracen バックエンドにおける API キー認証 (x-api-key) を使用する認証・管理者用 API
+    （MASTER_APIキーによるアクセスは、1分間に500アクセスまでのレートリミットが設定されています。）
+  version: 1.0.0
+servers:
+  - url: https://api.tracen.local/api/v1
+    description: Tracen API Base Server
+  - url: http://localhost:8000/api/v1
+    description: ローカル開発環境用
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Auth
+    description: 認証関連のエンドポイント (サインアップ、サインイン、トークンリフレッシュ)
+  - name: Admin
+    description: 管理者用のユーザー管理エンドポイント (ユーザー情報取得、更新、削除)
+
+paths:
+  /auth/sign-up:
+    post:
+      tags:
+        - Auth
+      summary: ユーザーサインアップ
+      description: >-
+        新規ユーザーアカウントを作成し、JWTアクセストークン、リフレッシュトークン、および登録されたユーザー情報を返却します。APIキー認証が必須です。
+      operationId: signUpUser
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '200':
+          description: サインアップ成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignUpResponse'
+        '400':
+          description: リクエストパラメータ不正 (必須項目欠落、名前が空文字、パスワードが8文字未満など)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定、または不正なAPIキー)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sign-in:
+    post:
+      tags:
+        - Auth
+      summary: ユーザーサインイン (ログイン)
+      description: >-
+        メールアドレスとパスワードによる認証を行い、JWTアクセストークン、リフレッシュトークン、およびユーザー情報を返却します。APIキー認証が必須です。
+      operationId: signInUser
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+      responses:
+        '200':
+          description: サインイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignInResponse'
+        '400':
+          description: リクエストパラメータ不正 (必須項目欠落、メールフォーマット違反など)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定・不正、またはメールアドレス/パスワードの不一致)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: トークンリフレッシュ
+      description: >-
+        有効なリフレッシュトークンを送信して、新しいJWTアクセストークンおよびリフレッシュトークンを取得します。APIキー認証が必須です。
+      operationId: refreshToken
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: トークンリフレッシュ成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '400':
+          description: リクエストパラメータ不正 (リフレッシュトークンの未指定・不備など)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定・不正、またはリフレッシュトークンが無効/期限切れ)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users/{id}:
+    get:
+      tags:
+        - Admin
+      summary: 管理者用 ユーザー詳細取得
+      description: >-
+        指定された UUID を持つユーザーの基本情報を取得します。APIキー認証が必須です。
+      operationId: getAdminUserById
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 取得対象ユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: ユーザー情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 無効なID形式 (UUID フォーマット違反)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定、または不正なAPIキー)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定されたユーザーが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Admin
+      summary: 管理者用 ユーザー情報更新
+      description: >-
+        指定された UUID のユーザー情報 (名前、メールアドレス) およびパスワードを更新します。
+        現在のパスワードによる本人検証が行われます。APIキー認証が必須です。
+      operationId: updateAdminUserById
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 更新対象ユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: >-
+            リクエストバリデーションエラー
+            (必須項目欠落、空文字名、パスワード8文字未満、newPassword8文字未満、UUIDフォーマット違反など)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定、または不正なAPIキー)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: パスワード検証失敗 (現在のパスワード不一致)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ユーザーが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: メールアドレス重複エラー (変更先メールアドレスが既に他ユーザーで使用中)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Admin
+      summary: 管理者用 ユーザー削除
+      description: >-
+        指定された UUID のユーザーアカウントをデータベースから削除します。APIキー認証が必須です。
+      operationId: deleteAdminUserById
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 削除対象ユーザーの UUID
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '204':
+          description: 削除成功 (レスポンスボディなし)
+        '400':
+          description: 無効なID形式 (UUID フォーマット違反)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー (APIキー未指定、または不正なAPIキー)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ユーザーが存在しない、または既に削除済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: >-
+        APIリクエストに必要な認証用APIキー (x-api-key)。
+        ※1分間に500アクセスまでの制限 (レートリミット) が適用されます。
+
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ユーザー一意識別子 (UUID)
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: admin_test_user1@example.com
+        name:
+          type: string
+          minLength: 1
+          description: ユーザー表示名 (空文字不可)
+          example: AdminTest User One
+        createdAt:
+          type: string
+          format: date-time
+          description: ユーザー作成日時
+          example: 2026-08-09T10:44:14.353Z
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ユーザープロフィール一意識別子 (UUID)
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: ユーザー表示名
+          example: AdminTest User One
+        avatar:
+          type: string
+          nullable: true
+          description: アバター画像のURLまたはパス
+          example: null
+        badge:
+          type: string
+          nullable: true
+          description: ユーザーのバッジ情報
+          example: null
+
+    SignUpRequest:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 登録するメールアドレス
+          example: admin_test_user1@example.com
+        name:
+          type: string
+          minLength: 1
+          description: 登録するユーザー名 (1文字以上)
+          example: AdminTest User One
+        password:
+          type: string
+          minLength: 8
+          description: パスワード (8文字以上)
+          example: password1234
+
+    SignUpResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - accessToken
+            - refreshToken
+            - user
+            - userProfile
+          properties:
+            accessToken:
+              type: string
+              description: JWT アクセストークン
+              example: eyJhbGciOiJIUzI1Ni...
+            refreshToken:
+              type: string
+              description: JWT リフレッシュトークン
+              example: eyJhbGciOiJIUzI1Ni...
+            user:
+              $ref: '#/components/schemas/User'
+            userProfile:
+              $ref: '#/components/schemas/UserProfile'
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: ログイン用メールアドレス
+          example: admin_test_user1@example.com
+        password:
+          type: string
+          minLength: 8
+          description: パスワード (8文字以上)
+          example: password1234
+
+    SignInResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - accessToken
+            - refreshToken
+            - user
+            - userProfile
+          properties:
+            accessToken:
+              type: string
+              description: JWT アクセストークン
+              example: eyJhbGciOiJIUzI1Ni...
+            refreshToken:
+              type: string
+              description: JWT リフレッシュトークン
+              example: eyJhbGciOiJIUzI1Ni...
+            user:
+              $ref: '#/components/schemas/User'
+            userProfile:
+              $ref: '#/components/schemas/UserProfile'
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - userId
+        - refreshToken
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: トークンをリフレッシュするユーザーのUUID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        refreshToken:
+          type: string
+          description: 発行済みのリフレッシュトークン
+          example: eyJhbGciOiJIUzI1Ni...
+
+    RefreshTokenResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - accessToken
+            - refreshToken
+          properties:
+            accessToken:
+              type: string
+              description: 新しい JWT アクセストークン
+              example: eyJhbGciOiJIUzI1Ni...
+            refreshToken:
+              type: string
+              description: 新しい JWT リフレッシュトークン
+              example: eyJhbGciOiJIUzI1Ni...
+
+    UserResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - user
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    UpdateUserRequest:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 更新後のメールアドレス
+          example: admin_test_user1@example.com
+        name:
+          type: string
+          minLength: 1
+          description: 更新後の表示名 (空文字不可)
+          example: AdminTest User One Updated
+        password:
+          type: string
+          minLength: 8
+          description: 現在のパスワード (必須・本人認証用・8文字以上)
+          example: password1234
+        newPassword:
+          type: string
+          nullable: true
+          minLength: 8
+          description: 変更先の新しいパスワード (変更しない場合は null、指定する場合は8文字以上)
+          example: newpassword5678
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: エラーメッセージ
+          example: description of the error

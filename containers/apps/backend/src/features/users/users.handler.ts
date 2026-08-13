@@ -1,14 +1,18 @@
 import { Hono } from 'hono';
 import { customZValidator as cZValidator } from '../../shared/utils/custom-z-validator';
 
-import { UserIdParamSchema, UserMeResponseSchema, UserNicknameSchema } from '@tracen/contracts';
+import {
+  UserIdParamSchema,
+  UserMeResponseSchema,
+  UserNicknameSchema,
+  SimpleApiResponseSchema,
+} from '@tracen/contracts';
 import { injectUsersDeps } from './users.di';
 import { injectFileQueryDeps } from '../file-storage/file.query-service.di';
 import { injectUserProfileDeps } from '../user-profile/user-profile.di';
 import { deleteUserById, getUserById } from './domain/users.usecase';
 import { getOrCreateUserProfile } from '../user-profile/domain/usecases/user-profile.get-or-create.usecase';
 import { NotFoundError } from '../../shared/errors/global.error';
-import { SimpleApiResponseSchema } from '@tracen/contracts';
 import { makeSafeResponse, makeSafeUsecaseResult } from '../../shared/utils/validation';
 
 export function usersRouter() {
@@ -17,6 +21,17 @@ export function usersRouter() {
     .delete('/:id', cZValidator('param', UserIdParamSchema), async (c) => {
       const { id } = c.req.valid('param');
       const userRepo = c.get('userRepo');
+      const jwtPayload = c.get('jwtPayload');
+      const userId = jwtPayload.sub;
+      if (id !== userId) {
+        return c.json(
+          makeSafeResponse(SimpleApiResponseSchema, {
+            success: false,
+            message: 'Forbidden: You can only delete your own account',
+          }),
+          403
+        );
+      }
       try {
         const deleted = await deleteUserById(userRepo, id);
         if (!deleted) {

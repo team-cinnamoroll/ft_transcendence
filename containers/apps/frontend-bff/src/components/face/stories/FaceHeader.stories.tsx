@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FaceHeader from '../FaceHeader';
 import { faces } from '@/mocks/faces';
+import { FACE_IDS } from '@/mocks/ids';
 
 const meta: Meta<typeof FaceHeader> = {
   title: 'Face/FaceHeader',
@@ -12,7 +13,7 @@ const meta: Meta<typeof FaceHeader> = {
 export default meta;
 type Story = StoryObj<typeof FaceHeader>;
 
-const face = faces.find((f) => f.id === 'face-1-1')!;
+const face = faces.find((f) => f.id === FACE_IDS.face11)!;
 const faceWithImage = faces.find((f) => f.image?.url) ?? face;
 
 export const Default: Story = {
@@ -20,11 +21,11 @@ export const Default: Story = {
 };
 
 export const AsOwner: Story = {
-  args: { face, isOwner: true, onSortChange: () => {} },
+  args: { face, onSortChange: () => {} },
 };
 
 export const WithImage: Story = {
-  args: { face: faceWithImage, isOwner: false },
+  args: { face: faceWithImage },
 };
 
 export const PrivateFace: Story = {
@@ -34,6 +35,5 @@ export const PrivateFace: Story = {
       visibility: 'private',
       name: '非公開フェイス',
     },
-    isOwner: true,
   },
 };

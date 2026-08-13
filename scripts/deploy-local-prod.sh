@@ -293,6 +293,7 @@ if [[ "$smoke_strategy" == "container" ]] || command -v curl >/dev/null 2>&1; th
       # $compose_project_dir（ホストOS側の絶対パス）を使ってマウントする
       # 証明書もマウントされた /workspace 配下のパスを直接参照させる
       docker run --rm \
+        --env-file "$env_file" \
         --network "${project_name}_local-prod" \
         -v "$compose_project_dir:/workspace" \
         -w /workspace \

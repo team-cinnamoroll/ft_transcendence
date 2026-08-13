@@ -8,7 +8,9 @@ import { getServerEnv } from './env/server';
 
 export function createBackendClient(token?: string) {
   return hc<AppType>(getServerEnv().APP_API_BASE_URL, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : { 'X-API-Key': getServerEnv().MASTER_API_KEY },
   });
 }
 

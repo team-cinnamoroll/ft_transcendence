@@ -21,6 +21,8 @@ export async function toSeed(
       return {
         id: fileDto.id,
         url: fileDto.url,
+        fileName: fileDto.fileName,
+        mimeType: fileDto.mimeType,
       };
     });
 
@@ -67,6 +69,8 @@ export async function toSeeds(
         return {
           id: fileDto.id,
           url: fileDto.url,
+          fileName: fileDto.fileName,
+          mimeType: fileDto.mimeType,
         };
       });
 

@@ -81,6 +81,48 @@ class UserDBRepositoryImpl implements UserRepositorySpec {
       throw error; // 上記で処理されなかったエラーは再スロー
     }
   }
+
+  async update(data: UserEntity): Promise<UserEntity> {
+    const updatedRow: Partial<NewUserRow> = {
+      email: data.email,
+      name: data.name,
+      passwordHash: data.password_hash,
+    };
+
+    try {
+      const rows = await this.db
+        .update(users)
+        .set(updatedRow)
+        .where(eq(users.id, data.id))
+        .returning();
+
+      if (rows.length === 0) {
+        throw new ValidationError(`User with ID "${data.id}" not found.`);
+      }
+
+      return mapUser(rows[0]);
+    } catch (error: unknown) {
+      const dbError = error instanceof Error ? error.cause : undefined;
+      if (dbError && typeof dbError === 'object' && 'code' in dbError) {
+        const errObj = dbError as Record<string, unknown>;
+        // ユニーク制約違反
+        if (errObj.code === '23505') {
+          if (errObj.constraint_name === 'users_email_unique') {
+            throw new ValidationError(`Email "${data.email}" is already in use.`);
+          }
+        }
+        // UUIDなどのフォーマット異常 (22P02)
+        if (errObj.code === '22P02') {
+          throw new ValidationError(`Invalid data format provided for User.`);
+        }
+        // NOT NULL 制約違反 (23502)
+        if (errObj.code === '23502') {
+          throw new ValidationError(`Missing required field: ${errObj.column_name}`);
+        }
+      }
+      throw error; // 上記で処理されなかったエラーは再スロー
+    }
+  }
 }
 
 export function createDrizzleUserRepository(db: TracenDb): UserRepositorySpec {

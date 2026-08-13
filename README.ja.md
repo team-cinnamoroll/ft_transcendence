@@ -11,9 +11,9 @@ _This project has been created as part of the 42 curriculum by hurabe, nkawaguc,
 
 ## 目的
 
-「つながり・発信・反応」を中心に設計されたサービスでは、投稿するほど他者の視線を意識してしまいます。MultiFace はそうしたソーシャルネットワークを目指しておらず、いいね・リプライ・メンションといった反応機能を意図的に持ちません。**自分の好きなことを気兼ねなく書き留めること**自体を目的としたサービスです。
+「他者とつながること」を中心に設計されたサービスでは、投稿するほど他者の視線を意識してしまいます。MultiFace はそうしたソーシャルネットワークを目指しておらず、いいね・リプライ・メンションといった反応機能を意図的に持ちません。**自分の好きなことを他人のリアクションを意識せずに書き留めること**自体を目的としたサービスです。
 
-さらに MultiFace 独自の考え方として、ユーザーは自分の関心や役割に応じた複数の「**フェイス**（多面性）」を持ち、その時々の内容に合ったフェイスへ投稿します。読書のフェイス、映画のフェイス、日記のフェイス——といった形で、1 つのアカウントの中で文脈を分けて記録できます。
+MultiFace では、ユーザーは自分の関心や役割に応じた複数の「**フェイス**（多面性）」を持ち、その時々の内容に合ったフェイスへ投稿します。読書のフェイス、映画のフェイス、日記のフェイス——といった形で、1 つのアカウントの中で文脈を分けて記録できます。
 
 ## 主要機能
 
@@ -246,6 +246,11 @@ README 冒頭に挙げた各チームメンバーについて、以下を書く�
 - その責務の簡潔な説明 -->
 
 # Team Information
+
+- hurabe (PM+Developers)
+- nkawaguc (PO+Developers): サービスコンセプトの立案、プロダクト方向性の決定
+- katakada (Tech Lead+Developers)
+- kharuya (Developers)
 
 <!-- ## 6. Project Management
 - チームがどのように作業を組織したか（タスク分担、ミーティング等）
@@ -559,26 +564,26 @@ erDiagram
 
 ## 画面・UX
 
-| 機能                                 | 概要                                                        | 担当 |
-| ------------------------------------ | ----------------------------------------------------------- | ---- |
-| ホーム                               | 自分のアクティビティ一覧                                    | TBD  |
-| フレンド / 通知 / サブスクリプション | 各一覧画面                                                  | TBD  |
-| プロフィール画面                     | ユーザーごとのプロフィール表示                              | TBD  |
-| 設定画面                             | ユーザー設定                                                | TBD  |
-| 利用規約・プライバシーポリシー       | 静的ページ（多言語対応）                                    | TBD  |
-| 多言語対応                           | 英語・フランス語・日本語。`[locale]` ルーティングで切り替え | TBD  |
-| コンポーネントカタログ               | Storybook による UI コンポーネントの確認                    | TBD  |
+| 機能                                 | 概要                                                        | 担当     |
+| ------------------------------------ | ----------------------------------------------------------- | -------- |
+| ホーム                               | 自分のアクティビティ一覧                                    | TBD      |
+| フレンド / 通知 / サブスクリプション | 各一覧画面                                                  | TBD      |
+| プロフィール画面                     | ユーザーごとのプロフィール表示                              | TBD      |
+| 設定画面                             | ユーザー設定                                                | TBD      |
+| 利用規約・プライバシーポリシー       | 静的ページ（多言語対応）                                    | nkawaguc |
+| 多言語対応                           | 英語・フランス語・日本語。`[locale]` ルーティングで切り替え | TBD      |
+| コンポーネントカタログ               | Storybook による UI コンポーネントの確認                    | TBD      |
 
 ## 運用・基盤
 
-| 機能             | 概要                                                                           | 担当 |
-| ---------------- | ------------------------------------------------------------------------------ | ---- |
-| ヘルスチェック   | `/api/health`（BFF 経由で backend まで確認）、`/health/redis`                  | TBD  |
-| メトリクス監視   | Prometheus + Grafana によるホスト・コンテナ・PostgreSQL・Redis・Nginx の可視化 | TBD  |
-| アラート通知     | Alertmanager から Discord への通知                                             | TBD  |
-| ログ可視化       | Filebeat → Logstash → Elasticsearch → Kibana のパイプライン                    | TBD  |
-| 本番相当デプロイ | ローカルレジストリ + HTTPS 構成への 1 コマンドデプロイ                         | TBD  |
-| ローカル CI      | 本番相当環境のビルド・起動・スモークテスト・後片付けの自動実行                 | TBD  |
+| 機能             | 概要                                                                           | 担当     |
+| ---------------- | ------------------------------------------------------------------------------ | -------- |
+| ヘルスチェック   | `/api/health`（BFF 経由で backend まで確認）、`/health/redis`                  | TBD      |
+| メトリクス監視   | Prometheus + Grafana によるホスト・コンテナ・PostgreSQL・Redis・Nginx の可視化 | nkawaguc |
+| アラート通知     | Alertmanager から Discord への通知                                             | nkawaguc |
+| ログ可視化       | Filebeat → Logstash → Elasticsearch → Kibana のパイプライン                    | TBD      |
+| 本番相当デプロイ | ローカルレジストリ + HTTPS 構成への 1 コマンドデプロイ                         | TBD      |
+| ローカル CI      | 本番相当環境のビルド・起動・スモークテスト・後片付けの自動実行                 | TBD      |
 
 ## 既知の制限
 
@@ -595,7 +600,7 @@ erDiagram
 
 # Modules
 
-○個のMajor moduleと○個のMinor moduleを実装しました。点数は合計でxx点です。
+7個のMajor moduleと7個のMinor moduleを実装しました。点数は合計で21点です。
 
 ## 1 Web
 
@@ -611,21 +616,43 @@ erDiagram
 
 ### Minor: Use an ORM for the database.
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: Server-Side Rendering (SSR) for improved performance and SEO.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ### Minor: Custom-made design system with reusable components, including a proper color palette, typography, and icons (minimum: 10 reusable components).
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: Implement advanced search functionality with filters, sorting, and pagination.
 
+- 担当: xx
+- 内容を簡潔に書く
+
 ### Minor: File upload and management system.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ## 2 Accessibility and Internationalization
 
 ### Minor: Support for multiple languages (at least 3 languages).
 
+- 担当: kharuya, nkawaguc
+- next-intl を用いて日本語/英語/フランス語の3言語に対応
+- Cookie とブラウザの Accept-Language からロケールを自動判定しつつ、UI上のセレクタで手動切り替えも可能
+
 ## 3 User Management
 
 ### Major: Standard user management and authentication.
+
+- 担当: xx
+- 内容を簡潔に書く
 
 ## 4 Artificial Intelligence
 
@@ -641,11 +668,16 @@ No modules implemented.
 
 ## 7 Devops
 
-### Major: Infrastructure for log management using ELK (Elasticsearch, Logstash,
+### Major: Infrastructure for log management using ELK (Elasticsearch, Logstash, Kibana).
 
-Kibana).
+- 担当: xx
+- 内容を簡潔に書く
 
 ### Major: Monitoring system with Prometheus and Grafana.
+
+- 担当: nkawaguc
+- Prometheus が node-exporter/cadvisor/postgres-exporter/redis-exporter/nginx-exporter の各 exporter からメトリクスを収集し、Grafana のダッシュボードで可視化、Alertmanager が異常検知時に Discord へ通知
+- Grafana は管理者パスワードを環境変数で設定しサインアップを無効化してアクセスを保護
 
 ## 8 Data and Analytics
 
@@ -659,17 +691,20 @@ No modules implemented.
 
 ### Major: カスタムモジュール1
 
-堅牢なDevSecOps開発プロセスとコンテナ検証パイプラインの自動化
-Devコンテナを使用した開発コンテナ環境とプロダクションデプロイ検証コンテナ（DinD）の構築
-安全な開発及び検証環境の構築（開発とプロダクションコンテナの分離、開発コンテナ上でのviteとturbopackによる開発サーバーの提供、pnpmを使用したパッケージ管理の導入、huskyを使用したコミット前などの事前検証環境の構築、lint-staged、pnpm auditに加えてosv:scan-lockfilesの導入、push前のtypecheckとローカルDinDによるci検証を含む）
+- 担当: xx
+- 堅牢なDevSecOps開発プロセスとコンテナ検証パイプラインの自動化
+- Devコンテナを使用した開発コンテナ環境とプロダクションデプロイ検証コンテナ（DinD）の構築
+- 安全な開発及び検証環境の構築（開発とプロダクションコンテナの分離、開発コンテナ上でのviteとturbopackによる開発サーバーの提供、pnpmを使用したパッケージ管理の導入、huskyを使用したコミット前などの事前検証環境の構築、lint-staged、pnpm auditに加えてosv:scan-lockfilesの導入、push前のtypecheckとローカルDinDによるci検証を含む）
 
 ### Major: カスタムモジュール2
 
-同一ユーザーによる複数端末からの個別ログインと、不正アクセス検知時の強制ログアウトの実装（JWTトークンと公開鍵（well-known APIを含む）による自己検証認証トークンとリフレッシュトークンの提供を含む）
+- 担当: xx
+- 同一ユーザーによる複数端末からの個別ログインと、不正アクセス検知時の強制ログアウトの実装（JWTトークンと公開鍵（well-known APIを含む）による自己検証認証トークンとリフレッシュトークンの提供を含む）
 
 ### Minor: カスタムモジュール3
 
-publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS S3のようなAPIベースのローカルファイルストレージをバックエンドサーバにスクラッチ実装
+- 担当: xx
+- publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS S3のようなAPIベースのローカルファイルストレージをバックエンドサーバにスクラッチ実装
 
 <!-- ## 11. Individual Contributions
 - 各メンバーが何に貢献したかの詳細な内訳
@@ -677,3 +712,26 @@ publicとprivate（JWTヘッダーによる判断） bucketが使用可能なAWS
 - 直面した課題と、それをどう乗り越えたか -->
 
 # Individual Contributions
+
+## hurabe
+
+## nkawaguc
+
+### サービスコンセプトの立案（PO）
+
+従来の SNS のような「人と人が密につながる」設計ではなく、他者のリアクションを意識せず自分の好きなことを書き留められる、関係の疎なサービスというコンセプトを提案した。自分の好きなアクティビティを気兼ねなく記録できるサービス「Trickle」がサービス終了したことをきっかけに着想し、類似サービスの有無を調査した上で（同種のサービスは見当たらなかった）、MultiFace のコアコンセプトとして採用した。
+
+### 実装
+
+- 監視基盤の構築: Prometheus + Grafana + Alertmanager の導入、および local-prod（本番相当環境）への対応
+- README の整備: 雛形の作成と内容の追記
+- i18n 対応: user-facing text の i18n leak 監査・修正、ICU plural 対応、zod errormap の i18n 化
+- 利用規約・プライバシーポリシーページの実装
+
+### 実機検証
+
+校舎の環境で VM を立て、その VM 内で local-prod（本番相当環境）を実際にデプロイして動作確認と調整を行った。
+
+## katakada
+
+## kharuya

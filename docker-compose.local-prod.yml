@@ -71,6 +71,8 @@ services:
       REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
       FILE_STORAGE_BASE_DIR: ${FILE_STORAGE_BASE_DIR}
       JWT_ISSUER: ${JWT_ISSUER}
+      MASTER_API_KEY_RATE_LIMIT: ${MASTER_API_KEY_RATE_LIMIT}
+      MASTER_API_KEY: ${MASTER_API_KEY}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -102,6 +104,7 @@ services:
       NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS}
       APP_API_BASE_URL: ${APP_API_BASE_URL}
       NEXT_PUBLIC_BFF_API_BASE_URL: ${NEXT_PUBLIC_BFF_API_BASE_URL}
+      MASTER_API_KEY: ${MASTER_API_KEY}
     volumes:
       - ./containers/infra/local-prod/certs/tls.crt:/etc/tracen/certs/tls.crt:ro
       - ./containers/infra/local-prod/certs/tls.key:/etc/tracen/certs/tls.key:ro
@@ -280,10 +283,7 @@ services:
     command:
       - |
         until curl -s -o /dev/null --cacert /certs/ca.crt https://elasticsearch.tracen.local:9200; do sleep 2; done
-        curl -fsS --cacert /certs/ca.crt -X POST -u "elastic:$${ELASTIC_PASSWORD}" \
-          https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password \
-          -H 'Content-Type: application/json' \
-          -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null
+        curl -fsS --cacert /certs/ca.crt -X POST -u "$${ELASTIC_USERNAME}:$${ELASTIC_PASSWORD}" https://elasticsearch.tracen.local:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d "{\"password\":\"$${KIBANA_SYSTEM_PASSWORD}\"}" >/dev/null # gitleaks:allow
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -321,9 +321,7 @@ services:
     command:
       - |
         until curl -fsS -o /dev/null --cacert /certs/ca.crt https://kibana.tracen.local:5601/api/status; do sleep 3; done
-        result=$$(curl -fsS --cacert /certs/ca.crt -u "elastic:$${ELASTIC_PASSWORD}" \
-          -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' \
-          -H 'kbn-xsrf: true' -F file=@/objects.ndjson)
+        result=$$(curl -fsS --cacert /certs/ca.crt -u "$${ELASTIC_USERNAME}:$${ELASTIC_PASSWORD}" -X POST 'https://kibana.tracen.local:5601/api/saved_objects/_import?overwrite=true' -H 'kbn-xsrf: true' -F file=@/objects.ndjson) # gitleaks:allow
         echo "$$result"
         echo "$$result" | grep -q '"success":true'
     depends_on:

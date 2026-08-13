@@ -6,6 +6,7 @@ const ServerEnvSchema = z
   .object({
     APP_API_BASE_URL: z.string().url(),
     NODE_EXTRA_CA_CERTS: z.string().min(1).optional(),
+    MASTER_API_KEY: z.string().min(1),
   })
   .superRefine((val, ctx) => {
     if (val.APP_API_BASE_URL.startsWith('https://') && !val.NODE_EXTRA_CA_CERTS) {
@@ -26,6 +27,7 @@ export function getServerEnv(): ServerEnv {
     cached = ServerEnvSchema.parse({
       APP_API_BASE_URL: process.env.APP_API_BASE_URL,
       NODE_EXTRA_CA_CERTS: process.env.NODE_EXTRA_CA_CERTS,
+      MASTER_API_KEY: process.env.MASTER_API_KEY,
     });
   }
   return cached;

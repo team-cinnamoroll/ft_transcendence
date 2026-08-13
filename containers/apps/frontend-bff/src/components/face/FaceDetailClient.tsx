@@ -9,30 +9,24 @@ import FaceHeader, { type SortOrder } from './FaceHeader';
 import FaceSeedFeed from './FaceSeedFeed';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
-
-const REFERENCE_MONTH = '2026-04';
-const SUBSCRIBER_COUNT_MOCK = 12;
+import { useSubscribeSeedCreated } from '@/lib/seed-created-provider';
 
 type SeedActionMenu = { seed: Seed; top: number; right: number };
 
 type Props = {
   face: Face;
-  isOwner: boolean;
   currentUserId: string;
   linkableCurrentUser: UserProfile;
   seeds: Seed[];
   users: UserProfile[];
-  isSubscribed?: boolean;
 };
 
 const FaceDetailClient = ({
   face,
-  isOwner,
   currentUserId,
   linkableCurrentUser,
   seeds: initialSeeds,
   users,
-  isSubscribed = false,
 }: Props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [seeds, setSeeds] = useState<Seed[]>(initialSeeds);
@@ -42,11 +36,16 @@ const FaceDetailClient = ({
   const [isDeleting, startDeleteTransition] = useTransition();
   const tSeed = useTranslations('seedActions');
 
+  useSubscribeSeedCreated((seed) => {
+    if (seed.faceId !== face.id) return;
+    setSeeds((prev) => [seed, ...prev]);
+  });
+
   const totalSeeds = seeds.length;
-  const monthlySeeds = useMemo(
-    () => seeds.filter((a) => a.createdAt.startsWith(REFERENCE_MONTH)).length,
-    [seeds]
-  );
+  const monthlySeeds = useMemo(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    return seeds.filter((a) => a.createdAt.startsWith(currentMonth)).length;
+  }, [seeds]);
 
   const openSeedActionMenu = (e: React.MouseEvent<HTMLButtonElement>, seed: Seed) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -75,12 +74,9 @@ const FaceDetailClient = ({
       <div style={{ borderBottom: '0.5px solid var(--mf-line)' }}>
         <FaceHeader
           face={face}
-          isOwner={isOwner}
           onSortChange={setSortOrder}
           totalSeeds={totalSeeds}
           monthlySeeds={monthlySeeds}
-          subscriberCount={SUBSCRIBER_COUNT_MOCK}
-          isSubscribed={isSubscribed}
         />
       </div>
       <section>

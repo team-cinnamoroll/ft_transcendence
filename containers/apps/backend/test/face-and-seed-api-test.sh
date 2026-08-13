@@ -5,6 +5,8 @@
 # ==========================================
 BASE_URL=${BASE_URL:-"http://localhost:8000/api/v1"}
 
+API_KEY=${MASTER_API_KEY:-"tracen_master_api_key"}  # APIキー（必要に応じて変更）
+
 STATE_FILE="/tmp/.face_seed_test_state"
 TEMP_RES="/tmp/temp_face_seed_res.json"
 TEST_IMAGE="/tmp/face_seed_test_image.jpg"
@@ -110,6 +112,7 @@ setup() {
     # --- User1 作成 ---
     echo "Signing up User1 ($USER1_EMAIL)..."
     RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
+        -H "X-API-Key: $API_KEY" \
         -H "Content-Type: application/json" \
         -d "{\"email\":\"$USER1_EMAIL\",\"name\":\"$USER1_NAME\",\"password\":\"$USER1_PASS\"}")
     if [ "$(echo "$RES" | jq -r '.success')" != "true" ]; then
@@ -123,6 +126,7 @@ setup() {
     # --- User2 作成 ---
     echo "Signing up User2 ($USER2_EMAIL)..."
     RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
+        -H "X-API-Key: $API_KEY" \
         -H "Content-Type: application/json" \
         -d "{\"email\":\"$USER2_EMAIL\",\"name\":\"$USER2_NAME\",\"password\":\"$USER2_PASS\"}")
     if [ "$(echo "$RES" | jq -r '.success')" != "true" ]; then

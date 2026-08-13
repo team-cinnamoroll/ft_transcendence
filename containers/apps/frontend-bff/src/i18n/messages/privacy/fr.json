@@ -10,7 +10,7 @@
         "Informations de compte : adresse e-mail, nom d'affichage, mot de passe (conservé sous forme hachée) et date de création",
         "Informations de profil : image d'avatar et emoji de badge",
         "Informations de contenu : faces (nom, emoji, description, image, paramètres de visibilité), publications (seeds : texte, images jointes, liens entre publications, date de création et face associée), ainsi que les fichiers téléversés et leurs métadonnées (nom, type, taille, propriétaire et visibilité)",
-        "Informations d'utilisation : relations d'abonnement, notifications et statut en ligne (présence)",
+        "Informations d'utilisation : relations d'amitié et statut en ligne (présence)",
         "Informations d'authentification : jetons d'accès (JWT) et jetons de rafraîchissement (heure d'émission, identifiant de génération et état activé/désactivé)"
       ]
     },
@@ -19,7 +19,7 @@
       "list": [
         "Fournir le Service, authentifier les utilisateurs et contrôler les accès",
         "Fournir des fonctionnalités d'affichage, de conservation et de recherche des contenus tels que les publications et les faces",
-        "Fournir des fonctionnalités telles que les abonnements, les notifications et le statut en ligne",
+        "Fournir des fonctionnalités telles que les fonctionnalités d'amis et le statut en ligne",
         "Prévenir les usages abusifs et améliorer la qualité du Service"
       ]
     },

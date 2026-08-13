@@ -3,7 +3,7 @@ import FaceBackButton from '@/components/face/FaceBackButton';
 import ProfileView from '@/components/profile/ProfileView';
 import { findUserById, getCurrentUser } from '@/server/usecases/users';
 import { getAuthSession } from '@/server/usecases/auth';
-import { listFacesByUserId } from '@/server/usecases/faces';
+import { listFacesPageByUserId } from '@/server/usecases/faces';
 
 type Props = {
   params: Promise<{ userId: string }>;
@@ -32,7 +32,9 @@ const ProfilePage = async ({ params }: Props) => {
   const displayProfile = isOwner ? { ...currentUser, relationship: null } : profile;
   // Faceは本物のバックエンドAPIに接続済みのため、URLのuserId(本物のID)をそのまま使えばよい。
   // isOwnerの場合はsession.userId === userIdが保証されているため、分岐は不要。
-  const faces = await listFacesByUserId(userId);
+  const facesResult = await listFacesPageByUserId(userId);
+  const initialFaceSummaries = facesResult.success ? facesResult.data.faceSummaries : [];
+  const facesNextCursor = facesResult.success ? facesResult.data.nextCursor : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -53,7 +55,12 @@ const ProfilePage = async ({ params }: Props) => {
       </header>
 
       <main>
-        <ProfileView profile={displayProfile} faces={faces} isOwner={isOwner} />
+        <ProfileView
+          profile={displayProfile}
+          initialFaceSummaries={initialFaceSummaries}
+          facesNextCursor={facesNextCursor}
+          isOwner={isOwner}
+        />
       </main>
     </div>
   );

@@ -6,4 +6,5 @@ export type UserRepositorySpec = {
   deleteById: (id: UserId) => Promise<boolean>;
   findByEmail: (email: Email) => Promise<UserEntity | null>;
   create: (data: UserEntity) => Promise<UserEntity>;
+  update: (data: UserEntity) => Promise<UserEntity>;
 };

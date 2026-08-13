@@ -1,5 +1,5 @@
 import { RawEnv, Config } from '../../env';
-import { JWTPayload } from '../../features/auth/domain/auth.entity';
+import type { JWTPayload, ApiKey } from '../../features/auth/domain/auth.entity';
 
 export type AppEnv = {
   Bindings: RawEnv;
@@ -11,5 +11,11 @@ export type AppEnv = {
 export type ProtectedEnv = AppEnv & {
   Variables: {
     jwtPayload: JWTPayload;
+  };
+};
+
+export type ApiKeyEnv = AppEnv & {
+  Variables: {
+    apiKey: ApiKey;
   };
 };

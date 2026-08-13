@@ -10,7 +10,7 @@
         "Account information: email address, display name, password (stored in hashed form), and date of creation",
         "Profile information: avatar image and badge emoji",
         "Content information: faces (name, emoji, description, image, visibility settings), posts (seeds: body text, attached images, links between posts, creation date, and associated face), and uploaded files and their metadata (file name, type, size, owner, and visibility)",
-        "Usage information: subscription relationships, notifications, and online status (presence)",
+        "Usage information: friend relationships and online status (presence)",
         "Authentication information: access tokens (JWT) and refresh tokens (issuance time, generation identifier, and enabled/disabled status)"
       ]
     },
@@ -19,7 +19,7 @@
       "list": [
         "Providing the Service, authenticating users, and controlling access",
         "Providing features for displaying, storing, and searching content such as posts and faces",
-        "Providing features such as subscriptions, notifications, and online status",
+        "Providing features such as friend features and online status",
         "Preventing misuse and improving the quality of the Service"
       ]
     },

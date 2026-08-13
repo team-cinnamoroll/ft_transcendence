@@ -8,6 +8,8 @@ STATE_FILE=".test_state_bulk"
 TOTAL_USERS=101
 TEMP_RES="temp_res.json"
 
+API_KEY=${API_KEY:-"tracen_master_api_key"}  # APIキー（必要に応じて変更）
+
 # ==========================================
 # ヘルパー関数
 # ==========================================
@@ -68,6 +70,7 @@ setup() {
 
         RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
             -H "Content-Type: application/json" \
+            -H "X-API-Key: $API_KEY" \
             -d "{\"email\":\"$email\",\"name\":\"$name\",\"password\":\"$pass\"}")
 
         SUCCESS=$(echo "$RES" | jq -r '.success')

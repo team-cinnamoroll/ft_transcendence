@@ -35,6 +35,8 @@ class DrizzleFileQueryServiceImpl implements FileQueryServiceSpec {
       const fileDto: File = {
         id: fileMetadata.id,
         url: fileUrl,
+        fileName: fileMetadata.fileName,
+        mimeType: fileMetadata.mimeType,
       };
 
       resultMap.set(fileMetadata.id, fileDto);
