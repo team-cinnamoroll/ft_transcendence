@@ -117,6 +117,9 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
   「You do not have permission to access the requested page」になる。
 - **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が TLS で Logstash に送る。mock-producer は含めない。
 - **provision**: 手動実行は不要。index template は Logstash が、ダッシュボード投入は `kibana-provision` サービスが起動時に行う（`provision-kibana.sh` は dev 用）。
+- **保持期間(ILM)**: ログは日次(または 1GB 到達時)に `events-000001`, `events-000002`... と分割され、**30日経過した index から自動削除**される。書き込みは alias `events` 宛てで、データビュー `events*` は分割後も全 index を横断して検索する。
+  ポリシー定義は [`es/events-ilm-policy.json`](./es/events-ilm-policy.json)、ES への登録は `es-setup` が起動時に冪等に行う。
+  旧方式（固定 index `events`）から移行する場合、`es-setup` が**具体的な index として存在するときだけ一度削除**する。alias になった後は何もしないため、再起動でログが消えることはない。
 
 ## 注意
 
