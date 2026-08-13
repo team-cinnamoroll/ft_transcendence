@@ -144,10 +144,11 @@ bash scripts/down-local-prod.sh
    - `.env` ファイルが無い場合は `scripts/make-env-contexts.sh keep` を実行して自動生成します。
    - TLS資材（`ca.crt` 等）が無い場合は `scripts/setup-local-prod-tls.sh` を呼び出して自動生成します。
    - `/etc/hosts` における名前解決の確認を行い、不足時は警告を表示します。
-2. `TRACEN_IMAGE_TAG` を決定（git の短い SHA を基本に、dirty なら `-dirty` を付与）し、`.env.local` に書き出して `docker compose` の変数として利用
+2. `.env.local` が存在する場合は、その中の `TRACEN_IMAGE_TAG` を読み込み、**以降のビルドとプッシュをスキップ（既存イメージを再利用）** します。存在しない場合は新規にタグを決定して `.env.local` に書き出します。
+   - ※ソースコードを変更して新たにイメージを作成・反映したい場合は、事前に `rm .env.local` を実行してください。
 3. local registry を起動（TLS付き）
-4. backend/frontend のイメージをビルド
-5. 4 で作ったイメージを local registry に push
+4. backend/frontend のイメージをビルド（既存の `.env.local` を再利用する場合はスキップ）
+5. 4 で作ったイメージを local registry に push（既存の `.env.local` を再利用する場合はスキップ）
 6. local-prod の Compose 全体を起動（`--remove-orphans`）
    - 環境変数 `WITH_ANALYTICS=1` が指定されている場合は `--profile analytics` オプションを付与し、ELK スタックも起動します。
 7. スモークテスト（`curl` コマンド、または `curlimages/curl` コンテナを起動してのネットワーク内通信）

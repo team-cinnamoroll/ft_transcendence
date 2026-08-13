@@ -124,18 +124,26 @@ if [[ "$mode" == "full" && ! -f /.dockerenv ]]; then
   fi
 fi
 
-tag=""
-if command -v git >/dev/null 2>&1 && git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  tag="$(git -C "$repo_root" rev-parse --short HEAD)"
-  if ! git -C "$repo_root" diff --quiet; then
-    tag="${tag}-dirty"
-  fi
+skip_build="no"
+if [[ -f "$repo_root/.env.local" ]]; then
+  echo "既存の .env.local を見つけました。再利用し、ビルドとプッシュをスキップします。"
+  # shellcheck disable=SC1091
+  source "$repo_root/.env.local"
+  export TRACEN_IMAGE_TAG
+  skip_build="yes"
 else
-  tag="$(date +%Y%m%d%H%M%S)"
-fi
+  if command -v git >/dev/null 2>&1 && git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    tag="$(git -C "$repo_root" rev-parse --short HEAD)"
+    if ! git -C "$repo_root" diff --quiet; then
+      tag="${tag}-dirty"
+    fi
+  else
+    tag="$(date +%Y%m%d%H%M%S)"
+  fi
 
-export TRACEN_IMAGE_TAG="$tag"
-echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local"
+  export TRACEN_IMAGE_TAG="$tag"
+  echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local"
+fi
 
 compose_cmd=(docker compose --project-directory "$compose_project_dir" --env-file "$env_file" -p "$project_name")
 for f in "${compose_files[@]}"; do
@@ -155,14 +163,18 @@ else
   echo "[1/5] Skip registry (mode=$mode)"
 fi
 
-echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
-"${compose_cmd[@]}" build backend frontend
-
-if [[ "$mode" == "full" ]]; then
-  echo "[3/5] Push images to local registry"
-  "${compose_cmd[@]}" push backend frontend
+if [[ "$skip_build" == "yes" ]]; then
+  echo "[2-3/5] Skip build and push (using existing image: $TRACEN_IMAGE_TAG)"
 else
-  echo "[3/5] Skip push (mode=$mode)"
+  echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
+  "${compose_cmd[@]}" build backend frontend
+
+  if [[ "$mode" == "full" ]]; then
+    echo "[3/5] Push images to local registry"
+    "${compose_cmd[@]}" push backend frontend
+  else
+    echo "[3/5] Skip push (mode=$mode)"
+  fi
 fi
 
 echo "[4/5] Start services"

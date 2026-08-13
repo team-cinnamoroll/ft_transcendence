@@ -59,7 +59,8 @@ pnpm local-ci:fast
 ### Full（忠実度重視）
 
 - 目的: 1日1回、または手動で「レジストリ込み」を確認したい時
-- 内容: registry 起動 + build + push + up + smoke + down
+- 内容: `.env.local` と不要データの削除 + registry 起動 + build + push + up + smoke + down
+- 補足: 実行時に必ず既存の `.env.local` と DinD 内の不要データ（古いイメージやレジストリのボリューム等）が削除されるため、常にクリーンな状態から新しいイメージをビルドしてテストします。これにより容量の肥大化を防ぎます。
 
 コマンド:
 
