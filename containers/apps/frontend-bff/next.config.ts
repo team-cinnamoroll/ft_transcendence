@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
       // backendのFileSizeSchemaの上限(10MB)に合わせる。デフォルトは1MBのため画像アップロードで不足する
       bodySizeLimit: '10mb',
     },
+    proxyClientMaxBodySize: '10mb', // standaloneビルド時の内部プロキシの制限も念のため解除
   },
   async rewrites() {
     return [
