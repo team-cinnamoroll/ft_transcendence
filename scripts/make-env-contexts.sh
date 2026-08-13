@@ -61,7 +61,7 @@ if [ ! -f "${CERTS_DIR}/private.pem" ] || [ ! -f "${CERTS_DIR}/public.pem" ]; th
   echo "Certs generated in $CERTS_DIR"
 fi
 
-if [ ! -f .env.dev.example ] || [ ! -f .env.local-prod.example ]; then
+if [ ! -f .env.dev.example ] || [ ! -f .env.example ]; then
   echo "ERROR: .env example files are missing." >&2
   exit 1
 fi
@@ -75,11 +75,11 @@ if [ ! -f .env.dev ]; then
   echo ".env file created from example."
 fi
 
-if [ "$mode" = "force" ] && [ -f .env.local-prod ]; then
-  rm -f .env.local-prod
-  echo "Existing .env.local-prod removed."
+if [ "$mode" = "force" ] && [ -f .env ]; then
+  rm -f .env
+  echo "Existing .env removed."
 fi
-if [ ! -f .env.local-prod ]; then
-  cp .env.local-prod.example .env.local-prod
-  echo ".env.local-prod file created from example."
+if [ ! -f .env ]; then
+  cp .env.example .env
+  echo ".env file created from example."
 fi

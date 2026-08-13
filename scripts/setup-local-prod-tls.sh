@@ -30,19 +30,37 @@ cp "$caroot/rootCA.pem" "$cert_dir/ca.crt"
 # ホストの uid や OS(macOS/Linux)の違いによらず読める。
 chmod 600 "$cert_dir/tls.key" || true
 
-cat <<'EOF'
+echo "TLS 資材を生成しました:"
+echo "- containers/infra/local-prod/certs/tls.crt"
+echo "- containers/infra/local-prod/certs/tls.key"
+echo "- containers/infra/local-prod/certs/ca.crt"
+echo ""
 
-TLS 資材を生成しました:
-- containers/infra/local-prod/certs/tls.crt
-- containers/infra/local-prod/certs/tls.key
-- containers/infra/local-prod/certs/ca.crt
+echo "Checking /etc/hosts configuration..."
+if ! grep -q "tracen.local" /etc/hosts; then
+  echo "Adding tracen.local to /etc/hosts (requires sudo)..."
+  echo "127.0.0.1 tracen.local registry.tracen.local api.tracen.local kibana.tracen.local" | sudo tee -a /etc/hosts >/dev/null
+else
+  echo "/etc/hosts is already configured."
+fi
 
-次の 1回だけのセットアップが必要です:
-1) /etc/hosts に以下を追加
-   127.0.0.1 tracen.local registry.tracen.local api.tracen.local
+echo ""
+echo "Checking Docker registry CA configuration..."
+DOCKER_CERTS_DIR="/etc/docker/certs.d/registry.tracen.local:5000"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  DOCKER_CERTS_DIR="${HOME}/.config/docker/certs.d/registry.tracen.local:5000"
+fi
 
-2) Docker が registry.tracen.local:5000 のTLSを信頼できるように CA を配置
-   sudo mkdir -p /etc/docker/certs.d/registry.tracen.local:5000
-  sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tracen.local:5000/ca.crt
-
-EOF
+if [[ ! -f "$DOCKER_CERTS_DIR/ca.crt" ]]; then
+  echo "Configuring Docker CA at $DOCKER_CERTS_DIR ..."
+  if [[ "$DOCKER_CERTS_DIR" == "/etc/docker"* ]]; then
+    echo "(requires sudo)"
+    sudo mkdir -p "$DOCKER_CERTS_DIR"
+    sudo cp "$cert_dir/ca.crt" "$DOCKER_CERTS_DIR/ca.crt"
+  else
+    mkdir -p "$DOCKER_CERTS_DIR"
+    cp "$cert_dir/ca.crt" "$DOCKER_CERTS_DIR/ca.crt"
+  fi
+else
+  echo "Docker CA is already configured at $DOCKER_CERTS_DIR/ca.crt"
+fi

@@ -205,7 +205,7 @@ curl -X DELETE "http://localhost:8000/api/v1/friendships/requests/friendship-uui
   `GET /friendships/requests`
 - **クエリパラメータ**
 - `type` (必須): `incoming`（受信一覧） または `outgoing`（送信一覧）
-- `limit` (必須): 取得件数。**1 〜 100** の範囲で指定。
+- `limit` (任意): 取得件数。**1 〜 100** の範囲で指定。省略時は `20`。
 - `cursor` (任意): 次のページを取得するためのカーソルトークン。
 
 **リクエスト実装例 (受信一覧の初回取得)**
@@ -258,7 +258,7 @@ curl -X GET "http://localhost:8000/api/v1/friendships/requests?type=incoming&lim
 - **メソッド / エンドポイント**
   `GET /friendships`
 - **クエリパラメータ**
-- `limit` (必須): 取得件数。**1 〜 100** の範囲で指定。
+- `limit` (任意): 取得件数。**1 〜 100** の範囲で指定。省略時は `20`。
 - `cursor` (任意): 次のページを取得するためのカーソルトークン。
 
 **リクエスト実装例**

@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 default_compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
-env_file="$repo_root/.env.local-prod"
+env_file="$repo_root/.env"
 
 compose_files=()
 if [[ -n "${TRACEN_LOCAL_PROD_COMPOSE_FILES:-}" ]]; then
@@ -32,5 +32,7 @@ for f in "${compose_files[@]}"; do
     compose_cmd+=( -f "$f" )
   fi
 done
+
+compose_cmd+=( --profile "*" )
 
 "${compose_cmd[@]}" down --remove-orphans

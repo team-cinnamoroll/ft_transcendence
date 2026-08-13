@@ -100,11 +100,11 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
   ```
   ```bash
   pnpm local-prod:setup-tls   # *.tracen.local のワイルドカード証明書を生成
-  pnpm make-env:force         # .env.local-prod を生成(パスワードは本番前に変更)
+  pnpm make-env:force         # .env を生成(パスワードは本番前に変更)
   ```
 - **起動(ワンコマンド)**:
   ```bash
-  pnpm local-prod:deploy:analytics   # ELK 込みで起動(app/monitoring も含む)
+  pnpm local-prod:deploy:with-analytics   # ELK 込みで起動(app/monitoring も含む)
   # ELK が不要なときは基本 deploy(ELK は起動しない):
   pnpm local-prod:deploy
   ```
@@ -112,7 +112,7 @@ Filebeat が拾うイベントの形（mock も将来の backend もこの形で
 - **全区間 HTTPS**: ES/Kibana/Logstash が `*.tracen.local` 証明書(`/certs` にマウント)で TLS 待ち受け・相互接続する。サービス間はサブドメイン(`elasticsearch.tracen.local` 等、証明書 SAN 一致)で通信。
 - **security**: `xpack.security.enabled=true`。**Logstash → `elastic`**、**Kibana → `kibana_system`** で ES に接続(Kibana は elastic superuser を拒否するため、`es-setup` が kibana_system のパスワードを設定)。
 - **公開範囲**: ES / Logstash は**外部公開しない**（`local-prod` network 内のみ）。**Kibana のみ Nginx 経由**で公開: `https://kibana.tracen.local`（**ログイン必須** = admin 限定）。
-- **ログイン**: ユーザー **`elastic`** / パスワードは `.env.local-prod` の `ELASTIC_PASSWORD`。
+- **ログイン**: ユーザー **`elastic`** / パスワードは `.env` の `ELASTIC_PASSWORD`。
   `kibana_system` は Kibana⇄ES の内部接続専用で UI 権限を持たないため、それでログインすると認証は通っても
   「You do not have permission to access the requested page」になる。
 - **収集対象**: backend コンテナ（`analytics_source: 'true'` ラベル済み）の stdout を Filebeat が TLS で Logstash に送る。mock-producer は含めない。

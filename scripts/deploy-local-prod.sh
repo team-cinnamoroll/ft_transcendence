@@ -5,7 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 default_compose_file="$repo_root/docker-compose.local-prod.yml"
 project_name="${TRACEN_LOCAL_PROD_PROJECT_NAME:-tracen-local-prod}"
 cert_dir="$repo_root/containers/infra/local-prod/certs"
-env_file="$repo_root/.env.local-prod"
+env_file="$repo_root/.env"
 test_script="$repo_root/containers/apps/backend/test"
 
 # Dev Container から docker.sock 経由でホスト Docker を操作する場合、
@@ -61,8 +61,11 @@ done
 
 if [[ ! -f "$env_file" ]]; then
   echo "環境変数ファイルが見つかりません: $env_file" >&2
-  echo "次を作成してください: cp .env.local-prod.example .env.local-prod" >&2
-  exit 1
+  echo "make-env-contexts.sh keep を実行して生成を試みます..." >&2
+  if ! bash "$repo_root/scripts/make-env-contexts.sh" keep; then
+    echo "ERROR: 環境変数ファイルの自動生成に失敗しました。" >&2
+    exit 1
+  fi
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -75,13 +78,21 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
+tls_missing=""
 for f in ca.crt tls.crt tls.key; do
   if [[ ! -f "$cert_dir/$f" ]]; then
-    echo "TLS 資材が不足しています: $cert_dir/$f" >&2
-    echo "先に次を実行してください: bash scripts/setup-local-prod-tls.sh" >&2
-    exit 1
+    tls_missing="yes"
+    break
   fi
 done
+
+if [[ "$tls_missing" == "yes" ]]; then
+  echo "TLS 資材が不足しています。setup-local-prod-tls.sh を実行して生成を試みます..." >&2
+  if ! bash "$repo_root/scripts/setup-local-prod-tls.sh"; then
+    echo "ERROR: TLS 資材の自動生成に失敗しました。" >&2
+    exit 1
+  fi
+fi
 
 if [[ "$smoke_strategy" != "container" ]]; then
   for target_host in tracen.local api.tracen.local; do
@@ -113,18 +124,26 @@ if [[ "$mode" == "full" && ! -f /.dockerenv ]]; then
   fi
 fi
 
-tag=""
-if command -v git >/dev/null 2>&1 && git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  tag="$(git -C "$repo_root" rev-parse --short HEAD)"
-  if ! git -C "$repo_root" diff --quiet; then
-    tag="${tag}-dirty"
-  fi
+skip_build="no"
+if [[ -f "$repo_root/.env.local" ]]; then
+  echo "既存の .env.local を見つけました。再利用し、ビルドとプッシュをスキップします。"
+  # shellcheck disable=SC1091
+  source "$repo_root/.env.local"
+  export TRACEN_IMAGE_TAG
+  skip_build="yes"
 else
-  tag="$(date +%Y%m%d%H%M%S)"
-fi
+  if command -v git >/dev/null 2>&1 && git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    tag="$(git -C "$repo_root" rev-parse --short HEAD)"
+    if ! git -C "$repo_root" diff --quiet; then
+      tag="${tag}-dirty"
+    fi
+  else
+    tag="$(date +%Y%m%d%H%M%S)"
+  fi
 
-export TRACEN_IMAGE_TAG="$tag"
-echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local-prod.local"
+  export TRACEN_IMAGE_TAG="$tag"
+  echo "TRACEN_IMAGE_TAG=$TRACEN_IMAGE_TAG" > "$repo_root/.env.local"
+fi
 
 compose_cmd=(docker compose --project-directory "$compose_project_dir" --env-file "$env_file" -p "$project_name")
 for f in "${compose_files[@]}"; do
@@ -144,14 +163,18 @@ else
   echo "[1/5] Skip registry (mode=$mode)"
 fi
 
-echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
-"${compose_cmd[@]}" build backend frontend
-
-if [[ "$mode" == "full" ]]; then
-  echo "[3/5] Push images to local registry"
-  "${compose_cmd[@]}" push backend frontend
+if [[ "$skip_build" == "yes" ]]; then
+  echo "[2-3/5] Skip build and push (using existing image: $TRACEN_IMAGE_TAG)"
 else
-  echo "[3/5] Skip push (mode=$mode)"
+  echo "[2/5] Build images ($TRACEN_IMAGE_TAG)"
+  "${compose_cmd[@]}" build backend frontend
+
+  if [[ "$mode" == "full" ]]; then
+    echo "[3/5] Push images to local registry"
+    "${compose_cmd[@]}" push backend frontend
+  else
+    echo "[3/5] Skip push (mode=$mode)"
+  fi
 fi
 
 echo "[4/5] Start services"
