@@ -75,7 +75,7 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     }
 
     if (file.size > MAX_AVATAR_FILE_SIZE) {
-      setAvatarError(t('errorAvatarUploadFailed'));
+      setAvatarError(t('errorImageTooLarge'));
       return;
     }
 

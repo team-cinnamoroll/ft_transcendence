@@ -55,7 +55,8 @@
     "pdfFileNameFallback": "PDFファイル",
     "submit": "投稿",
     "submitting": "投稿中...",
-    "errorGeneric": "投稿に失敗しました。時間をおいて再度お試しください。"
+    "errorGeneric": "投稿に失敗しました。時間をおいて再度お試しください。",
+    "errorImageTooLarge": "画像ファイルは10MB以下にしてください。"
   },
   "seedImageUpload": {
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
@@ -81,7 +82,8 @@
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "作成する",
     "submitting": "作成中...",
-    "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。"
+    "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。",
+    "errorImageTooLarge": "画像ファイルは10MB以下にしてください。"
   },
   "editFaceModal": {
     "title": "フェイスを編集",
@@ -104,7 +106,8 @@
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "submit": "保存する",
     "submitting": "保存中...",
-    "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。"
+    "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。",
+    "errorImageTooLarge": "画像ファイルは10MB以下にしてください。"
   },
   "faceImageUpload": {
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
@@ -291,7 +294,8 @@
     "errorAvatarInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
     "errorGeneric": "プロフィールの保存に失敗しました。時間をおいて再度お試しください。",
     "errorAvatarNotFound": "選択した画像が見つかりませんでした。もう一度画像を選び直してください。",
-    "errorSessionExpired": "セッションが切れました。再度ログインしてください。"
+    "errorSessionExpired": "セッションが切れました。再度ログインしてください。",
+    "errorImageTooLarge": "画像ファイルは10MB以下にしてください。"
   },
   "faceDetailPage": {
     "backAriaLabel": "前のページに戻る"
@@ -441,9 +445,15 @@
     "invalid": "入力内容が正しくありません",
     "tooShort": "{min}文字以上で入力してください",
     "tooLong": "{max}文字以内で入力してください",
-    "email": { "invalid": "メールアドレスの形式が正しくありません" },
-    "url": { "invalid": "URLの形式が正しくありません" },
-    "id": { "invalid": "IDの形式が正しくありません" },
+    "email": {
+      "invalid": "メールアドレスの形式が正しくありません"
+    },
+    "url": {
+      "invalid": "URLの形式が正しくありません"
+    },
+    "id": {
+      "invalid": "IDの形式が正しくありません"
+    },
     "password": {
       "tooShort": "パスワードは{min}文字以上で入力してください",
       "tooLong": "パスワードは{max}文字以内で入力してください"

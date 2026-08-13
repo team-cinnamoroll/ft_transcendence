@@ -55,7 +55,8 @@
     "pdfFileNameFallback": "PDF file",
     "submit": "Post",
     "submitting": "Posting...",
-    "errorGeneric": "Failed to post. Please try again later."
+    "errorGeneric": "Failed to post. Please try again later.",
+    "errorImageTooLarge": "The image file must be 10MB or smaller."
   },
   "seedImageUpload": {
     "errorSessionExpired": "Your session has expired. Please sign in again.",
@@ -81,7 +82,8 @@
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Create",
     "submitting": "Creating...",
-    "errorGeneric": "Failed to create the face. Please try again later."
+    "errorGeneric": "Failed to create the face. Please try again later.",
+    "errorImageTooLarge": "The image file must be 10MB or smaller."
   },
   "editFaceModal": {
     "title": "Edit Face",
@@ -104,7 +106,8 @@
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "submit": "Save",
     "submitting": "Saving...",
-    "errorGeneric": "Failed to save the face. Please try again later."
+    "errorGeneric": "Failed to save the face. Please try again later.",
+    "errorImageTooLarge": "The image file must be 10MB or smaller."
   },
   "faceImageUpload": {
     "errorSessionExpired": "Your session has expired. Please sign in again.",
@@ -291,7 +294,8 @@
     "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
     "errorGeneric": "Failed to save profile. Please try again later.",
     "errorAvatarNotFound": "The selected image could not be found. Please choose the image again.",
-    "errorSessionExpired": "Your session has expired. Please sign in again."
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorImageTooLarge": "The image file must be 10MB or smaller."
   },
   "faceDetailPage": {
     "backAriaLabel": "Go back"
@@ -441,9 +445,15 @@
     "invalid": "Invalid input",
     "tooShort": "Must be at least {min} characters",
     "tooLong": "Must be at most {max} characters",
-    "email": { "invalid": "Enter a valid email address" },
-    "url": { "invalid": "Enter a valid URL" },
-    "id": { "invalid": "Invalid ID format" },
+    "email": {
+      "invalid": "Enter a valid email address"
+    },
+    "url": {
+      "invalid": "Enter a valid URL"
+    },
+    "id": {
+      "invalid": "Invalid ID format"
+    },
     "password": {
       "tooShort": "Password must be at least {min} characters",
       "tooLong": "Password must be at most {max} characters"

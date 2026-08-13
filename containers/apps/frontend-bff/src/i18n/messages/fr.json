@@ -55,7 +55,8 @@
     "pdfFileNameFallback": "Fichier PDF",
     "submit": "Publier",
     "submitting": "Publication…",
-    "errorGeneric": "Échec de la publication. Veuillez réessayer plus tard."
+    "errorGeneric": "Échec de la publication. Veuillez réessayer plus tard.",
+    "errorImageTooLarge": "Le fichier image doit être inférieur ou égal à 10 Mo."
   },
   "seedImageUpload": {
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -81,7 +82,8 @@
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Créer",
     "submitting": "Création…",
-    "errorGeneric": "Échec de la création de la facette. Veuillez réessayer plus tard."
+    "errorGeneric": "Échec de la création de la facette. Veuillez réessayer plus tard.",
+    "errorImageTooLarge": "Le fichier image doit être inférieur ou égal à 10 Mo."
   },
   "editFaceModal": {
     "title": "Modifier la facette",
@@ -104,7 +106,8 @@
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "submit": "Enregistrer",
     "submitting": "Enregistrement…",
-    "errorGeneric": "Échec de l'enregistrement de la facette. Veuillez réessayer plus tard."
+    "errorGeneric": "Échec de l'enregistrement de la facette. Veuillez réessayer plus tard.",
+    "errorImageTooLarge": "Le fichier image doit être inférieur ou égal à 10 Mo."
   },
   "faceImageUpload": {
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -291,7 +294,8 @@
     "errorAvatarInvalidType": "Veuillez sélectionner une image au format JPEG ou PNG.",
     "errorGeneric": "Échec de l'enregistrement du profil. Veuillez réessayer plus tard.",
     "errorAvatarNotFound": "L'image sélectionnée est introuvable. Veuillez la sélectionner à nouveau.",
-    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+    "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "errorImageTooLarge": "Le fichier image doit être inférieur ou égal à 10 Mo."
   },
   "faceDetailPage": {
     "backAriaLabel": "Retour"
@@ -441,9 +445,15 @@
     "invalid": "Saisie invalide",
     "tooShort": "Doit contenir au moins {min} caractères",
     "tooLong": "Ne doit pas dépasser {max} caractères",
-    "email": { "invalid": "Saisissez une adresse e-mail valide" },
-    "url": { "invalid": "Saisissez une URL valide" },
-    "id": { "invalid": "Format d'identifiant invalide" },
+    "email": {
+      "invalid": "Saisissez une adresse e-mail valide"
+    },
+    "url": {
+      "invalid": "Saisissez une URL valide"
+    },
+    "id": {
+      "invalid": "Format d'identifiant invalide"
+    },
     "password": {
       "tooShort": "Le mot de passe doit contenir au moins {min} caractères",
       "tooLong": "Le mot de passe ne doit pas dépasser {max} caractères"
