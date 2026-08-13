@@ -22,10 +22,6 @@ tracen is another name for ft_transcendence, and they represent the same meaning
 - containers/infra/db: PostgreSQL 初期化 SQL
 - .devcontainer: VS Code Dev Container 設定
 
-開発者向けドキュメント:
-
-- BFF API 方針: [docs/api/BFF_API_GUIDE.md](docs/api/BFF_API_GUIDE.md)
-
 ## 開発環境の実行方法
 
 推奨は VS Code Dev Container での実行です。
@@ -45,7 +41,17 @@ cp .env.dev.example .env.dev
 
 1. VS Code でこのリポジトリを開く
 2. Reopen in Container を実行する
-3. 初回起動時に postCreateCommand で pnpm install が実行される
+3. Devコンテナ内のターミナルで次を実行する
+
+```bash
+# 開発時の環境変数の反映とJWTの秘密鍵を生成する
+pnpm make-env
+
+# データベースのスキーマを反映する
+pnpm --filter @tracen/backend db:push
+```
+
+- 初回起動時に `postCreateCommand` で `pnpm install` が実行されます。
 
 Dev Container 起動時に、以下のサービスが docker compose で同時に起動します。
 
@@ -55,13 +61,22 @@ Dev Container 起動時に、以下のサービスが docker compose で同時�
 - nginx
 - db
 
+* 以下は手動スクリプトにより起動します。
+  - 監視: `prometheus` / `grafana` / `alertmanager` と各 exporter（node / cAdvisor / postgres / redis / nginx）
+  - ログ可視化（`analytics` プロファイル指定時のみ）: `elasticsearch` / `kibana` / `logstash` / `filebeat`
+
 ### 手順 2: 動作確認
 
-- ブラウザ入口: http://localhost:8080
-- Next.js 直アクセス: http://localhost:3000
-- Hono API 直アクセス（デバッグ用）: http://localhost:8000/hello
-- BFF API（推奨）: http://localhost:8080/api/hello
+- ブラウザ入口（Nginx 経由）: http://localhost:8080
+- Next.js 直アクセス（デバッグ用）: http://localhost:3000
+- Hono API 直アクセス（デバッグ用）: http://localhost:8000/api/v1/
+- BFF API: http://localhost:8080/api/
 - PostgreSQL: localhost:5432
+- Redis: localhost:6379
+- Grafana: http://localhost:3001
+- Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- Kibana（analytics プロファイル）: http://localhost:8080/kibana
 
 Nginx 経由では、以下のルーティングです。
 
@@ -122,7 +137,7 @@ pnpm dev
 ホストOSの `/etc/hosts` に以下を追加します。
 
 ```
-127.0.0.1 tracen.local registry.tracen.local api.tracen.local
+127.0.0.1 tracen.local registry.tracen.local api.tracen.local kibana.tracen.local
 ```
 
 #### 手順 2: mkcert を用意して TLS 資材を生成
@@ -136,7 +151,7 @@ mkcert -install
 次に、このリポジトリで TLS 資材を生成します。
 
 ```bash
-pnpm local-prod:setup-tls
+bash scripts/setup-local-prod-tls.sh
 ```
 
 #### 手順 3: Docker がローカルレジストリの TLS を信頼するように設定
@@ -155,22 +170,29 @@ sudo cp containers/infra/local-prod/certs/ca.crt /etc/docker/certs.d/registry.tr
 まず、環境変数ファイルを用意します。
 
 ```bash
-cp .env.local-prod.example .env.local-prod
+cp .env.example .env
 ```
 
 ```bash
-pnpm local-prod:deploy
+# frontend / backend + monitoring のみを起動する場合は
+bash scripts/deploy-local-prod.sh
+
+# analyticを含めた全コンテナを起動する場合は
+WITH_ANALYTICS=1 bash scripts/deploy-local-prod.sh
 ```
 
 #### 手順 5: 動作確認
 
 - 入口: https://tracen.local
-- BFF API: https://tracen.local/api/hello
+- BFF API: https://tracen.local/api/
+- backend API: https://api.tracen.local/api/v1/
+- monitoring: https://tracen.local/grafana
+- analytics: https://kibana.tracen.local
 
 #### 停止
 
 ```bash
-pnpm local-prod:down
+bash scripts/down-local-prod.sh
 ```
 
 補足:
@@ -178,10 +200,6 @@ pnpm local-prod:down
 - `docker-compose.local-prod.yml` はデフォルトで HTTPS（`443`）のみを公開します（ホストの `80` が他プロセスで使用中でも起動しやすくするため）。HTTP→HTTPS リダイレクトが必要な場合は `docker-compose.local-prod.yml` で `80:80` の公開を追加してください。
 - rootless Docker などで `443` の公開が難しい場合は、ポートを `8443` 等に変更してください。
 - `.local` が環境の名前解決と衝突する場合は、`tracen.test` などへ切り替えてください（hosts / 証明書SAN / compose の alias も同様に変更が必要です）。
-
-### 参考: 手動でのプロダクション検証（旧手順）
-
-この手順は HTTPS 対応前の名残です。現在は `docker-compose.local-prod.yml` と `pnpm local-prod:deploy` を利用してください。
 
 ## 停止とクリーンアップ
 
@@ -194,5 +212,5 @@ docker compose -f docker-compose.dev.yml down
 ローカル本番相当の停止:
 
 ```bash
-pnpm local-prod:down
+bash scripts/down-local-prod.sh
 ```

@@ -38,14 +38,14 @@ FaceとSeedに関する全操作に **JWT認証が必須** になります。
 
 ### `/faces?` リクエストパラメータ一覧
 
-| パラメータ名 | 型     | 例                    | 説明・用途                                                              |
-| ------------ | ------ | --------------------- | ----------------------------------------------------------------------- |
-| **`q`**      | string | `q=React`             | faceタイトル・説明・絵文字に対する全文検索キーワード（要URLエンコード） |
-| **`userId`** | string | `userId=usr123`       | 作成者フィルタ                                                          |
-| **`sortBy`** | string | `sortBy=lastpostedAt` | ソート対象キー（`lastpostedAt`, `seedsCount` ）                         |
-| **`order`**  | `'asc' | 'desc'`               | `order=desc`                                                            | ソート順 |
-| **`limit`**  | number | `limit=20`            | 1回の取得件数                                                           |
-| **`cursor`** | string | `cursor=eyJpZCI6...`  | ページネーション用のカーソル（Base64等でエンコード）                    |
+| パラメータ名 | 型                      | 例                    | 説明・用途                                                              |
+| ------------ | ----------------------- | --------------------- | ----------------------------------------------------------------------- |
+| **`q`**      | string                  | `q=React`             | faceタイトル・説明・絵文字に対する全文検索キーワード（要URLエンコード） |
+| **`userId`** | string                  | `userId=usr123`       | 作成者フィルタ                                                          |
+| **`sortBy`** | string                  | `sortBy=lastpostedAt` | ソート対象キー（`lastpostedAt`, `seedsCount` ）                         |
+| **`order`**  | `'asc'` または `'desc'` | `order=desc`          | ソート順                                                                |
+| **`limit`**  | number                  | `limit=20`            | 1回の取得件数（省略時は 20、最大 100）                                  |
+| **`cursor`** | string                  | `cursor=eyJpZCI6...`  | ページネーション用のカーソル（Base64等でエンコード）                    |
 
 #### リクエスト例
 
@@ -58,15 +58,15 @@ GET /faces?userId=xxx&sortBy=lastpostedAt&limit=100&cursor=xxx
 
 - ソートは日付順のみ対応
 
-| パラメータ名                  | 型                    | 例                              | 説明・用途                                            |
-| ----------------------------- | --------------------- | ------------------------------- | ----------------------------------------------------- |
-| **`q`**                       | string                | `q=React`                       | 投稿本文に対する全文検索キーワード（要URLエンコード） |
-| **`faceId`**                  | string                | `faceId=face1`                  | フェイスの指定                                        |
-| **`userId`**                  | string                | `userId=usr123`                 | 作成者フィルタ                                        |
-| **`fromDate`** / **`toDate`** | string (ISO 8601 UTC) | `fromDate=2026-01-01T00:00:00Z` | 期間絞り込み（**末尾 `Z` 形式必須**）                 |
-| **`order`**                   | `'asc'                | 'desc'`                         | `order=desc`                                          | ソート順 |
-| **`limit`**                   | number                | `limit=20`                      | 1回の取得件数                                         |
-| **`cursor`**                  | string                | `cursor=eyJpZCI6...`            | ページネーション用のカーソル（Base64等でエンコード）  |
+| パラメータ名                  | 型                      | 例                              | 説明・用途                                            |
+| ----------------------------- | ----------------------- | ------------------------------- | ----------------------------------------------------- |
+| **`q`**                       | string                  | `q=React`                       | 投稿本文に対する全文検索キーワード（要URLエンコード） |
+| **`faceId`**                  | string                  | `faceId=face1`                  | フェイスの指定                                        |
+| **`userId`**                  | string                  | `userId=usr123`                 | 作成者フィルタ                                        |
+| **`fromDate`** / **`toDate`** | string (ISO 8601 UTC)   | `fromDate=2026-01-01T00:00:00Z` | 期間絞り込み（**末尾 `Z` 形式必須**）                 |
+| **`order`**                   | `'asc'` または `'desc'` | `order=desc`                    | ソート順                                              |
+| **`limit`**                   | number                  | `limit=20`                      | 1回の取得件数（省略時は 20、最大 100）                |
+| **`cursor`**                  | string                  | `cursor=eyJpZCI6...`            | ページネーション用のカーソル（Base64等でエンコード）  |
 
 #### リクエスト例
 

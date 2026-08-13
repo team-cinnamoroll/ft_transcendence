@@ -123,4 +123,10 @@ ensure_tls_assets
 start_ci_docker
 export DOCKER_HOST="$ci_docker_host"
 
+if [[ "$mode" == "full" ]]; then
+  echo "[local-ci] Full mode: 既存の .env.local と DinD 内の不要なデータ(レジストリ等)を削除します。" >&2
+  rm -f "$repo_root/.env.local"
+  docker system prune -af --volumes >/dev/null 2>&1 || true
+fi
+
 bash "$repo_root/scripts/deploy-local-prod.sh"
