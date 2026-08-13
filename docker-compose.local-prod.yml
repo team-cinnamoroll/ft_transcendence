@@ -376,6 +376,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - elk_certs:/certs:ro
+      # 読み取り位置(registry)。永続化しないとコンテナ作り直しのたびに
+      # 既存のコンテナログを先頭から読み直し、同じログが重複投入される
+      - filebeat_data:/usr/share/filebeat/data
     depends_on:
       - logstash
     networks:
@@ -393,5 +396,6 @@ volumes:
   file_storage_data:
   elasticsearch_data:
   elk_certs:
+  filebeat_data:
   prometheus_data:
   grafana_data:
