@@ -733,8 +733,16 @@ erDiagram
 ### Minor: Support for multiple languages (at least 3 languages).
 
 - 担当: kharuya, nkawaguc
-- next-intl を用いて日本語/英語/フランス語の3言語に対応
-- Cookie とブラウザの Accept-Language からロケールを自動判定しつつ、UI上のセレクタで手動切り替えも可能
+
+* **選定理由 (Justification):**
+  MultiFace は日本語話者以外のユーザーも想定しており、UI 文言をハードコードすると後から多言語化する際に user-facing text の洗い出しから始める必要が生じる。開発初期から `next-intl` を導入し、コンポーネント実装と同時に翻訳キーを切ることで、文言のi18n漏れ（i18n leak）を構造的に防ぐことを狙った。
+* **具体的な実装方法 (Implementation):**
+  - **ルーティング:** `next-intl` の `[locale]` セグメントルーティングを採用。`src/i18n/routing.ts` で対応ロケール（`ja` / `en` / `fr`、デフォルト `ja`）を定義し、`middleware`（`src/proxy.ts`）内で `next-intl` の `createMiddleware` を認証チェックと合成して実行。ロケール未指定アクセス時は Cookie（`NEXT_LOCALE`）とブラウザの `Accept-Language` から自動判定してリダイレクトする。
+  - **メッセージ管理:** 名前空間ごとに JSON を分割（`messages/{locale}.json` 本体、`messages/terms/{locale}.json`、`messages/privacy/{locale}.json`）し、`src/i18n/request.ts` でマージしてから配信。利用規約・プライバシーポリシーのような長文の静的ページと、UIの短い文言を別ファイルに分離することで、翻訳担当者が差分を追いやすい構成にした。
+  - **切り替えUI:** `LanguageSwitcher` コンポーネントで、`next-intl` の `useRouter` / `usePathname`（`src/i18n/navigation.ts` の `createNavigation` から取得）を使い、現在のパスを保ったままロケールだけを切り替える `router.replace(pathname, { locale })` を実装。
+  - **i18n漏れの監査:** 実装済みの55ファイルに対して、ハードコードされた日本語/英語文字列が残っていないかを目視 + grep で監査し、`useTranslations` / `getTranslations` への置き換えを実施。
+  - **ICU プルーラル対応:** 件数によって文言が変わる箇所（例: 件数表示）に ICU MessageFormat の `plural` 構文を使用し、日本語・英語・フランス語で異なる複数形ルールを吸収。
+  - **フォームバリデーションの多言語化:** `Zod` のエラーメッセージ（`errorMap`）をロケールに応じて切り替え、フォーム入力エラーの文言もUIと同じ言語で表示されるようにした。
 
 ## 3 User Management
 
@@ -773,8 +781,15 @@ No modules implemented.
 ### Major: Monitoring system with Prometheus and Grafana.
 
 - 担当: nkawaguc
-- Prometheus が node-exporter/cadvisor/postgres-exporter/redis-exporter/nginx-exporter の各 exporter からメトリクスを収集し、Grafana のダッシュボードで可視化、Alertmanager が異常検知時に Discord へ通知
-- Grafana は管理者パスワードを環境変数で設定しサインアップを無効化してアクセスを保護
+
+* **選定理由 (Justification):**
+  本番相当環境でアプリケーションが正常に動作しているかを、ログを都度確認するのではなく数値として継続的に把握し、異常を能動的に検知できる体制を構築するため。アプリケーション本体を改修せずに導入できる exporter 方式であれば、既存実装への影響を最小限に監視基盤を追加できる点も選定理由。
+* **具体的な実装方法 (Implementation):**
+  - **exporter によるメトリクス収集:** アプリ本体を無改修のまま、`node-exporter`（ホストのCPU/メモリ/ディスク）、`cadvisor`（コンテナ単位のリソース使用量）、`postgres-exporter`（PostgreSQLの接続数・クエリ統計）、`redis-exporter`（Redisのメモリ・ヒット率）、`nginx-exporter`（`stub_status` を読み取ったリクエスト数・接続数）の5種を並走させ、`/metrics` エンドポイントとして公開。
+  - **Prometheus によるスクレイプとアラート評価:** `prometheus.yml` の `scrape_configs` に各 exporter を登録し15秒間隔で収集。`alert.rules.yml` に `TargetDown`（exporter が1分以上ダウン）、`HostHighMemory` / `HostHighCPU`（5分間85%超）のアラートルールを定義し評価。
+  - **Alertmanager 経由の通知:** 発火したアラートを `alertname` で集約し、Discord Webhook（`webhook_url_file` 方式でシークレットをファイル分離、`.gitignore` 済み）へ通知。`send_resolved: true` により復旧時にも解決通知を送信。
+  - **Grafana の自動プロビジョニング:** `provisioning/datasources` で Prometheus をデータソースとして自動登録し、`provisioning/dashboards` で `dashboards/` 配下の JSON を自動読み込み。node-exporter・cAdvisor・PostgreSQL・Redis・nginx-exporter それぞれについて、grafana.com / 開発元公式で公開されているダウンロード数の多い定番ダッシュボードを採用し、`datasource` の参照を `uid: prometheus` に置換した上で git 管理下に置くことで、`git pull` するだけで全メンバーが同一のダッシュボードを再現できるようにした。
+  - **アクセス制御:** Grafana は `GF_SECURITY_ADMIN_PASSWORD` を環境変数で必須化し、デフォルト認証情報（admin/admin）を排除。`GF_USERS_ALLOW_SIGN_UP=false` によりセルフサインアップを無効化し、監視ダッシュボードへの不正アクセスを防止。
 
 ## 8 Data and Analytics
 
@@ -895,6 +910,10 @@ No modules implemented.
 ### 実機検証
 
 校舎の環境で VM を立て、その VM 内で local-prod（本番相当環境）を実際にデプロイして動作確認と調整を行った。
+
+### 直面した課題と克服方法
+
+Prometheusのボリュームが際限なく増加する懸念があったため、`--storage.tsdb.retention.time` による保持期間を指定していた。それにもかかわらず、ボリュームは短期間で際限なく増加してしまい、ボリュームのサイズが200GBを超えてしまった。このボリュームの肥大化は、DinDを利用したテストで使用する短命なコンテナも監視対象にしてしまっていたことが原因であることが判明したため、監視対象のコンテナを明示的に指定するように設定し、ボリュームサイズの上限も指定することで対応した。
 
 ## katakada
 
