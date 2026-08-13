@@ -44,19 +44,7 @@
     "typescript-eslint": "^8.65.0"
   },
   "lint-staged": {
-    "containers/apps/backend/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "pnpm --filter @tracen/backend exec eslint --fix",
-      "pnpm exec prettier --write"
-    ],
-    "containers/apps/contracts/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "pnpm --filter @tracen/contracts exec eslint --fix",
-      "pnpm exec prettier --write"
-    ],
-    "containers/apps/frontend-bff/**/*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "pnpm --filter @tracen/frontend-bff exec eslint --fix",
-      "pnpm exec prettier --write"
-    ],
-    "!(containers/apps/**/*).{js,jsx,ts,tsx,mjs,cjs}": [
+    "**/*.{js,jsx,ts,tsx,mjs,cjs}": [
       "pnpm exec eslint --fix",
       "pnpm exec prettier --write"
     ],
