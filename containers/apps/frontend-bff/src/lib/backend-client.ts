@@ -37,6 +37,15 @@ export async function verifyToken(token: string) {
     return payload;
   } catch (error) {
     // 期限切れや、改ざんされたトークンの場合はエラーになります
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code: string }).code === 'ERR_JWT_EXPIRED'
+    ) {
+      // 期限切れは通常のフロー（この後自動リフレッシュされる）なので、エラーログを抑制するかデバッグ出力に留める
+      return null;
+    }
     console.error('JWTの検証に失敗しました:', error);
     return null;
   }

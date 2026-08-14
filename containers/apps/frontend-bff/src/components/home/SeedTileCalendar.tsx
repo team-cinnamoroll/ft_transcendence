@@ -19,9 +19,9 @@ const getColorStyle = (count: number): string => {
 };
 
 const toDateKey = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 };
 
@@ -41,12 +41,29 @@ const SeedTileCalendar = ({ seeds, today }: SeedTileCalendarProps) => {
   const format = useFormatter();
 
   const weeks = useMemo<WeekData[]>(() => {
-    const dayOfWeek = today.getDay();
-    const sundayOfThisWeek = new Date(today);
-    sundayOfThisWeek.setDate(today.getDate() - dayOfWeek);
+    // タイムゾーンによるサーバー(UTC等)とクライアント(JST等)でのgetDay()のズレを防ぐため、
+    // まず指定したタイムゾーン(Asia/Tokyo)での「年月日」を抽出し、それをUTCとして扱うDateを作成する。
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Tokyo',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    });
+    const parts = formatter.formatToParts(today);
+    const y = parseInt(parts.find((p) => p.type === 'year')!.value, 10);
+    const m = parseInt(parts.find((p) => p.type === 'month')!.value, 10) - 1;
+    const d = parseInt(parts.find((p) => p.type === 'day')!.value, 10);
+
+    // これで「日本の現在日付の0時0分」を表す絶対的なUTC timestampが得られる
+    // サーバーでもクライアントでも、このDateに対して getUTCDay() 等を呼べば必ず一致する
+    const midnightUTC = new Date(Date.UTC(y, m, d));
+
+    const dayOfWeek = midnightUTC.getUTCDay();
+    const sundayOfThisWeek = new Date(midnightUTC);
+    sundayOfThisWeek.setUTCDate(midnightUTC.getUTCDate() - dayOfWeek);
 
     const startSunday = new Date(sundayOfThisWeek);
-    startSunday.setDate(sundayOfThisWeek.getDate() - 51 * 7);
+    startSunday.setUTCDate(sundayOfThisWeek.getUTCDate() - 51 * 7);
 
     const countMap: Record<string, number> = {};
     for (const seed of seeds) {
@@ -57,9 +74,9 @@ const SeedTileCalendar = ({ seeds, today }: SeedTileCalendarProps) => {
     const result: WeekData[] = [];
     for (let w = 0; w < 52; w++) {
       const days: WeekData['days'] = [];
-      for (let d = 0; d < 7; d++) {
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
         const date = new Date(startSunday);
-        date.setDate(startSunday.getDate() + w * 7 + d);
+        date.setUTCDate(startSunday.getUTCDate() + w * 7 + dayOffset);
         const key = toDateKey(date);
         days.push({ date, key, count: countMap[key] ?? 0 });
       }
@@ -72,7 +89,7 @@ const SeedTileCalendar = ({ seeds, today }: SeedTileCalendarProps) => {
     const labels: Record<number, string> = {};
     let lastMonth = -1;
     weeks.forEach((week, idx) => {
-      const month = week.startDate.getMonth();
+      const month = week.startDate.getUTCMonth();
       if (month !== lastMonth) {
         labels[idx] = format.dateTime(week.startDate, { month: 'short' });
         lastMonth = month;

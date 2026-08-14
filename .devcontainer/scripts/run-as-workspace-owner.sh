@@ -5,9 +5,17 @@ set -e
 WS_UID=$(stat -c "%u" /workspace)
 WS_GID=$(stat -c "%g" /workspace)
 
+# Rootless Dockerやuserns-remap環境では、ホスト側のユーザーがコンテナ内の root (0) にマッピングされることがあります。
+# その場合、/workspaceの所有者は root (0) となります。
+# 権限がない node ユーザーに切り替えると書き込みエラー(EACCES)になるため、そのまま root として実行します。
+if [ "$WS_UID" = "0" ]; then
+    export HOME=/root
+    exec "$@"
+fi
+
 # nodeユーザーのUID/GIDが異なる場合、/workspaceの所有者に合わせる
 # (Ubuntu等のLinux環境でのボリュームマウント権限エラーを解消するため)
-if [ "$WS_UID" != "0" ] && [ "$WS_UID" != "$(id -u node)" ]; then
+if [ "$WS_UID" != "$(id -u node)" ]; then
     groupmod -o -g "$WS_GID" node >/dev/null 2>&1 || true
     usermod -o -u "$WS_UID" -g "$WS_GID" node >/dev/null 2>&1 || true
     chown -R node:node /home/node >/dev/null 2>&1 || true

@@ -12,6 +12,7 @@ import { getFaceTitle, getFaceColor, getAvatarUrl } from '@/lib/display';
 import FaceBadge from '@/components/ui/FaceBadge';
 import FaceChip from '@/components/ui/FaceChip';
 import RailCard from '@/components/ui/RailCard';
+import { getCurrentMmDdInJST, getCurrentYearInJST, getCurrentMonthInJST } from '@/lib/date-utils';
 
 // ── WritingRail ────────────────────────────────────────────────
 
@@ -22,18 +23,18 @@ type WritingRailProps = {
 
 const WritingRail = ({ seeds, faces }: WritingRailProps) => {
   const t = useTranslations('contextRail');
-  const today = new Date();
-  const mmdd = today.toISOString().slice(5, 10);
+  const mmdd = getCurrentMmDdInJST();
+  const currentYear = getCurrentYearInJST();
 
   const faceById = new Map(faces.map((f) => [f.id, f]));
 
   const onThisDay = seeds.find((a) => {
     const d = a.createdAt.slice(0, 10);
-    return d.slice(5) === mmdd && d.slice(0, 4) !== String(today.getFullYear());
+    return d.slice(5) === mmdd && d.slice(0, 4) !== currentYear;
   });
   const onThisDayFace = onThisDay ? faceById.get(onThisDay.faceId) : undefined;
   const yearsAgo = onThisDay
-    ? today.getFullYear() - parseInt(onThisDay.createdAt.slice(0, 4), 10)
+    ? parseInt(currentYear, 10) - parseInt(onThisDay.createdAt.slice(0, 4), 10)
     : 0;
 
   return (
@@ -85,7 +86,7 @@ type ReflectionRailProps = {
 
 const ReflectionRail = ({ faces, seeds }: ReflectionRailProps) => {
   const t = useTranslations('contextRail');
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = getCurrentMonthInJST();
 
   const monthlyCountMap = new Map<string, number>();
   for (const act of seeds) {
