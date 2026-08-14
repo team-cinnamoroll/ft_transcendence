@@ -92,21 +92,28 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
     formData.set('file', file);
 
     void (async () => {
-      const result = await uploadFaceImageAction(formData);
-      setIsUploadingImage(false);
+      try {
+        const result = await uploadFaceImageAction(formData);
+        setIsUploadingImage(false);
 
-      if (!result.success) {
-        const firstFieldError = Object.values(result.errors)[0]?.[0];
-        setImageError(firstFieldError ?? t('errorImageInvalidType'));
-        return;
-      }
-      if (!result.data.success) {
-        setImageError(result.data.message);
-        return;
-      }
+        if (!result.success) {
+          const firstFieldError = Object.values(result.errors)[0]?.[0];
+          setImageError(firstFieldError ?? t('errorImageInvalidType'));
+          return;
+        }
+        if (!result.data.success) {
+          setImageError(result.data.message);
+          return;
+        }
 
-      uploadedFileIdRef.current = result.data.fileId;
-      setValue('imageId', result.data.fileId, { shouldValidate: true });
+        uploadedFileIdRef.current = result.data.fileId;
+        setValue('imageId', result.data.fileId, { shouldValidate: true });
+      } catch (err) {
+        // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+        console.error('EditFaceModal: uploadFaceImageAction threw unexpectedly', err);
+        setIsUploadingImage(false);
+        setImageError(t('errorImageUploadFailed'));
+      }
     })();
   };
 

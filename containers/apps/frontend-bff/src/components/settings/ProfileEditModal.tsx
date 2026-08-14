@@ -93,21 +93,28 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
     formData.set('file', file);
 
     void (async () => {
-      const result = await uploadAvatarFileAction(formData);
-      setIsUploadingAvatar(false);
+      try {
+        const result = await uploadAvatarFileAction(formData);
+        setIsUploadingAvatar(false);
 
-      if (!result.success) {
-        const firstFieldError = Object.values(result.errors)[0]?.[0];
-        setAvatarError(firstFieldError ?? t('errorAvatarUploadFailed'));
-        return;
-      }
-      if (!result.data.success) {
-        setAvatarError(result.data.message);
-        return;
-      }
+        if (!result.success) {
+          const firstFieldError = Object.values(result.errors)[0]?.[0];
+          setAvatarError(firstFieldError ?? t('errorAvatarUploadFailed'));
+          return;
+        }
+        if (!result.data.success) {
+          setAvatarError(result.data.message);
+          return;
+        }
 
-      uploadedFileIdRef.current = result.data.fileId;
-      setAvatarFileId(result.data.fileId);
+        uploadedFileIdRef.current = result.data.fileId;
+        setAvatarFileId(result.data.fileId);
+      } catch (err) {
+        // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+        console.error('ProfileEditModal: uploadAvatarFileAction threw unexpectedly', err);
+        setIsUploadingAvatar(false);
+        setAvatarError(t('errorAvatarUploadFailed'));
+      }
     })();
   };
 

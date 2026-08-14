@@ -223,24 +223,36 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
       formData.set('file', img.file);
 
       void (async () => {
-        const result = await uploadSeedImageAction(formData);
-        setImages((prev) =>
-          prev.map((i) => {
-            if (i.objectUrl !== img.objectUrl) return i;
-            if (!result.success) {
-              const firstFieldError = Object.values(result.errors)[0]?.[0];
-              return {
-                ...i,
-                isUploading: false,
-                error: firstFieldError ?? t('errorImageInvalidType'),
-              };
-            }
-            if (!result.data.success) {
-              return { ...i, isUploading: false, error: result.data.message };
-            }
-            return { ...i, isUploading: false, fileId: result.data.fileId };
-          })
-        );
+        try {
+          const result = await uploadSeedImageAction(formData);
+          setImages((prev) =>
+            prev.map((i) => {
+              if (i.objectUrl !== img.objectUrl) return i;
+              if (!result.success) {
+                const firstFieldError = Object.values(result.errors)[0]?.[0];
+                return {
+                  ...i,
+                  isUploading: false,
+                  error: firstFieldError ?? t('errorImageInvalidType'),
+                };
+              }
+              if (!result.data.success) {
+                return { ...i, isUploading: false, error: result.data.message };
+              }
+              return { ...i, isUploading: false, fileId: result.data.fileId };
+            })
+          );
+        } catch (err) {
+          // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+          console.error('PostModal: uploadSeedImageAction threw unexpectedly', err);
+          setImages((prev) =>
+            prev.map((i) =>
+              i.objectUrl === img.objectUrl
+                ? { ...i, isUploading: false, error: t('errorImageUploadFailed') }
+                : i
+            )
+          );
+        }
       })();
     });
   };

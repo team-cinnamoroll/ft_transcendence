@@ -53,6 +53,7 @@
     "uploadingImageAlt": "Image en cours d'envoi {n}",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG, ou un fichier PDF.",
     "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "pdfFileNameFallback": "Fichier PDF",
     "submit": "Publier",
     "submitting": "Publication…",
@@ -81,6 +82,7 @@
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "submit": "Créer",
     "submitting": "Création…",
     "errorGeneric": "Échec de la création de la facette. Veuillez réessayer plus tard."
@@ -105,6 +107,7 @@
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
     "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "submit": "Enregistrer",
     "submitting": "Enregistrement…",
     "errorGeneric": "Échec de l'enregistrement de la facette. Veuillez réessayer plus tard."

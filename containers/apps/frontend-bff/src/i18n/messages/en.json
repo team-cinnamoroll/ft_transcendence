@@ -53,6 +53,7 @@
     "uploadingImageAlt": "Uploading image {n}",
     "errorImageInvalidType": "Please choose a JPEG or PNG image, or a PDF file.",
     "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "pdfFileNameFallback": "PDF file",
     "submit": "Post",
     "submitting": "Posting...",
@@ -81,6 +82,7 @@
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "submit": "Create",
     "submitting": "Creating...",
     "errorGeneric": "Failed to create the face. Please try again later."
@@ -105,6 +107,7 @@
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
     "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "submit": "Save",
     "submitting": "Saving...",
     "errorGeneric": "Failed to save the face. Please try again later."
