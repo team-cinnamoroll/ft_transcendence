@@ -74,10 +74,14 @@ type RefreshResult = Awaited<ReturnType<AuthRepositorySpec['refresh']>>;
 const inFlightRefreshes = new Map<string, Promise<RefreshResult>>();
 
 function refreshTokens(userId: string, refreshToken: string): Promise<RefreshResult> {
+  const ts = new Date().toISOString();
+  console.log(`[Debug][${ts}] refreshTokens called. In-flight count: ${inFlightRefreshes.size}`);
   const existing = inFlightRefreshes.get(refreshToken);
   if (existing) {
+    console.log(`[Debug][${ts}] Found existing in-flight refresh promise. Reusing it.`);
     return existing;
   }
+  console.log(`[Debug][${ts}] No existing refresh promise. Starting new API call.`);
   const promise = getAuthRepository()
     .refresh(userId, refreshToken)
     .finally(() => {
@@ -96,7 +100,17 @@ async function resolveAuthState(request: NextRequest): Promise<AuthState> {
 
   const payload = await verifyToken(accessToken);
   if (payload?.sub) {
-    return { isAuthenticated: true, refreshedTokens: null, shouldClearSession: false };
+    // [修正] JWTの残り有効期間をチェック
+    // clockTolerance (5s) によって「すでに切れているが検証を通った」場合や、
+    // バックエンド到達時（Server Componentでの処理時）に切れてしまうリスクを防ぐため、
+    // 残り寿命が5秒以下ならリフレッシュ処理へフォールバックさせる
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp - nowInSeconds > 5) {
+      return { isAuthenticated: true, refreshedTokens: null, shouldClearSession: false };
+    }
+    console.log(
+      `[Debug][${new Date().toISOString()}] Token is close to expiration or in clockTolerance window (exp: ${payload.exp}, now: ${nowInSeconds}). Forcing refresh...`
+    );
   }
 
   // アクセストークンが無効/期限切れ。リフレッシュトークンがあれば再発行を試みる
@@ -106,6 +120,9 @@ async function resolveAuthState(request: NextRequest): Promise<AuthState> {
     return { isAuthenticated: false, refreshedTokens: null, shouldClearSession: true };
   }
 
+  console.log(
+    `[Debug][${new Date().toISOString()}] Token expired or invalid. Attempting to refresh for path: ${request.nextUrl.pathname}`
+  );
   const result = await refreshTokens(userId, refreshToken);
   if (result.success) {
     return { isAuthenticated: true, refreshedTokens: result.data, shouldClearSession: false };
@@ -116,6 +133,17 @@ async function resolveAuthState(request: NextRequest): Promise<AuthState> {
 export default async function middleware(request: NextRequest) {
   const { locale, path } = resolveLocaleAwarePath(request.nextUrl.pathname);
   const { isAuthenticated, refreshedTokens, shouldClearSession } = await resolveAuthState(request);
+
+  // [修正] Server Component 側（以降の処理）でも新しいトークンを読み取れるように
+  // request オブジェクトの Cookie も上書きしておく
+  if (refreshedTokens) {
+    request.cookies.set(ACCESS_TOKEN_COOKIE, refreshedTokens.accessToken);
+    request.cookies.set(REFRESH_TOKEN_COOKIE, refreshedTokens.refreshToken);
+  } else if (shouldClearSession) {
+    request.cookies.delete(ACCESS_TOKEN_COOKIE);
+    request.cookies.delete(REFRESH_TOKEN_COOKIE);
+  }
+
   const isAuthPath = AUTH_PATHS.includes(path);
   const isServerAction = isServerActionRequest(request);
 
@@ -146,9 +174,23 @@ export default async function middleware(request: NextRequest) {
       refreshedTokens.refreshToken,
       cookieOptions(REFRESH_TOKEN_MAX_AGE_SECONDS)
     );
+
+    // Server Component (next/headers の cookies()) に新しいCookie状態を伝播させるための Next.js 内部ヘッダー
+    const updatedCookieString = request.cookies
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join('; ');
+    response.headers.set('x-middleware-request-cookie', updatedCookieString);
   } else if (shouldClearSession) {
     response.cookies.delete(ACCESS_TOKEN_COOKIE);
     response.cookies.delete(REFRESH_TOKEN_COOKIE);
+
+    // クリアした場合も同様に状態を伝播させる
+    const updatedCookieString = request.cookies
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join('; ');
+    response.headers.set('x-middleware-request-cookie', updatedCookieString);
   }
 
   return response;
