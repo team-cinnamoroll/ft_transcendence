@@ -4,7 +4,7 @@
   "service": "dev-container",
   "workspaceFolder": "/workspace",
   "runServices": ["dev-container", "backend", "frontend", "nginx", "db", "redis"],
-  "forwardPorts": [3000, 8000, 8080, 5432, 4983, 6379, 9200, 5601, 9090, 3001, 9093],
+  "forwardPorts": [],
   "mounts": [
     // ワークスペース本体のバインドマウント
     "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
@@ -35,7 +35,8 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "remoteEnv": {
-    "TRACEN_LOCAL_CI_HOST_WORKSPACE": "${localWorkspaceFolder}"
+    "TRACEN_LOCAL_CI_HOST_WORKSPACE": "${localWorkspaceFolder}",
+    "DOCKER_HOST": "unix:///var/run/rootless.sock"
   },
   "customizations": {
     "vscode": {
@@ -47,32 +48,26 @@
         "usernamehw.errorlens",
         "github.copilot-chat",
         "anthropic.claude-code",
-
         // Next.js / React / Tailwind
         "bradlc.vscode-tailwindcss",
         "dsznajder.es7-react-js-snippets",
         "formulahendry.auto-rename-tag",
-
         // Hono / Backend 開発
         "humao.rest-client",
         "wallabyjs.console-ninja",
-
         // DB
         "ms-ossdata.vscode-pgsql",
         "davidsekar.redis-xplorer",
-
         // Git / チーム開発
         "eamodio.gitlens",
         "mhutchie.git-graph",
         "github.vscode-pull-request-github",
         "github.vscode-github-actions",
         "ms-vsliveshare.vsliveshare",
-
         // Markdown / ドキュメント
         "42crunch.vscode-openapi"
       ]
     }
   },
-  "remoteUser": "node",
-  "updateRemoteUserUID": true
+  "remoteUser": "root"
 }
