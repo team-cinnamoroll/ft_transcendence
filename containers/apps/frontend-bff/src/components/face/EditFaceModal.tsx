@@ -68,11 +68,13 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
     e.target.value = ''; // 同じファイルを選び直しても onChange が発火するようにする
     if (!file) return;
 
-    if (
-      !ALLOWED_FACE_IMAGE_FILE_TYPES.includes(file.type) ||
-      file.size > MAX_FACE_IMAGE_FILE_SIZE
-    ) {
+    if (!ALLOWED_FACE_IMAGE_FILE_TYPES.includes(file.type)) {
       setImageError(t('errorImageInvalidType'));
+      return;
+    }
+
+    if (file.size > MAX_FACE_IMAGE_FILE_SIZE) {
+      setImageError(t('errorImageTooLarge'));
       return;
     }
 

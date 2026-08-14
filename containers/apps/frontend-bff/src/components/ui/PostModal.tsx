@@ -198,14 +198,21 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
     setImages((prev) => [...prev, ...newImages]);
 
     newImages.forEach((img) => {
-      if (
-        !ALLOWED_SEED_ATTACHMENT_FILE_TYPES.includes(img.file.type) ||
-        img.file.size > MAX_IMAGE_FILE_SIZE
-      ) {
+      if (!ALLOWED_SEED_ATTACHMENT_FILE_TYPES.includes(img.file.type)) {
         setImages((prev) =>
           prev.map((i) =>
             i.objectUrl === img.objectUrl
               ? { ...i, isUploading: false, error: t('errorImageInvalidType') }
+              : i
+          )
+        );
+        return;
+      }
+      if (img.file.size > MAX_IMAGE_FILE_SIZE) {
+        setImages((prev) =>
+          prev.map((i) =>
+            i.objectUrl === img.objectUrl
+              ? { ...i, isUploading: false, error: t('errorImageTooLarge') }
               : i
           )
         );

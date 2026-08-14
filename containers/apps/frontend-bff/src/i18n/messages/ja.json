@@ -52,6 +52,7 @@
     "removeImageAriaLabel": "画像{n}を削除",
     "uploadingImageAlt": "アップロード中の画像{n}",
     "errorImageInvalidType": "JPEG・PNG形式の画像、またはPDFファイルを選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
     "pdfFileNameFallback": "PDFファイル",
     "submit": "投稿",
     "submitting": "投稿中...",
@@ -79,6 +80,7 @@
     "imageSelectButton": "画像を選択",
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
     "submit": "作成する",
     "submitting": "作成中...",
     "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。"
@@ -102,6 +104,7 @@
     "imageSelectButton": "画像を選択",
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
     "submit": "保存する",
     "submitting": "保存中...",
     "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。"
