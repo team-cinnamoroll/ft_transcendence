@@ -5,6 +5,7 @@ import { listSeedsByUserId } from '@/server/usecases/seeds';
 import { getViewerContext } from '@/server/usecases/viewer';
 import { getAuthSession } from '@/server/usecases/auth';
 import { getFormatter } from 'next-intl/server';
+import { getTodayInJST, getCurrentMmDdInJST, getCurrentYearInJST } from '@/lib/date-utils';
 
 export default async function Home() {
   const session = await getAuthSession();
@@ -17,16 +18,16 @@ export default async function Home() {
   const format = await getFormatter();
 
   // On This Day: 同じ月日の過去シードを探す
-  const today = new Date();
-  const mmdd = today.toISOString().slice(5, 10);
-  const currentYear = String(today.getFullYear());
+  const today = getTodayInJST();
+  const mmdd = getCurrentMmDdInJST();
+  const currentYear = getCurrentYearInJST();
   const onThisDay = seeds.find((s) => {
     const d = s.createdAt.slice(0, 10);
     return d.slice(5) === mmdd && !d.startsWith(currentYear);
   });
   const onThisDayFace = onThisDay ? myFaces.find((f) => f.id === onThisDay.faceId) : undefined;
   const yearsAgo = onThisDay
-    ? today.getFullYear() - parseInt(onThisDay.createdAt.slice(0, 4), 10)
+    ? parseInt(currentYear, 10) - parseInt(onThisDay.createdAt.slice(0, 4), 10)
     : 0;
   const dateLabel = format.dateTime(today, {
     month: 'long',

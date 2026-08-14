@@ -21,6 +21,7 @@ import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteFaceAction, searchFacesAction } from '@/server/actions/faces';
 import { deleteSeedAction, searchSeedsAction } from '@/server/actions/seeds';
 import { useTranslations } from 'next-intl';
+import { getCurrentMonthInJST, parseStartOfDayToUTC, parseEndOfDayToUTC } from '@/lib/date-utils';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -145,7 +146,7 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
   };
 
   const faceStats = useMemo(() => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = getCurrentMonthInJST();
     const stats = new Map<string, { total: number; monthly: number; lastDate: string | null }>();
     for (const face of faces) {
       const faceSeeds = seeds.filter((a) => a.faceId === face.id);
@@ -206,8 +207,8 @@ const FacesClient = ({ initialFaces, seeds: initialSeeds, currentUserId, current
   };
 
   const filteredAndSortedSearchedSeeds = useMemo(() => {
-    const fromTime = seedFromDate ? new Date(seedFromDate).getTime() : null;
-    const toTime = seedToDate ? new Date(`${seedToDate}T23:59:59.999`).getTime() : null;
+    const fromTime = seedFromDate ? parseStartOfDayToUTC(seedFromDate) : null;
+    const toTime = seedToDate ? parseEndOfDayToUTC(seedToDate) : null;
 
     const result = searchedSeeds.filter((seed) => {
       const createdAtTime = new Date(seed.createdAt).getTime();

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
+import { getMessages, getTranslations, getTimeZone } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 
@@ -32,6 +32,7 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages();
+  const timeZone = await getTimeZone();
 
   return (
     <html
@@ -44,7 +45,9 @@ export default async function RootLayout({
         className="min-h-full"
         style={{ background: 'var(--mf-bg-light)', color: 'var(--mf-text)' }}
       >
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages} timeZone={timeZone}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

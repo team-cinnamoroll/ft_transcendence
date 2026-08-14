@@ -18,6 +18,7 @@ import { useDebouncedValue } from '@/lib/use-debounced-value';
 import { searchFacesAction } from '@/server/actions/faces';
 import { searchSeedsAction } from '@/server/actions/seeds';
 import { findUsersByIdsAction } from '@/server/actions/users';
+import { parseStartOfDayToUTC, parseEndOfDayToUTC } from '@/lib/date-utils';
 
 type Props = {
   seeds: Seed[];
@@ -109,8 +110,8 @@ const FriendSeedFeed = ({ seeds, faces, users, currentUserId }: Props) => {
   };
 
   const filteredAndSortedSearchedSeeds = useMemo(() => {
-    const fromTime = seedFromDate ? new Date(seedFromDate).getTime() : null;
-    const toTime = seedToDate ? new Date(`${seedToDate}T23:59:59.999`).getTime() : null;
+    const fromTime = seedFromDate ? parseStartOfDayToUTC(seedFromDate) : null;
+    const toTime = seedToDate ? parseEndOfDayToUTC(seedToDate) : null;
 
     const result = searchedSeeds.filter((seed) => {
       const createdAtTime = new Date(seed.createdAt).getTime();
