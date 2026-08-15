@@ -25,7 +25,7 @@ MultiFace では、ユーザーは自分の関心や役割に応じた複数の�
 - **ユーザープロフィール**: 表示名・バッジ・アバター画像の管理
 - **ファイルストレージ**: 画像のアップロード / ダウンロード / 削除（public / private バケット分離）
 - **多言語対応**: 英語・フランス語・日本語の 3 言語（`next-intl`）
-- **運用基盤**: Prometheus + Grafana によるメトリクス監視、ELK によるログ可視化
+- **運用基盤**: Prometheus + Grafana + Alertmanager によるメトリクス監視、Elasticsearch + Logstash + Kibana によるログ可視化
 
 <!-- ## 3. Instructions
 - コンパイル・インストール・実行に関する情報を記載する。
@@ -80,6 +80,8 @@ cp .env.example .env                   # 本番相当環境用
 ```bash
 cp .env.dev.example .env.dev
 ```
+
+- 42の環境で開発する場合は別途、[42_DEV_ENVIRONMENT.md](./docs/for_dev/42_DEV_ENVIRONMENT.md) の手順に従ってセットアップしてください
 
 ## 開発環境の起動
 
@@ -197,6 +199,58 @@ bash scripts/down-local-prod.sh
 <!-- ## 4. Resources
 - テーマに関連する定番の参考資料を列挙する（ドキュメント、記事、チュートリアル等）。
 - AI をどのように使ったかの説明を含める。どのタスクに、プロジェクトのどの部分に使ったかを明示する。 -->
+
+## AlertmanagerによるDiscordへの通知
+
+Prometheus が `containers/infra/monitoring/prometheus/alert.rules.yml` のルールを評価し、発火したアラートを Alertmanager が `alertname` ごとに集約して Discord の Webhook へ通知します。現在のルールは以下の 3 つです。
+
+| アラート         | 条件                                       | severity |
+| ---------------- | ------------------------------------------ | -------- |
+| `TargetDown`     | 監視対象（exporter 含む）が 1 分以上ダウン | critical |
+| `HostHighMemory` | ホストのメモリ使用率が 5 分間 85% 超       | warning  |
+| `HostHighCPU`    | ホストの CPU 使用率が 5 分間 85% 超        | warning  |
+
+### 手順 1: Webhook URL を設定する
+
+Webhook URL は秘密情報のため git 管理外（`.gitignore` 済み）です。見本をコピーし、Discord の Webhook URL を 1 行で記入します。
+
+```bash
+cp containers/infra/monitoring/alertmanager/secret/webhook_url.example \
+   containers/infra/monitoring/alertmanager/secret/webhook_url
+```
+
+通知を使わない場合は何もする必要はありません。ファイルが未作成でも Alertmanager は正常に起動し、アラート通知が行われないだけで他は通常どおり動作します。
+
+### 手順 2: 監視スタックを起動する
+
+開発環境では監視系のコンテナは自動起動しないため、手動で起動します。
+
+```bash
+pnpm pg:up
+```
+
+本番相当環境（local-prod）では `bash scripts/deploy-local-prod.sh` に含まれています。
+
+### 設定変更時の反映
+
+- **`secret/webhook_url` の作成・変更**: コンテナの再起動は不要です。`secret/` はディレクトリごとマウントしており（dev / local-prod 共通）、`webhook_url_file` は通知のたびに読み直されるため、次の通知から反映されます。
+- **`alertmanager/config.yml` の変更**: 設定は起動時にのみ読まれるため、再起動が必要です。
+
+  ```bash
+  docker compose -f docker-compose.dev.yml restart alertmanager
+  ```
+
+### 動作確認
+
+exporter を 1 つ止めると `up == 0` になり、1 分後に `TargetDown` が発火します。
+
+```bash
+docker compose -f docker-compose.dev.yml stop redis-exporter
+# http://localhost:9090/alerts で Pending -> Firing を確認
+docker compose -f docker-compose.dev.yml start redis-exporter
+```
+
+監視基盤全体の構成や Grafana ダッシュボードについては `containers/infra/monitoring/README.md` を参照してください。
 
 # Resources
 
@@ -970,3 +1024,19 @@ Honoによるバックエンド実装を担当。可能な限りHonoのライブ
 開発環境の個人差を吸収するために、Dev Containerを導入したが、ホストPCとコンテナ間で権限やパスの違いによる問題が発生した。これを解決するために、sudoを使用せずに権限をクリアにするスクリプトを作成し、安定した順番制御による構築プロセスを確立した。また、node_modulesを個別のボリュームとしてマウントすることで、コンテナ自身の権限下での制御を可能にし、コンテナ起動時の問題を解決した。
 
 ## kharuya
+
+### 実装（フロントエンド + BFF）
+
+frontend-bff（Next.js）のUI・機能実装をほぼ一貫して担当した。
+
+- MultiFace UIへの全面刷新: デザインシステム（Midnight Ink）の基盤構築、home/face/search/subscriptions/notifications など主要画面のコンポーネント置き換え、ページルーティングとレイアウトの整備
+- 認証機能: サインアップ/ログイン/ログアウトのUsecase・Server Actions実装、react-hook-form + Zodによるフォームバリデーション、リフレッシュトークンによるアクセストークン自動再発行のMiddleware実装、未ログインユーザーのページアクセス制限
+- Face/Seed機能: repositoryを実APIに接続し、作成・更新・削除フローを実装。Seed投稿（PostModal）での画像・PDFアップロードとサムネイル表示にも対応
+- プロフィール/フレンド機能: プロフィール閲覧・編集ページの新設、アバター画像アップロード、フレンド一覧とオンライン状態表示用ハートビートの実装、フレンド申請・承認・ブロックのフロー
+- i18n（多言語対応）基盤: next-intl の導入、全コンポーネント向け翻訳キーの整備、フランス語ロケール追加、Zod ErrorMapのi18n化
+- Storybook導入: パッケージ導入、Next.js/サーバー専用モジュールのモック整備、各コンポーネントのストーリー追加
+- 実装計画・アーキテクチャドキュメントの整備: 機能追加のたびに実装計画書やCRUDチェックリストを作成し、設計判断の記録と実装状況の可視化を継続した
+
+### 直面した課題と克服方法
+
+アクセストークン失効直後、Next.jsのLink prefetchなどにより複数のリクエストがほぼ同時にMiddlewareを通過し、それぞれが独立してbackendの `/auth/refresh` を呼び出す状況が発生していた。backend側のトークンローテーション実装は、失効済みトークンの再利用を不正利用とみなして検知する仕組みになっていたため、この並行リクエストが誤検知を引き起こし、ユーザーのセッションがトークンファミリごと強制的に失効させられる不具合につながっていた。原因を調査した結果、同一のリフレッシュトークンに対して複数のリフレッシュ処理が並行に走っていることを特定し、進行中のリフレッシュ処理をリフレッシュトークンごとにキャッシュして、後続のリクエストは進行中のPromiseを共有する方式に変更することで解決した。

@@ -52,6 +52,9 @@
     "removeImageAriaLabel": "Remove image {n}",
     "uploadingImageAlt": "Uploading image {n}",
     "errorImageInvalidType": "Please choose a JPEG or PNG image, or a PDF file.",
+    "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageInvalidFormat": "This file doesn't look like a valid image or PDF. Please try a different file.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "pdfFileNameFallback": "PDF file",
     "submit": "Post",
     "submitting": "Posting...",
@@ -79,6 +82,9 @@
     "imageSelectButton": "Choose image",
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
+    "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageInvalidFormat": "This file doesn't look like a valid image. Please try a different file.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "submit": "Create",
     "submitting": "Creating...",
     "errorGeneric": "Failed to create the face. Please try again later."
@@ -102,6 +108,9 @@
     "imageSelectButton": "Choose image",
     "uploading": "Uploading…",
     "errorImageInvalidType": "Please choose a JPEG or PNG image.",
+    "errorImageTooLarge": "Please choose a file under 10MB.",
+    "errorImageInvalidFormat": "This file doesn't look like a valid image. Please try a different file.",
+    "errorImageUploadFailed": "Failed to upload the image. Please try again.",
     "submit": "Save",
     "submitting": "Saving...",
     "errorGeneric": "Failed to save the face. Please try again later."
@@ -193,7 +202,6 @@
     "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "reply": "What would you say to your past self?",
     "recentSeeds": "Recent seeds",
-    "viewAll": "View all",
     "compose": "What will you write today?",
     "post": "Post"
   },
@@ -289,6 +297,7 @@
     "errorAvatar": "Please enter a valid URL",
     "errorAvatarUploadFailed": "Failed to upload image. Please try again.",
     "errorAvatarInvalidType": "Please select a JPEG or PNG image.",
+    "errorAvatarInvalidFormat": "This file doesn't look like a valid image. Please try a different file.",
     "errorGeneric": "Failed to save profile. Please try again later.",
     "errorAvatarNotFound": "The selected image could not be found. Please choose the image again.",
     "errorSessionExpired": "Your session has expired. Please sign in again."

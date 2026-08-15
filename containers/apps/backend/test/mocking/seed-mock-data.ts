@@ -349,6 +349,16 @@ async function main() {
     }
   }
 
+  // ------------------------------------------
+  // テスト用ログイン情報の出力
+  // ------------------------------------------
+  console.log('\n🔑 ログインに使用可能なテストユーザー情報:');
+  for (const user of users) {
+    console.log(`  - 名前: ${user.name}`);
+    console.log(`    メール: ${user.key.toLowerCase()}@example.com`);
+    console.log(`    パスワード: ${DEFAULT_PASSWORD}`);
+  }
+
   console.log('\n🎉 すべてのシードデータ投入およびログアウト処理が完了しました！');
   console.log(
     'ℹ️  メールアドレスは決定論的なため、再実行する場合は先に `pnpm --filter backend db:reset` でDBをクリアしてください。'

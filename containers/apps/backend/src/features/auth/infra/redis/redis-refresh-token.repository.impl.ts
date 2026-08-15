@@ -1,5 +1,5 @@
 import type { RefreshToken, UserId } from '@tracen/contracts';
-import { AuthRefreshTokenRepositorySpec } from '../../domain/auth.repository';
+import { AuthRefreshTokenRepositorySpec, ActiveFamilyToken } from '../../domain/auth.repository';
 import { RedisClient } from '../../../../shared/infra/redis/client';
 import {
   RefreshTokenData,
@@ -45,6 +45,7 @@ function modifyStatusToRevoked(data: RefreshTokenData): RefreshTokenData {
   return makeSafeInfraResult(refreshTokenDataSchema, {
     ...data,
     status: 'revoked', // トークンの状態を「revoked」に変更
+    revokedAt: new Date().toISOString(),
   });
 }
 
@@ -141,6 +142,37 @@ class RedisRefreshTokenRepositoryImpl implements AuthRefreshTokenRepositorySpec 
         throw new ServiceUnavailableError('Token storage is unavailable.');
       }
       throw new Error('Failed to retrieve refresh token', { cause: error });
+    }
+  }
+
+  // 再利用の猶予期間判定用: familyId に紐づくトークン群の中から、現在アクティブな1件を探す。
+  // (ローテーション直後は「revokedになった旧トークン」と「新しく発行されたアクティブなトークン」が
+  // 同じfamilyKeyのSetに同居しているため、Setを走査してstatus==='active'のものを見つければよい)
+  async findActiveTokenOfFamily(familyId: FamilyId): Promise<ActiveFamilyToken | null> {
+    const familyKey = `${familyKeyPrefix}${familyId}`;
+    try {
+      const tokens = await this.redisClient.smembers(familyKey);
+      if (tokens.length === 0) return null;
+
+      const keys = tokens.map((token) => `${refreshKeyPrefix}${token}`);
+      const tokenDatas = await this.redisClient.mget(...keys);
+
+      for (let i = 0; i < tokens.length; i++) {
+        const raw = tokenDatas[i];
+        if (!raw) continue;
+        try {
+          const data = JSON.parse(raw) as RefreshTokenData;
+          if (data.status === 'active') {
+            return { token: tokens[i] as RefreshToken, data };
+          }
+        } catch {
+          continue; // 壊れたデータはスキップし、他のトークンを探す
+        }
+      }
+      return null;
+    } catch (error: unknown) {
+      if (isRedisError(error)) throw new ServiceUnavailableError('Token storage is unavailable.');
+      throw new Error(`Failed to find active token for family ${familyId}`, { cause: error });
     }
   }
 

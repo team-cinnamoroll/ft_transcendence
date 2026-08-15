@@ -10,6 +10,7 @@ import { getAvatarUrl } from '@/lib/display';
 import { updateUserProfileAction } from '@/server/actions/user-profile';
 import { uploadAvatarFileAction, deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useZodForm } from '@/lib/use-zod-form';
+import { isAllowedFileFormat } from '@/lib/file-format';
 
 type Props = {
   user: UserProfile;
@@ -79,35 +80,48 @@ const ProfileEditModal = ({ user, onClose }: Props) => {
       return;
     }
 
-    // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
-    discardPendingUpload();
-
-    const objectUrl = URL.createObjectURL(file);
-    objectUrlRef.current = objectUrl;
-    setPreviewUrl(objectUrl);
-    setAvatarError(null);
-    // avatarFileIdはここでは変更しない（アップロードが失敗した場合に、既存のアバターを消してしまわないため）
-    setIsUploadingAvatar(true);
-
-    const formData = new FormData();
-    formData.set('file', file);
-
     void (async () => {
-      const result = await uploadAvatarFileAction(formData);
-      setIsUploadingAvatar(false);
-
-      if (!result.success) {
-        const firstFieldError = Object.values(result.errors)[0]?.[0];
-        setAvatarError(firstFieldError ?? t('errorAvatarUploadFailed'));
-        return;
-      }
-      if (!result.data.success) {
-        setAvatarError(result.data.message);
+      // file.typeは拡張子等からの自己申告値にすぎないため、実体のバイト列（シグネチャ）も確認する
+      if (!(await isAllowedFileFormat(file, ALLOWED_AVATAR_FILE_TYPES))) {
+        setAvatarError(t('errorAvatarInvalidFormat'));
         return;
       }
 
-      uploadedFileIdRef.current = result.data.fileId;
-      setAvatarFileId(result.data.fileId);
+      // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
+      discardPendingUpload();
+
+      const objectUrl = URL.createObjectURL(file);
+      objectUrlRef.current = objectUrl;
+      setPreviewUrl(objectUrl);
+      setAvatarError(null);
+      // avatarFileIdはここでは変更しない（アップロードが失敗した場合に、既存のアバターを消してしまわないため）
+      setIsUploadingAvatar(true);
+
+      const formData = new FormData();
+      formData.set('file', file);
+
+      try {
+        const result = await uploadAvatarFileAction(formData);
+        setIsUploadingAvatar(false);
+
+        if (!result.success) {
+          const firstFieldError = Object.values(result.errors)[0]?.[0];
+          setAvatarError(firstFieldError ?? t('errorAvatarUploadFailed'));
+          return;
+        }
+        if (!result.data.success) {
+          setAvatarError(result.data.message);
+          return;
+        }
+
+        uploadedFileIdRef.current = result.data.fileId;
+        setAvatarFileId(result.data.fileId);
+      } catch (err) {
+        // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+        console.error('ProfileEditModal: uploadAvatarFileAction threw unexpectedly', err);
+        setIsUploadingAvatar(false);
+        setAvatarError(t('errorAvatarUploadFailed'));
+      }
     })();
   };
 

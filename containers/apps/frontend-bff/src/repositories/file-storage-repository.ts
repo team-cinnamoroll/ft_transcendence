@@ -22,30 +22,36 @@ export type FileStorageRepositorySpec = {
 export function createFileStorageApiRepositoryImpl(): FileStorageRepositorySpec {
   return {
     uploadFile: async (accessToken, file) => {
-      // POST /file-storage/upload はJSONではなく、ヘッダー+バイナリbodyという特殊な形式
-      // HTTPヘッダーの値はASCII(ByteString)である必要があるため、日本語等を含むファイル名は
-      // encodeURIComponentしてから設定する(fileNameはDB保存用メタデータでしかなく、
-      // フロントエンドからは参照されていないためデコードは不要)
-      const res = await createBackendClient(accessToken).api.v1['file-storage'].upload.$post(
-        {
-          header: {
-            'x-file-name': encodeURIComponent(file.name),
-            'x-file-type': file.type,
-            'content-length': String(file.size),
-            'x-visibility': 'public',
+      try {
+        // POST /file-storage/upload はJSONではなく、ヘッダー+バイナリbodyという特殊な形式
+        // HTTPヘッダーの値はASCII(ByteString)である必要があるため、日本語等を含むファイル名は
+        // encodeURIComponentしてから設定する(fileNameはDB保存用メタデータでしかなく、
+        // フロントエンドからは参照されていないためデコードは不要)
+        const res = await createBackendClient(accessToken).api.v1['file-storage'].upload.$post(
+          {
+            header: {
+              'x-file-name': encodeURIComponent(file.name),
+              'x-file-type': file.type as import('@tracen/contracts').MimeType,
+              'content-length': String(file.size),
+              'x-visibility': 'public',
+            },
           },
-        },
-        { init: { body: file } }
-      );
-      if (!res.ok) {
-        console.error('FileStorageRepository.uploadFile: backend request failed', res.status);
-        return { success: false, errorKind: classifyHttpStatus(res.status) };
+          { init: { body: file } }
+        );
+        if (!res.ok) {
+          console.error('FileStorageRepository.uploadFile: backend request failed', res.status);
+          return { success: false, errorKind: classifyHttpStatus(res.status) };
+        }
+        const json = (await res.json()) as FileUpload;
+        if (!json.success) {
+          return { success: false, errorKind: classifyHttpStatus(res.status) };
+        }
+        return { success: true, data: json.data };
+      } catch (error) {
+        // バックエンドがストリームを早期中断した場合の fetch failed などを捕捉
+        console.error('FileStorageRepository.uploadFile: network error or fetch failed', error);
+        return { success: false, errorKind: 'VALIDATION' };
       }
-      const json = (await res.json()) as FileUpload;
-      if (!json.success) {
-        return { success: false, errorKind: classifyHttpStatus(res.status) };
-      }
-      return { success: true, data: json.data };
     },
 
     deleteFile: async (accessToken, fileId) => {

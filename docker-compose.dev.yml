@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
-    entrypoint: []
     user: root
     volumes:
       - .:/workspace:cached
@@ -12,7 +11,7 @@ services:
       - tracen-backend-node-modules:/workspace/containers/apps/backend/node_modules
       - tracen-frontend-bff-node-modules:/workspace/containers/apps/frontend-bff/node_modules
       - file_storage_data:${FILE_STORAGE_BASE_DIR:-/app/uploads}
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/rootless.sock
       - ${HOME}/.claude:/home/node/.claude:cached
     working_dir: /workspace
     command:
@@ -124,7 +123,7 @@ services:
       - -ec
       - exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD:-tracen_secret}"
     ports:
-      - '6379:6379'
+      - '16379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -185,8 +184,8 @@ services:
     command: ['filebeat', '-e', '--strict.perms=false']
     volumes:
       - ./containers/infra/analytics/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro
+      - ${DOCKER_ROOT_DIR:-/var/lib/docker}/containers:/var/lib/docker/containers:ro
       # 読み取り位置(registry)。永続化しないとコンテナ作り直しのたびに
       # 既存のコンテナログを先頭から読み直し、同じログが重複投入される
       - filebeat_data:/usr/share/filebeat/data
@@ -263,7 +262,7 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
+      - ${DOCKER_ROOT_DIR:-/var/lib/docker}:/var/lib/docker:ro
 
   # PostgreSQL のコネクション数/クエリ/DB サイズ等
   postgres-exporter:

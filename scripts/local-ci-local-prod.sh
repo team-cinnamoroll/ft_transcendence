@@ -36,6 +36,9 @@ dev_project_name="${TRACEN_LOCAL_CI_DEV_PROJECT_NAME:-$(basename "$host_ws")}"
 outer_compose_file="$host_ws/docker-compose.dev.yml"
 ci_docker_host="${TRACEN_LOCAL_CI_DOCKER_HOST:-tcp://ci-docker:2375}"
 
+# アウターデーモンと通信するための元のDOCKER_HOSTを保存
+ORIGINAL_DOCKER_HOST="${DOCKER_HOST:-}"
+
 start_ci_docker() {
   if [[ ! -f "$outer_compose_file" ]]; then
     echo "[local-ci] dev compose が見つかりません: $outer_compose_file" >&2
@@ -45,7 +48,10 @@ start_ci_docker() {
   echo "[local-ci] Start DinD (service=ci-docker, project=$dev_project_name)" >&2
 
   # outer docker（devcontainer を起動している側）に対して ci-docker を起動する
-  (unset DOCKER_HOST; docker compose --project-directory "$host_ws" -p "$dev_project_name" -f "$outer_compose_file" up -d --force-recreate ci-docker) >/dev/null
+  (
+    if [ -n "$ORIGINAL_DOCKER_HOST" ]; then export DOCKER_HOST="$ORIGINAL_DOCKER_HOST"; else unset DOCKER_HOST; fi
+    docker compose --project-directory "$host_ws" -p "$dev_project_name" -f "$outer_compose_file" up -d --force-recreate ci-docker
+  ) >/dev/null
 
   echo "[local-ci] Wait for DinD daemon ($ci_docker_host)" >&2
   for _ in $(seq 1 30); do
@@ -111,7 +117,10 @@ cleanup() {
 
   if [[ "${TRACEN_LOCAL_CI_KEEP_DIND:-}" != "1" ]]; then
     echo "[local-ci] Stop DinD (service=ci-docker)" >&2
-    (unset DOCKER_HOST; docker compose -p "$dev_project_name" -f "$outer_compose_file" stop ci-docker) >/dev/null 2>&1 || true
+    (
+      if [ -n "$ORIGINAL_DOCKER_HOST" ]; then export DOCKER_HOST="$ORIGINAL_DOCKER_HOST"; else unset DOCKER_HOST; fi
+      docker compose -p "$dev_project_name" -f "$outer_compose_file" stop ci-docker
+    ) >/dev/null 2>&1 || true
   fi
 }
 trap cleanup EXIT INT TERM

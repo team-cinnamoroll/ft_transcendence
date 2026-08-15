@@ -8,6 +8,7 @@ import { updateFaceAction, uploadFaceImageAction } from '@/server/actions/faces'
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useTranslations } from 'next-intl';
 import { useZodForm } from '@/lib/use-zod-form';
+import { isAllowedFileFormat } from '@/lib/file-format';
 
 type Props = {
   isOpen: boolean;
@@ -68,43 +69,58 @@ const EditFaceModal = ({ isOpen, face, onClose, onUpdate }: Props) => {
     e.target.value = ''; // 同じファイルを選び直しても onChange が発火するようにする
     if (!file) return;
 
-    if (
-      !ALLOWED_FACE_IMAGE_FILE_TYPES.includes(file.type) ||
-      file.size > MAX_FACE_IMAGE_FILE_SIZE
-    ) {
+    if (!ALLOWED_FACE_IMAGE_FILE_TYPES.includes(file.type)) {
       setImageError(t('errorImageInvalidType'));
       return;
     }
 
-    // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
-    discardPendingUpload();
-
-    const objectUrl = URL.createObjectURL(file);
-    objectUrlRef.current = objectUrl;
-    setPreviewUrl(objectUrl);
-    setImageError(null);
-    // imageIdはここでは変更しない（アップロードが失敗した場合に、既存の画像を消してしまわないため）
-    setIsUploadingImage(true);
-
-    const formData = new FormData();
-    formData.set('file', file);
+    if (file.size > MAX_FACE_IMAGE_FILE_SIZE) {
+      setImageError(t('errorImageTooLarge'));
+      return;
+    }
 
     void (async () => {
-      const result = await uploadFaceImageAction(formData);
-      setIsUploadingImage(false);
-
-      if (!result.success) {
-        const firstFieldError = Object.values(result.errors)[0]?.[0];
-        setImageError(firstFieldError ?? t('errorImageInvalidType'));
-        return;
-      }
-      if (!result.data.success) {
-        setImageError(result.data.message);
+      // file.typeは拡張子等からの自己申告値にすぎないため、実体のバイト列（シグネチャ）も確認する
+      if (!(await isAllowedFileFormat(file, ALLOWED_FACE_IMAGE_FILE_TYPES))) {
+        setImageError(t('errorImageInvalidFormat'));
         return;
       }
 
-      uploadedFileIdRef.current = result.data.fileId;
-      setValue('imageId', result.data.fileId, { shouldValidate: true });
+      // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
+      discardPendingUpload();
+
+      const objectUrl = URL.createObjectURL(file);
+      objectUrlRef.current = objectUrl;
+      setPreviewUrl(objectUrl);
+      setImageError(null);
+      // imageIdはここでは変更しない（アップロードが失敗した場合に、既存の画像を消してしまわないため）
+      setIsUploadingImage(true);
+
+      const formData = new FormData();
+      formData.set('file', file);
+
+      try {
+        const result = await uploadFaceImageAction(formData);
+        setIsUploadingImage(false);
+
+        if (!result.success) {
+          const firstFieldError = Object.values(result.errors)[0]?.[0];
+          setImageError(firstFieldError ?? t('errorImageInvalidType'));
+          return;
+        }
+        if (!result.data.success) {
+          setImageError(result.data.message);
+          return;
+        }
+
+        uploadedFileIdRef.current = result.data.fileId;
+        setValue('imageId', result.data.fileId, { shouldValidate: true });
+      } catch (err) {
+        // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+        console.error('EditFaceModal: uploadFaceImageAction threw unexpectedly', err);
+        setIsUploadingImage(false);
+        setImageError(t('errorImageUploadFailed'));
+      }
     })();
   };
 

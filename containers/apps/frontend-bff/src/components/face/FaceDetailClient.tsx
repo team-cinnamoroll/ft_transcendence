@@ -10,6 +10,7 @@ import FaceSeedFeed from './FaceSeedFeed';
 import EditSeedModal from '@/components/seed/EditSeedModal';
 import { deleteSeedAction } from '@/server/actions/seeds';
 import { useSubscribeSeedCreated } from '@/lib/seed-created-provider';
+import { getCurrentMonthInJST } from '@/lib/date-utils';
 
 type SeedActionMenu = { seed: Seed; top: number; right: number };
 
@@ -43,7 +44,7 @@ const FaceDetailClient = ({
 
   const totalSeeds = seeds.length;
   const monthlySeeds = useMemo(() => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = getCurrentMonthInJST();
     return seeds.filter((a) => a.createdAt.startsWith(currentMonth)).length;
   }, [seeds]);
 

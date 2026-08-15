@@ -18,6 +18,7 @@ import { ValidationError, NotFoundError, ForbiddenError } from '../../shared/err
 import { StorageQuotaExceededError, InternalStorageError } from './domain/file-storage.error';
 import { ZodError } from 'zod';
 import { makeSafeResponse } from '../../shared/utils/validation';
+import { createFileSignatureValidatorStream } from '../../shared/utils/file-validator';
 
 export function fileStorageRouter() {
   return new Hono<FileStorageHandlerEnv>()
@@ -30,13 +31,21 @@ export function fileStorageRouter() {
         const jwtPayload = c.get('jwtPayload');
         const ownerId = jwtPayload.sub;
         const headers = c.req.valid('header');
+
+        if (!c.req.raw.body) {
+          throw new ValidationError('Request body is empty');
+        }
+        const validatedInputData = c.req.raw.body.pipeThrough(
+          createFileSignatureValidatorStream(headers['x-file-type'])
+        );
+
         const fileSaveRequest = FileSaveRequestSchema.parse({
           ownerId,
           fileName: headers['x-file-name'],
           mimeType: headers['x-file-type'],
           fileSize: Number(headers['content-length']),
           visibility: headers['x-visibility'],
-          inputData: c.req.raw.body,
+          inputData: validatedInputData,
         });
         const { fileId, filePath } = await saveFile(
           fileStorageRepo,

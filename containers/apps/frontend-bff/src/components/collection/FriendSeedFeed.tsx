@@ -18,6 +18,7 @@ import { useDebouncedValue } from '@/lib/use-debounced-value';
 import { searchFacesAction } from '@/server/actions/faces';
 import { searchSeedsAction } from '@/server/actions/seeds';
 import { findUsersByIdsAction } from '@/server/actions/users';
+import { parseStartOfDayToUTC, parseEndOfDayToUTC } from '@/lib/date-utils';
 
 type Props = {
   seeds: Seed[];
@@ -49,6 +50,8 @@ const FriendSeedFeed = ({ seeds, faces, users, currentUserId }: Props) => {
   const [seedToDate, setSeedToDate] = useState('');
   const [seedSearchSortOrder, setSeedSearchSortOrder] = useState<SeedSortOrder>('newest');
 
+  const faceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
+
   useEffect(() => {
     const q = debouncedSearchQuery.trim();
     if (!q) {
@@ -64,12 +67,18 @@ const FriendSeedFeed = ({ seeds, faces, users, currentUserId }: Props) => {
     Promise.all([searchFacesAction({ q }), searchSeedsAction({ q })]).then(
       async ([faceResults, seedResults]) => {
         if (ignore) return;
-        const otherFaces = faceResults.filter((summary) => summary.face.userId !== currentUserId);
-        const otherSeeds = seedResults.filter((seed) => seed.userId !== currentUserId);
-        const authors = await findUsersByIdsAction(otherSeeds.map((seed) => seed.userId));
+        const visibleFaces = faceResults.filter(
+          (summary) => summary.face.userId !== currentUserId && summary.face.visibility === 'public'
+        );
+        const visibleSeeds = seedResults.filter((seed) => {
+          if (seed.userId === currentUserId) return false;
+          const face = faceMap.get(seed.faceId);
+          return face?.visibility === 'public';
+        });
+        const authors = await findUsersByIdsAction(visibleSeeds.map((seed) => seed.userId));
         if (ignore) return;
-        setSearchedFaces(otherFaces);
-        setSearchedSeeds(otherSeeds);
+        setSearchedFaces(visibleFaces);
+        setSearchedSeeds(visibleSeeds);
         setSearchedAuthors(authors);
         setIsSearching(false);
       }
@@ -78,9 +87,7 @@ const FriendSeedFeed = ({ seeds, faces, users, currentUserId }: Props) => {
     return () => {
       ignore = true;
     };
-  }, [debouncedSearchQuery, currentUserId]);
-
-  const faceMap = useMemo(() => createLookupMap(faces, (face) => face.id), [faces]);
+  }, [debouncedSearchQuery, currentUserId, faceMap]);
   const userMap = useMemo(() => createLookupMap(users, (user) => user.id), [users]);
   const searchedAuthorMap = useMemo(
     () => createLookupMap(searchedAuthors, (user) => user.id),
@@ -109,8 +116,8 @@ const FriendSeedFeed = ({ seeds, faces, users, currentUserId }: Props) => {
   };
 
   const filteredAndSortedSearchedSeeds = useMemo(() => {
-    const fromTime = seedFromDate ? new Date(seedFromDate).getTime() : null;
-    const toTime = seedToDate ? new Date(`${seedToDate}T23:59:59.999`).getTime() : null;
+    const fromTime = seedFromDate ? parseStartOfDayToUTC(seedFromDate) : null;
+    const toTime = seedToDate ? parseEndOfDayToUTC(seedToDate) : null;
 
     const result = searchedSeeds.filter((seed) => {
       const createdAtTime = new Date(seed.createdAt).getTime();

@@ -15,9 +15,12 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   experimental: {
     serverActions: {
-      // backendのFileSizeSchemaの上限(10MB)に合わせる。デフォルトは1MBのため画像アップロードで不足する
-      bodySizeLimit: '10mb',
+      // backendのFileSizeSchemaの上限(10MB)に合わせる。デフォルトは1MBのため画像アップロードで不足する。
+      // multipart/form-dataのboundaryやパートヘッダー分のオーバーヘッドを吸収できるよう、
+      // 10MBちょうどではなく余裕を持たせる（ファイル自体の実質的な上限はbackend側の10MB制限のまま）
+      bodySizeLimit: '11mb',
     },
+    middlewareClientMaxBodySize: '11mb',
   },
   async rewrites() {
     return [

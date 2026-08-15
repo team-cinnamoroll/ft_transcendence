@@ -52,6 +52,9 @@
     "removeImageAriaLabel": "Supprimer l'image {n}",
     "uploadingImageAlt": "Image en cours d'envoi {n}",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG, ou un fichier PDF.",
+    "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageInvalidFormat": "Ce fichier ne semble pas être une image ou un PDF valide. Veuillez essayer un autre fichier.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "pdfFileNameFallback": "Fichier PDF",
     "submit": "Publier",
     "submitting": "Publication…",
@@ -79,6 +82,9 @@
     "imageSelectButton": "Choisir une image",
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
+    "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageInvalidFormat": "Ce fichier ne semble pas être une image valide. Veuillez essayer un autre fichier.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "submit": "Créer",
     "submitting": "Création…",
     "errorGeneric": "Échec de la création de la facette. Veuillez réessayer plus tard."
@@ -102,6 +108,9 @@
     "imageSelectButton": "Choisir une image",
     "uploading": "Envoi en cours…",
     "errorImageInvalidType": "Veuillez choisir une image au format JPEG ou PNG.",
+    "errorImageTooLarge": "Veuillez choisir un fichier de moins de 10 Mo.",
+    "errorImageInvalidFormat": "Ce fichier ne semble pas être une image valide. Veuillez essayer un autre fichier.",
+    "errorImageUploadFailed": "Échec de l'envoi de l'image. Veuillez réessayer.",
     "submit": "Enregistrer",
     "submitting": "Enregistrement…",
     "errorGeneric": "Échec de l'enregistrement de la facette. Veuillez réessayer plus tard."
@@ -193,7 +202,6 @@
     "yearsAgo": "{n, plural, one {Il y a # an} other {Il y a # ans}}",
     "reply": "Que répondriez-vous à votre passé ?",
     "recentSeeds": "Graines récentes",
-    "viewAll": "Tout voir",
     "compose": "Qu'allez-vous écrire aujourd'hui ?",
     "post": "Publier"
   },
@@ -289,6 +297,7 @@
     "errorAvatar": "Veuillez saisir une URL valide",
     "errorAvatarUploadFailed": "Échec du téléversement de l'image. Veuillez réessayer.",
     "errorAvatarInvalidType": "Veuillez sélectionner une image au format JPEG ou PNG.",
+    "errorAvatarInvalidFormat": "Ce fichier ne semble pas être une image valide. Veuillez essayer un autre fichier.",
     "errorGeneric": "Échec de l'enregistrement du profil. Veuillez réessayer plus tard.",
     "errorAvatarNotFound": "L'image sélectionnée est introuvable. Veuillez la sélectionner à nouveau.",
     "errorSessionExpired": "Votre session a expiré. Veuillez vous reconnecter."

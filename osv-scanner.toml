@@ -1,3 +1,1 @@
-[[IgnoredVulns]]
-id = "GHSA-mh99-v99m-4gvg"
-reason = "v5.0.8への強制上書きはViteのESM互換性を破壊するため除外。開発依存（ESLint等）内でのみ使用。"
+

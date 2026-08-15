@@ -52,6 +52,9 @@
     "removeImageAriaLabel": "画像{n}を削除",
     "uploadingImageAlt": "アップロード中の画像{n}",
     "errorImageInvalidType": "JPEG・PNG形式の画像、またはPDFファイルを選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
+    "errorImageInvalidFormat": "ファイルの中身が画像またはPDFとして認識できませんでした。別のファイルをお試しください。",
+    "errorImageUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
     "pdfFileNameFallback": "PDFファイル",
     "submit": "投稿",
     "submitting": "投稿中...",
@@ -79,6 +82,9 @@
     "imageSelectButton": "画像を選択",
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
+    "errorImageInvalidFormat": "ファイルの中身が画像として認識できませんでした。別のファイルをお試しください。",
+    "errorImageUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
     "submit": "作成する",
     "submitting": "作成中...",
     "errorGeneric": "フェイスの作成に失敗しました。時間をおいて再度お試しください。"
@@ -102,6 +108,9 @@
     "imageSelectButton": "画像を選択",
     "uploading": "アップロード中…",
     "errorImageInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorImageTooLarge": "ファイルサイズは10MB以下にしてください。",
+    "errorImageInvalidFormat": "ファイルの中身が画像として認識できませんでした。別のファイルをお試しください。",
+    "errorImageUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
     "submit": "保存する",
     "submitting": "保存中...",
     "errorGeneric": "フェイスの保存に失敗しました。時間をおいて再度お試しください。"
@@ -193,7 +202,6 @@
     "yearsAgo": "{n}年前",
     "reply": "今のあなたは、何と返しますか",
     "recentSeeds": "最近のシード",
-    "viewAll": "すべて見る",
     "compose": "今、何を書く？",
     "post": "投稿"
   },
@@ -289,6 +297,7 @@
     "errorAvatar": "有効なURLを入力してください",
     "errorAvatarUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
     "errorAvatarInvalidType": "JPEGまたはPNG形式の画像を選択してください。",
+    "errorAvatarInvalidFormat": "ファイルの中身が画像として認識できませんでした。別のファイルをお試しください。",
     "errorGeneric": "プロフィールの保存に失敗しました。時間をおいて再度お試しください。",
     "errorAvatarNotFound": "選択した画像が見つかりませんでした。もう一度画像を選び直してください。",
     "errorSessionExpired": "セッションが切れました。再度ログインしてください。"

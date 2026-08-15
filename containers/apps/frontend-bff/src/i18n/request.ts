@@ -20,6 +20,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
+    timeZone: 'Asia/Tokyo', // SSRとクライアントで時刻のズレによるHydration Mismatchを防ぐため明示的に指定
     messages: {
       ...baseMessages,
       Terms: termsMessages,

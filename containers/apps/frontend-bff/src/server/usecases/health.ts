@@ -426,27 +426,58 @@ export async function runApiHealthCheck(
       `OK (refresh-token): refresh token response includes new refreshToken=${refreshJson.data.refreshToken}`
     );
 
-    // API: 失効したリフレッシュトークンを使用する
-    const noRefreshRes = await repo.refreshToken(createdUserId, createdRefreshToken);
-    if (noRefreshRes.ok && noRefreshRes.status !== 401) {
+    // API: 失効直後のリフレッシュトークンを再送する（猶予期間内の再利用は許容される仕様）
+    const graceRefreshRes = await repo.refreshToken(createdUserId, createdRefreshToken);
+    if (!graceRefreshRes.ok || graceRefreshRes.status !== 200) {
       return await failWithResponse(
         'refresh-token',
-        noRefreshRes,
-        'refresh token endpoint returned 2xx for revoked token'
+        graceRefreshRes,
+        'revoked refresh token reuse within grace period was not accepted'
       );
     }
-    log('OK (refresh-token): revoked refresh token cannot be used');
+    const graceRefreshJson = (await graceRefreshRes.json()) as AuthRefresh;
+    if (!graceRefreshJson.success) {
+      log(
+        `FAIL (refresh-token): grace period reuse response JSON success=false, message=${graceRefreshJson.message}`
+      );
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: `grace period reuse failed: ${graceRefreshJson.message}` },
+      };
+    }
+    const graceVerifiedPayload = await verifyToken(graceRefreshJson.data.accessToken);
+    if (!graceVerifiedPayload || graceVerifiedPayload.sub !== createdUserId) {
+      log('FAIL (refresh-token): grace period reuse returned invalid or mismatched JWT');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'grace period reuse returned invalid or mismatched JWT' },
+      };
+    }
+    if (graceRefreshJson.data.refreshToken !== refreshJson.data.refreshToken) {
+      log('FAIL (refresh-token): grace period reuse rotated the already-active refreshToken');
+      return {
+        ok: false,
+        logs,
+        failedStep: 'refresh-token',
+        error: { message: 'grace period reuse rotated the already-active refreshToken' },
+      };
+    }
+    log('OK (refresh-token): revoked refresh token reused within grace period without re-rotating');
 
-    // API: 追放したリフレッシュトークンを使用する
-    const noRefreshRes2 = await repo.refreshToken(createdUserId, refreshJson.data.refreshToken);
-    if (noRefreshRes2.ok && noRefreshRes2.status !== 401) {
+    // API: 存在しないリフレッシュトークンを使用する
+    const unknownRefreshRes = await repo.refreshToken(createdUserId, crypto.randomUUID());
+    if (unknownRefreshRes.ok && unknownRefreshRes.status !== 401) {
       return await failWithResponse(
         'refresh-token',
-        noRefreshRes2,
-        'refresh token endpoint returned 2xx for revoked token'
+        unknownRefreshRes,
+        'refresh token endpoint returned 2xx for unknown token'
       );
     }
-    log('OK (refresh-token): force revoked refresh token cannot be used');
+    log('OK (refresh-token): unknown refresh token cannot be used');
 
     log('STEP 3/5: backend GET /users/:id (exists check)');
 

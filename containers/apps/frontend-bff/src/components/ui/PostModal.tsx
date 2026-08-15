@@ -14,6 +14,7 @@ import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds'
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useZodForm } from '@/lib/use-zod-form';
 import { usePublishSeedCreated } from '@/lib/seed-created-provider';
+import { isAllowedFileFormat } from '@/lib/file-format';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -23,6 +24,16 @@ const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 
 // backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/png/pdfのみに制限する
 const ALLOWED_SEED_ATTACHMENT_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+
+// 画像プレビューのグリッド定義。列数は最大2列とし、3枚以上は自動的に2行目へ折り返す
+const getImagePreviewGridStyle = (count: number): React.CSSProperties => {
+  return { gridTemplateColumns: `repeat(${Math.min(count, 2)}, 1fr)` };
+};
+
+// 各セルのアスペクト比。1枚のときのみ写真らしい横長比率、2枚以上は全セルを正方形に揃える
+const getImagePreviewItemAspectRatio = (count: number): string => {
+  return count === 1 ? '4 / 3' : '1 / 1';
+};
 
 type AttachedImage = {
   file: File;
@@ -198,10 +209,7 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
     setImages((prev) => [...prev, ...newImages]);
 
     newImages.forEach((img) => {
-      if (
-        !ALLOWED_SEED_ATTACHMENT_FILE_TYPES.includes(img.file.type) ||
-        img.file.size > MAX_IMAGE_FILE_SIZE
-      ) {
+      if (!ALLOWED_SEED_ATTACHMENT_FILE_TYPES.includes(img.file.type)) {
         setImages((prev) =>
           prev.map((i) =>
             i.objectUrl === img.objectUrl
@@ -211,29 +219,63 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
         );
         return;
       }
-
-      const formData = new FormData();
-      formData.set('file', img.file);
+      if (img.file.size > MAX_IMAGE_FILE_SIZE) {
+        setImages((prev) =>
+          prev.map((i) =>
+            i.objectUrl === img.objectUrl
+              ? { ...i, isUploading: false, error: t('errorImageTooLarge') }
+              : i
+          )
+        );
+        return;
+      }
 
       void (async () => {
-        const result = await uploadSeedImageAction(formData);
-        setImages((prev) =>
-          prev.map((i) => {
-            if (i.objectUrl !== img.objectUrl) return i;
-            if (!result.success) {
-              const firstFieldError = Object.values(result.errors)[0]?.[0];
-              return {
-                ...i,
-                isUploading: false,
-                error: firstFieldError ?? t('errorImageInvalidType'),
-              };
-            }
-            if (!result.data.success) {
-              return { ...i, isUploading: false, error: result.data.message };
-            }
-            return { ...i, isUploading: false, fileId: result.data.fileId };
-          })
-        );
+        // file.typeは拡張子等からの自己申告値にすぎないため、実体のバイト列（シグネチャ）も確認する
+        if (!(await isAllowedFileFormat(img.file, ALLOWED_SEED_ATTACHMENT_FILE_TYPES))) {
+          setImages((prev) =>
+            prev.map((i) =>
+              i.objectUrl === img.objectUrl
+                ? { ...i, isUploading: false, error: t('errorImageInvalidFormat') }
+                : i
+            )
+          );
+          return;
+        }
+
+        const formData = new FormData();
+        formData.set('file', img.file);
+
+        try {
+          const result = await uploadSeedImageAction(formData);
+          setImages((prev) =>
+            prev.map((i) => {
+              if (i.objectUrl !== img.objectUrl) return i;
+              if (!result.success) {
+                const firstFieldError = Object.values(result.errors)[0]?.[0];
+                return {
+                  ...i,
+                  isUploading: false,
+                  error: firstFieldError ?? t('errorImageInvalidType'),
+                };
+              }
+              if (!result.data.success) {
+                return { ...i, isUploading: false, error: result.data.message };
+              }
+              return { ...i, isUploading: false, fileId: result.data.fileId };
+            })
+          );
+        } catch (err) {
+          // Server Actionのリクエストボディサイズ上限超過など、想定外の通信エラー用のフォールバック
+          console.error('PostModal: uploadSeedImageAction threw unexpectedly', err);
+          setImages((prev) =>
+            prev.map((i) =>
+              i.objectUrl === img.objectUrl
+                ? { ...i, isUploading: false, error: t('errorImageUploadFailed') }
+                : i
+            )
+          );
+        }
       })();
     });
   };
@@ -512,7 +554,9 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           placeholder={t('textareaPlaceholder')}
           style={{
             width: '100%',
-            height: '100%',
+            // 画像添付時にtextareaが常に親の全高さを専有すると、下のプレビューがスクロールしないと見えなくなるため、
+            // 画像がある場合は内容量に応じた高さ(auto)にしてプレビューを常に画面内に収める
+            height: images.length > 0 ? 'auto' : '100%',
             minHeight: 200,
             resize: 'none',
             border: 'none',
@@ -553,21 +597,23 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '2fr 1fr',
+              ...getImagePreviewGridStyle(images.length),
               gap: 3,
               borderRadius: 14,
               overflow: 'hidden',
-              height: 150,
+              // 各セルはaspectRatioで正方形になるため、高さでなく幅を制限して大きくなりすぎるのを防ぐ
+              // （高さで制限すると、2行になる3枚以上のケースで2行目がoverflow: hiddenに隠れてしまう）
+              maxWidth: 480,
               border: '0.5px solid var(--mf-line-soft)',
               marginTop: 12,
             }}
           >
-            {images.slice(0, 3).map((img, index) => (
+            {images.map((img, index) => (
               <div
                 key={img.objectUrl}
                 style={{
                   position: 'relative',
-                  gridRow: index === 0 ? '1 / 3' : undefined,
+                  aspectRatio: getImagePreviewItemAspectRatio(images.length),
                 }}
               >
                 {isImageFile(img.file.type) ? (
