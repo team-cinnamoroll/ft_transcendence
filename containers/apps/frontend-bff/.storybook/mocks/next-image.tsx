@@ -13,6 +13,8 @@ type ImageProps = {
 
 // Storybook 用 next/image モック
 // next/image は最適化処理があるため、通常の <img> に置き換える
+// style は必ず転送すること: 多くのコンポーネントが object-fit などの見た目を
+// className ではなくインラインstyleで指定しているため、転送しないと画像が正しくクロップされない
 const NextImage = ({ src, alt, width, height, className, style, fill }: ImageProps) => {
   // next/imageの fill プロパティをエミュレートする
   const mergedClassName = [fill ? 'absolute inset-0 w-full h-full' : '', className]
