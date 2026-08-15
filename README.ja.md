@@ -198,6 +198,58 @@ bash scripts/down-local-prod.sh
 - テーマに関連する定番の参考資料を列挙する（ドキュメント、記事、チュートリアル等）。
 - AI をどのように使ったかの説明を含める。どのタスクに、プロジェクトのどの部分に使ったかを明示する。 -->
 
+## AlertmanagerによるDiscordへの通知
+
+Prometheus が `containers/infra/monitoring/prometheus/alert.rules.yml` のルールを評価し、発火したアラートを Alertmanager が `alertname` ごとに集約して Discord の Webhook へ通知します。現在のルールは以下の 3 つです。
+
+| アラート         | 条件                                       | severity |
+| ---------------- | ------------------------------------------ | -------- |
+| `TargetDown`     | 監視対象（exporter 含む）が 1 分以上ダウン | critical |
+| `HostHighMemory` | ホストのメモリ使用率が 5 分間 85% 超       | warning  |
+| `HostHighCPU`    | ホストの CPU 使用率が 5 分間 85% 超        | warning  |
+
+### 手順 1: Webhook URL を設定する
+
+Webhook URL は秘密情報のため git 管理外（`.gitignore` 済み）です。見本をコピーし、Discord の Webhook URL を 1 行で記入します。
+
+```bash
+cp containers/infra/monitoring/alertmanager/secret/webhook_url.example \
+   containers/infra/monitoring/alertmanager/secret/webhook_url
+```
+
+通知を使わない場合は何もする必要はありません。ファイルが未作成でも Alertmanager は正常に起動し、アラート通知が行われないだけで他は通常どおり動作します。
+
+### 手順 2: 監視スタックを起動する
+
+開発環境では監視系のコンテナは自動起動しないため、手動で起動します。
+
+```bash
+pnpm pg:up
+```
+
+本番相当環境（local-prod）では `bash scripts/deploy-local-prod.sh` に含まれています。
+
+### 設定変更時の反映
+
+- **`secret/webhook_url` の作成・変更**: コンテナの再起動は不要です。`secret/` はディレクトリごとマウントしており（dev / local-prod 共通）、`webhook_url_file` は通知のたびに読み直されるため、次の通知から反映されます。
+- **`alertmanager/config.yml` の変更**: 設定は起動時にのみ読まれるため、再起動が必要です。
+
+  ```bash
+  docker compose -f docker-compose.dev.yml restart alertmanager
+  ```
+
+### 動作確認
+
+exporter を 1 つ止めると `up == 0` になり、1 分後に `TargetDown` が発火します。
+
+```bash
+docker compose -f docker-compose.dev.yml stop redis-exporter
+# http://localhost:9090/alerts で Pending -> Firing を確認
+docker compose -f docker-compose.dev.yml start redis-exporter
+```
+
+監視基盤全体の構成や Grafana ダッシュボードについては `containers/infra/monitoring/README.md` を参照してください。
+
 # Resources
 
 ## 参考資料
