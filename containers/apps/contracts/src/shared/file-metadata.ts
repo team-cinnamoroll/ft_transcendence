@@ -9,7 +9,14 @@ export type FileUrl = z.infer<typeof FileUrlSchema>;
 export const FileNameSchema = z.string().min(1).max(255);
 export type FileName = z.infer<typeof FileNameSchema>;
 
-export const MimeTypeSchema = z.string().min(1).max(255);
+export const MimeTypeSchema = z.enum([
+  'image/jpeg',
+  'image/jpg',
+  'image/pjpeg',
+  'image/png',
+  'image/x-png',
+  'application/pdf',
+]);
 export type MimeType = z.infer<typeof MimeTypeSchema>;
 
 export const FileSchema = z

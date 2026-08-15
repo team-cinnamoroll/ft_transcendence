@@ -30,7 +30,7 @@ export function createFileStorageApiRepositoryImpl(): FileStorageRepositorySpec 
         {
           header: {
             'x-file-name': encodeURIComponent(file.name),
-            'x-file-type': file.type,
+            'x-file-type': file.type as import('@tracen/contracts').MimeType,
             'content-length': String(file.size),
             'x-visibility': 'public',
           },

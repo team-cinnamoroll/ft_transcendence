@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Readable } from 'node:stream';
-import { finished } from 'node:stream/promises';
+import { pipeline } from 'node:stream/promises';
 import {
   FileStoragesServiceRepositorySpec,
   UploadOptions,
@@ -10,6 +10,7 @@ import { StorageDataInput } from '../../domain/usecases/file-storage.file-save.r
 import { type BucketNameType, type StorageKey } from '../../domain/file-metadata.entity';
 import { type Visibility, type FilePath, type FileMetadataId } from '@tracen/contracts';
 import { StorageQuotaExceededError, InternalStorageError } from '../../domain/file-storage.error';
+import { ValidationError } from '../../../../shared/errors/global.error';
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error;
@@ -45,11 +46,21 @@ class LocalFileStorageRepository implements FileStoragesServiceRepositorySpec {
         // 書き込み用のストリームを作成
         const writeStream = (await fs.open(fullPath, 'w')).createWriteStream();
 
-        // パイプで繋いでデータを流し込み、完了を待つ（サーバーのメモリを消費しない）
-        nodeReadable.pipe(writeStream);
-        await finished(writeStream);
+        // パイプラインで繋いでデータを流し込み、完了を待つ（エラーハンドリングも自動で行われる）
+        await pipeline(nodeReadable, writeStream);
       }
     } catch (error: unknown) {
+      // ストリームの途中でエラーが発生した場合、中途半端なファイルが残るため削除を試みる
+      try {
+        await fs.unlink(fullPath);
+      } catch {
+        // ファイルがまだ作成されていない、または既に削除済みの場合は無視
+      }
+
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+
       if (isErrnoException(error)) {
         // ディスク容量不足
         if (error.code === 'ENOSPC') {

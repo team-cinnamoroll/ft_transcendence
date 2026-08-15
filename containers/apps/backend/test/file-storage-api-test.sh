@@ -130,9 +130,10 @@ run_download_assertion() {
 setup() {
     echo "=== 【準備】ユーザー作成 ＆ テストファイルの準備 ==="
 
-    # テスト用のランダムなバイナリJPGファイルを生成
+    # テスト用のランダムなバイナリJPGファイルを生成（今回追加したマジックナンバーバリデーションを通るように FF D8 FF を先頭に付与）
     echo "Generating $IMAGE_SIZE_MB MB dummy image file ($TEST_IMAGE)..."
-    dd if=/dev/urandom of="$TEST_IMAGE" bs=1M count=$IMAGE_SIZE_MB 2>/dev/null
+    printf '\xFF\xD8\xFF' > "$TEST_IMAGE"
+    dd if=/dev/urandom bs=1M count=$IMAGE_SIZE_MB 2>/dev/null >> "$TEST_IMAGE"
 
     echo "Signing up test user ($TEST_EMAIL)..."
     RES=$(curl -s -X POST "$BASE_URL/auth/sign-up" \
@@ -201,6 +202,68 @@ run_upload_test() {
     save_state
     echo ""
 }
+
+# 2.5 バリデーションテスト (MIMEタイプとファイルフォーマットの不一致など)
+run_validation_test() {
+    load_state
+    echo "=== 【テスト実行】バリデーション（フォーマット検証）テスト ==="
+
+    local INVALID_TEST_FILE="test_invalid.txt"
+    echo "Hello, this is a plain text file." > "$INVALID_TEST_FILE"
+    
+    local PNG_TEST_FILE="test_valid.png"
+    printf '\x89\x50\x4E\x47\x0D\x0A\x1A\x0A' > "$PNG_TEST_FILE"
+    echo "dummy png data" >> "$PNG_TEST_FILE"
+
+    echo "[ケース1] 許可されていないMIMEタイプ (text/plain) -> 400エラー期待"
+    RES_VAL1=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/upload" \
+        -H "Authorization: Bearer $USER_TOKEN" \
+        -H "x-file-name: test.txt" \
+        -H "x-file-type: text/plain" \
+        -H "content-length: $(wc -c < "$INVALID_TEST_FILE" | tr -d ' ')" \
+        -H "x-visibility: public" \
+        --data-binary @"$INVALID_TEST_FILE")
+    VAL1_HTTP_STATUS=$(echo "$RES_VAL1" | tail -n 1)
+    if [ "$VAL1_HTTP_STATUS" -ne 400 ]; then
+        echo "❌ Validation Case 1 Failed. Expected HTTP 400 but got $VAL1_HTTP_STATUS"
+        exit 1
+    fi
+    echo "  -> ✅ Expected HTTP 400 confirmed."
+
+    echo "[ケース2] MIMEタイプは許可されている(image/jpeg)が中身が違う -> 400エラー期待"
+    RES_VAL2=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/file-storage/upload" \
+        -H "Authorization: Bearer $USER_TOKEN" \
+        -H "x-file-name: fake.jpg" \
+        -H "x-file-type: image/jpeg" \
+        -H "content-length: $(wc -c < "$INVALID_TEST_FILE" | tr -d ' ')" \
+        -H "x-visibility: public" \
+        --data-binary @"$INVALID_TEST_FILE")
+    VAL2_HTTP_STATUS=$(echo "$RES_VAL2" | tail -n 1)
+    if [ "$VAL2_HTTP_STATUS" -ne 400 ]; then
+        echo "❌ Validation Case 2 Failed. Expected HTTP 400 but got $VAL2_HTTP_STATUS"
+        exit 1
+    fi
+    echo "  -> ✅ Expected HTTP 400 confirmed."
+
+    echo "[ケース3] 別の許可されているMIMEタイプと正しいフォーマット(image/png) -> 成功期待"
+    RES_VAL3=$(curl -s -X POST "$BASE_URL/file-storage/upload" \
+        -H "Authorization: Bearer $USER_TOKEN" \
+        -H "x-file-name: valid.png" \
+        -H "x-file-type: image/png" \
+        -H "content-length: $(wc -c < "$PNG_TEST_FILE" | tr -d ' ')" \
+        -H "x-visibility: public" \
+        --data-binary @"$PNG_TEST_FILE")
+    VAL3_SUCCESS=$(echo "$RES_VAL3" | jq -r '.success')
+    if [ "$VAL3_SUCCESS" != "true" ]; then
+        echo "❌ Validation Case 3 Failed. Response: $RES_VAL3"
+        exit 1
+    fi
+    echo "  -> 🎉 Validation Case 3 Success!"
+
+    rm -f "$INVALID_TEST_FILE" "$PNG_TEST_FILE"
+    echo ""
+}
+
 
 # 3. ダウンロードテスト (静的コンテンツの配信 ＆ 同一性検証)
 run_download_test() {
@@ -289,6 +352,9 @@ case "$1" in
     upload)
         run_upload_test
         ;;
+    validate)
+        run_validation_test
+        ;;
     download)
         run_download_test
         ;;
@@ -300,15 +366,17 @@ case "$1" in
         ;;
     all)
         setup
+        run_validation_test
         run_upload_test
         run_download_test
         run_delete_test
         cleanup
         ;;
     *)
-        echo "使用方法: $0 {setup|upload|download|delete|cleanup|all}"
+        echo "使用方法: $0 {setup|upload|validate|download|delete|cleanup|all}"
         echo "  setup    : 準備（アカウント作成とダミーファイルの生成）"
         echo "  upload   : テスト実行（ストリームバイナリアップロードのテスト）"
+        echo "  validate : テスト実行（MIMEタイプやファイルフォーマットのバリデーションテスト）"
         echo "  download : テスト実行（静的配信ファイルの取得とハッシュ検証）"
         echo "  delete   : テスト実行（削除と削除後の404確認）"
         echo "  cleanup  : 後処理（アカウント削除、一時ファイルのクリーンアップ）"
