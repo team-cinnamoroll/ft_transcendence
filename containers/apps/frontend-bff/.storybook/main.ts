@@ -37,6 +37,15 @@ const config: StorybookConfig = {
             find: '@/server/actions/user-profile',
             replacement: path.resolve(__dirname, 'mocks/user-profile-actions.ts'),
           },
+          // AppHeader/SideNav が heartbeat-provider.tsx 経由でトップレベルimportしているため必要
+          {
+            find: '@/server/actions/presence',
+            replacement: path.resolve(__dirname, 'mocks/presence-actions.ts'),
+          },
+          {
+            find: '@/server/actions/friendship',
+            replacement: path.resolve(__dirname, 'mocks/friendship-actions.ts'),
+          },
           // Next.js / Node.js サーバー専用モジュールをスタブ化
           { find: 'server-only', replacement: path.resolve(__dirname, 'mocks/server-only.ts') },
           // Next.js 固有モジュールをモック化
