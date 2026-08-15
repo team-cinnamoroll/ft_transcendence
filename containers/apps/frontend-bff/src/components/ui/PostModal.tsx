@@ -24,6 +24,16 @@ const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 // backendはmimeTypeの許可リスト検証をしていないため、フロントエンド側でjpeg/png/pdfのみに制限する
 const ALLOWED_SEED_ATTACHMENT_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
+// 画像プレビューのグリッド定義。列数は最大2列とし、3枚以上は自動的に2行目へ折り返す
+const getImagePreviewGridStyle = (count: number): React.CSSProperties => {
+  return { gridTemplateColumns: `repeat(${Math.min(count, 2)}, 1fr)` };
+};
+
+// 各セルのアスペクト比。1枚のときのみ写真らしい横長比率、2枚以上は全セルを正方形に揃える
+const getImagePreviewItemAspectRatio = (count: number): string => {
+  return count === 1 ? '4 / 3' : '1 / 1';
+};
+
 type AttachedImage = {
   file: File;
   objectUrl: string;
@@ -531,7 +541,9 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           placeholder={t('textareaPlaceholder')}
           style={{
             width: '100%',
-            height: '100%',
+            // 画像添付時にtextareaが常に親の全高さを専有すると、下のプレビューがスクロールしないと見えなくなるため、
+            // 画像がある場合は内容量に応じた高さ(auto)にしてプレビューを常に画面内に収める
+            height: images.length > 0 ? 'auto' : '100%',
             minHeight: 200,
             resize: 'none',
             border: 'none',
@@ -572,21 +584,23 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '2fr 1fr',
+              ...getImagePreviewGridStyle(images.length),
               gap: 3,
               borderRadius: 14,
               overflow: 'hidden',
-              height: 150,
+              // 各セルはaspectRatioで正方形になるため、高さでなく幅を制限して大きくなりすぎるのを防ぐ
+              // （高さで制限すると、2行になる3枚以上のケースで2行目がoverflow: hiddenに隠れてしまう）
+              maxWidth: 480,
               border: '0.5px solid var(--mf-line-soft)',
               marginTop: 12,
             }}
           >
-            {images.slice(0, 3).map((img, index) => (
+            {images.map((img, index) => (
               <div
                 key={img.objectUrl}
                 style={{
                   position: 'relative',
-                  gridRow: index === 0 ? '1 / 3' : undefined,
+                  aspectRatio: getImagePreviewItemAspectRatio(images.length),
                 }}
               >
                 {isImageFile(img.file.type) ? (
