@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
       // 10MBちょうどではなく余裕を持たせる（ファイル自体の実質的な上限はbackend側の10MB制限のまま）
       bodySizeLimit: '11mb',
     },
+    middlewareClientMaxBodySize: '11mb',
   },
   async rewrites() {
     return [
