@@ -334,7 +334,7 @@ for ((i=0; i<$len; i++)); do
         
     success=$(echo "$res" | jq -r '.success')
     if [ "$success" = "true" ]; then
-        ((seed_count++))
+        seed_count=$((seed_count + 1))
     else
         echo "  ❌ Seed作成失敗 ($f_key): $res"
     fi
