@@ -211,9 +211,6 @@ const HomeClient = ({
       {/* 最近のシード セクションヘッダー */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
           padding: '20px 18px 4px',
         }}
       >
@@ -222,7 +219,6 @@ const HomeClient = ({
         >
           {t('recentSeeds')}
         </span>
-        <span style={{ fontSize: 11.5, color: 'var(--mf-text-muted)' }}>{t('viewAll')}</span>
       </div>
 
       <FaceFilterBar faces={faces} selectedFaceId={selectedFaceId} onSelect={setSelectedFaceId} />

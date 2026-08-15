@@ -199,7 +199,6 @@
     "yearsAgo": "{n, plural, one {# year ago} other {# years ago}}",
     "reply": "What would you say to your past self?",
     "recentSeeds": "Recent seeds",
-    "viewAll": "View all",
     "compose": "What will you write today?",
     "post": "Post"
   },
