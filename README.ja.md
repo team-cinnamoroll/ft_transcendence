@@ -81,6 +81,8 @@ cp .env.example .env                   # 本番相当環境用
 cp .env.dev.example .env.dev
 ```
 
+- 42の環境で開発する場合は別途、[42_DEV_ENVIRONMENT.md](./docs/for_dev/42_DEV_ENVIRONMENT.md) の手順に従ってセットアップしてください
+
 ## 開発環境の起動
 
 1. VS Code でリポジトリを開く
