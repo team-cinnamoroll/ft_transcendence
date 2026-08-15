@@ -105,9 +105,10 @@ load_state() {
 setup() {
     echo "=== 【準備】ユーザー作成 & 画像アップロード ==="
 
-    # ダミー画像生成
+    # ダミー画像生成（JPGマジックナンバー FF D8 FF を付与）
     echo "Generating dummy image ($TEST_IMAGE)..."
-    dd if=/dev/urandom of="$TEST_IMAGE" bs=1k count=100 2>/dev/null
+    printf '\xFF\xD8\xFF' > "$TEST_IMAGE"
+    dd if=/dev/urandom bs=1k count=100 2>/dev/null >> "$TEST_IMAGE"
 
     # --- User1 作成 ---
     echo "Signing up User1 ($USER1_EMAIL)..."
