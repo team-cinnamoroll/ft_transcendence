@@ -50,7 +50,7 @@ export function createFileStorageApiRepositoryImpl(): FileStorageRepositorySpec 
       } catch (error) {
         // バックエンドがストリームを早期中断した場合の fetch failed などを捕捉
         console.error('FileStorageRepository.uploadFile: network error or fetch failed', error);
-        return { success: false, errorKind: 'BAD_REQUEST' };
+        return { success: false, errorKind: 'VALIDATION' };
       }
     },
 
