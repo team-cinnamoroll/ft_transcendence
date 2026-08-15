@@ -4,7 +4,10 @@ import { customZValidator as cZValidator } from '../../../shared/utils/custom-z-
 import { type AuthHandlerEnv } from '../auth.di';
 import { AuthRefreshRequestSchema, AuthRefreshResponseSchema } from '@tracen/contracts';
 import { acceptRefreshRequest, logoutByRefreshToken } from './refresh.usecase';
-import { refreshUserTokens } from '../../../features/auth/domain/auth.usecase';
+import {
+  refreshUserTokens,
+  reissueAccessTokenOnly,
+} from '../../../features/auth/domain/auth.usecase';
 import { makeSafeResponse } from '../../../shared/utils/validation';
 import { ServiceUnavailableError } from '../../../shared/errors/global.error';
 
@@ -17,14 +20,14 @@ export function refreshRouter() {
       const config = c.get('config');
       try {
         const response = await acceptRefreshRequest(authRefreshTokenRepository, request);
-        if (response && response.userId && response.familyId) {
+        if (response?.kind === 'rotate') {
           const userTokens = await refreshUserTokens(
             authAccessTokenWorker,
             authRefreshTokenRepository,
             config,
             request.refreshToken,
-            response.userId,
-            response.familyId
+            response.data.userId,
+            response.data.familyId
           );
           return c.json(
             makeSafeResponse(AuthRefreshResponseSchema, {
@@ -32,6 +35,25 @@ export function refreshRouter() {
               data: {
                 accessToken: userTokens.accessToken,
                 refreshToken: userTokens.refreshToken,
+              },
+            }),
+            200
+          );
+        }
+        if (response?.kind === 'reuse-grace') {
+          // 猶予期間内の古いトークン再送。ローテーションはせず、既にアクティブな
+          // トークンに対してアクセストークンだけを再発行する。
+          const { accessToken } = await reissueAccessTokenOnly(
+            authAccessTokenWorker,
+            config,
+            response.data.userId
+          );
+          return c.json(
+            makeSafeResponse(AuthRefreshResponseSchema, {
+              success: true,
+              data: {
+                accessToken,
+                refreshToken: response.token,
               },
             }),
             200

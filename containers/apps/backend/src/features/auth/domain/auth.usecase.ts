@@ -91,3 +91,24 @@ export async function refreshUserTokens(
     refreshToken: newRefreshToken.token,
   };
 }
+
+/**
+ * 既に発行済みの（アクティブな）リフレッシュトークンに対して、ローテーションを行わずに
+ * アクセストークンだけを再発行する。
+ * 再利用の猶予期間内に古いリフレッシュトークンが再送された際、既にローテーション済みの
+ * アクティブなトークンをそのまま使い回すために使う（詳細は refresh.usecase.ts を参照）。
+ */
+export async function reissueAccessTokenOnly(
+  authAccessTokenWorker: AuthAccessTokenWorkerSpec,
+  config: Config,
+  userId: string
+): Promise<{ accessToken: string }> {
+  const payload = createJWTPayload(
+    userId,
+    'user',
+    config.ACCESS_TOKEN_EXPIRES_IN,
+    config.JWT_ISSUER
+  );
+  const accessToken = await authAccessTokenWorker.createJWT(payload);
+  return { accessToken };
+}

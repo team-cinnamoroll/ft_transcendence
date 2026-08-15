@@ -33,5 +33,7 @@ export const refreshTokenDataSchema = z.object({
   createdAt: IsoDateTimeStringSchema, // 発行時刻（ISO 8601）
   familyId: FamilyIdSchema, // トークン世代の識別子
   status: z.enum(['active', 'revoked']).default('active'), // トークンの状態
+  // status が 'revoked' になった時刻（ISO 8601）。再利用検知の猶予期間判定に使う。
+  revokedAt: IsoDateTimeStringSchema.optional(),
 });
 export type RefreshTokenData = z.infer<typeof refreshTokenDataSchema>;
