@@ -12,7 +12,7 @@ In MultiFace, a user has multiple "**faces**" corresponding to their interests a
 
 ## Key Features
 
-- **Authentication**: sign-up / sign-in / sign-out / token refresh (JWT + refresh tokens, stored in httpOnly cookies)
+- **Authentication**: sign-up / sign-in / sign-out / token refresh (JWT + refresh tokens, stored in httpOnly Cookies)
 - **Faces**: create a category per facet of yourself, and set it public or private
 - **Seeds (activities)**: posts tied to a face. Supports body text plus multiple image and PDF attachments
 - **Friendship**: request / accept / block / remove, friend list and pending-request list
@@ -20,19 +20,19 @@ In MultiFace, a user has multiple "**faces**" corresponding to their interests a
 - **User profile**: display name, badge, and avatar image management
 - **File storage**: image upload / download / delete (separate public and private buckets)
 - **Internationalization**: three languages — English, French, and Japanese (`next-intl`)
-- **Operations platform**: metrics monitoring with Prometheus + Grafana, log visualization with ELK
+- **Operations platform**: metrics monitoring with Prometheus + Grafana + Alertmanager, log visualization with Elasticsearch + Logstash + Kibana
 
 # Instruction
 
 ## Prerequisites
 
-| Item    | Version / condition                                                            |
-| ------- | ------------------------------------------------------------------------------ |
-| Docker  | Docker Desktop or OrbStack must be running                                     |
-| VS Code | Dev Containers extension must be enabled                                       |
-| Node.js | 24 (provided inside the Dev Container)                                         |
-| pnpm    | 11.16.0 (pinned in `packageManager`; enabled automatically through corepack)    |
-| mkcert  | Required only when running the production-like environment (local-prod)         |
+| Item    | Version / condition                                                          |
+| ------- | ---------------------------------------------------------------------------- |
+| Docker  | Docker Desktop or OrbStack must be running                                   |
+| VS Code | Dev Containers extension must be enabled                                     |
+| Node.js | 24 (provided inside the Dev Container)                                       |
+| pnpm    | 11.16.0 (pinned in `packageManager`; enabled automatically through corepack) |
+| mkcert  | Required only when running the production-like environment (local-prod)      |
 
 Running the development environment through the **VS Code Dev Container** is recommended. Deployment operations for the production-like environment (docker / mkcert / hosts changes) should be run **on the host OS** (the Dev Container is for editing).
 
@@ -47,20 +47,20 @@ cp .env.example .env                   # for the production-like environment
 
 The main variables are listed below (see each `.example` file for details).
 
-| Variable                                               | Description                                                     |
-| ------------------------------------------------------ | --------------------------------------------------------------- |
-| `NODE_ENV`                                             | Run mode (development / production)                             |
-| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD`  | PostgreSQL connection settings                                  |
-| `DATABASE_URL`                                         | Connection URL used by the backend (Drizzle / postgres.js)      |
-| `RUN_MIGRATIONS`                                       | Whether to run migrations automatically on startup              |
-| `REDIS_PASSWORD`                                       | Redis authentication password                                   |
-| `PEPPER`                                               | Pepper (secret value) added to password hashing                 |
-| `JWT_ISSUER`                                           | JWT issuer                                                      |
-| `ACCESS_TOKEN_EXPIRES_IN` / `REFRESH_TOKEN_EXPIRES_IN` | Token lifetimes                                                 |
-| `FILE_STORAGE_BASE_DIR`                                | Directory where uploaded files are stored                       |
-| `APP_API_BASE_URL`                                     | Base URL the BFF (Next.js server) uses to call the backend      |
+| Variable                                               | Description                                                           |
+| ------------------------------------------------------ | --------------------------------------------------------------------- |
+| `NODE_ENV`                                             | Run mode (development / production)                                   |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD`  | PostgreSQL connection settings                                        |
+| `DATABASE_URL`                                         | Connection URL used by the backend (Drizzle / postgres.js)            |
+| `RUN_MIGRATIONS`                                       | Whether to run migrations automatically on startup                    |
+| `REDIS_PASSWORD`                                       | Redis authentication password                                         |
+| `PEPPER`                                               | Pepper (secret value) added to password hashing                       |
+| `JWT_ISSUER`                                           | JWT issuer                                                            |
+| `ACCESS_TOKEN_EXPIRES_IN` / `REFRESH_TOKEN_EXPIRES_IN` | Token lifetimes                                                       |
+| `FILE_STORAGE_BASE_DIR`                                | Directory where uploaded files are stored                             |
+| `APP_API_BASE_URL`                                     | Base URL the BFF (Next.js server) uses to call the backend            |
 | `NEXT_PUBLIC_BFF_API_BASE_URL`                         | Base URL the browser uses to call the BFF API (exposed to the client) |
-| `GF_SECURITY_ADMIN_PASSWORD` and others                | Grafana / Elasticsearch / Kibana / Logstash settings            |
+| `GF_SECURITY_ADMIN_PASSWORD` and others                | Grafana / Elasticsearch / Kibana / Logstash settings                  |
 
 ## Setting Up the Development Environment
 
@@ -190,11 +190,11 @@ bash scripts/down-local-prod.sh
 
 Prometheus evaluates the rules in `containers/infra/monitoring/prometheus/alert.rules.yml`, and Alertmanager groups the fired alerts by `alertname` and notifies a Discord webhook. There are currently three rules.
 
-| Alert            | Condition                                              | severity |
-| ---------------- | ------------------------------------------------------ | -------- |
+| Alert            | Condition                                                          | severity |
+| ---------------- | ------------------------------------------------------------------ | -------- |
 | `TargetDown`     | A monitored target (including exporters) is down for over 1 minute | critical |
-| `HostHighMemory` | Host memory usage above 85% for 5 minutes              | warning  |
-| `HostHighCPU`    | Host CPU usage above 85% for 5 minutes                 | warning  |
+| `HostHighMemory` | Host memory usage above 85% for 5 minutes                          | warning  |
+| `HostHighCPU`    | Host CPU usage above 85% for 5 minutes                             | warning  |
 
 ### Step 1: Configure the webhook URL
 
@@ -267,21 +267,21 @@ For the overall structure of the monitoring platform and the Grafana dashboards,
 
 ### In-project Documentation
 
-| Document                                       | Contents                                                        |
-| ---------------------------------------------- | --------------------------------------------------------------- |
-| `docs/DEVELOPMENT.md`                          | Development environment procedures                              |
-| `docs/architecture/ARCHITECTURE.md`            | Overall project architecture                                    |
-| `docs/contracts/CONTRACTS_GUIDE.md`            | Guide for working with shared types and schemas                 |
-| `docs/deploy/LOCAL_PROD_DEPLOYMENT.md`         | Deployment steps for the production-like environment            |
-| `docs/test/LOCAL_CI_LOCAL_PROD.md`             | How to run local CI                                             |
-| `docs/for_dev/EDITORCONFIG_SETUP.md`           | EditorConfig setup                                              |
-| `docs/for_dev/GIT_HOOKS_LOCAL_VALIDATION.md`   | Local validation through Git hooks                              |
-| `docs/for_dev/LINTER_SETUP.md`                 | Linter (ESLint) setup                                           |
-| `docs/for_dev/PRETTIER_SETUP.md`               | Prettier setup                                                  |
-| `docs/for_dev/SECURITY_EXCEPTION_3DAY_RULE.md` | Security exception handling rules                               |
-| `docs/api/backend/api-key-openapi.yaml`        | Backend API spec (API-key authentication, for administrators)   |
+| Document                                       | Contents                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| `docs/DEVELOPMENT.md`                          | Development environment procedures                                    |
+| `docs/architecture/ARCHITECTURE.md`            | Overall project architecture                                          |
+| `docs/contracts/CONTRACTS_GUIDE.md`            | Guide for working with shared types and schemas                       |
+| `docs/deploy/LOCAL_PROD_DEPLOYMENT.md`         | Deployment steps for the production-like environment                  |
+| `docs/test/LOCAL_CI_LOCAL_PROD.md`             | How to run local CI                                                   |
+| `docs/for_dev/EDITORCONFIG_SETUP.md`           | EditorConfig setup                                                    |
+| `docs/for_dev/GIT_HOOKS_LOCAL_VALIDATION.md`   | Local validation through Git hooks                                    |
+| `docs/for_dev/LINTER_SETUP.md`                 | Linter (ESLint) setup                                                 |
+| `docs/for_dev/PRETTIER_SETUP.md`               | Prettier setup                                                        |
+| `docs/for_dev/SECURITY_EXCEPTION_3DAY_RULE.md` | Security exception handling rules                                     |
+| `docs/api/backend/api-key-openapi.yaml`        | Backend API spec (API-key authentication, for administrators)         |
 | `docs/api/backend/jwt-auth-openapi.yaml`       | Backend API spec (JWT access-token authentication, for regular users) |
-| `docs/api/backend/public-openapi.yaml`         | Backend API spec (public API, no authentication required)       |
+| `docs/api/backend/public-openapi.yaml`         | Backend API spec (public API, no authentication required)             |
 
 ## Use of AI
 
@@ -289,13 +289,13 @@ Throughout this project we continuously used generative AI (Claude Code / GitHub
 
 ### Tasks Where AI Was Used
 
-| Target                | How it was used                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Filing issues         | Created issues following the templates via `.claude/skills/github-create-issue` and `.github/agents/issue-creator.agent.md`  |
-| Implementation support| Progressed implementation issue by issue via `.claude/skills/github-impl-issue` and `.github/agents/issue-implementer.agent.md` |
-| Commits / PRs         | Standardized commit messages and PR descriptions via `.claude/skills/github-commit`, `.claude/skills/github-make-pr`, and `.github/skills/*` |
-| Technical research    | Researched external information via `.claude/skills/web-search`                                                              |
-| Documentation         | Drafted and reviewed the design and procedure documents under `docs/`                                                        |
+| Target                 | How it was used                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Filing issues          | Created issues following the templates via `.claude/skills/github-create-issue` and `.github/agents/issue-creator.agent.md`                  |
+| Implementation support | Progressed implementation issue by issue via `.claude/skills/github-impl-issue` and `.github/agents/issue-implementer.agent.md`              |
+| Commits / PRs          | Standardized commit messages and PR descriptions via `.claude/skills/github-commit`, `.claude/skills/github-make-pr`, and `.github/skills/*` |
+| Technical research     | Researched external information via `.claude/skills/web-search`                                                                              |
+| Documentation          | Drafted and reviewed the design and procedure documents under `docs/`                                                                        |
 
 ### Areas Decided by Humans
 
@@ -329,13 +329,13 @@ Work followed the flow "file an issue → create a branch → implement → PR �
 
 Issues are labeled with prefixed labels so that "which area," "which priority," and "which size" can be told at a glance. This lets us assign owners and decide what to work on next just by filtering labels.
 
-| Category   | Labels                                                                                                  | Purpose                                                  |
-| ---------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Area       | `area:frontend` / `area:backend` / `area:contracts` / `area:db` / `area:infra` / `area:ci` / `area:docs` | Indicates the layer affected by the change               |
-| Priority   | `priority:p0` – `priority:p3`                                                                           | Deciding what to work on first                           |
-| Size       | `size:XS` / `size:S` / `size:M` / `size:L`                                                              | A guide for estimation and splitting                     |
-| Subject requirements | `mandatory` / `module:major` / `module:minor`                                                 | Mapping to mandatory requirements and modules            |
-| Other      | `epic` / `type:design` / `onboarding` / `question`                                                      | Large groupings, design discussion, environment setup, questions |
+| Category             | Labels                                                                                                   | Purpose                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Area                 | `area:frontend` / `area:backend` / `area:contracts` / `area:db` / `area:infra` / `area:ci` / `area:docs` | Indicates the layer affected by the change                       |
+| Priority             | `priority:p0` – `priority:p3`                                                                            | Deciding what to work on first                                   |
+| Size                 | `size:XS` / `size:S` / `size:M` / `size:L`                                                               | A guide for estimation and splitting                             |
+| Subject requirements | `mandatory` / `module:major` / `module:minor`                                                            | Mapping to mandatory requirements and modules                    |
+| Other                | `epic` / `type:design` / `onboarding` / `question`                                                       | Large groupings, design discussion, environment setup, questions |
 
 ## Communication
 
@@ -346,11 +346,11 @@ Issues are labeled with prefixed labels so that "which area," "which priority," 
 
 Quality is enforced by **Git hooks and local CI** rather than a CI server.
 
-| Timing       | What runs                                                                                                        |
-| ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `pre-commit` | `lint-staged` (ESLint + Prettier), `pnpm audit`, `secrets:scan` (gitleaks), `osv:scan-lockfiles` (OSV-Scanner)   |
-| `pre-push`   | `pnpm typecheck`, `pnpm local-ci:fast` (build, start, smoke-test, and clean up the production-like environment)  |
-| Optional     | `pnpm local-ci:full` (startup verification including the production-like registry)                               |
+| Timing       | What runs                                                                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `lint-staged` (ESLint + Prettier), `pnpm audit`, `secrets:scan` (gitleaks), `osv:scan-lockfiles` (OSV-Scanner)  |
+| `pre-push`   | `pnpm typecheck`, `pnpm local-ci:fast` (build, start, smoke-test, and clean up the production-like environment) |
+| Optional     | `pnpm local-ci:full` (startup verification including the production-like registry)                              |
 
 Local CI actually brings up `docker-compose.local-prod.yml` and verifies `https://tracen.local/api/health`, the test scripts, and connectivity to the top page. This catches early on whether an in-progress change has broken the production-like deployment.
 
@@ -384,20 +384,20 @@ backend (Hono)
 
 ## Technologies Used
 
-| Layer                        | Technologies                                                                          |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| Frontend / BFF               | Next.js, React, Tailwind CSS, next-intl, react-hook-form, Zod, lucide-react, Storybook |
-| Backend                      | Hono, Vite                                                                             |
-| Shared types and schemas     | @tracen/contracts (Zod schemas), Hono RPC client (hc)                                  |
-| Database                     | PostgreSQL, Drizzle ORM, postgres.js, drizzle-kit                                      |
-| Cache / short-lived data     | Redis (ioredis)                                                                        |
-| Authentication               | argon2 (+ pepper), JWT, public JWKS endpoint, jose                                     |
-| Reverse proxy                | Nginx (development: HTTP; production-like: HTTPS + upstream certificate verification)  |
-| Monitoring                   | Prometheus, Grafana, Alertmanager, various exporters                                   |
-| Log visualization            | Elasticsearch, Logstash, Kibana, Filebeat                                              |
-| Testing                      | Vitest, shell-script API tests, local-prod smoke tests                                 |
-| Development environment      | Docker Compose, Dev Container, pnpm, local Docker registry, mkcert                     |
-| Quality management           | ESLint, Prettier, EditorConfig, husky, lint-staged, gitleaks, OSV-Scanner              |
+| Layer                    | Technologies                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| Frontend / BFF           | Next.js, React, Tailwind CSS, next-intl, react-hook-form, Zod, lucide-react, Storybook |
+| Backend                  | Hono, Vite                                                                             |
+| Shared types and schemas | @tracen/contracts (Zod schemas), Hono RPC client (hc)                                  |
+| Database                 | PostgreSQL, Drizzle ORM, postgres.js, drizzle-kit                                      |
+| Cache / short-lived data | Redis (ioredis)                                                                        |
+| Authentication           | argon2 (+ pepper), JWT, public JWKS endpoint, jose                                     |
+| Reverse proxy            | Nginx (development: HTTP; production-like: HTTPS + upstream certificate verification)  |
+| Monitoring               | Prometheus, Grafana, Alertmanager, various exporters                                   |
+| Log visualization        | Elasticsearch, Logstash, Kibana, Filebeat                                              |
+| Testing                  | Vitest, shell-script API tests, local-prod smoke tests                                 |
+| Development environment  | Docker Compose, Dev Container, pnpm, local Docker registry, mkcert                     |
+| Quality management       | ESLint, Prettier, EditorConfig, husky, lint-staged, gitleaks, OSV-Scanner              |
 
 ## Rationale for Technology Choices
 
@@ -407,7 +407,7 @@ We adopted a pnpm workspaces monorepo because we wanted API types drifting betwe
 
 ### BFF Pattern (Next.js)
 
-Rather than letting the browser call the backend API directly, every call goes through the Next.js server side (Route Handlers / Server Actions / usecases). This keeps access tokens confined to httpOnly cookies, and keeps presentation-driven data shaping out of the backend's API design. The backend API can even be kept private from the outside in the production-like setup (it is currently exposed temporarily in order to implement one of the subject modules).
+Rather than letting the browser call the backend API directly, every call goes through the Next.js server side (Route Handlers / Server Actions / usecases). This keeps access tokens confined to httpOnly Cookies, and keeps presentation-driven data shaping out of the backend's API design. The backend API can even be kept private from the outside in the production-like setup (it is currently exposed temporarily in order to implement one of the subject modules).
 
 ### Hono
 
@@ -459,66 +459,66 @@ erDiagram
 
 ### users
 
-| Column          | Type      | Constraints / description                             |
-| --------------- | --------- | ----------------------------------------------------- |
-| `id`            | uuid      | Primary key · ID                                      |
-| `email`         | text      | NOT NULL / unique index · Email address               |
-| `name`          | text      | NOT NULL · Registered name                            |
-| `password_hash` | text      | NOT NULL · Password hash                              |
-| `created_at`    | timestamp | NOT NULL · Created at                                 |
+| Column          | Type      | Constraints / description               |
+| --------------- | --------- | --------------------------------------- |
+| `id`            | uuid      | Primary key · ID                        |
+| `email`         | text      | NOT NULL / unique index · Email address |
+| `name`          | text      | NOT NULL · Registered name              |
+| `password_hash` | text      | NOT NULL · Password hash                |
+| `created_at`    | timestamp | NOT NULL · Created at                   |
 
 ### user_profiles
 
-| Column           | Type      | Constraints / description                                                   |
-| ---------------- | --------- | ---------------------------------------------------------------------------- |
-| `id`             | uuid      | Primary key · ID                                                             |
-| `name`           | text      | NOT NULL · Display name                                                      |
-| `badge`          | text      | Badge emoji                                                                  |
+| Column           | Type      | Constraints / description                                                         |
+| ---------------- | --------- | --------------------------------------------------------------------------------- |
+| `id`             | uuid      | Primary key · ID                                                                  |
+| `name`           | text      | NOT NULL · Display name                                                           |
+| `badge`          | text      | Badge emoji                                                                       |
 | `avatar_file_id` | uuid      | References `file_metadata.id` (unique, SET NULL on delete) · Avatar image file ID |
-| `user_id`        | uuid      | NOT NULL / references `users.id` (unique, CASCADE on delete) · User ID       |
-| `created_at`     | timestamp | NOT NULL · Created at                                                        |
-| `updated_at`     | timestamp | NOT NULL · Updated at                                                        |
+| `user_id`        | uuid      | NOT NULL / references `users.id` (unique, CASCADE on delete) · User ID            |
+| `created_at`     | timestamp | NOT NULL · Created at                                                             |
+| `updated_at`     | timestamp | NOT NULL · Updated at                                                             |
 
 ### file_metadata
 
-| Column        | Type         | Constraints / description                     |
-| ------------- | ------------ | --------------------------------------------- |
-| `id`          | uuid         | Primary key · ID                              |
-| `owner_id`    | uuid         | NOT NULL · Owner ID (user ID)                 |
-| `bucket`      | varchar(63)  | NOT NULL · Bucket name                        |
-| `storage_key` | varchar(512) | NOT NULL / unique · Relative path in storage  |
-| `file_name`   | varchar(255) | NOT NULL · Original file name at upload time  |
-| `mime_type`   | varchar(100) | NOT NULL · Content-Type                       |
-| `file_size`   | integer      | NOT NULL · File size                          |
-| `created_at`  | timestamp    | NOT NULL · Created at                         |
-| `updated_at`  | timestamp    | NOT NULL · Updated at                         |
+| Column        | Type         | Constraints / description                    |
+| ------------- | ------------ | -------------------------------------------- |
+| `id`          | uuid         | Primary key · ID                             |
+| `owner_id`    | uuid         | NOT NULL · Owner ID (user ID)                |
+| `bucket`      | varchar(63)  | NOT NULL · Bucket name                       |
+| `storage_key` | varchar(512) | NOT NULL / unique · Relative path in storage |
+| `file_name`   | varchar(255) | NOT NULL · Original file name at upload time |
+| `mime_type`   | varchar(100) | NOT NULL · Content-Type                      |
+| `file_size`   | integer      | NOT NULL · File size                         |
+| `created_at`  | timestamp    | NOT NULL · Created at                        |
+| `updated_at`  | timestamp    | NOT NULL · Updated at                        |
 
 ### faces
 
-| Column        | Type      | Constraints / description                                        |
-| ------------- | --------- | ---------------------------------------------------------------- |
-| `id`          | uuid      | Primary key · ID                                                 |
-| `user_id`     | uuid      | NOT NULL / references `users.id` (CASCADE on delete) · User ID   |
-| `name`        | text      | NOT NULL · Face name                                             |
-| `emoji`       | text      | Face emoji                                                       |
-| `description` | text      | Face description                                                 |
+| Column        | Type      | Constraints / description                                               |
+| ------------- | --------- | ----------------------------------------------------------------------- |
+| `id`          | uuid      | Primary key · ID                                                        |
+| `user_id`     | uuid      | NOT NULL / references `users.id` (CASCADE on delete) · User ID          |
+| `name`        | text      | NOT NULL · Face name                                                    |
+| `emoji`       | text      | Face emoji                                                              |
+| `description` | text      | Face description                                                        |
 | `image_id`    | uuid      | References `file_metadata.id` (SET NULL on delete) · Face image file ID |
-| `visibility`  | enum      | NOT NULL · Visibility status                                     |
-| `created_at`  | timestamp | NOT NULL · Created at                                            |
-| `updated_at`  | timestamp | NOT NULL · Updated at                                            |
+| `visibility`  | enum      | NOT NULL · Visibility status                                            |
+| `created_at`  | timestamp | NOT NULL · Created at                                                   |
+| `updated_at`  | timestamp | NOT NULL · Updated at                                                   |
 
 Index: `idx_faces_user_id` (for fetching your own list of faces)
 
 ### seeds
 
-| Column       | Type      | Constraints / description                                       |
-| ------------ | --------- | --------------------------------------------------------------- |
-| `id`         | uuid      | Primary key · ID                                                |
-| `user_id`    | uuid      | NOT NULL / references `users.id` (CASCADE on delete) · User ID  |
-| `face_id`    | uuid      | NOT NULL / references `faces.id` (CASCADE on delete) · Face ID  |
-| `body`       | text      | NOT NULL · Body text                                            |
-| `created_at` | timestamp | NOT NULL · Created at                                           |
-| `updated_at` | timestamp | NOT NULL · Updated at                                           |
+| Column       | Type      | Constraints / description                                      |
+| ------------ | --------- | -------------------------------------------------------------- |
+| `id`         | uuid      | Primary key · ID                                               |
+| `user_id`    | uuid      | NOT NULL / references `users.id` (CASCADE on delete) · User ID |
+| `face_id`    | uuid      | NOT NULL / references `faces.id` (CASCADE on delete) · Face ID |
+| `body`       | text      | NOT NULL · Body text                                           |
+| `created_at` | timestamp | NOT NULL · Created at                                          |
+| `updated_at` | timestamp | NOT NULL · Updated at                                          |
 
 Indexes: `idx_seeds_user_id` (for fetching a user's seed list), `idx_seeds_face_id` (for fetching a face's seed list)
 
@@ -526,11 +526,11 @@ Indexes: `idx_seeds_user_id` (for fetching a user's seed list), `idx_seeds_face_
 
 A join table representing the many-to-many relationship between seeds and images.
 
-| Column          | Type    | Constraints / description                                                  |
-| --------------- | ------- | -------------------------------------------------------------------------- |
-| `seed_id`       | uuid    | NOT NULL / references `seeds.id` (CASCADE on delete) · Seed ID             |
+| Column          | Type    | Constraints / description                                                         |
+| --------------- | ------- | --------------------------------------------------------------------------------- |
+| `seed_id`       | uuid    | NOT NULL / references `seeds.id` (CASCADE on delete) · Seed ID                    |
 | `image_id`      | uuid    | NOT NULL / references `file_metadata.id` (CASCADE on delete) · Seed image file ID |
-| `display_order` | integer | NOT NULL · Display order index                                             |
+| `display_order` | integer | NOT NULL · Display order index                                                    |
 
 Constraints: composite primary key on `(seed_id, image_id)`, unique constraint on `(seed_id, display_order)`
 
@@ -538,14 +538,14 @@ Index: `idx_seed_images_image_id` (for reverse lookup by image_id)
 
 ### friendships
 
-| Column         | Type        | Constraints / description                                              |
-| -------------- | ----------- | ---------------------------------------------------------------------- |
-| `id`           | uuid        | Primary key · ID                                                       |
+| Column         | Type        | Constraints / description                                                  |
+| -------------- | ----------- | -------------------------------------------------------------------------- |
+| `id`           | uuid        | Primary key · ID                                                           |
 | `requester_id` | uuid        | NOT NULL / references `users.id` (CASCADE on delete) · Requester (user ID) |
 | `addressee_id` | uuid        | NOT NULL / references `users.id` (CASCADE on delete) · Addressee (user ID) |
-| `status`       | enum        | NOT NULL · Friendship status                                           |
-| `created_at`   | timestamptz | NOT NULL · Created at                                                  |
-| `updated_at`   | timestamptz | NOT NULL · Updated at                                                  |
+| `status`       | enum        | NOT NULL · Friendship status                                               |
+| `created_at`   | timestamptz | NOT NULL · Created at                                                      |
+| `updated_at`   | timestamptz | NOT NULL · Updated at                                                      |
 
 Constraint: unique constraint on `(requester_id, addressee_id)` (prevents duplicate requests)
 
@@ -559,73 +559,73 @@ The TypeScript definitions in Drizzle ORM are the source of truth for the schema
 
 ## Authentication and Accounts
 
-| Feature        | Overview                                                                                          | Owner              |
-| -------------- | ------------------------------------------------------------------------------------------------- | ------------------ |
-| Sign-up        | Registration by email and password. Hashed with argon2 + pepper, and a profile is created at the same time | katakada / kharuya |
-| Sign-in        | On successful authentication, issues an access token and a refresh token and stores them in httpOnly cookies | katakada / kharuya |
-| Sign-out       | Revokes the refresh token and clears the cookies                                                  | katakada / kharuya |
-| Token refresh  | Re-issues an access token using the refresh token                                                 | katakada / kharuya |
-| JWKS publishing| Distributes the public key for verification at `/.well-known/jwks.json`                           | katakada           |
+| Feature         | Overview                                                                                                     | Owner              |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| Sign-up         | Registration by email and password. Hashed with argon2 + pepper, and a profile is created at the same time   | katakada / kharuya |
+| Sign-in         | On successful authentication, issues an access token and a refresh token and stores them in httpOnly cookies | katakada / kharuya |
+| Sign-out        | Revokes the refresh token and clears the cookies                                                             | katakada / kharuya |
+| Token refresh   | Re-issues an access token using the refresh token                                                            | katakada / kharuya |
+| JWKS publishing | Distributes the public key for verification at `/.well-known/jwks.json`                                      | katakada           |
 
 ## Profile and Users
 
-| Feature                  | Overview                                    | Owner              |
-| ------------------------ | ------------------------------------------- | ------------------ |
-| Get / update profile     | Reading and updating display name, badge, and avatar | katakada / kharuya |
-| Bulk profile fetch       | Fetching multiple users' profiles at once   | katakada / kharuya |
-| User management API      | Creating, fetching, and deleting users      | katakada           |
-| Presence                 | Recording and reading online status         | katakada           |
+| Feature              | Overview                                             | Owner              |
+| -------------------- | ---------------------------------------------------- | ------------------ |
+| Get / update profile | Reading and updating display name, badge, and avatar | katakada / kharuya |
+| Bulk profile fetch   | Fetching multiple users' profiles at once            | katakada / kharuya |
+| User management API  | Creating, fetching, and deleting users               | katakada           |
+| Presence             | Recording and reading online status                  | katakada           |
 
 ## Faces and Seeds (Posts)
 
-| Feature                          | Overview                                                        | Owner              |
-| -------------------------------- | --------------------------------------------------------------- | ------------------ |
-| Create / list / view faces       | Creating a category per facet of yourself, with list and detail views | katakada / kharuya |
-| Posting seeds                    | Posting body text tied to a face                                | katakada / kharuya |
-| Attaching images to seeds        | Attaching multiple images with a display order                  | katakada / kharuya |
-| Seed detail view                 | An individual seed detail page and a fetch API through the BFF  | katakada / kharuya |
+| Feature                    | Overview                                                              | Owner              |
+| -------------------------- | --------------------------------------------------------------------- | ------------------ |
+| Create / list / view faces | Creating a category per facet of yourself, with list and detail views | katakada / kharuya |
+| Posting seeds              | Posting body text tied to a face                                      | katakada / kharuya |
+| Attaching images to seeds  | Attaching multiple images with a display order                        | katakada / kharuya |
+| Seed detail view           | An individual seed detail page and a fetch API through the BFF        | katakada / kharuya |
 
 ## Friendship
 
-| Feature                  | Overview                                          | Owner              |
-| ------------------------ | ------------------------------------------------- | ------------------ |
-| Friend request           | Creating a request to a target user               | katakada / kharuya |
-| Accept / reject requests | Updating the status of a received request         | katakada / kharuya |
-| Block                    | Blocking a target user                            | katakada / kharuya |
-| Remove friend            | Deleting an established relationship              | katakada / kharuya |
-| Friend list              | Listing established friends                       | katakada / kharuya |
+| Feature                  | Overview                                             | Owner              |
+| ------------------------ | ---------------------------------------------------- | ------------------ |
+| Friend request           | Creating a request to a target user                  | katakada / kharuya |
+| Accept / reject requests | Updating the status of a received request            | katakada / kharuya |
+| Block                    | Blocking a target user                               | katakada / kharuya |
+| Remove friend            | Deleting an established relationship                 | katakada / kharuya |
+| Friend list              | Listing established friends                          | katakada / kharuya |
 | Pending request list     | Listing pending requests, both incoming and outgoing | katakada / kharuya |
 
 ## File Storage
 
-| Feature       | Overview                                             | Owner              |
-| ------------- | ---------------------------------------------------- | ------------------ |
-| Upload        | Saving a file and registering its metadata           | katakada / kharuya |
-| Download      | Serving a file after checking ownership and visibility | katakada / kharuya |
-| Delete        | Deleting both the file itself and its metadata       | katakada / kharuya |
-| Static serving| Serving static files from the public bucket          | katakada           |
+| Feature        | Overview                                               | Owner              |
+| -------------- | ------------------------------------------------------ | ------------------ |
+| Upload         | Saving a file and registering its metadata             | katakada / kharuya |
+| Download       | Serving a file after checking ownership and visibility | katakada / kharuya |
+| Delete         | Deleting both the file itself and its metadata         | katakada / kharuya |
+| Static serving | Serving static files from the public bucket            | katakada           |
 
 ## Screens and UX
 
-| Feature                       | Overview                                                        | Owner    |
-| ----------------------------- | --------------------------------------------------------------- | -------- |
-| Home                          | A list of your own activities                                   | kharuya  |
-| Friends                       | The list screen                                                 | kharuya  |
-| Profile screen                | Displaying each user's profile                                  | kharuya  |
-| Settings screen               | User settings                                                   | kharuya  |
-| Terms of service / privacy policy | Static pages (internationalized)                            | nkawaguc |
-| Internationalization          | English, French, and Japanese, switched via `[locale]` routing   | kharuya  |
-| Component catalog             | Reviewing UI components with Storybook                          | kharuya  |
+| Feature                           | Overview                                                       | Owner    |
+| --------------------------------- | -------------------------------------------------------------- | -------- |
+| Home                              | A list of your own activities                                  | kharuya  |
+| Friends                           | The list screen                                                | kharuya  |
+| Profile screen                    | Displaying each user's profile                                 | kharuya  |
+| Settings screen                   | User settings                                                  | kharuya  |
+| Terms of service / privacy policy | Static pages (internationalized)                               | nkawaguc |
+| Internationalization              | English, French, and Japanese, switched via `[locale]` routing | kharuya  |
+| Component catalog                 | Reviewing UI components with Storybook                         | kharuya  |
 
 ## Operations and Platform
 
-| Feature                    | Overview                                                                        | Owner    |
-| -------------------------- | ------------------------------------------------------------------------------- | -------- |
-| Health check               | `/api/health` (checks through the BFF all the way to the backend), `/health/redis` | katakada |
-| Metrics monitoring         | Visualizing host, container, PostgreSQL, Redis, and Nginx metrics with Prometheus + Grafana | nkawaguc |
-| Alert notifications        | Notifications from Alertmanager to Discord                                      | nkawaguc |
-| Log visualization          | The Filebeat → Logstash → Elasticsearch → Kibana pipeline                        | hurabe   |
-| Production-like deployment | One-command deployment to a local-registry + HTTPS setup                         | katakada |
+| Feature                    | Overview                                                                                         | Owner    |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | -------- |
+| Health check               | `/api/health` (checks through the BFF all the way to the backend), `/health/redis`               | katakada |
+| Metrics monitoring         | Visualizing host, container, PostgreSQL, Redis, and Nginx metrics with Prometheus + Grafana      | nkawaguc |
+| Alert notifications        | Notifications from Alertmanager to Discord                                                       | nkawaguc |
+| Log visualization          | The Filebeat → Logstash → Elasticsearch → Kibana pipeline                                        | hurabe   |
+| Production-like deployment | One-command deployment to a local-registry + HTTPS setup                                         | katakada |
 | Local CI                   | Automatically building, starting, smoke-testing, and cleaning up the production-like environment | katakada |
 
 ## Known Limitations

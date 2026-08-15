@@ -25,7 +25,7 @@ MultiFace では、ユーザーは自分の関心や役割に応じた複数の�
 - **ユーザープロフィール**: 表示名・バッジ・アバター画像の管理
 - **ファイルストレージ**: 画像のアップロード / ダウンロード / 削除（public / private バケット分離）
 - **多言語対応**: 英語・フランス語・日本語の 3 言語（`next-intl`）
-- **運用基盤**: Prometheus + Grafana によるメトリクス監視、ELK によるログ可視化
+- **運用基盤**: Prometheus + Grafana + Alertmanager によるメトリクス監視、Elasticsearch + Logstash + Kibana によるログ可視化
 
 <!-- ## 3. Instructions
 - コンパイル・インストール・実行に関する情報を記載する。
