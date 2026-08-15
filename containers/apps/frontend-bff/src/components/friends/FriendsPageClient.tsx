@@ -156,9 +156,12 @@ const FriendsPageClient = ({
   friendsRef.current = friends;
 
   useEffect(() => {
-    const tick = () => {
+    const tick = async () => {
       const userIds = friendsRef.current.map((friend) => friend.friendProfile.id);
       if (userIds.length === 0) return;
+
+      // MiddlewareでのSet-Cookie握り潰しを回避するため事前に空のGETリクエストを投げる
+      await fetch('/ping').catch(() => {});
 
       void refreshOnlineStatusesAction(userIds).then((onlineStatuses) => {
         if (!onlineStatuses) return;

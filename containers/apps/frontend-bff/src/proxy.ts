@@ -148,7 +148,11 @@ export default async function middleware(request: NextRequest) {
   const isServerAction = isServerActionRequest(request);
 
   let response: NextResponse;
-  if (isServerAction) {
+  if (path === '/ping') {
+    // ダミーのGETリクエスト(トークンリフレッシュ用)には最速で200 OKを返す。
+    // next-intl のリダイレクトや Next.js ルーターへのフォールバックを防ぐため。
+    response = new NextResponse('pong', { status: 200 });
+  } else if (isServerAction) {
     // Server Actionへはリダイレクトを返さず、常にそのまま通す(認証NGの場合の扱いは呼び出し先のActionに委ねる)
     response = await intlMiddleware(request);
   } else if (!PUBLIC_PATHS.includes(path) && !isAuthenticated && !isAuthPath) {

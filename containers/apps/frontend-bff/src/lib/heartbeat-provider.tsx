@@ -37,6 +37,10 @@ export const HeartbeatProvider = ({
     // 同時に発火すると、アクセストークンが切れた瞬間に両方が同じリフレッシュトークンを使おうとし、
     // 片方だけが成功して片方が失敗する競合が起きうる(失敗側のCookie削除が成功側を上書きしてしまう)。
     const tick = async () => {
+      // MiddlewareでのSet-Cookie握り潰し（Server Actionバグ）を回避するため、
+      // 事前に空のGETリクエストを投げて、もし期限切れならここでリフレッシュ(とSet-Cookie)を済ませる
+      await fetch('/ping').catch(() => {});
+
       await heartbeatAction();
       const hasPending = await checkPendingFriendRequestsAction();
       setHasPendingFriendRequest(hasPending);
