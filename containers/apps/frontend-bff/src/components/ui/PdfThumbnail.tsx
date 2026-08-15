@@ -41,7 +41,10 @@ const PdfThumbnail = ({ src, fileName, fallbackLabel }: Props) => {
       try {
         await configureWorker();
         const pdfjsLib = await import('pdfjs-dist');
-        const pdf = await pdfjsLib.getDocument({ url: src }).promise;
+        const pdf = await pdfjsLib.getDocument({
+          url: src,
+          verbosity: 0, // ERRORSのみ出力し、警告(Warning: Indexing all PDF objects 等)を抑制
+        }).promise;
         if (cancelled) return;
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1.5 });
