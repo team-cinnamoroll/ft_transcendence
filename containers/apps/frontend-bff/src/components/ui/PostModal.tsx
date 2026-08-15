@@ -14,6 +14,7 @@ import { createSeedAction, uploadSeedImageAction } from '@/server/actions/seeds'
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useZodForm } from '@/lib/use-zod-form';
 import { usePublishSeedCreated } from '@/lib/seed-created-provider';
+import { isAllowedFileFormat } from '@/lib/file-format';
 
 const MAX_IMAGES = 4;
 const MAX_LENGTH = 5000;
@@ -229,10 +230,22 @@ const PostModal = ({ isOpen, onClose, defaultFaceId }: Props) => {
         return;
       }
 
-      const formData = new FormData();
-      formData.set('file', img.file);
-
       void (async () => {
+        // file.typeは拡張子等からの自己申告値にすぎないため、実体のバイト列（シグネチャ）も確認する
+        if (!(await isAllowedFileFormat(img.file, ALLOWED_SEED_ATTACHMENT_FILE_TYPES))) {
+          setImages((prev) =>
+            prev.map((i) =>
+              i.objectUrl === img.objectUrl
+                ? { ...i, isUploading: false, error: t('errorImageInvalidFormat') }
+                : i
+            )
+          );
+          return;
+        }
+
+        const formData = new FormData();
+        formData.set('file', img.file);
+
         try {
           const result = await uploadSeedImageAction(formData);
           setImages((prev) =>

@@ -8,6 +8,7 @@ import { createFaceAction, uploadFaceImageAction } from '@/server/actions/faces'
 import { deleteUploadedFileAction } from '@/server/actions/file-storage';
 import { useTranslations } from 'next-intl';
 import { useZodForm } from '@/lib/use-zod-form';
+import { isAllowedFileFormat } from '@/lib/file-format';
 
 type Props = {
   isOpen: boolean;
@@ -78,19 +79,25 @@ const CreateFaceModal = ({ isOpen, onClose, onCreate }: Props) => {
       return;
     }
 
-    // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
-    discardPendingUpload();
-
-    const objectUrl = URL.createObjectURL(file);
-    objectUrlRef.current = objectUrl;
-    setPreviewUrl(objectUrl);
-    setImageError(null);
-    setIsUploadingImage(true);
-
-    const formData = new FormData();
-    formData.set('file', file);
-
     void (async () => {
+      // file.typeは拡張子等からの自己申告値にすぎないため、実体のバイト列（シグネチャ）も確認する
+      if (!(await isAllowedFileFormat(file, ALLOWED_FACE_IMAGE_FILE_TYPES))) {
+        setImageError(t('errorImageInvalidFormat'));
+        return;
+      }
+
+      // 前回アップロード済みで未保存のファイルがあれば、後始末として削除する
+      discardPendingUpload();
+
+      const objectUrl = URL.createObjectURL(file);
+      objectUrlRef.current = objectUrl;
+      setPreviewUrl(objectUrl);
+      setImageError(null);
+      setIsUploadingImage(true);
+
+      const formData = new FormData();
+      formData.set('file', file);
+
       try {
         const result = await uploadFaceImageAction(formData);
         setIsUploadingImage(false);
